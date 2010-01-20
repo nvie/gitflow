@@ -1,0 +1,62 @@
+gitflow
+=======
+A collection of Git wrapper scripts to provide high-level repository operations
+for Vincent Driessen's [branching model](http://nvie.com/archives/323 "original
+blog post").
+
+Please help out
+---------------
+This project is yet unimplemented. And yes, I mean unimplemented. There are no
+scripts yet, but I will use this README file as the "design document" for now,
+so people may start collaborating on it.
+
+Feel free to fork this repo and to commit your additions.
+
+Commands
+--------
+Initially, the following subcommands to `gitflow` should be created:
+
+* `start`
+* `finish`
+
+Those subcommands could work on branch types:
+
+* `feature`
+* `release`
+* `hotfix`
+
+Examples
+--------
+
+* To start a new feature branch, use:
+  
+  	gitflow start feature <name> [<base>]
+  	gitflow start feature foo-support
+  
+  `base` is `develop` by default.
+
+* To finish this feature and have it merged into `develop`, use:
+  
+  	gitflow finish feature <name>
+  	gitflow finish feature foo-support
+  
+* To start a new release branch for 2.0, based on the 1.1 production release, use:
+  
+  	gitflow start release <release>
+  	gitflow start release 2.0
+  
+* To finish the release branch (i.e. to make an actual production release), use:
+  
+  	gitflow finish release <release>
+  	gitflow finish release 2.0
+  
+* To start a new hotfix branch for 2.1, based on the 2.0 production release, use:
+  
+  	gitflow start hotfix <release> [<base-release>]
+  	gitflow start hotfix 2.1 2.0
+  
+* To finish the hotfix branch, use:
+  
+  	gitflow finish hotfix <release>
+  	gitflow finish hotfix 2.1
+
