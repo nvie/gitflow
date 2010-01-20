@@ -30,8 +30,8 @@ Examples
 
 * To start a new feature branch, use:
   
-  	gitflow start feature <name> [<base>]
-  	gitflow start feature foo-support
+  		gitflow start feature <name> [<base>]
+  		gitflow start feature foo-support
   
   `base` is `develop` by default.
 
