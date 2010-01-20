@@ -37,26 +37,26 @@ Examples
 
 * To finish this feature and have it merged into `develop`, use:
   
-  	gitflow finish feature <name>
-  	gitflow finish feature foo-support
+  		gitflow finish feature <name>
+  		gitflow finish feature foo-support
   
 * To start a new release branch for 2.0, based on the 1.1 production release, use:
   
-  	gitflow start release <release>
-  	gitflow start release 2.0
+  		gitflow start release <release>
+  		gitflow start release 2.0
   
 * To finish the release branch (i.e. to make an actual production release), use:
   
-  	gitflow finish release <release>
-  	gitflow finish release 2.0
+  		gitflow finish release <release>
+  		gitflow finish release 2.0
   
 * To start a new hotfix branch for 2.1, based on the 2.0 production release, use:
   
-  	gitflow start hotfix <release> [<base-release>]
-  	gitflow start hotfix 2.1 2.0
+  		gitflow start hotfix <release> [<base-release>]
+  		gitflow start hotfix 2.1 2.0
   
 * To finish the hotfix branch, use:
   
-  	gitflow finish hotfix <release>
-  	gitflow finish hotfix 2.1
+  		gitflow finish hotfix <release>
+  		gitflow finish hotfix 2.1
 
