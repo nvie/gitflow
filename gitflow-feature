@@ -1,0 +1,33 @@
+#!/bin/sh
+
+usage() {
+	echo "usage: gitflow start feature <name> [<base>]"
+	echo "       gitflow finish feature <name>"
+}
+
+parse_args() {
+	# TODO: Implement the optional base argument
+	FEATURE="$1"
+	BASE="develop"
+	if [ "$FEATURE" = "" ]; then
+		echo "Missing argument <release>."
+		usage
+		exit 1
+	fi
+}
+
+start() {
+	# TODO
+	parse_args "$@"
+	gitflow_check_clean_working_tree
+	echo "git checkout -b $FEATURE $BASE"
+}
+
+finish() {
+	# TODO
+	parse_args "$@"
+	gitflow_check_clean_working_tree
+	echo "git checkout $BASE"
+	echo "git merge --no-ff $FEATURE"
+}
+

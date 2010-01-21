@@ -1,8 +1,8 @@
 #!/bin/sh
 
 usage() {
-	echo "usage: gitflow start hotfix <release>"
-	echo "       gitflow finish hotfix <release>"
+	echo "usage: gitflow start release <release>"
+	echo "       gitflow finish release <release>"
 }
 
 parse_args() {
@@ -18,7 +18,7 @@ start() {
 	# TODO
 	parse_args "$@"
 	gitflow_check_clean_working_tree
-	echo "git checkout -b hotfix-$RELEASE master"
+	echo "git checkout -b release-$RELEASE develop"
 	echo "Bump version number"
 	echo "Fix bug"
 }
@@ -28,9 +28,9 @@ finish() {
 	parse_args "$@"
 	gitflow_check_clean_working_tree
 	echo "git checkout master"
-	echo "git merge --no-ff hotfix-$RELEASE"
+	echo "git merge --no-ff release-$RELEASE"
 	echo "git checkout develop"
-	echo "git merge --no-ff hotfix-$RELEASE"
-	echo "git branch -d hotfix-$RELEASE"
+	echo "git merge --no-ff release-$RELEASE"
+	echo "git branch -d release-$RELEASE"
 }
 
