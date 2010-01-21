@@ -1,0 +1,6 @@
+#!/bin/sh
+
+gitflow_check_clean_working_tree() {
+	echo "Working tree $(pwd) clean."
+}
+

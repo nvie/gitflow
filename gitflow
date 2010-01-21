@@ -1,0 +1,49 @@
+#!/bin/sh
+
+usage() {
+	echo "usage: gitflow <start|finish> <btype> <args>"
+	echo ""
+	echo "btype can be any of: \"feature\", \"release\", \"hotfix\""
+	echo ""
+}
+
+check_incoming() {
+	if [ "$ACTION" != "start" -a "$ACTION" != "finish" ]; then
+		usage
+		exit 1
+	fi
+	
+	if [ "$BTYPE" != "feature" -a "$BTYPE" != "release" -a "$BTYPE" != "hotfix" ]; then
+		usage
+		exit 1
+	fi
+}
+
+gitflow_check_clean_working_tree() {
+	echo "Working tree clean."
+}
+
+if [ $# -lt 2 ]; then
+	usage
+	exit 1
+fi
+
+# Set & check arguments
+export GITFLOW_DIR=$(dirname "$0")
+ACTION="$1"
+BTYPE="$2"
+shift 2
+check_incoming
+
+# Now, $ACTION and $BTYPE are set
+# It's time to call the appropriate subcommand
+. "$GITFLOW_DIR/gitflow-sh-setup"
+. "$GITFLOW_DIR/gitflow-$BTYPE"
+
+if [ "$ACTION" = "start" ]; then
+	start "$@"
+elif [ "$ACTION" = "finish" ]; then
+	finish "$@"
+else
+	usage
+fi
