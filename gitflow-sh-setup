@@ -1,4 +1,16 @@
 #!/bin/sh
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+# 
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+# 
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+#
 
 gitflow_check_clean_working_tree() {
 	echo "Working tree $(pwd) clean."
