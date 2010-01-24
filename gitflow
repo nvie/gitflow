@@ -31,10 +31,6 @@ check_incoming() {
 	fi
 }
 
-gitflow_check_clean_working_tree() {
-	echo "Working tree clean."
-}
-
 if [ $# -lt 2 ]; then
 	usage
 	exit 1

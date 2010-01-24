@@ -18,9 +18,12 @@ usage() {
 }
 
 parse_args() {
-	# TODO: Implement the optional base argument
 	FEATURE="$1"
-	BASE="develop"
+    if [ $# -eq 2 ]; then
+        BASE="$2"
+    else
+        BASE="develop"
+    fi
 	if [ "$FEATURE" = "" ]; then
 		echo "Missing argument <release>."
 		usage
