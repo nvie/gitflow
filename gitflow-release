@@ -41,6 +41,7 @@ finish() {
 	gitflow_check_clean_working_tree
 	echo "git checkout master"
 	echo "git merge --no-ff release-$RELEASE"
+	echo "git tag $RELEASE"
 	echo "git checkout develop"
 	echo "git merge --no-ff release-$RELEASE"
 	echo "git branch -d release-$RELEASE"
