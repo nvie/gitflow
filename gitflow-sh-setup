@@ -20,10 +20,8 @@ LOCAL_BRANCHES=$(cd "$GIT_DIR/refs/heads"; find * -type f)
 REMOTE_BRANCHES=$(cd "$GIT_DIR/refs/remotes"; find * -type f)
 ALL_BRANCHES="$LOCAL_BRANCHES\n$REMOTE_BRANCHES"
 
-die() {
-	echo "$@" >&2
-	exit 1
-}
+warn() { echo "$@" >&2; }
+die() { warn "$@"; exit 1; }
 
 gitflow_check_clean_working_tree() {
 	# TODO: Implement this
