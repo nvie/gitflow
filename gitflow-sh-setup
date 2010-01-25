@@ -24,8 +24,9 @@ warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
 gitflow_check_clean_working_tree() {
-	# TODO: Implement this
-	echo "TODO"
+	if [ "$(git status 2> /dev/null | tail -n1)" != "nothing to commit (working directory clean)" ]; then
+		die "Working directory is dirty. Only use gitflow in clean working directories for your own safety."
+	fi
 }
 
 gitflow_require_local_branch() {
