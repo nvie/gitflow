@@ -13,8 +13,21 @@
 #
 
 usage() {
-	echo "usage: gitflow start feature <name> [<base>]"
-	echo "       gitflow finish feature <name>"
+	echo "usage: gitflow start feature [<options>] <name> [<base>]"
+	echo "       gitflow finish feature [<options>] <name>"
+	# TODO
+	#echo ""
+	#echo "options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "start-only options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "finish-only options:"
+	#echo "--rebase    Rebases the feature branch on top of develop, instead of merging"
+	#echo "--squash    Squashes all commits of the feature branch into a single commit"
+	#echo "            on develop"
+	#echo "--push      Push to the origin repo when finished"
 }
 
 parse_args() {
@@ -25,7 +38,7 @@ parse_args() {
         BASE="develop"
     fi
 	if [ "$FEATURE" = "" ]; then
-		echo "Missing argument <release>."
+		echo "Missing argument <release>"
 		usage
 		exit 1
 	fi
@@ -42,7 +55,16 @@ start() {
 	fi
 
 	# All checks passed, ready to roll
-	echo "git checkout -b $FEATURE $BASE"
+	git checkout -b "$FEATURE" "$BASE"
+
+	echo ""
+	echo "Summary of actions:"
+	echo "- A new branch '$FEATURE' was created, based on '$BASE'"
+	echo "- You are now on branch '$FEATURE'"
+	echo ""
+	echo "Now, start committing on your feature. When done, use:"
+	echo ""
+	echo "     gitflow finish feature '$FEATURE'"
 }
 
 finish() {
@@ -51,13 +73,20 @@ finish() {
 	# Checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch "$FEATURE"
-	if [ "$BASE" = "develop" ]; then
-		gitflow_require_branches_equal 'develop' 'origin/develop'
-	fi
+	gitflow_require_branches_equal 'develop' 'origin/develop'
 
 	# All checks passed, ready to roll
-	echo "git checkout $BASE"
-	echo "git merge --no-ff $FEATURE"
-	echo "git branch -d $FEATURE"
+	git checkout develop
+	git merge --no-ff "$FEATURE"
+	# TODO: How do we handle merge conflicts here??
+	git branch -d "$FEATURE"
+
+	echo ""
+	echo "Summary of actions:"
+	echo "- The feature branch '$FEATURE' was merged into 'develop'"
+	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+	echo "- Feature branch '$FEATURE' has been removed"
+	echo "- You are now on branch 'develop'"
+	echo ""
 }
 

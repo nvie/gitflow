@@ -98,7 +98,8 @@ gitflow_require_branches_equal() {
 		if [ $status -eq 1 ]; then
 			die "And branch '$1' may be fast-forwarded."
 		elif [ $status -eq 2 ]; then
-			die "And local branch '$1' is ahead of '$2'."
+			# Warn here, since there is no harm in being ahead
+			warn "And local branch '$1' is ahead of '$2'."
 		else
 			die "Branches need merging first."
 		fi
