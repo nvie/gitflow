@@ -24,25 +24,39 @@ parse_args() {
 		usage
 		exit 1
 	fi
+	HOTFIX_BRANCH="hotfix-$RELEASE"
 }
 
 start() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
-	echo "git checkout -b hotfix-$RELEASE master"
-	echo "Bump version number"
-	echo "Fix bug"
+	gitflow_require_branches_equal 'master' 'origin/master'
+	gitflow_require_branch_absent "$HOTFIX_BRANCH"
+
+	# All checks passed, ready to roll
+	echo "git checkout -b \"$HOTFIX_BRANCH\" master"
+	echo "Don't forget to bump the version number now."
 }
 
 finish() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
+
+	echo "git fetch origin"
+	git fetch origin
+	gitflow_require_branches_equal 'master' 'origin/master'
+	gitflow_require_branches_equal 'develop' 'origin/develop'
+
+	# All checks passed, ready to roll
 	echo "git checkout master"
-	echo "git merge --no-ff hotfix-$RELEASE"
+	echo "git merge --no-ff \"$HOTFIX_BRANCH\""
+	echo "git tag \"$RELEASE\""
 	echo "git checkout develop"
-	echo "git merge --no-ff hotfix-$RELEASE"
-	echo "git branch -d hotfix-$RELEASE"
+	echo "git merge --no-ff \"$HOTFIX_BRANCH\""
+	echo "git branch -d \"$HOTFIX_BRANCH\""
 }
 
