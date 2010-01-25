@@ -24,26 +24,39 @@ parse_args() {
 		usage
 		exit 1
 	fi
+	RELEASE_BRANCH="release-$RELEASE"
 }
 
 start() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
-	echo "git checkout -b release-$RELEASE develop"
-	echo "Bump version number"
-	echo "Fix bug"
+	gitflow_require_branches_equal 'develop' 'origin/develop'
+	gitflow_require_branch_absent "$RELEASE_BRANCH"
+
+	# All checks passed, ready to roll
+	echo "git checkout -b \"$RELEASE_BRANCH\" develop"
+	echo "Don't forget to bump the version number now."
 }
 
 finish() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
+
+	echo "git fetch origin"
+	git fetch origin
+	gitflow_require_branches_equal 'master' 'origin/master'
+	gitflow_require_branches_equal 'develop' 'origin/develop'
+
+	# All checks passed, ready to roll
 	echo "git checkout master"
-	echo "git merge --no-ff release-$RELEASE"
-	echo "git tag $RELEASE"
+	echo "git merge --no-ff \"$RELEASE_BRANCH\""
+	echo "git tag \"$RELEASE\""
 	echo "git checkout develop"
-	echo "git merge --no-ff release-$RELEASE"
-	echo "git branch -d release-$RELEASE"
+	echo "git merge --no-ff \"$RELEASE_BRANCH\""
+	echo "git branch -d \"$RELEASE_BRANCH\""
 }
 

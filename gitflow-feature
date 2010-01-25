@@ -32,17 +32,32 @@ parse_args() {
 }
 
 start() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
+	gitflow_require_branch_absent "$FEATURE"
+	if [ "$BASE" = "develop" ]; then
+		gitflow_require_branches_equal 'develop' 'origin/develop'
+	fi
+
+	# All checks passed, ready to roll
 	echo "git checkout -b $FEATURE $BASE"
 }
 
 finish() {
-	# TODO
 	parse_args "$@"
+
+	# Checks
 	gitflow_check_clean_working_tree
+	gitflow_require_branch "$FEATURE"
+	if [ "$BASE" = "develop" ]; then
+		gitflow_require_branches_equal 'develop' 'origin/develop'
+	fi
+
+	# All checks passed, ready to roll
 	echo "git checkout $BASE"
 	echo "git merge --no-ff $FEATURE"
+	echo "git branch -d $FEATURE"
 }
 
