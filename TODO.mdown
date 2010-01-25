@@ -2,4 +2,4 @@ TODO-list
 =========
 - Support configurable naming for fixed branch names 'master' and 'develop'
 - Support configurable naming conventions (i.e. name prefixes) for supporting
-  branches, instead of fixed 'release-*' and 'hotfix-*'
+  branches, instead of fixed 'release-\*' and 'hotfix-\*'
