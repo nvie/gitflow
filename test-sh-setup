@@ -1,0 +1,9 @@
+#!/bin/sh
+. gitflow-sh-setup
+
+gitflow_require_branch 'master'
+gitflow_require_branch 'develop'
+gitflow_require_branch 'origin/develop'
+gitflow_require_branch 'origin/master'
+
+echo "All OK."

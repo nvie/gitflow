@@ -12,7 +12,42 @@
 # Copyright (c) 2010 by Vincent Driessen
 #
 
+# Get the git dir
+GIT_DIR=$(git rev-parse --git-dir)
+
+# Get all available branches
+LOCAL_BRANCHES=$(cd "$GIT_DIR/refs/heads"; find * -type f)
+REMOTE_BRANCHES=$(cd "$GIT_DIR/refs/remotes"; find * -type f)
+ALL_BRANCHES="$LOCAL_BRANCHES\n$REMOTE_BRANCHES"
+
+die() {
+	echo "$@" >&2
+	exit 1
+}
+
 gitflow_check_clean_working_tree() {
-	echo "Working tree $(pwd) clean."
+	# TODO: Implement this
+	echo "TODO"
+}
+
+gitflow_require_local_branch() {
+	echo "$LOCAL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Local branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_remote_branch() {
+	echo "$REMOTE_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Remote branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_branch() {
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Branch '$1' does not exist and is required."
+	fi
 }
 
