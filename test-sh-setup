@@ -6,4 +6,8 @@ gitflow_require_branch 'develop'
 gitflow_require_branch 'origin/develop'
 gitflow_require_branch 'origin/master'
 
+gitflow_require_branches_equal 'master' 'origin/master'
+gitflow_require_branches_equal 'develop' 'origin/develop'
+gitflow_require_branches_equal 'rebase-not-merge' 'truemped/rebase-not-merge'
+
 echo "All OK."
