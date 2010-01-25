@@ -77,7 +77,14 @@ finish() {
 
 	# All checks passed, ready to roll
 	git checkout develop
-	git merge --no-ff "$FEATURE"
+
+	# In case there has been only a single commit in the feature branch, don't
+	# use --no-ff, since it has no extra advantages
+	FF_FLAG="--no-ff"
+	if [ "$(git rev-list develop.."$FEATURE" | wc -l)" -eq 1 ]; then
+		FF_FLAG="--ff"
+	fi
+	git merge "$FF_FLAG" "$FEATURE"
 	# TODO: How do we handle merge conflicts here??
 	git branch -d "$FEATURE"
 
