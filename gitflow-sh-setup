@@ -24,34 +24,34 @@ warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
 gitflow_check_clean_working_tree() {
-	if [ "$(git status 2> /dev/null | tail -n1)" != "nothing to commit (working directory clean)" ]; then
+	if [ "$(git status 2>/dev/null | tail -n1)" != "nothing to commit (working directory clean)" ]; then
 		die "Working directory is dirty. Only use gitflow in clean working directories for your own safety."
 	fi
 }
 
 gitflow_require_local_branch() {
-	echo "$LOCAL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	echo "$LOCAL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
 	if [ $? -ne 0 ]; then
 		die "Local branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_remote_branch() {
-	echo "$REMOTE_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	echo "$REMOTE_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
 	if [ $? -ne 0 ]; then
 		die "Remote branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_branch() {
-	echo "$ALL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
 	if [ $? -ne 0 ]; then
 		die "Branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_branch_absent() {
-	echo "$ALL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
 	if [ $? -eq 0 ]; then
 		die "Branch '$1' already exists. Pick another name."
 	fi
