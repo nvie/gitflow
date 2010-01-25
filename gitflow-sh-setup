@@ -16,8 +16,8 @@
 GIT_DIR=$(git rev-parse --git-dir)
 
 # Get all available branches
-LOCAL_BRANCHES=$(cd "$GIT_DIR/refs/heads"; find * -type f)
-REMOTE_BRANCHES=$(cd "$GIT_DIR/refs/remotes"; find * -type f)
+LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
+REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
 ALL_BRANCHES="$LOCAL_BRANCHES\n$REMOTE_BRANCHES"
 
 warn() { echo "$@" >&2; }
