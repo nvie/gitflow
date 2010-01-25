@@ -50,6 +50,13 @@ gitflow_require_branch() {
 	fi
 }
 
+gitflow_require_branch_absent() {
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>/dev/null >/dev/null
+	if [ $? -eq 0 ]; then
+		die "Branch '$1' already exists."
+	fi
+}
+
 #
 # gitflow_test_branches_equal()
 # 
