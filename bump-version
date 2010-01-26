@@ -1,0 +1,11 @@
+#!/bin/sh
+usage() {
+	echo "usage: bump-version <version-id>"
+}
+
+if [ $# -ne 1 ]; then
+	usage
+	exit 1
+fi
+
+echo "GITFLOW_VERSION=$1" > gitflow-version
