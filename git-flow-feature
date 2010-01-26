@@ -56,7 +56,7 @@ cmd_start() {
 	gitflow_check_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
 	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
-		git fetch $ORIGIN $DEVELOP_BRANCH
+		git fetch -q $ORIGIN $DEVELOP_BRANCH
 		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	fi
 
@@ -80,7 +80,7 @@ cmd_finish() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch $BRANCH
-	git fetch $ORIGIN
+	git fetch -q $ORIGIN
 	if has $ORIGIN/$BRANCH $REMOTE_BRANCHES; then
 		gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
 	fi
@@ -116,12 +116,12 @@ cmd_publish() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch $BRANCH
-	git fetch $ORIGIN
+	git fetch -q $ORIGIN
 	gitflow_require_branch_absent $ORIGIN/$BRANCH
 
 	# create remote branch
 	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
-	git fetch $ORIGIN
+	git fetch -q $ORIGIN
 
 	# configure remote tracking
 	git config branch.$BRANCH.remote $ORIGIN
@@ -142,7 +142,7 @@ cmd_track() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
-	git fetch $ORIGIN
+	git fetch -q $ORIGIN
 	gitflow_require_branch $ORIGIN/$BRANCH
 
 	# create tracking branch
