@@ -13,6 +13,11 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+# enable debug mode
+if [ "$DEBUG" = "yes" ]; then
+	set -x
+fi
+
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 has() { [[ " ${*:2} " == *" $1 "* ]]; }
