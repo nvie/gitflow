@@ -42,9 +42,9 @@ cmd_start() {
 	git checkout -b $BRANCH $BASE
 
 	# publish branch
-	git push origin $BRANCH:refs/heads/$BRANCH
-	git fetch origin
-	git config branch.$BRANCH.remote origin
+	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
+	git fetch $ORIGIN
+	git config branch.$BRANCH.remote $ORIGIN
 	git config branch.$BRANCH.merge refs/heads/$BRANCH
 	git co $BRANCH
 

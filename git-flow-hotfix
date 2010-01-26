@@ -48,8 +48,8 @@ cmd_start() {
 
 	# sanity checks
 	gitflow_check_clean_working_tree
-	git fetch origin
-	gitflow_require_branches_equal $MASTER_BRANCH origin/$MASTER_BRANCH
+	git fetch $ORIGIN
+	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
 	gitflow_require_branch_absent $BRANCH
 
 	# create branch
@@ -74,10 +74,10 @@ cmd_finish() {
 
 	# sanity checks
 	gitflow_check_clean_working_tree
-	git fetch origin $MASTER_BRANCH
-	git fetch origin $DEVELOP_BRANCH
-	gitflow_require_branches_equal $MASTER_BRANCH origin/$MASTER_BRANCH
-	gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
+	git fetch $ORIGIN $MASTER_BRANCH
+	git fetch $ORIGIN $DEVELOP_BRANCH
+	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 
 	# merge into BASE
 	git checkout $BASE
@@ -99,7 +99,7 @@ cmd_finish() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- Latest objects have been fetched from 'origin'"
+	echo "- Latest objects have been fetched from '$ORIGIN'"
 	echo "- Hotfix branch has been merged into '$BASE'"
 	echo "- The hotfix was tagged 'v$VERSION'"
 	if [ "$BASE" = "$MASTER_BRANCH" ]; then

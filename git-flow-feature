@@ -55,8 +55,8 @@ cmd_start() {
 	gitflow_check_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
 	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
-		git fetch origin $DEVELOP_BRANCH
-		gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
+		git fetch $ORIGIN $DEVELOP_BRANCH
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	fi
 
 	# create branch
@@ -79,12 +79,12 @@ cmd_finish() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch $BRANCH
-	git fetch origin
-	if has origin/$BRANCH $REMOTE_BRANCHES; then
-		gitflow_require_branches_equal $BRANCH origin/$BRANCH
+	git fetch $ORIGIN
+	if has $ORIGIN/$BRANCH $REMOTE_BRANCHES; then
+		gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
 	fi
 	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
-		gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	fi
 
 	# merge into BASE
@@ -97,7 +97,7 @@ cmd_finish() {
 
 	# delete branch
 	# TODO: How do we handle merge conflicts here??
-	git push origin :refs/heads/$BRANCH
+	git push $ORIGIN :refs/heads/$BRANCH
 	git branch -d $BRANCH
 
 	echo
@@ -115,15 +115,15 @@ cmd_publish() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch $BRANCH
-	git fetch origin
-	gitflow_require_branch_absent origin/$BRANCH
+	git fetch $ORIGIN
+	gitflow_require_branch_absent $ORIGIN/$BRANCH
 
 	# create remote branch
-	git push origin $BRANCH:refs/heads/$BRANCH
-	git fetch origin
+	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
+	git fetch $ORIGIN
 
 	# configure remote tracking
-	git config branch.$BRANCH.remote origin
+	git config branch.$BRANCH.remote $ORIGIN
 	git config branch.$BRANCH.merge refs/heads/$BRANCH
 	git checkout $BRANCH
 
@@ -141,11 +141,11 @@ cmd_track() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
-	git fetch origin
-	gitflow_require_branch origin/$BRANCH
+	git fetch $ORIGIN
+	gitflow_require_branch $ORIGIN/$BRANCH
 
 	# create tracking branch
-	git checkout -b $BRANCH origin/$BRANCH
+	git checkout -b $BRANCH $ORIGIN/$BRANCH
 
 	echo
 	echo "Summary of actions:"
