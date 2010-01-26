@@ -1,4 +1,4 @@
-GIT_EXEC_PATH=/usr/libexec/git-core
+GIT_EXEC_PATH=`git --exec-path 2>/dev/null || echo /usr/libexec/git-core`
 
 all:
 	@echo "There is only one target here: install"
