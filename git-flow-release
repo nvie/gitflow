@@ -1,20 +1,20 @@
-#!/bin/sh
 #
 # gitflow -- A collection of Git wrapper scripts to provide high-level
 # repository operations for Vincent Driessen's branching model:
-# 
+#
 # Original blog post presenting this model is found at:
 #    http://nvie.com/archives/323
-# 
+#
 # Feel free to contribute to this project at:
 #    http://github.com/nvie/gitflow
 #
 # Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
 #
 
 usage() {
-	echo "usage: gitflow start release <release>"
-	echo "       gitflow finish release <release>"
+	echo "usage: git flow start release <version>"
+	echo "       git flow finish release <version>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -29,68 +29,76 @@ usage() {
 }
 
 parse_args() {
-	RELEASE="$1"
-	if [ "$RELEASE" = "" ]; then
-		echo "Missing argument <release>"
+	VERSION="$1"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
 		usage
 		exit 1
 	fi
-	RELEASE_BRANCH="release-$RELEASE"
+	BRANCH=release/$VERSION
 }
 
-start() {
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_start() {
 	parse_args "$@"
 
-	# Checks
+	# sanity checks
 	gitflow_check_clean_working_tree
-	gitflow_require_branches_equal 'develop' 'origin/develop'
-	gitflow_require_branch_absent "$RELEASE_BRANCH"
+	git fetch origin
+	gitflow_require_branches_equal develop origin/develop
+	gitflow_require_branch_absent $BRANCH
 
-	# All checks passed, ready to roll
-	git checkout -b "$RELEASE_BRANCH" develop
+	# create branch
+	git checkout -b $BRANCH develop
 
-	echo ""
+	echo
 	echo "Summary of actions:"
-	echo "- A new branch '$RELEASE_BRANCH' was created, based on 'develop'"
-	echo "- You are now on branch '$RELEASE_BRANCH'"
-	echo ""
+	echo "- A new branch '$BRANCH' was created, based on 'develop'"
+	echo "- You are now on branch '$BRANCH'"
+	echo
 	echo "Follow-up actions:"
 	echo "- Bump the version number now!"
 	echo "- Start committing last-minute fixes in preparing your release"
 	echo "- When done, run:"
-	echo ""
-	echo "     gitflow finish release '$RELEASE_BRANCH'"
+	echo
+	echo "     git flow finish release '$VERSION'"
+	echo
 }
 
-finish() {
+cmd_finish() {
 	parse_args "$@"
 
-	# Checks
+	# sanity checks
 	gitflow_check_clean_working_tree
+	git fetch origin
+	gitflow_require_branches_equal master origin/master
+	gitflow_require_branches_equal develop origin/develop
 
-	git fetch origin develop	# TODO: Make a flag to skip these fetches
-	git fetch origin master		# TODO: Make a flag to skip these fetches
-	gitflow_require_branches_equal 'master' 'origin/master'
-	gitflow_require_branches_equal 'develop' 'origin/develop'
-
-	# All checks passed, ready to roll
+	# merge into master
 	git checkout master
-	git merge --no-ff "$RELEASE_BRANCH"
-	git tag "$RELEASE"
+	git merge --no-ff $BRANCH
+	git tag v$VERSION
+
+	# merge into develop
 	git checkout develop
-	git merge --no-ff "$RELEASE_BRANCH"
-	git branch -d "$RELEASE_BRANCH"
+	git merge --no-ff $BRANCH
+
+	# delete branch
+	git branch -d $BRANCH
 
 	# TODO: Implement an optional push to master
 	# git push origin develop; git push origin master; git push --tags origin
 
-	echo ""
+	echo
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from 'origin'"
 	echo "- Release branch has been merged into 'master'"
-	echo "- The release was tagged '$RELEASE'"
+	echo "- The release was tagged 'v$VERSION'"
 	echo "- Release branch has been back-merged into 'develop'"
-	echo "- Release branch '$RELEASE_BRANCH' has been deleted"
-	echo ""
+	echo "- Release branch '$BRANCH' has been deleted"
+	echo
 }
-

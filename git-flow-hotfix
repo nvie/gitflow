@@ -1,0 +1,110 @@
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+usage() {
+	echo "usage: git flow start hotfix <version> [<base>]"
+	echo "       git flow finish hotfix <version> [<base>]"
+	# TODO
+	#echo ""
+	#echo "options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "start-only options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "finish-only options:"
+	#echo "--push      Push to the origin repo when finished"
+}
+
+parse_args() {
+	VERSION="$1"
+	BASE="${2:-master}"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
+		usage
+		exit 1
+	fi
+	BRANCH=hotfix/$VERSION
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_start() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	git fetch origin
+	gitflow_require_branches_equal master origin/master
+	gitflow_require_branch_absent $BRANCH
+
+	# create branch
+	git checkout -b $BRANCH $BASE
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+	echo "Follow-up actions:"
+	echo "- Bump the version number now!"
+	echo "- Start committing your hot fixes"
+	echo "- When done, run:"
+	echo
+	echo "     git flow finish hotfix '$HOTFIX_BRANCH'"
+	echo
+}
+
+cmd_finish() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	git fetch origin master
+	git fetch origin develop
+	gitflow_require_branches_equal master origin/master
+	gitflow_require_branches_equal develop origin/develop
+
+	# merge into BASE
+	git checkout $BASE
+	git merge --no-ff $BRANCH
+	git tag v$VERSION
+
+	# merge into develop if we fixed a master issue
+	# TODO: merge into support branch
+	if [ "$BASE" = "master" ]; then
+		git checkout develop
+		git merge --no-ff $BRANCH
+	fi
+
+	# delete branch
+	git branch -d $BRANCH
+
+	# TODO: Implement an optional push to master
+	# git push origin develop; git push origin master; git push --tags origin
+
+	echo
+	echo "Summary of actions:"
+	echo "- Latest objects have been fetched from 'origin'"
+	echo "- Hotfix branch has been merged into '$BASE'"
+	echo "- The hotfix was tagged 'v$VERSION'"
+	if [ "$BASE" = "master" ]; then
+		echo "- Hotfix branch has been back-merged into 'develop'"
+	fi
+	echo "- Hotfix branch '$BRANCH' has been deleted"
+	echo
+}
