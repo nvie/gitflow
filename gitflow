@@ -12,9 +12,15 @@
 # Copyright (c) 2010 by Vincent Driessen
 #
 
+export GITFLOW_DIR=$(dirname "$0")
+
 usage() {
+	. "$GITFLOW_DIR/gitflow-version"
+	echo "gitflow, version $GITFLOW_VERSION"
+	echo ""
 	echo "usage: gitflow <start|finish> <type> <args>"
 	echo ""
+	echo "arguments:"
 	echo "type can be any of: \"feature\", \"release\", \"hotfix\""
 	echo ""
 }
@@ -37,7 +43,6 @@ if [ $# -lt 2 ]; then
 fi
 
 # Set & check arguments
-export GITFLOW_DIR=$(dirname "$0")
 ACTION="$1"
 BTYPE="$2"
 shift 2
