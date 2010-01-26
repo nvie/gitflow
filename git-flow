@@ -22,6 +22,7 @@ export GITFLOW_DIR=$(dirname "$0")
 export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
 export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
 export ORIGIN=$(git config --get gitflow.origin || echo origin)
+export README=$(git config --get gitflow.readme || echo README)
 
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
@@ -36,6 +37,7 @@ usage() {
 	echo "gitflow, version $GITFLOW_VERSION"
 	echo
 	echo "usage: git flow <cmd> <type> <args>"
+	echo "       git flow init [<url>]"
 	echo
 	echo "<type> can be any of: feature, release, hotfix, support"
 	echo
@@ -43,15 +45,20 @@ usage() {
 }
 
 main() {
-	if [ $# -lt 2 ]; then
+	if [ $# -lt 1 ]; then
 		usage
 		exit 1
 	fi
 
 	# sanity checks
-	ACTION="$1"
-	BTYPE="$2"
-	shift 2
+	ACTION="$1"; shift
+
+	if [ "$ACTION" = "init" ]; then
+		gitflow_init "$@"
+		exit 0
+	fi
+
+	BTYPE="$1"; shift
 
 	if [ ! -e "$GITFLOW_DIR/git-flow-$BTYPE" ]; then
 		usage
@@ -77,6 +84,60 @@ main() {
 
 	# run command
 	cmd_$ACTION "$@"
+}
+
+gitflow_init() {
+	echo
+	echo "Summary of actions:"
+
+	if ! git rev-parse --git-dir &>/dev/null; then
+		git init --quiet
+		echo "- A new git repository at $PWD was created"
+	fi
+
+	if ! git rev-parse --quiet --verify HEAD >/dev/null; then
+		touch $README
+		git add $README
+		git commit --quiet -m "initial commit"
+		if [ "$MASTER_BRANCH" != "master" ]; then
+			git branch -m master $MASTER_BRANCH
+		fi
+		echo "- An initial commit was created at branch '$MASTER_BRANCH'"
+	fi
+
+	if ! git rev-parse --verify $MASTER_BRANCH &>/dev/null; then
+		die "Cannot find your master branch. Try: git branch -m <mymaster> $MASTER_BRANCH"
+	fi
+
+	gitflow_check_clean_working_tree
+
+	if git remote | grep -q $ORIGIN; then
+		git fetch -q $ORIGIN
+		gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	fi
+
+	if git rev-parse --verify $DEVELOP_BRANCH &>/dev/null; then
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	else
+		git checkout -q -b $DEVELOP_BRANCH $MASTER_BRANCH
+		echo "- A new branch '$DEVELOP_BRANCH' was created"
+		echo "- You are now on branch '$DEVELOP_BRANCH'"
+	fi
+
+	if ! git remote | grep -q $ORIGIN; then
+		if [ "$1" = "" ]; then
+			echo "- No remote location was added. Try: git remote add $ORIGIN <url>"
+		else
+			git remote add $ORIGIN $1
+			echo "- A new remote location '$1' was added"
+		fi
+	fi
+
+	echo
+
+	if git remote | grep -q $ORIGIN; then
+		git push $ORIGIN $MASTER_BRANCH $DEVELOP_BRANCH
+	fi
 }
 
 gitflow_check_clean_working_tree() {
