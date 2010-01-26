@@ -8,6 +8,6 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-echo "GITFLOW_VERSION=$1" > gitflow-version
-git add gitflow-version
-git commit -m "Bumped version number to $1" gitflow-version
+echo "GITFLOW_VERSION=$1" > git-flow-version
+git add git-flow-version
+git commit -m "Bumped version number to $1" git-flow-version
