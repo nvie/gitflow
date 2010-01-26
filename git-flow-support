@@ -47,7 +47,7 @@ cmd_start() {
 	git fetch -q $ORIGIN
 	git config branch.$BRANCH.remote $ORIGIN
 	git config branch.$BRANCH.merge refs/heads/$BRANCH
-	git co $BRANCH
+	git checkout $BRANCH
 
 	echo
 	echo "Summary of actions:"
