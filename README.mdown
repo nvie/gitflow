@@ -28,9 +28,9 @@ Either:
 - Put the `gitflow` directory anywhere on your Unix `PATH` variable; or
 - Run:
   
-	$ git clone git://github.com/nvie/gitflow
-	$ cd gitflow
-	$ cp gitflow* /usr/local/bin
+  		$ git clone git://github.com/nvie/gitflow
+  		$ cd gitflow
+  		$ cp gitflow* /usr/local/bin
 
 
 Please help out
