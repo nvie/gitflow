@@ -3,8 +3,6 @@ TODO-list
 
 General configuration
 ---------------------
-- Support configurable naming conventions (i.e. name prefixes) for supporting
-  branches, instead of fixed 'release-\*' and 'hotfix-\*'
 
 Release branch support
 ----------------------

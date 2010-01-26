@@ -40,7 +40,8 @@ parse_args() {
 		usage
 		exit 1
 	fi
-	BRANCH=feature/$NAME
+	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+	BRANCH=$PREFIX$NAME
 }
 
 cmd_help() {

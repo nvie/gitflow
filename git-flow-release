@@ -35,7 +35,8 @@ parse_args() {
 		usage
 		exit 1
 	fi
-	BRANCH=release/$VERSION
+	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+	BRANCH=$PREFIX$VERSION
 }
 
 cmd_help() {
