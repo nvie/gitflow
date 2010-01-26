@@ -1,0 +1,222 @@
+#!/bin/sh
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+# enable debug mode
+if [ "$DEBUG" = "yes" ]; then
+	set -x
+fi
+
+export GITFLOW_DIR=$(dirname "$0")
+export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
+export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
+export ORIGIN=$(git config --get gitflow.origin || echo origin)
+export README=$(git config --get gitflow.readme || echo README)
+
+warn() { echo "$@" >&2; }
+die() { warn "$@"; exit 1; }
+
+has() {
+	local item=$1; shift
+	echo " $@ " | grep -q " $item "
+}
+
+usage() {
+	. "$GITFLOW_DIR/git-flow-version"
+	echo "gitflow, version $GITFLOW_VERSION"
+	echo
+	echo "usage: git flow <cmd> <type> <args>"
+	echo "       git flow init [<url>]"
+	echo
+	echo "<type> can be any of: feature, release, hotfix, support"
+	echo
+	echo "Try 'git flow help <type>' for details."
+}
+
+main() {
+	if [ $# -lt 1 ]; then
+		usage
+		exit 1
+	fi
+
+	# sanity checks
+	ACTION="$1"; shift
+
+	if [ "$ACTION" = "init" ]; then
+		gitflow_init "$@"
+		exit 0
+	fi
+
+	BTYPE="$1"; shift
+
+	if [ ! -e "$GITFLOW_DIR/git-flow-$BTYPE" ]; then
+		usage
+		exit 1
+	fi
+
+	if ! git rev-parse --git-dir &>/dev/null; then
+		die "Not a git repository"
+	fi
+
+	# get all available branches
+	LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
+	REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
+	ALL_BRANCHES="$LOCAL_BRANCHES $REMOTE_BRANCHES"
+
+	# run command
+	. "$GITFLOW_DIR/git-flow-$BTYPE"
+
+	if ! declare -f cmd_$ACTION >/dev/null; then
+		usage
+		exit 1
+	fi
+
+	# run command
+	cmd_$ACTION "$@"
+}
+
+gitflow_init() {
+	echo
+	echo "Summary of actions:"
+
+	if ! git rev-parse --git-dir &>/dev/null; then
+		git init --quiet
+		echo "- A new git repository at $PWD was created"
+	fi
+
+	if ! git rev-parse --quiet --verify HEAD >/dev/null; then
+		touch $README
+		git add $README
+		git commit --quiet -m "initial commit"
+		if [ "$MASTER_BRANCH" != "master" ]; then
+			git branch -m master $MASTER_BRANCH
+		fi
+		echo "- An initial commit was created at branch '$MASTER_BRANCH'"
+	fi
+
+	if ! git rev-parse --verify $MASTER_BRANCH &>/dev/null; then
+		die "Cannot find your master branch. Try: git branch -m <mymaster> $MASTER_BRANCH"
+	fi
+
+	gitflow_check_clean_working_tree
+
+	if git remote | grep -q $ORIGIN; then
+		git fetch -q $ORIGIN
+		gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	fi
+
+	if git rev-parse --verify $DEVELOP_BRANCH &>/dev/null; then
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	else
+		git checkout -q -b $DEVELOP_BRANCH $MASTER_BRANCH
+		echo "- A new branch '$DEVELOP_BRANCH' was created"
+		echo "- You are now on branch '$DEVELOP_BRANCH'"
+	fi
+
+	if ! git remote | grep -q $ORIGIN; then
+		if [ "$1" = "" ]; then
+			echo "- No remote location was added. Try: git remote add $ORIGIN <url>"
+		else
+			git remote add $ORIGIN $1
+			echo "- A new remote location '$1' was added"
+		fi
+	fi
+
+	echo
+
+	if git remote | grep -q $ORIGIN; then
+		git push $ORIGIN $MASTER_BRANCH $DEVELOP_BRANCH
+	fi
+}
+
+gitflow_check_clean_working_tree() {
+	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
+		die "Working tree contains unstaged changes. Aborting ..."
+	fi
+	if ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+		die "Index contains uncommited changes. Aborting ..."
+	fi
+}
+
+gitflow_require_local_branch() {
+	if ! has $1 $LOCAL_BRANCHES; then
+		die "Local branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_remote_branch() {
+	if ! has $1 $REMOTE_BRANCHES; then
+		die "Remote branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_branch() {
+	if ! has $1 $ALL_BRANCHES; then
+		die "Branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_branch_absent() {
+	if has $1 $ALL_BRANCHES; then
+		die "Branch '$1' already exists. Pick another name."
+	fi
+}
+
+#
+# gitflow_test_branches_equal()
+#
+# Tests whether branches and their "origin" counterparts have diverged and need
+# merging first. It returns error codes to provide more detail, like so:
+#
+# 0    Branch heads point to the same commit
+# 1    First given branch needs fast-forwarding
+# 2    Second given branch needs fast-forwarding
+# 3    Branch needs a real merge
+#
+gitflow_test_branches_equal() {
+	commit1=$(git rev-parse "$1")
+	commit2=$(git rev-parse "$2")
+	if [ "$commit1" != "$commit2" ]; then
+		base=$(git merge-base "$commit1" "$commit2")
+		if [ "$commit1" = "$base" ]; then
+			return 1
+		elif [ "$commit2" = "$base" ]; then
+			return 2
+		else
+			return 3
+		fi
+	else
+		return 0
+	fi
+}
+
+gitflow_require_branches_equal() {
+	gitflow_require_local_branch "$1"
+	gitflow_require_remote_branch "$2"
+	gitflow_test_branches_equal "$1" "$2"
+	status=$?
+	if [ $status -gt 0 ]; then
+		warn "Branches '$1' and '$2' have diverged."
+		if [ $status -eq 1 ]; then
+			die "And branch '$1' may be fast-forwarded."
+		elif [ $status -eq 2 ]; then
+			# Warn here, since there is no harm in being ahead
+			warn "And local branch '$1' is ahead of '$2'."
+		else
+			die "Branches need merging first."
+		fi
+	fi
+}
+
+main "$@"

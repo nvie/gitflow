@@ -1,0 +1,156 @@
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+usage() {
+	echo "usage: git flow start feature <name> [<base>]"
+	echo "       git flow finish feature <name> [<base>]"
+	echo "       git flow publish feature <name>"
+	echo "       git flow track feature <name>"
+	# TODO
+	#echo ""
+	#echo "options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "start-only options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "finish-only options:"
+	#echo "--rebase    Rebases the feature branch on top of develop, instead of merging"
+	#echo "--squash    Squashes all commits of the feature branch into a single commit"
+	#echo "            on develop"
+	#echo "--push      Push to the origin repo when finished"
+}
+
+parse_args() {
+	NAME="$1"
+	BASE="${2:-$DEVELOP_BRANCH}"
+	if [ "$NAME" = "" ]; then
+		echo "Missing argument <name>."
+		usage
+		exit 1
+	fi
+	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+	BRANCH=$PREFIX$NAME
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_start() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch_absent $BRANCH
+	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
+		git fetch -q $ORIGIN $DEVELOP_BRANCH
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	fi
+
+	# create branch
+	git checkout -b $BRANCH $BASE
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- You are now on branch '$BRANCH'"
+	echo ""
+	echo "Now, start committing on your feature. When done, use:"
+	echo ""
+	echo "     git flow finish feature $NAME"
+	echo
+}
+
+cmd_finish() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch $BRANCH
+	git fetch -q $ORIGIN
+	if has $ORIGIN/$BRANCH $REMOTE_BRANCHES; then
+		gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
+	fi
+	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	fi
+
+	# merge into BASE
+	git checkout $BASE
+	if [ "$(git rev-list -n2 $BASE..$BRANCH | wc -l)" = "1" ]; then
+		git merge --ff $BRANCH
+	else
+		git merge --no-ff $BRANCH
+	fi
+
+	# delete branch
+	# TODO: How do we handle merge conflicts here??
+	git push $ORIGIN :refs/heads/$BRANCH
+	git branch -d $BRANCH
+
+	echo
+	echo "Summary of actions:"
+	echo "- The feature branch '$BRANCH' was merged into '$BASE'"
+	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+	echo "- Feature branch '$BRANCH' has been removed"
+	echo "- You are now on branch '$BASE'"
+	echo
+}
+
+cmd_publish() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch $BRANCH
+	git fetch -q $ORIGIN
+	gitflow_require_branch_absent $ORIGIN/$BRANCH
+
+	# create remote branch
+	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
+	git fetch -q $ORIGIN
+
+	# configure remote tracking
+	git config branch.$BRANCH.remote $ORIGIN
+	git config branch.$BRANCH.merge refs/heads/$BRANCH
+	git checkout $BRANCH
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote branch '$BRANCH' was created"
+	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
+cmd_track() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch_absent $BRANCH
+	git fetch -q $ORIGIN
+	gitflow_require_branch $ORIGIN/$BRANCH
+
+	# create tracking branch
+	git checkout -b $BRANCH $ORIGIN/$BRANCH
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote tracking branch '$BRANCH' was created"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}

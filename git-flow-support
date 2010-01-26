@@ -1,0 +1,58 @@
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+usage() {
+	echo "usage: git flow start support <version> [<base>]"
+}
+
+parse_args() {
+	VERSION="$1"
+	BASE="${2:-v${VERSION}}"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
+		usage
+		exit 1
+	fi
+	PREFIX=$(git config --get gitflow.prefix.support || echo support/)
+	BRANCH=$PREFIX$VERSION
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_start() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+
+	# create branch
+	git checkout -b $BRANCH $BASE
+
+	# publish branch
+	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
+	git fetch -q $ORIGIN
+	git config branch.$BRANCH.remote $ORIGIN
+	git config branch.$BRANCH.merge refs/heads/$BRANCH
+	git co $BRANCH
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote branch '$BRANCH' was created, based on '$BASE'"
+	echo "- A new tracking branch '$BRANCH' was created"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}

@@ -1,0 +1,105 @@
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+usage() {
+	echo "usage: git flow start release <version>"
+	echo "       git flow finish release <version>"
+	# TODO
+	#echo ""
+	#echo "options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "start-only options:"
+	#echo "--bump <script>"
+	#echo "            Run the given script to auto-update the version number"
+	#echo ""
+	#echo "finish-only options:"
+	#echo "--push      Push to the origin repo when finished"
+}
+
+parse_args() {
+	VERSION="$1"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
+		usage
+		exit 1
+	fi
+	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+	BRANCH=$PREFIX$VERSION
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+cmd_start() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	git fetch -q $ORIGIN
+	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	gitflow_require_branch_absent $BRANCH
+
+	# create branch
+	git checkout -b $BRANCH $DEVELOP_BRANCH
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$DEVELOP_BRANCH'"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+	echo "Follow-up actions:"
+	echo "- Bump the version number now!"
+	echo "- Start committing last-minute fixes in preparing your release"
+	echo "- When done, run:"
+	echo
+	echo "     git flow finish release '$VERSION'"
+	echo
+}
+
+cmd_finish() {
+	parse_args "$@"
+
+	# sanity checks
+	gitflow_check_clean_working_tree
+	git fetch -q $ORIGIN
+	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+
+	# merge into master
+	git checkout $MASTER_BRANCH
+	git merge --no-ff $BRANCH
+	git tag v$VERSION
+
+	# merge into develop
+	git checkout $DEVELOP_BRANCH
+	git merge --no-ff $BRANCH
+
+	# delete branch
+	git branch -d $BRANCH
+
+	# TODO: Implement an optional push to master
+	# git push origin develop; git push origin master; git push --tags origin
+
+	echo
+	echo "Summary of actions:"
+	echo "- Latest objects have been fetched from '$ORIGIN'"
+	echo "- Release branch has been merged into '$MASTER_BRANCH'"
+	echo "- The release was tagged 'v$VERSION'"
+	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
+	echo "- Release branch '$BRANCH' has been deleted"
+	echo
+}
