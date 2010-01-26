@@ -13,9 +13,9 @@
 #
 
 usage() {
-	echo "usage: gitflow <start|finish> <btype> <args>"
+	echo "usage: gitflow <start|finish> <type> <args>"
 	echo ""
-	echo "btype can be any of: \"feature\", \"release\", \"hotfix\""
+	echo "type can be any of: \"feature\", \"release\", \"hotfix\""
 	echo ""
 }
 
