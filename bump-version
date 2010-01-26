@@ -9,3 +9,5 @@ if [ $# -ne 1 ]; then
 fi
 
 echo "GITFLOW_VERSION=$1" > gitflow-version
+git add gitflow-version
+git commit -m "Bumped version number to $1" gitflow-version
