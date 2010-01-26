@@ -7,11 +7,13 @@ all:
 	@echo "Use 'make install' explicitly to install git-flow."
 
 install:
-	install -m 0755 -t $(GIT_EXEC_PATH) git-flow
-	install -m 0644 -t $(GIT_EXEC_PATH) \
+	install -d -m 0755 $(GIT_EXEC_PATH)
+	install -m 0755 git-flow $(GIT_EXEC_PATH)
+	install -m 0644 \
 		git-flow-feature \
 		git-flow-hotfix \
 		git-flow-release \
 		git-flow-support \
-		git-flow-version
+		git-flow-version \
+		$(GIT_EXEC_PATH)
 
