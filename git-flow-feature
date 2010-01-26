@@ -34,7 +34,7 @@ usage() {
 
 parse_args() {
 	NAME="$1"
-	BASE="${2:-develop}"
+	BASE="${2:-$DEVELOP_BRANCH}"
 	if [ "$NAME" = "" ]; then
 		echo "Missing argument <name>."
 		usage
@@ -54,9 +54,9 @@ cmd_start() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
-	if [ "$BASE" = "develop" ]; then
-		git fetch origin develop
-		gitflow_require_branches_equal develop origin/develop
+	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
+		git fetch origin $DEVELOP_BRANCH
+		gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
 	fi
 
 	# create branch
@@ -83,8 +83,8 @@ cmd_finish() {
 	if has origin/$BRANCH $REMOTE_BRANCHES; then
 		gitflow_require_branches_equal $BRANCH origin/$BRANCH
 	fi
-	if [ "$BASE" = "develop" ]; then
-		gitflow_require_branches_equal develop origin/develop
+	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
+		gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
 	fi
 
 	# merge into BASE

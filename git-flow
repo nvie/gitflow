@@ -18,6 +18,10 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
+export GITFLOW_DIR=$(dirname "$0")
+export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
+export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
+
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 has() { [[ " ${*:2} " == *" $1 "* ]]; }
@@ -35,8 +39,6 @@ main() {
 		usage
 		exit 1
 	fi
-
-	export GITFLOW_DIR=$(dirname "$0")
 
 	# sanity checks
 	ACTION="$1"

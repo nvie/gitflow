@@ -29,7 +29,7 @@ usage() {
 
 parse_args() {
 	VERSION="$1"
-	BASE="${2:-master}"
+	BASE="${2:-$MASTER_BRANCH}"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
 		usage
@@ -49,7 +49,7 @@ cmd_start() {
 	# sanity checks
 	gitflow_check_clean_working_tree
 	git fetch origin
-	gitflow_require_branches_equal master origin/master
+	gitflow_require_branches_equal $MASTER_BRANCH origin/$MASTER_BRANCH
 	gitflow_require_branch_absent $BRANCH
 
 	# create branch
@@ -74,10 +74,10 @@ cmd_finish() {
 
 	# sanity checks
 	gitflow_check_clean_working_tree
-	git fetch origin master
-	git fetch origin develop
-	gitflow_require_branches_equal master origin/master
-	gitflow_require_branches_equal develop origin/develop
+	git fetch origin $MASTER_BRANCH
+	git fetch origin $DEVELOP_BRANCH
+	gitflow_require_branches_equal $MASTER_BRANCH origin/$MASTER_BRANCH
+	gitflow_require_branches_equal $DEVELOP_BRANCH origin/$DEVELOP_BRANCH
 
 	# merge into BASE
 	git checkout $BASE
@@ -86,8 +86,8 @@ cmd_finish() {
 
 	# merge into develop if we fixed a master issue
 	# TODO: merge into support branch
-	if [ "$BASE" = "master" ]; then
-		git checkout develop
+	if [ "$BASE" = "$MASTER_BRANCH" ]; then
+		git checkout $DEVELOP_BRANCH
 		git merge --no-ff $BRANCH
 	fi
 
@@ -102,8 +102,8 @@ cmd_finish() {
 	echo "- Latest objects have been fetched from 'origin'"
 	echo "- Hotfix branch has been merged into '$BASE'"
 	echo "- The hotfix was tagged 'v$VERSION'"
-	if [ "$BASE" = "master" ]; then
-		echo "- Hotfix branch has been back-merged into 'develop'"
+	if [ "$BASE" = "$MASTER_BRANCH" ]; then
+		echo "- Hotfix branch has been back-merged into '$DEVELOP_BRANCH'"
 	fi
 	echo "- Hotfix branch '$BRANCH' has been deleted"
 	echo
