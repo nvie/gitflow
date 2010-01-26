@@ -65,9 +65,6 @@ main() {
 		exit 1
 	fi
 
-	# fail if a command failes
-	set -e
-
 	# run command
 	cmd_$ACTION "$@"
 }
