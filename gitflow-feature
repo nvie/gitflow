@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+# 
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+# 
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+#
+
+usage() {
+	echo "usage: gitflow start feature [<options>] <name> [<base>]"
+	echo "       gitflow finish feature [<options>] <name>"
+	# TODO
+	#echo ""
+	#echo "options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "start-only options:"
+	#echo "--option    Explanation"
+	#echo ""
+	#echo "finish-only options:"
+	#echo "--rebase    Rebases the feature branch on top of develop, instead of merging"
+	#echo "--squash    Squashes all commits of the feature branch into a single commit"
+	#echo "            on develop"
+	#echo "--push      Push to the origin repo when finished"
+}
+
+parse_args() {
+	FEATURE="$1"
+    if [ $# -eq 2 ]; then
+        BASE="$2"
+    else
+        BASE="develop"
+    fi
+	if [ "$FEATURE" = "" ]; then
+		echo "Missing argument <release>"
+		usage
+		exit 1
+	fi
+}
+
+start() {
+	parse_args "$@"
+
+	# Checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch_absent "$FEATURE"
+	if [ "$BASE" = "develop" ]; then
+		gitflow_require_branches_equal 'develop' 'origin/develop'
+	fi
+
+	# All checks passed, ready to roll
+	git checkout -b "$FEATURE" "$BASE"
+
+	echo ""
+	echo "Summary of actions:"
+	echo "- A new branch '$FEATURE' was created, based on '$BASE'"
+	echo "- You are now on branch '$FEATURE'"
+	echo ""
+	echo "Now, start committing on your feature. When done, use:"
+	echo ""
+	echo "     gitflow finish feature '$FEATURE'"
+}
+
+finish() {
+	parse_args "$@"
+
+	# Checks
+	gitflow_check_clean_working_tree
+	gitflow_require_branch "$FEATURE"
+	gitflow_require_branches_equal 'develop' 'origin/develop'
+
+	# All checks passed, ready to roll
+	git checkout develop
+
+	# In case there has been only a single commit in the feature branch, don't
+	# use --no-ff, since it has no extra advantages
+	FF_FLAG="--no-ff"
+	if [ "$(git rev-list develop.."$FEATURE" | wc -l)" -eq 1 ]; then
+		FF_FLAG="--ff"
+	fi
+	git merge "$FF_FLAG" "$FEATURE"
+	# TODO: How do we handle merge conflicts here??
+	git branch -d "$FEATURE"
+
+	echo ""
+	echo "Summary of actions:"
+	echo "- The feature branch '$FEATURE' was merged into 'develop'"
+	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+	echo "- Feature branch '$FEATURE' has been removed"
+	echo "- You are now on branch 'develop'"
+	echo ""
+}
+

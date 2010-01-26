@@ -1,0 +1,84 @@
+gitflow
+=======
+A collection of Git wrapper scripts to provide high-level repository operations
+for Vincent Driessen's [branching model](http://nvie.com/archives/323 "original
+blog post").
+
+
+Release 0.1
+-----------
+A quick release of version 0.1 has arrived. The main script are functional and
+should be usable under "normal" use.
+
+There have barely been any real-world tests, but I encourage you to start using
+it actively. [Feedback](http://github.com/nvie/gitflow/issues) is also very
+welcome. See the "Please help out" section below, also.
+
+**Make sure to validate the modifications to your repo after running any of the
+`gitflow` commands, before pushing them permanently.**
+
+
+Installing gitflow
+------------------
+There isn't a real Unix installer available, but the project is so small that
+installing it is easy.
+
+Either:
+
+- Put the `gitflow` directory anywhere on your Unix `PATH` variable; or
+- Run:
+  
+	$ git clone git://github.com/nvie/gitflow
+	$ cd gitflow
+	$ cp gitflow* /usr/local/bin
+
+
+Please help out
+---------------
+This project is still under development. What is available today is merely its
+foundation. However, it is functional in its current form and should be usable
+under normal use. (Don't try to create multiple release branches next to each
+other and stuff like that, yet.)
+
+Feedback and suggestions are very welcome and I encourage you to use the
+[Issues list](http://github.com/nvie/gitflow/issues) on Github to provide that
+feedback.
+
+Feel free to fork this repo and to commit your additions.
+
+
+Example uses:
+-------------
+
+* To start a new feature branch, use:
+  
+  		gitflow start feature <name> [<base>]
+  		gitflow start feature foo-support
+  
+  `base` is `develop` by default.
+
+* To finish this feature and have it merged into `develop`, use:
+  
+  		gitflow finish feature <name>
+  		gitflow finish feature foo-support
+  
+* To start a new release branch for 2.0, based on the 1.1 production release, use:
+  
+  		gitflow start release <release>
+  		gitflow start release 2.0
+  
+* To finish the release branch (i.e. to make an actual production release), use:
+  
+  		gitflow finish release <release>
+  		gitflow finish release 2.0
+  
+* To start a new hotfix branch for 2.1, based on the 2.0 production release, use:
+  
+  		gitflow start hotfix <release> [<base-release>]
+  		gitflow start hotfix 2.1 2.0
+  
+* To finish the hotfix branch, use:
+  
+  		gitflow finish hotfix <release>
+  		gitflow finish hotfix 2.1
+

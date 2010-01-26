@@ -1,0 +1,108 @@
+#!/bin/sh
+#
+# gitflow -- A collection of Git wrapper scripts to provide high-level
+# repository operations for Vincent Driessen's branching model:
+# 
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+# 
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+#
+
+# Get the git dir
+GIT_DIR=$(git rev-parse --git-dir)
+
+# Get all available branches
+LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
+REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
+ALL_BRANCHES="$LOCAL_BRANCHES\n$REMOTE_BRANCHES"
+
+warn() { echo "$@" >&2; }
+die() { warn "$@"; exit 1; }
+
+gitflow_check_clean_working_tree() {
+	if [ "$(git status 2>/dev/null | tail -n1)" != "nothing to commit (working directory clean)" ]; then
+		die "Working directory is dirty. Only use gitflow in clean working directories for your own safety."
+	fi
+}
+
+gitflow_require_local_branch() {
+	echo "$LOCAL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Local branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_remote_branch() {
+	echo "$REMOTE_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Remote branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_branch() {
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
+	if [ $? -ne 0 ]; then
+		die "Branch '$1' does not exist and is required."
+	fi
+}
+
+gitflow_require_branch_absent() {
+	echo "$ALL_BRANCHES" | grep "^$1\$" 2>&1 >/dev/null
+	if [ $? -eq 0 ]; then
+		die "Branch '$1' already exists. Pick another name."
+	fi
+}
+
+#
+# gitflow_test_branches_equal()
+# 
+# Tests whether branches and their "origin" counterparts have diverged and need
+# merging first. It returns error codes to provide more detail, like so:
+# 
+# 0		Branch heads point to the same commit
+# 1		First given branch needs fast-forwarding
+# 2		Second given branch needs fast-forwarding
+# 3		Branch needs a real merge
+#
+gitflow_test_branches_equal() {
+	commit1=$(git rev-parse "$1")
+	commit2=$(git rev-parse "$2")
+	if [ "$commit1" != "$commit2" ]; then
+		base=$(git merge-base "$commit1" "$commit2")
+		short_base=$(git rev-parse --short "$base")
+
+		if [ "$commit1" = "$base" ]; then
+			return 1
+		elif [ "$commit2" = "$base" ]; then
+			return 2
+		else
+			return 3
+		fi
+	else
+		return 0
+	fi
+}
+
+gitflow_require_branches_equal() {
+	gitflow_require_local_branch "$1"
+	gitflow_require_remote_branch "$2"
+	gitflow_test_branches_equal "$1" "$2"
+	status=$?
+	if [ $status -gt 0 ]; then
+		warn "Branches '$1' and '$2' have diverged."
+
+		if [ $status -eq 1 ]; then
+			die "And branch '$1' may be fast-forwarded."
+		elif [ $status -eq 2 ]; then
+			# Warn here, since there is no harm in being ahead
+			warn "And local branch '$1' is ahead of '$2'."
+		else
+			die "Branches need merging first."
+		fi
+	fi
+}
+

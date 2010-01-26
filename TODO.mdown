@@ -1,0 +1,15 @@
+TODO-list
+=========
+
+General configuration
+---------------------
+- Support configurable naming for fixed branch names 'master' and 'develop'
+- Support configurable naming conventions (i.e. name prefixes) for supporting
+  branches, instead of fixed 'release-\*' and 'hotfix-\*'
+
+Release branch support
+----------------------
+- Take care of the situation where two release branches live next to each
+  other. In that situation, a "finish release" action should merge back changes
+  into the other release, not into 'develop'. Or at least warn about it. Or not
+  support creating a new release branch if the other isn't finished yet.
