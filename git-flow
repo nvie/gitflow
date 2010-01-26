@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # gitflow -- A collection of Git wrapper scripts to provide high-level
 # repository operations for Vincent Driessen's branching model:
@@ -25,7 +25,11 @@ export ORIGIN=$(git config --get gitflow.origin || echo origin)
 
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
-has() { [[ " ${*:2} " == *" $1 "* ]]; }
+
+has() {
+	local item=$1; shift
+	echo " $@ " | grep -q " $item "
+}
 
 usage() {
 	. "$GITFLOW_DIR/git-flow-version"
