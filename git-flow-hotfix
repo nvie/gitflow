@@ -1,6 +1,6 @@
 #
-# gitflow -- A collection of Git wrapper scripts to provide high-level
-# repository operations for Vincent Driessen's branching model:
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
 #
 # Original blog post presenting this model is found at:
 #    http://nvie.com/archives/323
