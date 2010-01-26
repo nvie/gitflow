@@ -28,11 +28,14 @@ die() { warn "$@"; exit 1; }
 has() { [[ " ${*:2} " == *" $1 "* ]]; }
 
 usage() {
-	echo "usage: git flow <cmd> <btype> <args>"
+	. "$GITFLOW_DIR/git-flow-version"
+	echo "gitflow, version $GITFLOW_VERSION"
 	echo
-	echo "<btype> can be any of: feature, release, hotfix, support"
+	echo "usage: git flow <cmd> <type> <args>"
 	echo
-	echo "Try 'git flow help <btype>' for details."
+	echo "<type> can be any of: feature, release, hotfix, support"
+	echo
+	echo "Try 'git flow help <type>' for details."
 }
 
 main() {
