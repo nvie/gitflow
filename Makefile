@@ -17,3 +17,5 @@ install:
 		git-flow-version \
 		$(GIT_EXEC_PATH)
 
+uninstall:
+	test -d $(GIT_EXEC_PATH) && rm -f $(GIT_EXEC_PATH)/git-flow*
