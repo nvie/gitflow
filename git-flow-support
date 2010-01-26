@@ -18,7 +18,7 @@ usage() {
 
 parse_args() {
 	VERSION="$1"
-	BASE="${2:-v${VERSION}}"
+	BASE="${2:-${VERSION}}"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
 		usage
