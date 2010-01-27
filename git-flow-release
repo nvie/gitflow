@@ -29,6 +29,7 @@ usage() {
 }
 
 parse_args() {
+	VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 	VERSION="$1"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
@@ -82,7 +83,7 @@ cmd_finish() {
 	# merge into master
 	git checkout $MASTER_BRANCH
 	git merge --no-ff $BRANCH
-	git tag $VERSION
+	git tag $VERSION_PREFIX$VERSION
 
 	# merge into develop
 	git checkout $DEVELOP_BRANCH

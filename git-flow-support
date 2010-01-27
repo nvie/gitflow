@@ -17,8 +17,9 @@ usage() {
 }
 
 parse_args() {
+	VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 	VERSION="$1"
-	BASE="${2:-${VERSION}}"
+	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
 		usage
