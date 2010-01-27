@@ -13,10 +13,12 @@
 #
 
 usage() {
-	echo "usage: git flow start feature <name> [<base>]"
+	echo "usage: git flow list feature"
+	echo "       git flow start feature <name> [<base>]"
 	echo "       git flow finish feature <name> [<base>]"
 	echo "       git flow publish feature <name>"
 	echo "       git flow track feature <name>"
+	echo "       git flow diff feature <name>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -153,4 +155,22 @@ cmd_track() {
 	echo "- A new remote tracking branch '$BRANCH' was created"
 	echo "- You are now on branch '$BRANCH'"
 	echo
+}
+
+cmd_list() {
+	# TODO: refactor this, because passing in this dummy "foo" is really ugly!
+	parse_args "$@" foo
+	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$FEATURE_BRANCHES" ]; then
+		warn "No feature branches exist."
+		exit 1
+	fi
+	echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g"
+}
+
+cmd_diff() {
+	parse_args "$@"
+	# TODO: if this feature has been based on a non-develop branch, we really
+	# should not be comparing to $DEVELOP. How to deal with this?
+	git diff $DEVELOP..$BRANCH
 }
