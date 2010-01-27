@@ -47,8 +47,8 @@ parse_args() {
 }
 
 cmd_default() {
-	# TODO: refactor this, because passing in this dummy "foo" is really ugly!
-	parse_args "$@" foo
+	# TODO: Refactor getting this prefix into a general function
+	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$FEATURE_BRANCHES" ]; then
 		warn "No feature branches exist."

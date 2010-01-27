@@ -13,7 +13,8 @@
 #
 
 usage() {
-	echo "usage: git flow start support <version> [<base>]"
+	echo "usage: git flow support"
+	echo "       git flow support start <version> [<base>]"
 }
 
 parse_args() {
@@ -27,6 +28,17 @@ parse_args() {
 	fi
 	PREFIX=$(git config --get gitflow.prefix.support || echo support/)
 	BRANCH=$PREFIX$VERSION
+}
+
+cmd_default() {
+	# TODO: Refactor getting this prefix into a general function
+	PREFIX=$(git config --get gitflow.prefix.support || echo support/)
+	SUPPORT_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$SUPPORT_BRANCHES" ]; then
+		warn "No support branches exist."
+		exit 0
+	fi
+	echo "$SUPPORT_BRANCHES" | sed "s?^$PREFIX??g"
 }
 
 cmd_help() {
