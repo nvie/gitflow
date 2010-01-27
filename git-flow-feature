@@ -163,7 +163,7 @@ cmd_list() {
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$FEATURE_BRANCHES" ]; then
 		warn "No feature branches exist."
-		exit 1
+		exit 0
 	fi
 	echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g"
 }
