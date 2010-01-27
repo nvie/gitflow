@@ -52,10 +52,6 @@ Example uses:
   
   		git flow init
 
-* List all feature branches:
-  
-  		git flow feature
-  
 * To list/start/finish feature branches, use:
   
   		git flow feature
