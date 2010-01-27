@@ -33,9 +33,6 @@ has() {
 }
 
 usage() {
-	. "$GITFLOW_DIR/git-flow-version"
-	echo "git-flow, version $GITFLOW_VERSION"
-	echo
 	echo "usage: git flow <subcommand>"
 	echo
 	echo "Available subcommands are:"
@@ -44,6 +41,7 @@ usage() {
 	echo "   release   Manage your release branches."
 	echo "   hotfix    Manage your hotfix branches."
 	echo "   support   Manage your support branches."
+	echo "   version   Shows version information."
 	echo
 	echo "Try 'git flow <subcommand> help' for details."
 }
