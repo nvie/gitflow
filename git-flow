@@ -72,16 +72,6 @@ main() {
 	# run command
 	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
 
-	if ! typeset -f sub_main >/dev/null; then
-		usage
-		exit 1
-	fi
-
-	# run command
-	sub_main "$@"
-}
-
-sub_main() {
 	SUBACTION="${1:-default}"; shift
 	if ! typeset -f cmd_$SUBACTION 2>&1 >/dev/null; then
 		warn "Unknown subcommand: '$1'"
