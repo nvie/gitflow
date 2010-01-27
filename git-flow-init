@@ -1,0 +1,78 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+usage() {
+	echo "usage: git flow init"
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+# Default entry when no SUBACTION is given
+cmd_default() {
+	echo
+	echo "Summary of actions:"
+
+	if ! git rev-parse --git-dir 2>&1 >/dev/null; then
+		git init --quiet
+		echo "- A new git repository at $PWD was created"
+	fi
+
+	if ! git rev-parse --quiet --verify HEAD 2>&1 >/dev/null; then
+		touch $README
+		git add $README
+		git commit --quiet -m "initial commit"
+		if [ "$MASTER_BRANCH" != "master" ]; then
+			git branch -m master $MASTER_BRANCH
+		fi
+		echo "- An initial commit was created at branch '$MASTER_BRANCH'"
+	fi
+
+	if ! git rev-parse --verify $MASTER_BRANCH 2>&1 >/dev/null; then
+		die "Cannot find your master branch. Try: git branch -m <mymaster> $MASTER_BRANCH"
+	fi
+
+	gitflow_check_clean_working_tree
+
+	if git remote | grep -q $ORIGIN; then
+		git fetch -q $ORIGIN
+		gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	fi
+
+	if git rev-parse --verify $DEVELOP_BRANCH 2>&1 >/dev/null; then
+		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	else
+		git checkout -q -b $DEVELOP_BRANCH $MASTER_BRANCH
+		echo "- A new branch '$DEVELOP_BRANCH' was created"
+		echo "- You are now on branch '$DEVELOP_BRANCH'"
+	fi
+
+	if ! git remote | grep -q $ORIGIN; then
+		if [ "$1" = "" ]; then
+			echo "- No remote location was added. Try: git remote add $ORIGIN <url>"
+		else
+			git remote add $ORIGIN $1
+			echo "- A new remote location '$1' was added"
+		fi
+	fi
+
+	echo
+
+	if git remote | grep -q $ORIGIN; then
+		git push $ORIGIN $MASTER_BRANCH $DEVELOP_BRANCH
+	fi
+}
+

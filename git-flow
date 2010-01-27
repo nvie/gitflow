@@ -36,12 +36,16 @@ usage() {
 	. "$GITFLOW_DIR/git-flow-version"
 	echo "git-flow, version $GITFLOW_VERSION"
 	echo
-	echo "usage: git flow <cmd> <type> <args>"
-	echo "       git flow init [<url>]"
+	echo "usage: git flow <subcommand>"
 	echo
-	echo "<type> can be any of: feature, release, hotfix, support"
+	echo "Available subcommands are:"
+	echo "   init      Initialize a new git repo with support for the branching model."
+	echo "   feature   Manage your feature branches."
+	echo "   release   Manage your release branches."
+	echo "   hotfix    Manage your hotfix branches."
+	echo "   support   Manage your support branches."
 	echo
-	echo "Try 'git flow help <type>' for details."
+	echo "Try 'git flow <subcommand> help' for details."
 }
 
 main() {
@@ -51,16 +55,9 @@ main() {
 	fi
 
 	# sanity checks
-	ACTION="$1"; shift
+	SUBCOMMAND="$1"; shift
 
-	if [ "$ACTION" = "init" ]; then
-		gitflow_init "$@"
-		exit 0
-	fi
-
-	BTYPE="$1"; shift
-
-	if [ ! -e "$GITFLOW_DIR/git-flow-$BTYPE" ]; then
+	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
 		usage
 		exit 1
 	fi
@@ -75,69 +72,27 @@ main() {
 	ALL_BRANCHES="$LOCAL_BRANCHES $REMOTE_BRANCHES"
 
 	# run command
-	. "$GITFLOW_DIR/git-flow-$BTYPE"
+	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
 
-	if ! typeset -f cmd_$ACTION >/dev/null; then
+	if ! typeset -f sub_main >/dev/null; then
 		usage
 		exit 1
 	fi
 
 	# run command
-	cmd_$ACTION "$@"
+	sub_main "$@"
 }
 
-gitflow_init() {
-	echo
-	echo "Summary of actions:"
-
-	if ! git rev-parse --git-dir 2>&1 >/dev/null; then
-		git init --quiet
-		echo "- A new git repository at $PWD was created"
+sub_main() {
+	SUBACTION="${1:-default}"; shift
+	if ! typeset -f cmd_$SUBACTION 2>&1 >/dev/null; then
+		warn "Unknown subcommand: '$1'"
+		usage
+		exit 1
 	fi
 
-	if ! git rev-parse --quiet --verify HEAD 2>&1 >/dev/null; then
-		touch $README
-		git add $README
-		git commit --quiet -m "initial commit"
-		if [ "$MASTER_BRANCH" != "master" ]; then
-			git branch -m master $MASTER_BRANCH
-		fi
-		echo "- An initial commit was created at branch '$MASTER_BRANCH'"
-	fi
-
-	if ! git rev-parse --verify $MASTER_BRANCH 2>&1 >/dev/null; then
-		die "Cannot find your master branch. Try: git branch -m <mymaster> $MASTER_BRANCH"
-	fi
-
-	gitflow_check_clean_working_tree
-
-	if git remote | grep -q $ORIGIN; then
-		git fetch -q $ORIGIN
-		gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
-	fi
-
-	if git rev-parse --verify $DEVELOP_BRANCH 2>&1 >/dev/null; then
-		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
-	else
-		git checkout -q -b $DEVELOP_BRANCH $MASTER_BRANCH
-		echo "- A new branch '$DEVELOP_BRANCH' was created"
-		echo "- You are now on branch '$DEVELOP_BRANCH'"
-	fi
-
-	if ! git remote | grep -q $ORIGIN; then
-		if [ "$1" = "" ]; then
-			echo "- No remote location was added. Try: git remote add $ORIGIN <url>"
-		else
-			git remote add $ORIGIN $1
-			echo "- A new remote location '$1' was added"
-		fi
-	fi
-
-	echo
-
-	if git remote | grep -q $ORIGIN; then
-		git push $ORIGIN $MASTER_BRANCH $DEVELOP_BRANCH
-	fi
+	# run the specified action
+	cmd_$SUBACTION "$@"
 }
 
 gitflow_check_clean_working_tree() {

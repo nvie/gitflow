@@ -13,12 +13,12 @@
 #
 
 usage() {
-	echo "usage: git flow list feature"
-	echo "       git flow start feature <name> [<base>]"
-	echo "       git flow finish feature <name> [<base>]"
-	echo "       git flow publish feature <name>"
-	echo "       git flow track feature <name>"
-	echo "       git flow diff feature <name>"
+	echo "usage: git flow feature"
+	echo "       git flow feature start <name> [<base>]"
+	echo "       git flow feature finish <name> [<base>]"
+	echo "       git flow feature publish <name>"
+	echo "       git flow feature track <name>"
+	echo "       git flow feature diff <name>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -44,6 +44,17 @@ parse_args() {
 	fi
 	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 	BRANCH=$PREFIX$NAME
+}
+
+cmd_default() {
+	# TODO: refactor this, because passing in this dummy "foo" is really ugly!
+	parse_args "$@" foo
+	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$FEATURE_BRANCHES" ]; then
+		warn "No feature branches exist."
+		exit 0
+	fi
+	echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g"
 }
 
 cmd_help() {
@@ -155,17 +166,6 @@ cmd_track() {
 	echo "- A new remote tracking branch '$BRANCH' was created"
 	echo "- You are now on branch '$BRANCH'"
 	echo
-}
-
-cmd_list() {
-	# TODO: refactor this, because passing in this dummy "foo" is really ugly!
-	parse_args "$@" foo
-	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
-	if [ -z "$FEATURE_BRANCHES" ]; then
-		warn "No feature branches exist."
-		exit 0
-	fi
-	echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g"
 }
 
 cmd_diff() {
