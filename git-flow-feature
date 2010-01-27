@@ -12,6 +12,8 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+
 usage() {
 	echo "usage: git flow feature"
 	echo "       git flow feature start <name> [<base>]"
@@ -42,13 +44,10 @@ parse_args() {
 		usage
 		exit 1
 	fi
-	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 	BRANCH=$PREFIX$NAME
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$FEATURE_BRANCHES" ]; then
 		warn "No feature branches exist."

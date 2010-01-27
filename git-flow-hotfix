@@ -12,6 +12,8 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+
 usage() {
 	echo "usage: git flow hotfix"
 	echo "       git flow hotfix start <version> [<base>]"
@@ -36,13 +38,10 @@ parse_args() {
 		usage
 		exit 1
 	fi
-	PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
 	BRANCH=$PREFIX$VERSION
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
 	HOTFIX_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$HOTFIX_BRANCHES" ]; then
 		warn "No hotfix branches exist."

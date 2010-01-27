@@ -12,13 +12,15 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+PREFIX=$(git config --get gitflow.prefix.support || echo support/)
+
 usage() {
 	echo "usage: git flow support"
 	echo "       git flow support start <version> [<base>]"
 }
 
 parse_args() {
-	VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 	VERSION="$1"
 	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
 	if [ "$VERSION" = "" ]; then
@@ -26,13 +28,10 @@ parse_args() {
 		usage
 		exit 1
 	fi
-	PREFIX=$(git config --get gitflow.prefix.support || echo support/)
 	BRANCH=$PREFIX$VERSION
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.support || echo support/)
 	SUPPORT_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$SUPPORT_BRANCHES" ]; then
 		warn "No support branches exist."

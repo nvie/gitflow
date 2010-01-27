@@ -12,6 +12,9 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+
 usage() {
 	echo "usage: git flow release"
 	echo "       git flow release start <version>"
@@ -30,20 +33,16 @@ usage() {
 }
 
 parse_args() {
-	VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 	VERSION="$1"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
 		usage
 		exit 1
 	fi
-	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
 	BRANCH=$PREFIX$VERSION
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
 	RELEASE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$RELEASE_BRANCHES" ]; then
 		warn "No release branches exist."
