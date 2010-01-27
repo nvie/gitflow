@@ -82,7 +82,7 @@ cmd_finish() {
 	# merge into master
 	git checkout $MASTER_BRANCH
 	git merge --no-ff $BRANCH
-	git tag v$VERSION
+	git tag $VERSION
 
 	# merge into develop
 	git checkout $DEVELOP_BRANCH
