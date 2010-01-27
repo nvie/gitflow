@@ -99,7 +99,7 @@ cmd_finish() {
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
-	echo "- The release was tagged '$VERSION'"
+	echo "- The release was tagged '$VERSION_PREFIX$VERSION'"
 	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
 	echo "- Release branch '$BRANCH' has been deleted"
 	echo
