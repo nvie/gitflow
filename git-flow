@@ -77,7 +77,7 @@ main() {
 	# run command
 	. "$GITFLOW_DIR/git-flow-$BTYPE"
 
-	if ! declare -f cmd_$ACTION >/dev/null; then
+	if ! typeset -f cmd_$ACTION >/dev/null; then
 		usage
 		exit 1
 	fi
