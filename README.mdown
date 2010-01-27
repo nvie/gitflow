@@ -5,17 +5,9 @@ for Vincent Driessen's [branching model](http://nvie.com/archives/323 "original
 blog post").
 
 
-Release 0.1
------------
-A quick release of version 0.1 has arrived. The main scripts are functional and
-should be usable under "normal" use.
-
-There have barely been any real-world tests, but I encourage you to start using
-it actively. [Feedback](http://github.com/nvie/gitflow/issues) is also very
-welcome. See the "Please help out" section below, also.
-
-**Make sure to validate the modifications to your repo after running any of the
-`git-flow` commands, before pushing them permanently.**
+> **IMPORTANT NOTE:**  
+> In release 0.2, the order of the arguments has changed to provide a logical
+> subcommand hierarchy.
 
 
 Installing git-flow
@@ -60,35 +52,31 @@ Example uses:
   
   		git flow init
 
-* To start a new feature branch, use:
+* List all feature branches:
   
-  		git flow start feature <name> [<base>]
-  		git flow start feature foo-support
+  		git flow feature
   
-  `base` is `develop` by default.
+* To list/start/finish feature branches, use:
+  
+  		git flow feature
+  		git flow feature start <name> [<base>]
+  		git flow feature finish <name>
+  
+  (`base` is `develop` by default)
 
-* To finish this feature and have it merged into `develop`, use:
+* To list/start/finish release branches, use:
   
-  		git flow finish feature <name>
-  		git flow finish feature foo-support
+  		git flow release 
+  		git flow release start <release>
+  		git flow release finish <release>
   
-* To start a new release branch for 2.0, based on the 1.1 production release, use:
+* To list/start/finish hotfix branches, use:
   
-  		git flow start release <release>
-  		git flow start release 2.0
+  		git flow hotfix start <release> [<base-release>]
+  		git flow hotfix finish <release>
+
+* To list/start support branches, use:
   
-* To finish the release branch (i.e. to make an actual production release), use:
-  
-  		git flow finish release <release>
-  		git flow finish release 2.0
-  
-* To start a new hotfix branch for 2.1, based on the 2.0 production release, use:
-  
-  		git flow start hotfix <release> [<base-release>]
-  		git flow start hotfix 2.1 2.0
-  
-* To finish the hotfix branch, use:
-  
-  		git flow finish hotfix <release>
-  		git flow finish hotfix 2.1
+  		git flow support
+  		git flow support start <release> [<base-release>]
 

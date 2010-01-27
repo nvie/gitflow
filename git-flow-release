@@ -13,8 +13,9 @@
 #
 
 usage() {
-	echo "usage: git flow start release <version>"
-	echo "       git flow finish release <version>"
+	echo "usage: git flow release"
+	echo "       git flow release start <version>"
+	echo "       git flow release finish <version>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -38,6 +39,17 @@ parse_args() {
 	fi
 	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
 	BRANCH=$PREFIX$VERSION
+}
+
+cmd_default() {
+	# TODO: Refactor getting this prefix into a general function
+	PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+	RELEASE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$RELEASE_BRANCHES" ]; then
+		warn "No release branches exist."
+		exit 0
+	fi
+	echo "$RELEASE_BRANCHES" | sed "s?^$PREFIX??g"
 }
 
 cmd_help() {
