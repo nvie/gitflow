@@ -62,12 +62,13 @@ Example uses:
 
 * To list/start/finish release branches, use:
   
-  		git flow release 
+  		git flow release
   		git flow release start <release>
   		git flow release finish <release>
   
 * To list/start/finish hotfix branches, use:
   
+  		git flow hotfix
   		git flow hotfix start <release> [<base-release>]
   		git flow hotfix finish <release>
 
