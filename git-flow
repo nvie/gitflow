@@ -18,6 +18,7 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
+export GIT_DIR=$(git rev-parse --git-dir)
 export GITFLOW_DIR=$(dirname "$0")
 export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
 export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
@@ -160,6 +161,18 @@ gitflow_require_branches_equal() {
 			die "Branches need merging first."
 		fi
 	fi
+}
+
+#
+# gitflow_is_branch_merged_into()
+#
+# Checks whether branch $1 is succesfully merged into $2
+#
+gitflow_is_branch_merged_into() {
+	local SUBJECT=$1
+	local BASE=$2
+	ALL_MERGES=$(git branch --contains $SUBJECT | sed 's/^[* ] //')
+	has $BASE $ALL_MERGES
 }
 
 main "$@"
