@@ -16,22 +16,15 @@ VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.support || echo support/)
 
 usage() {
-	echo "usage: git flow support"
+	echo "usage: git flow support [list]"
 	echo "       git flow support start <version> [<base>]"
 }
 
-parse_args() {
-	VERSION="$1"
-	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
-	if [ "$VERSION" = "" ]; then
-		echo "Missing argument <version>."
-		usage
-		exit 1
-	fi
-	BRANCH=$PREFIX$VERSION
+cmd_default() {
+	cmd_list "$@"
 }
 
-cmd_default() {
+cmd_list() {
 	SUPPORT_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$SUPPORT_BRANCHES" ]; then
 		warn "No support branches exist."
@@ -43,6 +36,17 @@ cmd_default() {
 cmd_help() {
 	usage
 	exit 0
+}
+
+parse_args() {
+	VERSION="$1"
+	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
+		usage
+		exit 1
+	fi
+	BRANCH=$PREFIX$VERSION
 }
 
 cmd_start() {

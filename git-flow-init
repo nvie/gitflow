@@ -16,11 +16,6 @@ usage() {
 	echo "usage: git flow init"
 }
 
-cmd_help() {
-	usage
-	exit 0
-}
-
 # Default entry when no SUBACTION is given
 cmd_default() {
 	echo
@@ -76,3 +71,7 @@ cmd_default() {
 	fi
 }
 
+cmd_help() {
+	usage
+	exit 0
+}

@@ -17,11 +17,11 @@ usage() {
 	echo "usage: git flow version"
 }
 
+cmd_default() {
+	echo "$GITFLOW_VERSION"
+}
+
 cmd_help() {
 	usage
 	exit 0
-}
-
-cmd_default() {
-	echo "$GITFLOW_VERSION"
 }

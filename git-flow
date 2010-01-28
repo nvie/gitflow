@@ -80,6 +80,10 @@ main() {
 	fi
 
 	# run the specified action
+	# if the subcommand declares a setup() function, call that first
+	if typeset -f setup >/dev/null; then
+		setup
+	fi
 	cmd_$SUBACTION "$@"
 }
 
