@@ -175,5 +175,5 @@ cmd_diff() {
 	parse_args "$@"
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
-	git diff $DEVELOP..$BRANCH
+	git diff $DEVELOP_BRANCH..$BRANCH
 }
