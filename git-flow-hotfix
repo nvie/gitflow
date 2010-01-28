@@ -13,7 +13,7 @@
 #
 
 usage() {
-	echo "usage: git flow hotfix"
+	echo "usage: git flow hotfix [list]"
 	echo "       git flow hotfix start <version> [<base>]"
 	echo "       git flow hotfix finish <version> [<base>]"
 	# TODO
@@ -28,21 +28,16 @@ usage() {
 	#echo "--push      Push to the origin repo when finished"
 }
 
-parse_args() {
-	VERSION="$1"
-	BASE="${2:-$MASTER_BRANCH}"
-	if [ "$VERSION" = "" ]; then
-		echo "Missing argument <version>."
-		usage
-		exit 1
-	fi
+# setup will always be called before the actual cmd_* functions
+setup() {
 	PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-	BRANCH=$PREFIX$VERSION
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+	cmd_list "$@"
+}
+
+cmd_list() {
 	HOTFIX_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$HOTFIX_BRANCHES" ]; then
 		warn "No hotfix branches exist."
@@ -54,6 +49,18 @@ cmd_default() {
 cmd_help() {
 	usage
 	exit 0
+}
+
+parse_args() {
+	VERSION="$1"
+	BASE="${2:-$MASTER_BRANCH}"
+	if [ "$VERSION" = "" ]; then
+		echo "Missing argument <version>."
+		usage
+		exit 1
+	fi
+	PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+	BRANCH=$PREFIX$VERSION
 }
 
 cmd_start() {

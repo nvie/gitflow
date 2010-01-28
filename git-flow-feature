@@ -13,7 +13,7 @@
 #
 
 usage() {
-	echo "usage: git flow feature"
+	echo "usage: git flow feature [list]"
 	echo "       git flow feature start <name> [<base>]"
 	echo "       git flow feature finish <name> [<base>]"
 	echo "       git flow feature publish <name>"
@@ -34,21 +34,16 @@ usage() {
 	#echo "--push      Push to the origin repo when finished"
 }
 
-parse_args() {
-	NAME="$1"
-	BASE="${2:-$DEVELOP_BRANCH}"
-	if [ "$NAME" = "" ]; then
-		echo "Missing argument <name>."
-		usage
-		exit 1
-	fi
+# setup will always be called before the actual cmd_* functions
+setup() {
 	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
-	BRANCH=$PREFIX$NAME
 }
 
 cmd_default() {
-	# TODO: Refactor getting this prefix into a general function
-	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+	cmd_list "$@"
+}
+
+cmd_list() {
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$FEATURE_BRANCHES" ]; then
 		warn "No feature branches exist."
@@ -60,6 +55,18 @@ cmd_default() {
 cmd_help() {
 	usage
 	exit 0
+}
+
+parse_args() {
+	NAME="$1"
+	BASE="${2:-$DEVELOP_BRANCH}"
+	if [ "$NAME" = "" ]; then
+		echo "Missing argument <name>."
+		usage
+		exit 1
+	fi
+	PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+	BRANCH=$PREFIX$NAME
 }
 
 cmd_start() {
