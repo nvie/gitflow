@@ -83,7 +83,7 @@ main() {
 	cmd_$SUBACTION "$@"
 }
 
-gitflow_check_clean_working_tree() {
+gitflow_require_clean_working_tree() {
 	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
 		die "Working tree contains unstaged changes. Aborting ..."
 	fi

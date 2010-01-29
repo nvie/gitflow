@@ -53,7 +53,7 @@ cmd_start() {
 	parse_args "$@"
 
 	# sanity checks
-	gitflow_check_clean_working_tree
+	gitflow_require_clean_working_tree
 
 	# create branch
 	git checkout -b $BRANCH $BASE

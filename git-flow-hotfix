@@ -63,7 +63,7 @@ cmd_start() {
 	parse_args "$@"
 
 	# sanity checks
-	gitflow_check_clean_working_tree
+	gitflow_require_clean_working_tree
 	git fetch -q $ORIGIN
 	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
 	gitflow_require_branch_absent $BRANCH
@@ -89,7 +89,7 @@ cmd_finish() {
 	parse_args "$@"
 
 	# sanity checks
-	gitflow_check_clean_working_tree
+	gitflow_require_clean_working_tree
 	git fetch -q $ORIGIN $MASTER_BRANCH
 	git fetch -q $ORIGIN $DEVELOP_BRANCH
 	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH

@@ -40,7 +40,7 @@ cmd_default() {
 		die "Cannot find your master branch. Try: git branch -m <mymaster> $MASTER_BRANCH"
 	fi
 
-	gitflow_check_clean_working_tree
+	gitflow_require_clean_working_tree
 
 	if git remote | grep -q $ORIGIN; then
 		git fetch -q $ORIGIN
