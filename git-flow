@@ -84,11 +84,23 @@ main() {
 	cmd_$SUBACTION "$@"
 }
 
-gitflow_require_clean_working_tree() {
+gitflow_test_clean_working_tree() {
 	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
+		return 1
+	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+		return 2
+	else
+		return 0
+	fi
+}
+
+gitflow_require_clean_working_tree() {
+	gitflow_test_clean_working_tree
+	result=$?
+	if [ $result -eq 1 ]; then
 		die "Working tree contains unstaged changes. Aborting ..."
 	fi
-	if ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+	if [ $result -eq 2 ]; then
 		die "Index contains uncommited changes. Aborting ..."
 	fi
 }
