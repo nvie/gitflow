@@ -18,10 +18,10 @@ FLAG_FETCH=0
 usage() {
 	echo "usage: git flow feature [list]"
 	echo "       git flow feature start <name> [<base>]"
-	echo "       git flow feature finish <name> [<base>]"
+	echo "       git flow feature finish <name|nameprefix> [<base>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
-	echo "       git flow feature diff <name>"
+	echo "       git flow feature diff <name|nameprefix>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -55,12 +55,44 @@ cmd_help() {
 	exit 0
 }
 
-parse_args() {
+resolve_name_by_prefix() {
+	# first, check if there is a perfect match
+	if has "$LOCAL_BRANCHES" "$PREFIX$1"; then
+		echo "$1"
+		return 0
+	fi
+
+	MATCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
+	NUM_MATCHES=$(echo "$MATCHES" | wc -l)
+	if [ $NUM_MATCHES -eq 1 ]; then
+		# sed arg looks a bit weird, but $PREFIX should not contain spaces,
+		# so this one is safe
+		echo "$MATCHES" | sed "s $PREFIX  g"
+	elif [ $NUM_MATCHES -eq 0 ]; then
+		# no prefix match, so take it literally
+		echo "$1"
+	else
+		# multiple matches, cannot decide
+		warn "Multiple branches match for prefix '$1':"
+		for match in $MATCHES; do
+			warn "- $match"
+		done
+		die "Aborting. Use an unambiguous prefix."
+	fi
+}
+
+get_name_by_prefix() {
+	NAME=$(resolve_name_by_prefix "$1")
+	if [ -z "$NAME" ]; then
+		exit 1
+	fi
+}
+
+parse_args_common() {
 	# TODO: When we have a nice structured way of parsing flags with getopt,
 	# implement the following flags:
 	# --fetch, to set FLAG_FETCH=1
 	# --no-fetch, to set FLAG_FETCH=0
-	NAME="$1"
 	BASE="${2:-$DEVELOP_BRANCH}"
 	if [ "$NAME" = "" ]; then
 		echo "Missing argument <name>."
@@ -68,6 +100,16 @@ parse_args() {
 		exit 1
 	fi
 	BRANCH=$PREFIX$NAME
+}
+
+parse_args_with_name_prefix() {
+	get_name_by_prefix "$1"
+	parse_args_common
+}
+
+parse_args() {
+	NAME="$1"
+	parse_args_common
 }
 
 cmd_start() {
@@ -99,7 +141,7 @@ cmd_start() {
 }
 
 cmd_finish() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 
 	# sanity checks
 	gitflow_require_branch $BRANCH
@@ -251,7 +293,7 @@ cmd_track() {
 }
 
 cmd_diff() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
 	git diff $DEVELOP_BRANCH..$BRANCH
