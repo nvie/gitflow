@@ -107,13 +107,13 @@ parse_args() {
 	parse_args_common
 }
 
-parse_start_args() {
+parse_args_with_name_prefix() {
 	NAME="$1"
 	parse_args_common
 }
 
 cmd_start() {
-	parse_start_args "$@"
+	parse_args_with_name_prefix "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -248,7 +248,7 @@ helper_finish_cleanup() {
 }
 
 cmd_publish() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -274,7 +274,7 @@ cmd_publish() {
 }
 
 cmd_track() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
