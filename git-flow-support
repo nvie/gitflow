@@ -14,6 +14,7 @@
 
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.support || echo support/)
+FLAG_FETCH=1
 
 usage() {
 	echo "usage: git flow support [list]"
@@ -39,6 +40,10 @@ cmd_help() {
 }
 
 parse_args() {
+	# TODO: When we have a nice structured way of parsing flags with getopt,
+	# implement the following flags:
+	# --fetch, to set FLAG_FETCH=1
+	# --no-fetch, to set FLAG_FETCH=0
 	VERSION="$1"
 	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
 	if [ "$VERSION" = "" ]; then
@@ -55,12 +60,18 @@ cmd_start() {
 	# sanity checks
 	gitflow_require_clean_working_tree
 
+	# fetch remote changes
+	if [ $FLAG_FETCH -eq 1 ]; then
+		git fetch -q $ORIGIN $BASE
+	fi
+	gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
+
 	# create branch
 	git checkout -b $BRANCH $BASE
 
 	# publish branch
 	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
-	git fetch -q $ORIGIN
+
 	git config branch.$BRANCH.remote $ORIGIN
 	git config branch.$BRANCH.merge refs/heads/$BRANCH
 	git checkout $BRANCH

@@ -13,6 +13,7 @@
 #
 
 PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+FLAG_FETCH=0
 
 usage() {
 	echo "usage: git flow feature [list]"
@@ -55,6 +56,10 @@ cmd_help() {
 }
 
 parse_args() {
+	# TODO: When we have a nice structured way of parsing flags with getopt,
+	# implement the following flags:
+	# --fetch, to set FLAG_FETCH=1
+	# --no-fetch, to set FLAG_FETCH=0
 	NAME="$1"
 	BASE="${2:-$DEVELOP_BRANCH}"
 	if [ "$NAME" = "" ]; then
@@ -71,10 +76,13 @@ cmd_start() {
 	# sanity checks
 	gitflow_require_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
-	if [ "$BASE" = "$DEVELOP_BRANCH" ]; then
+
+	# update the local repo with remote changes, if asked
+	if [ $FLAG_FETCH -eq 1 ]; then
 		git fetch -q $ORIGIN $DEVELOP_BRANCH
-		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	fi
+
+	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 
 	# create branch
 	git checkout -b $BRANCH $BASE
@@ -96,7 +104,12 @@ cmd_finish() {
 	# sanity checks
 	gitflow_require_clean_working_tree
 	gitflow_require_branch $BRANCH
-	git fetch -q $ORIGIN
+
+	# update local repo with remote changes first, if asked
+	if [ $FLAG_FETCH -eq 1 ]; then
+		git fetch -q $ORIGIN $BRANCH
+	fi
+
 	if has $ORIGIN/$BRANCH $REMOTE_BRANCHES; then
 		gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
 	fi
