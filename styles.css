@@ -1,0 +1,80 @@
+/*
+   Shamelessly ripped from the Github pages of the mogenerator project, by Jonathan Rentzsch
+   http://rentzsch.github.com/mogenerator/
+ */
+a { text-decoration: none; }
+h1, h2, h3, h4, h5, h6, pre, code, li, p {
+	font-size: 1em;
+}
+ul, ol, dl, ul, li, dl, dt, dd, h1, h2, h3, h4, h5, h6, pre, 
+form, body, html, p, blockquote, fieldset, input, td, th {
+	padding: 0;
+	margin: 0;
+}
+a img, :link img, :visited img {
+	border: none;
+}
+body {
+    font-family: helvetica, verdana, sans-serif;
+    padding: 20px 0 0 0;
+    color: #333;
+}
+a {
+    color: #115FB9;
+}
+a:hover {
+    color: #1A8BF4;
+}
+#page {
+    width: 49em;
+    min-height: 500px;
+    padding-top: 30px;
+    margin: 50px auto 0 auto;
+    background: #fff left top no-repeat;
+}
+#main {
+    margin: 0;
+}
+dt {
+    color: #A60D3F;
+    float: left;
+    text-align: right;
+    width: 7em;
+    line-height: 140%;
+    font-weight: bold;
+}
+dd {
+    float: left;
+    width: 30em;
+    line-height: 140%;
+    margin-bottom: .9em;
+    margin-left: 11px;
+    display: inline;
+}
+dd p {
+    margin-bottom: .9em;
+}
+#actions {
+    clear: both;
+    float: left;
+    margin-top: .7em;
+    width: 100%;
+}
+#actions a {
+    font-size: 80%;
+    font-weight: bold;
+    text-align: center;
+    width: 16em;
+    margin-left: 180px;
+    display: inline;
+    float: left;
+}
+#actions .title, #actions .subtitle {
+    display: block;
+}
+#actions .title {
+    margin: .7em 0 .3em 0;
+}
+#actions .subtitle {
+    color: #999;
+}
