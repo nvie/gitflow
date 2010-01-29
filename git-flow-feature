@@ -55,7 +55,54 @@ cmd_help() {
 	exit 0
 }
 
+parse_feature_rev() {
+	# first, check if there is a perfect match
+	if echo "$LOCAL_BRANCHES" | grep -q "^$PREFIX/$1\$"; then
+		echo "$PREFIX/$1"
+	fi
+
+	MATCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
+	NUM_MATCHES=$(echo "$MATCHES" | wc -l)
+	if [ $NUM_MATCHES -eq 1 ]; then
+		echo "$MATCHES"
+	elif [ $NUM_MATCHES -eq 0 ]; then
+		# no prefix match, so take it literally
+		echo "$1"
+	else
+		# multiple matches, cannot decide
+		warn "Multiple branches match for prefix '$1':"
+		for match in $MATCHES; do
+			warn "- $match"
+		done
+		die "Aborting. Use an unambiguous prefix."
+	fi
+}
+
+get_name_from_arg() {
+	NAME=$(parse_feature_rev "$1")
+	if [ -z "$NAME" ]; then
+		exit 1
+	fi
+}
+
 parse_args() {
+	# TODO: When we have a nice structured way of parsing flags with getopt,
+	# implement the following flags:
+	# --fetch, to set FLAG_FETCH=1
+	# --no-fetch, to set FLAG_FETCH=0
+	get_name_from_arg "$1"
+	echo $NAME
+	#exit 1 # debug!
+	BASE="${2:-$DEVELOP_BRANCH}"
+	if [ "$NAME" = "" ]; then
+		echo "Missing argument <name>."
+		usage
+		exit 1
+	fi
+	BRANCH=$PREFIX$NAME
+}
+
+parse_start_args() {
 	# TODO: When we have a nice structured way of parsing flags with getopt,
 	# implement the following flags:
 	# --fetch, to set FLAG_FETCH=1
@@ -71,7 +118,7 @@ parse_args() {
 }
 
 cmd_start() {
-	parse_args "$@"
+	parse_start_args "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
