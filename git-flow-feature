@@ -190,7 +190,7 @@ cmd_finish() {
 helper_finish_cleanup() {
 	# sanity checks
 	gitflow_require_branch $BRANCH
-	gitflow_check_clean_working_tree
+	gitflow_require_clean_working_tree
 
 	# delete branch
 	git push $ORIGIN :refs/heads/$BRANCH
