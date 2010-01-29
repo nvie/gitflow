@@ -57,7 +57,9 @@ cmd_help() {
 
 parse_args() {
 	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the --fetch flag, to set FLAG_FETCH=1
+	# implement the following flags:
+	# --fetch, to set FLAG_FETCH=1
+	# --no-fetch, to set FLAG_FETCH=0
 	NAME="$1"
 	BASE="${2:-$DEVELOP_BRANCH}"
 	if [ "$NAME" = "" ]; then

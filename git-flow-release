@@ -14,6 +14,7 @@
 
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+FLAG_FETCH=1
 
 usage() {
 	echo "usage: git flow release [list]"
@@ -51,6 +52,10 @@ cmd_help() {
 }
 
 parse_args() {
+	# TODO: When we have a nice structured way of parsing flags with getopt,
+	# implement the following flags:
+	# --fetch, to set FLAG_FETCH=1
+	# --no-fetch, to set FLAG_FETCH=0
 	VERSION="$1"
 	if [ "$VERSION" = "" ]; then
 		echo "Missing argument <version>."
@@ -65,7 +70,9 @@ cmd_start() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	git fetch -q $ORIGIN
+	if [ $FLAG_FETCH -eq 1 ]; then
+		git fetch -q $ORIGIN $DEVELOP_BRANCH
+	fi
 	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	gitflow_require_branch_absent $BRANCH
 
@@ -91,7 +98,10 @@ cmd_finish() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	git fetch -q $ORIGIN
+	if [ $FLAG_FETCH -eq 1 ]; then
+		git fetch -q $ORIGIN $MASTER_BRANCH
+		git fetch -q $ORIGIN $DEVELOP_BRANCH
+	fi
 	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
 	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 
