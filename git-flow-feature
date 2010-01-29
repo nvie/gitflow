@@ -55,16 +55,19 @@ cmd_help() {
 	exit 0
 }
 
-parse_feature_rev() {
+resolve_name_by_prefix() {
 	# first, check if there is a perfect match
-	if echo "$LOCAL_BRANCHES" | grep -q "^$PREFIX/$1\$"; then
-		echo "$PREFIX/$1"
+	if has "$LOCAL_BRANCHES" "$PREFIX$1"; then
+		echo "$1"
+		return 0
 	fi
 
 	MATCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
 	NUM_MATCHES=$(echo "$MATCHES" | wc -l)
 	if [ $NUM_MATCHES -eq 1 ]; then
-		echo "$MATCHES"
+		# sed arg looks a bit weird, but $PREFIX should not contain spaces,
+		# so this one is safe
+		echo "$MATCHES" | sed "s $PREFIX  g"
 	elif [ $NUM_MATCHES -eq 0 ]; then
 		# no prefix match, so take it literally
 		echo "$1"
@@ -78,21 +81,18 @@ parse_feature_rev() {
 	fi
 }
 
-get_name_from_arg() {
-	NAME=$(parse_feature_rev "$1")
+get_name_by_prefix() {
+	NAME=$(resolve_name_by_prefix "$1")
 	if [ -z "$NAME" ]; then
 		exit 1
 	fi
 }
 
-parse_args() {
+parse_args_common() {
 	# TODO: When we have a nice structured way of parsing flags with getopt,
 	# implement the following flags:
 	# --fetch, to set FLAG_FETCH=1
 	# --no-fetch, to set FLAG_FETCH=0
-	get_name_from_arg "$1"
-	echo $NAME
-	#exit 1 # debug!
 	BASE="${2:-$DEVELOP_BRANCH}"
 	if [ "$NAME" = "" ]; then
 		echo "Missing argument <name>."
@@ -102,19 +102,14 @@ parse_args() {
 	BRANCH=$PREFIX$NAME
 }
 
+parse_args() {
+	get_name_by_prefix "$1"
+	parse_args_common
+}
+
 parse_start_args() {
-	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the following flags:
-	# --fetch, to set FLAG_FETCH=1
-	# --no-fetch, to set FLAG_FETCH=0
 	NAME="$1"
-	BASE="${2:-$DEVELOP_BRANCH}"
-	if [ "$NAME" = "" ]; then
-		echo "Missing argument <name>."
-		usage
-		exit 1
-	fi
-	BRANCH=$PREFIX$NAME
+	parse_args_common
 }
 
 cmd_start() {
