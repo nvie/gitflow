@@ -102,7 +102,6 @@ cmd_finish() {
 	parse_args "$@"
 
 	# sanity checks
-	gitflow_require_clean_working_tree
 	gitflow_require_branch $BRANCH
 
 	# detect if we're restoring from a merge conflict
@@ -112,11 +111,26 @@ cmd_finish() {
 		# The user need not necessarily have given the same $NAME twice here
 		# (although he/she should).
 		# 
-		FINISH_BASE="$(cat "$GIT_DIR/.gitflow/MERGE_BASE")"
-		if gitflow_is_branch_merged_into $BRANCH $FINISH_BASE; then
-			rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
-			helper_finish_cleanup
-			exit 0
+
+		# TODO: gitflow_test_clean_working_tree() should provide an alternative
+		# exit code for "unmerged changes in working tree", which we should
+		# actually be testing for here
+		if gitflow_test_clean_working_tree; then
+			FINISH_BASE="$(cat "$GIT_DIR/.gitflow/MERGE_BASE")"
+
+			# Since the working tree is now clean, either the user did a
+			# succesfull merge manually, or the merge was cancelled.
+			# We detect this using gitflow_is_branch_merged_into()
+			if gitflow_is_branch_merged_into $BRANCH $FINISH_BASE; then
+				rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
+				helper_finish_cleanup
+				exit 0
+			else
+				# If the user cancelled the merge and decided to wait until later,
+				# that's fine. But we have to acknowledge this by removing the
+				# MERGE_BASE file and continuing normal execution of the finish
+				rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
+			fi
 		else
 			echo
 			echo "Merge conflicts not resolved yet, use:"
@@ -129,6 +143,9 @@ cmd_finish() {
 			exit 1
 		fi
 	fi
+
+	# sanity checks
+	gitflow_require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
 	if [ $FLAG_FETCH -eq 1 ]; then
@@ -153,7 +170,7 @@ cmd_finish() {
 	if [ $? -ne 0 ]; then
 		# oops.. we have a merge conflict!
 		# write the given $BASE to a temporary file (we need it later)
-        mkdir -p "$GIT_DIR/.gitflow"
+		mkdir -p "$GIT_DIR/.gitflow"
 		echo "$BASE" > "$GIT_DIR/.gitflow/MERGE_BASE"
 		echo
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
@@ -171,6 +188,10 @@ cmd_finish() {
 }
 
 helper_finish_cleanup() {
+	# sanity checks
+	gitflow_require_branch $BRANCH
+	gitflow_check_clean_working_tree
+
 	# delete branch
 	git push $ORIGIN :refs/heads/$BRANCH
 	git branch -d $BRANCH
