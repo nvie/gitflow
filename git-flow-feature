@@ -18,10 +18,10 @@ FLAG_FETCH=0
 usage() {
 	echo "usage: git flow feature [list]"
 	echo "       git flow feature start <name> [<base>]"
-	echo "       git flow feature finish <name> [<base>]"
+	echo "       git flow feature finish <name|nameprefix> [<base>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
-	echo "       git flow feature diff <name>"
+	echo "       git flow feature diff <name|nameprefix>"
 	# TODO
 	#echo ""
 	#echo "options:"
@@ -102,18 +102,18 @@ parse_args_common() {
 	BRANCH=$PREFIX$NAME
 }
 
-parse_args() {
+parse_args_with_name_prefix() {
 	get_name_by_prefix "$1"
 	parse_args_common
 }
 
-parse_args_with_name_prefix() {
+parse_args() {
 	NAME="$1"
 	parse_args_common
 }
 
 cmd_start() {
-	parse_args_with_name_prefix "$@"
+	parse_args "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -141,7 +141,7 @@ cmd_start() {
 }
 
 cmd_finish() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 
 	# sanity checks
 	gitflow_require_branch $BRANCH
@@ -248,7 +248,7 @@ helper_finish_cleanup() {
 }
 
 cmd_publish() {
-	parse_args_with_name_prefix "$@"
+	parse_args "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -274,7 +274,7 @@ cmd_publish() {
 }
 
 cmd_track() {
-	parse_args_with_name_prefix "$@"
+	parse_args "$@"
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -293,7 +293,7 @@ cmd_track() {
 }
 
 cmd_diff() {
-	parse_args "$@"
+	parse_args_with_name_prefix "$@"
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
 	git diff $DEVELOP_BRANCH..$BRANCH
