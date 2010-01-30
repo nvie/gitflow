@@ -40,6 +40,8 @@ cmd_default() {
 	cmd_list "$@"
 }
 
+max() { if [ "$1" -gt "$2" ]; then echo "$1"; else echo "$2"; fi; }
+
 cmd_list() {
 	DEFINE_boolean verbose 0 'verbose (more) output' v
 	parse_args "$@"
@@ -54,12 +56,20 @@ cmd_list() {
 	if [ $FLAGS_verbose -eq 0 ]; then
 		echo "$SHORT_NAMES"
 	else
+		# determine column width first
+		width=0
+		for branch in $SHORT_NAMES; do
+			len=$(($(echo "$branch" | wc -c) - 1))
+			width=$(max $width $len)
+		done
+		width=$(($width + 3))
+
 		for branch in $SHORT_NAMES; do
 			fullname="$PREFIX$branch"
 			base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
 			develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
 			branch_sha=$(git rev-parse "$fullname")
-			printf "%-40s" "$branch"
+			printf "%-${width}s" "$branch"
 			if [ "$branch_sha" = "$develop_sha" ]; then
 				printf "(no commits yet)"
 			elif [ "$base" = "$branch_sha" ]; then
