@@ -53,6 +53,13 @@ main() {
 		exit 1
 	fi
 
+	# use the shFlags project to parse the command line arguments
+	. "$GITFLOW_DIR/shFlags/src/shFlags"
+	#DEFINE_boolean quiet 0 'run without output' q
+	#DEFINE_boolean verbose 0 'run verbose (more output)' v
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
 	# sanity checks
 	SUBCOMMAND="$1"; shift
 
@@ -73,6 +80,11 @@ main() {
 	# run command
 	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
 
+	#
+	# TODO: How to handle 'git flow feature --verbose'
+	#          instead of 'git flow feature list --verbose'
+	#       "--verbose" is not a subcommand!
+	#
 	SUBACTION="${1:-default}"; shift
 	if ! typeset -f cmd_$SUBACTION 2>&1 >/dev/null; then
 		warn "Unknown subcommand: '$1'"
