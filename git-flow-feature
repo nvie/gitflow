@@ -52,23 +52,27 @@ cmd_list() {
 		exit 0
 	fi
 
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	SHORT_NAMES=$(echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g")
-	if [ $FLAGS_verbose -eq 0 ]; then
-		echo "$SHORT_NAMES"
-	else
-		# determine column width first
-		width=0
-		for branch in $SHORT_NAMES; do
-			len=$(($(echo "$branch" | wc -c) - 1))
-			width=$(max $width $len)
-		done
-		width=$(($width + 3))
+	# determine column width first
+	width=0
+	for branch in $SHORT_NAMES; do
+		len=$(($(echo "$branch" | wc -c) - 1))
+		width=$(max $width $len)
+	done
+	width=$(($width + 3))
 
-		for branch in $SHORT_NAMES; do
-			fullname="$PREFIX$branch"
-			base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
-			develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
-			branch_sha=$(git rev-parse "$fullname")
+	for branch in $SHORT_NAMES; do
+		fullname="$PREFIX$branch"
+		base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if [ $FLAGS_verbose -eq 1 ]; then
 			printf "%-${width}s" "$branch"
 			if [ "$branch_sha" = "$develop_sha" ]; then
 				printf "(no commits yet)"
@@ -79,9 +83,11 @@ cmd_list() {
 			else
 				printf "(may be rebased)"
 			fi
-			echo
-		done
-	fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
 }
 
 cmd_help() {
