@@ -15,25 +15,12 @@
 PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 
 usage() {
-	echo "usage: git flow feature [list]"
-	echo "       git flow feature start <name> [<base>]"
-	echo "       git flow feature finish <name|nameprefix> [<base>]"
+	echo "usage: git flow feature [list] [-v]"
+	echo "       git flow feature start [-Fv] <name> [<base>]"
+	echo "       git flow feature finish [-rsFv] <name|nameprefix> [<base>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff <name|nameprefix>"
-	# TODO
-	#echo ""
-	#echo "options:"
-	#echo "--option    Explanation"
-	#echo ""
-	#echo "start-only options:"
-	#echo "--option    Explanation"
-	#echo ""
-	#echo "finish-only options:"
-	#echo "--rebase    Rebases the feature branch on top of develop, instead of merging"
-	#echo "--squash    Squashes all commits of the feature branch into a single commit"
-	#echo "            on develop"
-	#echo "--push      Push to the origin repo when finished"
 }
 
 cmd_default() {
