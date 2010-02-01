@@ -148,6 +148,7 @@ parse_args() {
 	# read arguments into global variables
 	NAME="$1"
 	BASE="${2:-$DEVELOP_BRANCH}"
+	BRANCH=$PREFIX$NAME
 }
 
 cmd_start() {
