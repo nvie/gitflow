@@ -49,7 +49,29 @@ cmd_list() {
 		warn "No feature branches exist."
 		exit 0
 	fi
-	echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g"
+
+	SHORT_NAMES=$(echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g")
+	if [ $FLAGS_verbose -eq 0 ]; then
+		echo "$SHORT_NAMES"
+	else
+		for branch in $SHORT_NAMES; do
+			fullname="$PREFIX$branch"
+			base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+			develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+			branch_sha=$(git rev-parse "$fullname")
+			printf "%-40s" "$branch"
+			if [ "$branch_sha" = "$develop_sha" ]; then
+				printf "(no commits yet)"
+			elif [ "$base" = "$branch_sha" ]; then
+				printf "(is behind develop, may ff)"
+			elif [ "$base" = "$develop_sha" ]; then
+				printf "(based on latest develop)"
+			else
+				printf "(may be rebased)"
+			fi
+			echo
+		done
+	fi
 }
 
 cmd_help() {
