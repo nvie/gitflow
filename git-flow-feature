@@ -13,7 +13,6 @@
 #
 
 PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
-FLAG_FETCH=0
 
 usage() {
 	echo "usage: git flow feature [list]"
@@ -42,6 +41,9 @@ cmd_default() {
 }
 
 cmd_list() {
+	DEFINE_boolean verbose 0 'verbose (more) output' v
+	parse_args "$@"
+
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$FEATURE_BRANCHES" ]; then
 		warn "No feature branches exist."
@@ -64,63 +66,63 @@ resolve_name_by_prefix() {
 
 	MATCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
 	NUM_MATCHES=$(echo "$MATCHES" | wc -l)
-	if [ $NUM_MATCHES -eq 1 ]; then
-		# sed arg looks a bit weird, but $PREFIX should not contain spaces,
-		# so this one is safe
-		echo "$MATCHES" | sed "s $PREFIX  g"
-	elif [ $NUM_MATCHES -eq 0 ]; then
+	if [ -z "$MATCHES" ]; then
 		# no prefix match, so take it literally
 		echo "$1"
 	else
-		# multiple matches, cannot decide
-		warn "Multiple branches match for prefix '$1':"
-		for match in $MATCHES; do
-			warn "- $match"
-		done
-		die "Aborting. Use an unambiguous prefix."
+		if [ $NUM_MATCHES -eq 1 ]; then
+			# sed arg looks a bit weird, but $PREFIX should not contain spaces,
+			# so this one is safe
+			echo "$MATCHES" | sed "s $PREFIX  g"
+		else
+			# multiple matches, cannot decide
+			warn "Multiple branches match for prefix '$1':"
+			for match in $MATCHES; do
+				warn "- $match"
+			done
+			die "Aborting. Use an unambiguous prefix."
+		fi
 	fi
 }
 
-get_name_by_prefix() {
-	NAME=$(resolve_name_by_prefix "$1")
-	if [ -z "$NAME" ]; then
+require_name() {
+	if [ "$NAME" = "" ]; then
+		echo "Missing argument <name>"
+		usage
 		exit 1
 	fi
 }
 
-parse_args_common() {
-	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the following flags:
-	# --fetch, to set FLAG_FETCH=1
-	# --no-fetch, to set FLAG_FETCH=0
-	BASE="${2:-$DEVELOP_BRANCH}"
-	if [ "$NAME" = "" ]; then
-		echo "Missing argument <name>."
-		usage
+expand_name_arg_prefix() {
+	require_name
+	NAME=$(resolve_name_by_prefix "$NAME")
+	if echo "$NAME" | grep -q "^[ \t\n\r]+$"; then
 		exit 1
 	fi
 	BRANCH=$PREFIX$NAME
 }
 
-parse_args_with_name_prefix() {
-	get_name_by_prefix "$1"
-	parse_args_common
-}
-
 parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
 	NAME="$1"
-	parse_args_common
+	BASE="${2:-$DEVELOP_BRANCH}"
 }
 
 cmd_start() {
+	DEFINE_boolean fetch 0 'fetch from origin before performing local operation' F
 	parse_args "$@"
+	require_name
 
 	# sanity checks
 	gitflow_require_clean_working_tree
 	gitflow_require_branch_absent $BRANCH
 
 	# update the local repo with remote changes, if asked
-	if [ $FLAG_FETCH -eq 1 ]; then
+	if [ $FLAGS_fetch -eq 1 ]; then
 		git fetch -q $ORIGIN $DEVELOP_BRANCH
 	fi
 
@@ -141,7 +143,11 @@ cmd_start() {
 }
 
 cmd_finish() {
-	parse_args_with_name_prefix "$@"
+	DEFINE_boolean fetch 0 'fetch from origin before performing local operation' F
+	DEFINE_boolean rebase 0 'rebase instead of merge' r
+	DEFINE_boolean squash 0 'squash all commits when rebasing (implies --rebase)' s
+	parse_args "$@"
+	expand_name_arg_prefix
 
 	# sanity checks
 	gitflow_require_branch $BRANCH
@@ -190,7 +196,7 @@ cmd_finish() {
 	gitflow_require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if [ $FLAG_FETCH -eq 1 ]; then
+	if [ $FLAGS_fetch -eq 1 ]; then
 		git fetch -q $ORIGIN $BRANCH
 	fi
 
@@ -249,6 +255,7 @@ helper_finish_cleanup() {
 
 cmd_publish() {
 	parse_args "$@"
+	expand_name_arg_prefix
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -275,6 +282,7 @@ cmd_publish() {
 
 cmd_track() {
 	parse_args "$@"
+	require_name
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -293,7 +301,9 @@ cmd_track() {
 }
 
 cmd_diff() {
-	parse_args_with_name_prefix "$@"
+	parse_args "$@"
+	expand_name_arg_prefix 
+
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
 	git diff $DEVELOP_BRANCH..$BRANCH
