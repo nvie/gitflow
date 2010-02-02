@@ -294,7 +294,9 @@ helper_finish_cleanup() {
 	gitflow_require_clean_working_tree
 
 	# delete branch
-	git push $ORIGIN :refs/heads/$BRANCH
+	if [ $FLAGS_fetch -eq 1 ]; then
+		git push $ORIGIN :refs/heads/$BRANCH
+	fi
 	git branch -d $BRANCH
 
 	echo
