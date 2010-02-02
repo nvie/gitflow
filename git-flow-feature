@@ -156,11 +156,14 @@ parse_args() {
 
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
 	require_name
 
 	# sanity checks
-	gitflow_require_clean_working_tree
+	if noflag force; then
+		gitflow_require_clean_working_tree
+	fi
 	gitflow_require_branch_absent $BRANCH
 
 	# update the local repo with remote changes, if asked
@@ -171,7 +174,9 @@ cmd_start() {
 	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 
 	# create branch
-	git checkout -b $BRANCH $BASE
+	if ! git checkout -b $BRANCH $BASE; then
+		die "Could not create feature branch '$BRANCH'"
+	fi
 
 	echo
 	echo "Summary of actions:"
