@@ -111,16 +111,16 @@ gitflow_require_clean_working_tree() {
 	gitflow_test_clean_working_tree
 	result=$?
 	if [ $result -eq 1 ]; then
-		die "Working tree contains unstaged changes. Aborting ..."
+		die "fatal: Working tree contains unstaged changes. Aborting."
 	fi
 	if [ $result -eq 2 ]; then
-		die "Index contains uncommited changes. Aborting ..."
+		die "fatal: Index contains uncommited changes. Aborting."
 	fi
 }
 
 gitflow_require_local_branch() {
 	if ! has $1 $LOCAL_BRANCHES; then
-		die "Local branch '$1' does not exist and is required."
+		die "fatal: Local branch '$1' does not exist and is required."
 	fi
 }
 
