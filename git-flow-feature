@@ -251,7 +251,7 @@ cmd_finish() {
 
 	# merge into BASE
 	git checkout $BASE
-	if [ "$(git rev-list -n2 $BASE..$BRANCH | wc -l)" = "1" ]; then
+	if [ "$(git rev-list -n2 $BASE..$BRANCH | wc -l)" -eq 1 ]; then
 		git merge --ff $BRANCH
 	else
 		git merge --no-ff $BRANCH
