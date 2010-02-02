@@ -21,6 +21,7 @@ usage() {
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff <name|nameprefix>"
+	echo "       git flow feature rebase [-i] <name|nameprefix>"
 }
 
 cmd_default() {
@@ -125,6 +126,21 @@ expand_name_arg_prefix() {
 		exit 1
 	fi
 	BRANCH=$PREFIX$NAME
+}
+
+expand_name_arg_prefix_or_current() {
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	if [ "$NAME" != "" ]; then
+		expand_name_arg_prefix
+	elif [ "$CURRENT_BRANCH" != "" ]; then
+		BRANCH="$CURRENT_BRANCH"
+		NAME=$(echo "$BRANCH" | sed "s?$PREFIX??g")
+	else
+		warn "The current HEAD is no feature branch."
+		warn "To diff a feature, specify a <name> argument."
+		usage
+		exit 1
+	fi
 }
 
 parse_args() {
@@ -328,19 +344,25 @@ cmd_track() {
 
 cmd_diff() {
 	parse_args "$@"
-	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	if [ "$NAME" != "" ]; then
-		expand_name_arg_prefix 
-	elif [ "$CURRENT_BRANCH" != "" ]; then
-		BRANCH="$CURRENT_BRANCH"
-	else
-		warn "The current HEAD is no feature branch."
-		warn "To diff a feature, specify a <name> argument."
-		usage
-		exit 1
-	fi
+	expand_name_arg_prefix_or_current
 
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
 	git diff $DEVELOP_BRANCH..$BRANCH
+}
+
+cmd_rebase() {
+	DEFINE_boolean interactive 0 'do an interactive rebase' i
+	parse_args "$@"
+	expand_name_arg_prefix_or_current
+	warn "Will try to rebase '$NAME'..."
+	gitflow_require_clean_working_tree
+	gitflow_require_branch "$BRANCH"
+
+	git checkout -q "$BRANCH"
+	OPTS=
+	if [ $FLAGS_interactive -eq 1 ]; then
+		OPTS="$OPTS -i"
+	fi
+	git rebase $OPTS "$BASE"
 }
