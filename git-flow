@@ -55,6 +55,7 @@ main() {
 
 	# use the shFlags project to parse the command line arguments
 	. "$GITFLOW_DIR/shFlags.sh"
+	FLAGS_PARENT="git flow"
 	#DEFINE_boolean quiet 0 'run without output' q
 	#DEFINE_boolean verbose 0 'run verbose (more output)' v
 	FLAGS "$@" || exit $?
@@ -79,6 +80,7 @@ main() {
 
 	# run command
 	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
+	FLAGS_PARENT="git flow $SUBCOMMAND"
 
 	# test if the first argument is a flag (i.e. starts with '-')
 	# in that case, we interpret this arg as a flag for the default
@@ -199,5 +201,9 @@ gitflow_is_branch_merged_into() {
 	ALL_MERGES=$(git branch --contains $SUBJECT | sed 's/^[* ] //')
 	has $BASE $ALL_MERGES
 }
+
+# convenience functions for checking whether flags have been set or not
+flag() { eval FLAG=\$FLAGS_$1; [ $FLAG -eq $FLAGS_TRUE ]; }
+noflag() { eval FLAG=\$FLAGS_$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 
 main "$@"

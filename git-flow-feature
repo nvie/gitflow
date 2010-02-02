@@ -31,7 +31,7 @@ cmd_default() {
 max() { if [ "$1" -gt "$2" ]; then echo "$1"; else echo "$2"; fi; }
 
 cmd_list() {
-	DEFINE_boolean verbose 0 'verbose (more) output' v
+	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
 	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
@@ -60,7 +60,7 @@ cmd_list() {
 		else
 			printf "  "
 		fi
-		if [ $FLAGS_verbose -eq 1 ]; then
+		if flag verbose; then
 			printf "%-${width}s" "$branch"
 			if [ "$branch_sha" = "$develop_sha" ]; then
 				printf "(no commits yet)"
@@ -155,7 +155,7 @@ parse_args() {
 }
 
 cmd_start() {
-	DEFINE_boolean fetch 0 'fetch from origin before performing local operation' F
+	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
 	parse_args "$@"
 	require_name
 
@@ -164,7 +164,7 @@ cmd_start() {
 	gitflow_require_branch_absent $BRANCH
 
 	# update the local repo with remote changes, if asked
-	if [ $FLAGS_fetch -eq 1 ]; then
+	if flag fetch; then
 		git fetch -q $ORIGIN $DEVELOP_BRANCH
 	fi
 
@@ -185,9 +185,9 @@ cmd_start() {
 }
 
 cmd_finish() {
-	DEFINE_boolean fetch 0 'fetch from origin before performing local operation' F
-	DEFINE_boolean rebase 0 'rebase instead of merge' r
-	DEFINE_boolean squash 0 'squash all commits when rebasing (implies --rebase)' s
+	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+	DEFINE_boolean rebase false 'rebase instead of merge' r
+	DEFINE_boolean squash false 'squash all commits when rebasing (implies --rebase)' s
 	parse_args "$@"
 	expand_name_arg_prefix
 
@@ -238,7 +238,7 @@ cmd_finish() {
 	gitflow_require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if [ $FLAGS_fetch -eq 1 ]; then
+	if flag fetch; then
 		git fetch -q $ORIGIN $BRANCH
 	fi
 
@@ -250,7 +250,7 @@ cmd_finish() {
 	fi
 
 	# if the user wants to rebase, do that first
-	if [ $FLAGS_rebase -eq 1 ]; then
+	if flag rebase; then
 		if ! git flow feature rebase "$NAME" "$BASE"; then
 			warn "Finish was aborted due to conflicts during rebase."
 			warn "Please finish the rebase manually now."
@@ -294,7 +294,7 @@ helper_finish_cleanup() {
 	gitflow_require_clean_working_tree
 
 	# delete branch
-	if [ $FLAGS_fetch -eq 1 ]; then
+	if flag fetch; then
 		git push $ORIGIN :refs/heads/$BRANCH
 	fi
 	git branch -d $BRANCH
@@ -365,7 +365,7 @@ cmd_diff() {
 }
 
 cmd_rebase() {
-	DEFINE_boolean interactive 0 'do an interactive rebase' i
+	DEFINE_boolean interactive false 'do an interactive rebase' i
 	parse_args "$@"
 	expand_name_arg_prefix_or_current
 	warn "Will try to rebase '$NAME'..."
@@ -374,7 +374,7 @@ cmd_rebase() {
 
 	git checkout -q "$BRANCH"
 	OPTS=
-	if [ $FLAGS_interactive -eq 1 ]; then
+	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
 	git rebase $OPTS "$BASE"
