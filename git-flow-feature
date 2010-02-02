@@ -249,6 +249,17 @@ cmd_finish() {
 		gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
 	fi
 
+	# if the user wants to rebase, do that first
+	if [ $FLAGS_rebase -eq 1 ]; then
+		if ! git flow feature rebase "$NAME" "$BASE"; then
+			warn "Finish was aborted due to conflicts during rebase."
+			warn "Please finish the rebase manually now."
+			warn "When finished, re-run:"
+			warn "    git flow feature finish '$NAME' '$BASE'"
+			exit 1
+		fi
+	fi
+
 	# merge into BASE
 	git checkout $BASE
 	if [ "$(git rev-list -n2 $BASE..$BRANCH | wc -l)" -eq 1 ]; then
