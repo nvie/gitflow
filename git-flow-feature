@@ -328,7 +328,17 @@ cmd_track() {
 
 cmd_diff() {
 	parse_args "$@"
-	expand_name_arg_prefix 
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	if [ "$NAME" != "" ]; then
+		expand_name_arg_prefix 
+	elif [ "$CURRENT_BRANCH" != "" ]; then
+		BRANCH="$CURRENT_BRANCH"
+	else
+		warn "The current HEAD is no feature branch."
+		warn "To diff a feature, specify a <name> argument."
+		usage
+		exit 1
+	fi
 
 	# TODO: if this feature has been based on a non-develop branch, we really
 	# should not be comparing to $DEVELOP. How to deal with this?
