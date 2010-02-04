@@ -58,22 +58,28 @@ Example uses:
   		git flow feature start <name> [<base>]
   		git flow feature finish <name>
   
-  (`base` is `develop` by default)
+  For feature branches, the `<base>` arg must be a commit on `develop`.
 
 * To list/start/finish release branches, use:
   
   		git flow release
-  		git flow release start <release>
+  		git flow release start <release> [<base>]
   		git flow release finish <release>
+  
+  For release branches, the `<base>` arg must be a commit on `develop`.
   
 * To list/start/finish hotfix branches, use:
   
   		git flow hotfix
-  		git flow hotfix start <release> [<base-release>]
+  		git flow hotfix start <release> [<base>]
   		git flow hotfix finish <release>
+  
+  For hotfix branches, the `<base>` arg must be a commit on `master`.
 
 * To list/start support branches, use:
   
   		git flow support
-  		git flow support start <release> [<base-release>]
+  		git flow support start <release> <base>
+  
+  For support branches, the `<base>` arg must be a commit on `master`.
 

@@ -21,7 +21,7 @@ warn "note: DO NOT use it in a production situation."
 
 usage() {
 	echo "usage: git flow support [list] [-v]"
-	echo "       git flow support start <version> [<base>]"
+	echo "       git flow support start <version> <base>"
 }
 
 cmd_default() {
@@ -90,7 +90,7 @@ parse_args() {
 
 	# read arguments into global variables
 	VERSION="$1"
-	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
+	BASE="$2"
 	BRANCH=$PREFIX$VERSION
 }
 
@@ -102,9 +102,27 @@ require_version_arg() {
 	fi
 }
 
+require_base_arg() {
+	if [ "$BASE" = "" ]; then
+		warn "Missing argument <base>"
+		usage
+		exit 1
+	fi
+}
+
+require_base_is_on_master() {
+	if ! git branch --contains "$BASE" 2>/dev/null \
+			| sed 's/[* ] //g' \
+	  		| grep -q "^$MASTER_BRANCH\$"; then
+		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	fi
+}
+
 cmd_start() {
 	parse_args "$@"
 	require_version_arg
+	require_base_arg
+	require_base_is_on_master
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -113,21 +131,14 @@ cmd_start() {
 	if [ $FLAG_FETCH -eq 1 ]; then
 		git fetch -q $ORIGIN $BASE
 	fi
+	gitflow_require_branch_absent $BRANCH
 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
 
-	# publish branch
-	#git push $ORIGIN $BRANCH:refs/heads/$BRANCH
-
-	git config branch.$BRANCH.remote $ORIGIN
-	git config branch.$BRANCH.merge refs/heads/$BRANCH
-	git checkout $BRANCH
-
 	echo
 	echo "Summary of actions:"
-	echo "- A new remote branch '$BRANCH' was created, based on '$BASE'"
-	echo "- A new tracking branch '$BRANCH' was created"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
 	echo "- You are now on branch '$BRANCH'"
 	echo
 }
