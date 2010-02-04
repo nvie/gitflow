@@ -90,7 +90,7 @@ main() {
 		SUBACTION="$1"; shift
 	fi
 	if ! typeset -f "cmd_$SUBACTION" 2>&1 >/dev/null; then
-		warn "Unknown subcommand: '$1'"
+		warn "Unknown subcommand: '$SUBACTION'"
 		usage
 		exit 1
 	fi
