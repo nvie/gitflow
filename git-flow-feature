@@ -358,11 +358,20 @@ cmd_track() {
 
 cmd_diff() {
 	parse_args "$@"
-	expand_name_arg_prefix_or_current
 
-	# TODO: if this feature has been based on a non-develop branch, we really
-	# should not be comparing to $DEVELOP. How to deal with this?
-	git diff $DEVELOP_BRANCH..$BRANCH
+	if [ "$NAME" != "" ]; then
+		expand_name_arg_prefix_or_current
+		BASE=$(git merge-base $DEVELOP_BRANCH $BRANCH)
+		git diff $BASE..$BRANCH
+	else
+		CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+		if ! echo "$CURRENT_BRANCH" | grep -q "^$PREFIX"; then
+			die "Not on a feature branch. Name one explicitly."
+		fi
+
+		BASE=$(git merge-base $DEVELOP_BRANCH HEAD)
+		git diff $BASE
+	fi
 }
 
 cmd_rebase() {
