@@ -17,7 +17,7 @@ PREFIX=$(git config --get gitflow.prefix.release || echo release/)
 FLAG_FETCH=1
 
 usage() {
-	echo "usage: git flow release [list]"
+	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start <version>"
 	echo "       git flow release finish <version>"
 	# TODO
@@ -38,12 +38,48 @@ cmd_default() {
 }
 
 cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
 	RELEASE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$RELEASE_BRANCHES" ]; then
 		warn "No release branches exist."
 		exit 0
 	fi
-	echo "$RELEASE_BRANCHES" | sed "s?^$PREFIX??g"
+
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	SHORT_NAMES=$(echo "$RELEASE_BRANCHES" | sed "s?^$PREFIX??g")
+	# determine column width first
+	width=0
+	for branch in $SHORT_NAMES; do
+		len=$(($(echo "$branch" | wc -c) - 1))
+		width=$(max $width $len)
+	done
+	width=$(($width + 3))
+
+	for branch in $SHORT_NAMES; do
+		fullname="$PREFIX$branch"
+		base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$develop_sha" ]; then
+				printf "(no commits yet)"
+			else
+				nicename="$(git rev-parse --short $base)"
+				printf "(based on $nicename)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
 }
 
 cmd_help() {
@@ -52,21 +88,26 @@ cmd_help() {
 }
 
 parse_args() {
-	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the following flags:
-	# --fetch, to set FLAG_FETCH=1
-	# --no-fetch, to set FLAG_FETCH=0
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
 	VERSION="$1"
+	BRANCH="$PREFIX$VERSION"
+}
+
+require_version_arg() {
 	if [ "$VERSION" = "" ]; then
-		echo "Missing argument <version>."
+		warn "Missing argument <version>"
 		usage
 		exit 1
 	fi
-	BRANCH=$PREFIX$VERSION
 }
 
 cmd_start() {
 	parse_args "$@"
+	require_version_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -95,6 +136,7 @@ cmd_start() {
 
 cmd_finish() {
 	parse_args "$@"
+	require_version_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree

@@ -16,8 +16,11 @@ VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.support || echo support/)
 FLAG_FETCH=1
 
+warn "note: The support subcommand is still very EXPERIMENTAL!"
+warn "note: DO NOT use it in a production situation."
+
 usage() {
-	echo "usage: git flow support [list]"
+	echo "usage: git flow support [list] [-v]"
 	echo "       git flow support start <version> [<base>]"
 }
 
@@ -26,12 +29,53 @@ cmd_default() {
 }
 
 cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
 	SUPPORT_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$SUPPORT_BRANCHES" ]; then
 		warn "No support branches exist."
 		exit 0
 	fi
-	echo "$SUPPORT_BRANCHES" | sed "s?^$PREFIX??g"
+
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	SHORT_NAMES=$(echo "$SUPPORT_BRANCHES" | sed "s?^$PREFIX??g")
+	# determine column width first
+	width=0
+	for branch in $SHORT_NAMES; do
+		len=$(($(echo "$branch" | wc -c) - 1))
+		width=$(max $width $len)
+	done
+	width=$(($width + 3))
+
+	for branch in $SHORT_NAMES; do
+		fullname="$PREFIX$branch"
+		base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		master_sha=$(git rev-parse "$MASTER_BRANCH")
+		branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$master_sha" ]; then
+				printf "(no commits yet)"
+			else
+				tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				if [ "$tagname" != "" ]; then
+					nicename="$tagname"
+				else
+					nicename="$(git rev-parse --short $base)"
+				fi
+				printf "(based on $nicename)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
 }
 
 cmd_help() {
@@ -40,22 +84,27 @@ cmd_help() {
 }
 
 parse_args() {
-	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the following flags:
-	# --fetch, to set FLAG_FETCH=1
-	# --no-fetch, to set FLAG_FETCH=0
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
 	VERSION="$1"
 	BASE="${2:-${VERSION_PREFIX}${VERSION}}"
+	BRANCH=$PREFIX$VERSION
+}
+
+require_version_arg() {
 	if [ "$VERSION" = "" ]; then
-		echo "Missing argument <version>."
+		warn "Missing argument <version>"
 		usage
 		exit 1
 	fi
-	BRANCH=$PREFIX$VERSION
 }
 
 cmd_start() {
 	parse_args "$@"
+	require_version_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -64,13 +113,12 @@ cmd_start() {
 	if [ $FLAG_FETCH -eq 1 ]; then
 		git fetch -q $ORIGIN $BASE
 	fi
-	gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
 
 	# create branch
-	git checkout -b $BRANCH $BASE
+	git checkout -b "$BRANCH" "$BASE"
 
 	# publish branch
-	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
+	#git push $ORIGIN $BRANCH:refs/heads/$BRANCH
 
 	git config branch.$BRANCH.remote $ORIGIN
 	git config branch.$BRANCH.merge refs/heads/$BRANCH

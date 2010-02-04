@@ -28,8 +28,6 @@ cmd_default() {
 	cmd_list "$@"
 }
 
-max() { if [ "$1" -gt "$2" ]; then echo "$1"; else echo "$2"; fi; }
-
 cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
@@ -113,7 +111,7 @@ resolve_name_by_prefix() {
 
 require_name() {
 	if [ "$NAME" = "" ]; then
-		echo "Missing argument <name>"
+		warn "Missing argument <name>"
 		usage
 		exit 1
 	fi

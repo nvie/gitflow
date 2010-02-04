@@ -17,7 +17,7 @@ PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
 FLAG_FETCH=1
 
 usage() {
-	echo "usage: git flow hotfix [list]"
+	echo "usage: git flow hotfix [list] [-v]"
 	echo "       git flow hotfix start <version> [<base>]"
 	echo "       git flow hotfix finish <version> [<base>]"
 	# TODO
@@ -37,12 +37,53 @@ cmd_default() {
 }
 
 cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
 	HOTFIX_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
 	if [ -z "$HOTFIX_BRANCHES" ]; then
 		warn "No hotfix branches exist."
 		exit 0
 	fi
-	echo "$HOTFIX_BRANCHES" | sed "s?^$PREFIX??g"
+
+	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	SHORT_NAMES=$(echo "$HOTFIX_BRANCHES" | sed "s?^$PREFIX??g")
+	# determine column width first
+	width=0
+	for branch in $SHORT_NAMES; do
+		len=$(($(echo "$branch" | wc -c) - 1))
+		width=$(max $width $len)
+	done
+	width=$(($width + 3))
+
+	for branch in $SHORT_NAMES; do
+		fullname="$PREFIX$branch"
+		base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		master_sha=$(git rev-parse "$MASTER_BRANCH")
+		branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$master_sha" ]; then
+				printf "(no commits yet)"
+			else
+				tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				if [ "$tagname" != "" ]; then
+					nicename="$tagname"
+				else
+					nicename="$(git rev-parse --short $base)"
+				fi
+				printf "(based on $nicename)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
 }
 
 cmd_help() {
@@ -51,18 +92,22 @@ cmd_help() {
 }
 
 parse_args() {
-	# TODO: When we have a nice structured way of parsing flags with getopt,
-	# implement the following flags:
-	# --fetch, to set FLAG_FETCH=1
-	# --no-fetch, to set FLAG_FETCH=0
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
 	VERSION="$1"
 	BASE="${2:-$MASTER_BRANCH}"
+	BRANCH=$PREFIX$VERSION
+}
+
+require_version_arg() {
 	if [ "$VERSION" = "" ]; then
-		echo "Missing argument <version>."
+		warn "Missing argument <version>"
 		usage
 		exit 1
 	fi
-	BRANCH=$PREFIX$VERSION
 }
 
 cmd_start() {
