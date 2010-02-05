@@ -10,7 +10,8 @@ SCRIPT_FILES+=git-flow-hotfix
 SCRIPT_FILES+=git-flow-release
 SCRIPT_FILES+=git-flow-support
 SCRIPT_FILES+=git-flow-version
-SCRIPT_FILES+=shFlags.sh
+SCRIPT_FILES+=gitflow-common
+SCRIPT_FILES+=gitflow-shFlags
 
 all:
 	@echo "usage: make install"
