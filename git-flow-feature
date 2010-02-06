@@ -32,28 +32,33 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	FEATURE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
-	if [ -z "$FEATURE_BRANCHES" ]; then
+	typeset feature_branches
+	typeset current_branch
+	typeset short_names
+	feature_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		exit 0
 	fi
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
 
-	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	SHORT_NAMES=$(echo "$FEATURE_BRANCHES" | sed "s?^$PREFIX??g")
 	# determine column width first
-	width=0
-	for branch in $SHORT_NAMES; do
-		len=$(($(echo "$branch" | wc -c) - 1))
+	typeset -i width=0
+	typeset branch
+	for branch in $short_names; do
+		typeset -i len=${#branch}
 		width=$(max $width $len)
 	done
-	width=$(($width + 3))
+	width=width+3
 
-	for branch in $SHORT_NAMES; do
-		fullname="$PREFIX$branch"
-		base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
-		develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
-		branch_sha=$(git rev-parse "$fullname")
-		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+	typeset branch
+	for branch in $short_names; do
+		typeset fullname="$PREFIX$branch"
+		typeset base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		typeset develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		typeset branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
 			printf "  "
@@ -82,26 +87,27 @@ cmd_help() {
 }
 
 resolve_name_by_prefix() {
+	typeset matches
+	typeset -i num_matches
+
 	# first, check if there is a perfect match
 	if has "$LOCAL_BRANCHES" "$PREFIX$1"; then
 		echo "$1"
 		return 0
 	fi
 
-	MATCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
-	NUM_MATCHES=$(echo "$MATCHES" | wc -l)
-	if [ -z "$MATCHES" ]; then
+	matches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
+	num_matches=$(echo "$matches" | wc -l)
+	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
 		echo "$1"
 	else
-		if [ $NUM_MATCHES -eq 1 ]; then
-			# sed arg looks a bit weird, but $PREFIX should not contain spaces,
-			# so this one is safe
-			echo "$MATCHES" | sed "s $PREFIX  g"
+		if [ $num_matches -eq 1 ]; then
+			echo "${matches#$PREFIX}"
 		else
 			# multiple matches, cannot decide
 			warn "Multiple branches match for prefix '$1':"
-			for match in $MATCHES; do
+			for match in $matches; do
 				warn "- $match"
 			done
 			die "Aborting. Use an unambiguous prefix."
@@ -127,11 +133,11 @@ expand_name_arg_prefix() {
 }
 
 expand_name_arg_prefix_or_current() {
-	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	if [ "$NAME" != "" ]; then
 		expand_name_arg_prefix
-	elif [ "$CURRENT_BRANCH" != "" ]; then
-		BRANCH="$CURRENT_BRANCH"
+	elif [ "$current_branch" != "" ]; then
+		BRANCH="$current_branch"
 		NAME=$(echo "$BRANCH" | sed "s?$PREFIX??g")
 	else
 		warn "The current HEAD is no feature branch."
@@ -364,8 +370,8 @@ cmd_diff() {
 		BASE=$(git merge-base $DEVELOP_BRANCH $BRANCH)
 		git diff $BASE..$BRANCH
 	else
-		CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-		if ! echo "$CURRENT_BRANCH" | grep -q "^$PREFIX"; then
+		current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+		if ! echo "$current_branch" | grep -q "^$PREFIX"; then
 			die "Not on a feature branch. Name one explicitly."
 		fi
 
@@ -383,7 +389,7 @@ cmd_rebase() {
 	gitflow_require_branch "$BRANCH"
 
 	git checkout -q "$BRANCH"
-	OPTS=
+	typeset OPTS=
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
