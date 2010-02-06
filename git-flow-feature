@@ -86,36 +86,7 @@ cmd_help() {
 	exit 0
 }
 
-resolve_name_by_prefix() {
-	typeset matches
-	typeset -i num_matches
-
-	# first, check if there is a perfect match
-	if has "$LOCAL_BRANCHES" "$PREFIX$1"; then
-		echo "$1"
-		return 0
-	fi
-
-	matches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX$1")"
-	num_matches=$(echo "$matches" | wc -l)
-	if [ -z "$matches" ]; then
-		# no prefix match, so take it literally
-		echo "$1"
-	else
-		if [ $num_matches -eq 1 ]; then
-			echo "${matches#$PREFIX}"
-		else
-			# multiple matches, cannot decide
-			warn "Multiple branches match for prefix '$1':"
-			for match in $matches; do
-				warn "- $match"
-			done
-			die "Aborting. Use an unambiguous prefix."
-		fi
-	fi
-}
-
-require_name() {
+require_name_arg() {
 	if [ "$NAME" = "" ]; then
 		warn "Missing argument <name>"
 		usage
@@ -123,27 +94,36 @@ require_name() {
 	fi
 }
 
-expand_name_arg_prefix() {
-	require_name
-	NAME=$(resolve_name_by_prefix "$NAME")
-	if echo "$NAME" | grep -q "^[ \t\n\r]+$"; then
-		exit 1
-	fi
-	BRANCH=$PREFIX$NAME
+expand_nameprefix_arg() {
+	require_name_arg
+
+	typeset expanded_name
+	typeset -i exitcode
+	expanded_name=$(resolve_nameprefix "$NAME" "$PREFIX")
+	exitcode=$?
+	case $exitcode in
+		0) NAME=$expanded_name
+		   BRANCH=$PREFIX$NAME
+		   ;;
+		*) exit 1 ;;
+	esac
 }
 
-expand_name_arg_prefix_or_current() {
-	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+expand_nameprefix_arg_or_current() {
 	if [ "$NAME" != "" ]; then
-		expand_name_arg_prefix
-	elif [ "$current_branch" != "" ]; then
-		BRANCH="$current_branch"
-		NAME=$(echo "$BRANCH" | sed "s?$PREFIX??g")
+		expand_nameprefix_arg
+		gitflow_require_branch "$PREFIX$NAME"
 	else
-		warn "The current HEAD is no feature branch."
-		warn "To diff a feature, specify a <name> argument."
-		usage
-		exit 1
+		typeset current_branch=$(gitflow_current_branch)
+		if startswith "$current_branch" "$PREFIX"; then
+			BRANCH=$current_branch
+			NAME=${BRANCH#$PREFIX}
+		else
+			warn "The current HEAD is no feature branch."
+			warn "To diff a feature, specify a <name> argument."
+			usage
+			exit 1
+		fi
 	fi
 }
 
@@ -162,7 +142,7 @@ cmd_start() {
 	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
 	BASE="${2:-$DEVELOP_BRANCH}"
-	require_name
+	require_name_arg
 
 	# sanity checks
 	if noflag force; then
@@ -198,7 +178,7 @@ cmd_finish() {
 	DEFINE_boolean rebase false 'rebase instead of merge' r
 	DEFINE_boolean squash false 'squash all commits when rebasing (implies --rebase)' s
 	parse_args "$@"
-	expand_name_arg_prefix
+	expand_nameprefix_arg
 
 	# sanity checks
 	gitflow_require_branch $BRANCH
@@ -317,7 +297,7 @@ helper_finish_cleanup() {
 
 cmd_publish() {
 	parse_args "$@"
-	expand_name_arg_prefix
+	expand_nameprefix_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -344,7 +324,7 @@ cmd_publish() {
 
 cmd_track() {
 	parse_args "$@"
-	require_name
+	require_name_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree
@@ -366,12 +346,11 @@ cmd_diff() {
 	parse_args "$@"
 
 	if [ "$NAME" != "" ]; then
-		expand_name_arg_prefix_or_current
+		expand_nameprefix_arg
 		BASE=$(git merge-base $DEVELOP_BRANCH $BRANCH)
 		git diff $BASE..$BRANCH
 	else
-		current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-		if ! echo "$current_branch" | grep -q "^$PREFIX"; then
+		if ! gitflow_current_branch | grep -q "^$PREFIX"; then
 			die "Not on a feature branch. Name one explicitly."
 		fi
 
@@ -383,7 +362,7 @@ cmd_diff() {
 cmd_rebase() {
 	DEFINE_boolean interactive false 'do an interactive rebase' i
 	parse_args "$@"
-	expand_name_arg_prefix_or_current
+	expand_nameprefix_arg_or_current
 	warn "Will try to rebase '$NAME'..."
 	gitflow_require_clean_working_tree
 	gitflow_require_branch "$BRANCH"

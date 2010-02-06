@@ -43,6 +43,59 @@ LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
 REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
 ALL_BRANCHES="$LOCAL_BRANCHES $REMOTE_BRANCHES"
 
+#
+# resolve_nameprefix
+#
+# Inputs:
+# $1 = name prefix to resolve
+# $2 = branch prefix to use
+#
+# Searches branch names from LOCAL_BRANCHES to look for a unique branch
+# name whose name starts with the given name prefix.
+#
+# There are multiple exit codes possible:
+# 0: The unambiguous full name of the branch is written to stdout
+#    (success)
+# 1: No match is found.
+# 2: Multiple matches found. These matches are written to stderr
+#
+resolve_nameprefix() {
+	typeset name="$1"
+	typeset prefix="$2"
+	typeset matches
+	typeset -i num_matches
+
+	# first, check if there is a perfect match
+	if has "$LOCAL_BRANCHES" "$prefix$name"; then
+		echo "$name"
+		return 0
+	fi
+
+	matches="$(echo "$LOCAL_BRANCHES" | grep "^$prefix$name")"
+	num_matches=$(echo "$matches" | wc -l)
+	if [ -z "$matches" ]; then
+		# no prefix match, so take it literally
+		warn "No branch matches prefix '$name'"
+		return 1
+	else
+		if [ $num_matches -eq 1 ]; then
+			echo "${matches#$prefix}"
+			return 0
+		else
+			# multiple matches, cannot decide
+			warn "Multiple branches match prefix '$name':"
+			for match in $matches; do
+				warn "- $match"
+			done
+			return 2
+		fi
+	fi
+}
+
+gitflow_current_branch() {
+	git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+}
+
 gitflow_test_clean_working_tree() {
 	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
 		return 1
