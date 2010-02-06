@@ -41,28 +41,34 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	RELEASE_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
-	if [ -z "$RELEASE_BRANCHES" ]; then
+	typeset release_branches
+	typeset current_branch
+	typeset short_names
+	release_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
 		exit 0
 	fi
 
-	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	SHORT_NAMES=$(echo "$RELEASE_BRANCHES" | sed "s?^$PREFIX??g")
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$release_branches" | sed "s?^$PREFIX??g")
+
 	# determine column width first
-	width=0
-	for branch in $SHORT_NAMES; do
-		len=$(($(echo "$branch" | wc -c) - 1))
+	typeset -i width=0
+	typeset branch
+	for branch in $short_names; do
+		typeset -i len=$(($(echo "$branch" | wc -c) - 1))
 		width=$(max $width $len)
 	done
-	width=$(($width + 3))
+	width=width+3
 
-	for branch in $SHORT_NAMES; do
-		fullname="$PREFIX$branch"
-		base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
-		develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
-		branch_sha=$(git rev-parse "$fullname")
-		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+	typeset branch
+	for branch in $short_names; do
+		typeset fullname="$PREFIX$branch"
+		typeset base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		typeset develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		typeset branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
 			printf "  "
@@ -72,7 +78,7 @@ cmd_list() {
 			if [ "$branch_sha" = "$develop_sha" ]; then
 				printf "(no commits yet)"
 			else
-				nicename="$(git rev-parse --short $base)"
+				typeset nicename="$(git rev-parse --short $base)"
 				printf "(based on $nicename)"
 			fi
 		else

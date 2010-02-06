@@ -30,28 +30,33 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	HOTFIX_BRANCHES="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
-	if [ -z "$HOTFIX_BRANCHES" ]; then
+	typeset hotfix_branches
+	typeset current_branch
+	typeset short_names
+	hotfix_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
 		exit 0
 	fi
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$hotfix_branches" | sed "s?^$PREFIX??g")
 
-	CURRENT_BRANCH=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	SHORT_NAMES=$(echo "$HOTFIX_BRANCHES" | sed "s?^$PREFIX??g")
 	# determine column width first
-	width=0
-	for branch in $SHORT_NAMES; do
-		len=$(($(echo "$branch" | wc -c) - 1))
+	typeset -i width=0
+	typeset branch
+	for branch in $short_names; do
+		typeset -i len=$(($(echo "$branch" | wc -c) - 1))
 		width=$(max $width $len)
 	done
-	width=$(($width + 3))
+	width=width+3
 
-	for branch in $SHORT_NAMES; do
-		fullname="$PREFIX$branch"
-		base=$(git merge-base "$fullname" "$MASTER_BRANCH")
-		master_sha=$(git rev-parse "$MASTER_BRANCH")
-		branch_sha=$(git rev-parse "$fullname")
-		if [ "$fullname" = "$CURRENT_BRANCH" ]; then
+	typeset branch
+	for branch in $short_names; do
+		typeset fullname="$PREFIX$branch"
+		typeset base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		typeset master_sha=$(git rev-parse "$MASTER_BRANCH")
+		typeset branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
 			printf "  "
@@ -61,7 +66,8 @@ cmd_list() {
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
-				tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				typeset tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				typeset nicename
 				if [ "$tagname" != "" ]; then
 					nicename="$tagname"
 				else
