@@ -174,7 +174,7 @@ cmd_start() {
 }
 
 cmd_finish() {
-	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false 'rebase instead of merge' r
 	DEFINE_boolean squash false 'squash all commits when rebasing (implies --rebase)' s
 	parse_args "$@"

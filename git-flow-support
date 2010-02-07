@@ -14,7 +14,6 @@
 
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.support || echo support/)
-FLAG_FETCH=1
 
 warn "note: The support subcommand is still very EXPERIMENTAL!"
 warn "note: DO NOT use it in a production situation."
@@ -125,6 +124,7 @@ require_base_is_on_master() {
 }
 
 cmd_start() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	require_version_arg
 	require_base_arg
@@ -134,7 +134,7 @@ cmd_start() {
 	gitflow_require_clean_working_tree
 
 	# fetch remote changes
-	if [ $FLAG_FETCH -eq 1 ]; then
+	if flag fetch; then
 		git fetch -q $ORIGIN $BASE
 	fi
 	gitflow_require_branch_absent $BRANCH

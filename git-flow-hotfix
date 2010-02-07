@@ -14,7 +14,6 @@
 
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-FLAG_FETCH=1
 
 usage() {
 	echo "usage: git flow hotfix [list] [-v]"
@@ -114,6 +113,7 @@ require_base_is_on_master() {
 }
 
 cmd_start() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before finishing hotfix" F
 	parse_args "$@"
 	BASE="${2:-$MASTER_BRANCH}"
 	require_version_arg
@@ -121,7 +121,7 @@ cmd_start() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	if [ $FLAG_FETCH -eq 1 ]; then
+	if flag fetch; then
 		git fetch -q $ORIGIN $MASTER_BRANCH
 	fi
 	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
@@ -145,12 +145,13 @@ cmd_start() {
 }
 
 cmd_finish() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before finishing hotfix" F
 	parse_args "$@"
 	require_version_arg
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	if [ $FLAG_FETCH -eq 1 ]; then
+	if flag fetch; then
 		git fetch -q $ORIGIN $MASTER_BRANCH
 		git fetch -q $ORIGIN $DEVELOP_BRANCH
 	fi
