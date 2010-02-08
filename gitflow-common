@@ -148,6 +148,10 @@ gitflow_require_tag_absent() {
 	fi
 }
 
+gitflow_tag_exists() {
+	has $1 $ALL_TAGS
+}
+
 #
 # gitflow_test_branches_equal()
 #
