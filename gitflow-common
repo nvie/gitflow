@@ -42,6 +42,7 @@ noflag() { typeset FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
 REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
 ALL_BRANCHES="$LOCAL_BRANCHES $REMOTE_BRANCHES"
+ALL_TAGS=$(git tag)
 
 #
 # resolve_nameprefix
@@ -139,6 +140,16 @@ gitflow_require_branch_absent() {
 	if has $1 $ALL_BRANCHES; then
 		die "Branch '$1' already exists. Pick another name."
 	fi
+}
+
+gitflow_require_tag_absent() {
+	if has $1 $ALL_TAGS; then
+		die "Tag '$1' already exists. Pick another name."
+	fi
+}
+
+gitflow_tag_exists() {
+	has $1 $ALL_TAGS
 }
 
 #
