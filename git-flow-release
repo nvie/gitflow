@@ -206,6 +206,9 @@ cmd_finish() {
 	if ! gitflow_is_branch_merged_into $BRANCH $DEVELOP_BRANCH; then
 		git checkout $DEVELOP_BRANCH || \
 		  die "Could not check out $DEVELOP_BRANCH."
+
+		# TODO: Actually, accounting for 'git describe' pays, so we should
+		# ideally git merge --no-ff $tagname here, instead!
 		git merge --no-ff $BRANCH || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
