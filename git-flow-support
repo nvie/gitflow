@@ -40,7 +40,7 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$support_branches" | sed "s?^$PREFIX??g")
+	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
 	typeset -i width=0
