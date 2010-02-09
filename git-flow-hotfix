@@ -65,12 +65,12 @@ cmd_list() {
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
-				typeset tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				typeset tagname=$(git name-rev --tags --no-undefined --name-only "$base")
 				typeset nicename
 				if [ "$tagname" != "" ]; then
 					nicename=$tagname
 				else
-					nicename=$(git rev-parse --short $base)
+					nicename=$(git rev-parse --short "$base")
 				fi
 				printf "(based on $nicename)"
 			fi
@@ -121,15 +121,15 @@ cmd_start() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	gitflow_require_branch_absent $BRANCH
-	gitflow_require_tag_absent $VERSION_PREFIX$VERSION
+	gitflow_require_branch_absent "$BRANCH"
+	gitflow_require_tag_absent "$VERSION_PREFIX$VERSION"
 	if flag fetch; then
-		git fetch -q $ORIGIN $MASTER_BRANCH
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
 	fi
-	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
+	gitflow_require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
 
 	# create branch
-	git checkout -b $BRANCH $BASE
+	git checkout -b "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -159,24 +159,24 @@ cmd_finish() {
 	fi
 
 	# sanity checks
-	gitflow_require_branch $BRANCH
+	gitflow_require_branch "$BRANCH"
 	gitflow_require_clean_working_tree
 	if flag fetch; then
-		git fetch -q $ORIGIN $MASTER_BRANCH || \
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
-		git fetch -q $ORIGIN $DEVELOP_BRANCH || \
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	gitflow_require_branches_equal $MASTER_BRANCH $ORIGIN/$MASTER_BRANCH
-	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	gitflow_require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
-	if ! gitflow_is_branch_merged_into $BRANCH $MASTER_BRANCH; then
-		git checkout $MASTER_BRANCH || \
+	if ! gitflow_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
+		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff $BRANCH || \
+		git merge --no-ff "$BRANCH" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
@@ -185,7 +185,7 @@ cmd_finish() {
 	# in case a previous attempt to finish this release branch has failed,
 	# but the tag was set successful, we skip it now
 	typeset tagname=$VERSION_PREFIX$VERSION
-	if ! gitflow_tag_exists $tagname; then
+	if ! gitflow_tag_exists "$tagname"; then
 		typeset opts="-a"
 		flag sign && opts="$opts -s"
 		[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
@@ -197,19 +197,19 @@ cmd_finish() {
 	# try to merge into develop
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
-	if ! gitflow_is_branch_merged_into $BRANCH $DEVELOP_BRANCH; then
-		git checkout $DEVELOP_BRANCH || \
+	if ! gitflow_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+		git checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
-		git merge --no-ff $BRANCH || \
+		git merge --no-ff "$BRANCH" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
 	# delete branch
-	git branch -d $BRANCH
+	git branch -d "$BRANCH"
 
 	# TODO: Implement an optional push to master
 	# git push origin develop; git push origin master; git push --tags origin
