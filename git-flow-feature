@@ -35,7 +35,7 @@ cmd_list() {
 	typeset feature_branches
 	typeset current_branch
 	typeset short_names
-	feature_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	feature_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		exit 0
@@ -54,7 +54,7 @@ cmd_list() {
 
 	typeset branch
 	for branch in $short_names; do
-		typeset fullname="$PREFIX$branch"
+		typeset fullname=$PREFIX$branch
 		typeset base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
 		typeset develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
 		typeset branch_sha=$(git rev-parse "$fullname")
@@ -133,7 +133,7 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	NAME="$1"
+	NAME=$1
 	BRANCH=$PREFIX$NAME
 }
 
@@ -141,24 +141,24 @@ cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
 	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
-	BASE="${2:-$DEVELOP_BRANCH}"
+	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
 	# sanity checks
 	if noflag force; then
 		gitflow_require_clean_working_tree
 	fi
-	gitflow_require_branch_absent $BRANCH
+	gitflow_require_branch_absent "$BRANCH"
 
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
-		git fetch -q $ORIGIN $DEVELOP_BRANCH
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
-	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 
 	# create branch
-	if ! git checkout -b $BRANCH $BASE; then
+	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
 
@@ -181,7 +181,7 @@ cmd_finish() {
 	expand_nameprefix_arg
 
 	# sanity checks
-	gitflow_require_branch $BRANCH
+	gitflow_require_branch "$BRANCH"
 
 	# detect if we're restoring from a merge conflict
 	if [ -f "$GIT_DIR/.gitflow/MERGE_BASE" ]; then
@@ -195,12 +195,12 @@ cmd_finish() {
 		# exit code for "unmerged changes in working tree", which we should
 		# actually be testing for here
 		if gitflow_test_clean_working_tree; then
-			FINISH_BASE="$(cat "$GIT_DIR/.gitflow/MERGE_BASE")"
+			FINISH_BASE=$(cat "$GIT_DIR/.gitflow/MERGE_BASE")
 
 			# Since the working tree is now clean, either the user did a
 			# succesfull merge manually, or the merge was cancelled.
 			# We detect this using gitflow_is_branch_merged_into()
-			if gitflow_is_branch_merged_into $BRANCH $FINISH_BASE; then
+			if gitflow_is_branch_merged_into "$BRANCH" "$FINISH_BASE"; then
 				rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
 				helper_finish_cleanup
 				exit 0
@@ -228,13 +228,13 @@ cmd_finish() {
 
 	# update local repo with remote changes first, if asked
 	if flag fetch; then
-		git fetch -q $ORIGIN $BRANCH
+		git fetch -q "$ORIGIN" "$BRANCH"
 	fi
 
-	if has $ORIGIN/$BRANCH $REMOTE_BRANCHES; then
-		gitflow_require_branches_equal $BRANCH $ORIGIN/$BRANCH
+	if has "$ORIGIN/$BRANCH" "$REMOTE_BRANCHES"; then
+		gitflow_require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	gitflow_require_branches_equal $DEVELOP_BRANCH $ORIGIN/$DEVELOP_BRANCH
+	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
@@ -248,11 +248,11 @@ cmd_finish() {
 	fi
 
 	# merge into BASE
-	git checkout $DEVELOP_BRANCH
-	if [ "$(git rev-list -n2 $DEVELOP_BRANCH..$BRANCH | wc -l)" -eq 1 ]; then
-		git merge --ff $BRANCH
+	git checkout "$DEVELOP_BRANCH"
+	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+		git merge --ff "$BRANCH"
 	else
-		git merge --no-ff $BRANCH
+		git merge --no-ff "$BRANCH"
 	fi
 
 	if [ $? -ne 0 ]; then
@@ -277,14 +277,14 @@ cmd_finish() {
 
 helper_finish_cleanup() {
 	# sanity checks
-	gitflow_require_branch $BRANCH
+	gitflow_require_branch "$BRANCH"
 	gitflow_require_clean_working_tree
 
 	# delete branch
 	if flag fetch; then
-		git push $ORIGIN :refs/heads/$BRANCH
+		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	git branch -d $BRANCH
+	git branch -d "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -301,18 +301,18 @@ cmd_publish() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	gitflow_require_branch $BRANCH
-	git fetch -q $ORIGIN
-	gitflow_require_branch_absent $ORIGIN/$BRANCH
+	gitflow_require_branch "$BRANCH"
+	git fetch -q "$ORIGIN"
+	gitflow_require_branch_absent "$ORIGIN/$BRANCH"
 
 	# create remote branch
-	git push $ORIGIN $BRANCH:refs/heads/$BRANCH
-	git fetch -q $ORIGIN
+	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+	git fetch -q "$ORIGIN"
 
 	# configure remote tracking
-	git config branch.$BRANCH.remote $ORIGIN
-	git config branch.$BRANCH.merge refs/heads/$BRANCH
-	git checkout $BRANCH
+	git config "branch.$BRANCH.remote" "$ORIGIN"
+	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+	git checkout "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -328,12 +328,12 @@ cmd_track() {
 
 	# sanity checks
 	gitflow_require_clean_working_tree
-	gitflow_require_branch_absent $BRANCH
-	git fetch -q $ORIGIN
-	gitflow_require_branch $ORIGIN/$BRANCH
+	gitflow_require_branch_absent "$BRANCH"
+	git fetch -q "$ORIGIN"
+	gitflow_require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
-	git checkout -b $BRANCH $ORIGIN/$BRANCH
+	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -347,15 +347,15 @@ cmd_diff() {
 
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
-		BASE=$(git merge-base $DEVELOP_BRANCH $BRANCH)
-		git diff $BASE..$BRANCH
+		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
+		git diff "$BASE..$BRANCH"
 	else
 		if ! gitflow_current_branch | grep -q "^$PREFIX"; then
 			die "Not on a feature branch. Name one explicitly."
 		fi
 
-		BASE=$(git merge-base $DEVELOP_BRANCH HEAD)
-		git diff $BASE
+		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
+		git diff "$BASE"
 	fi
 }
 

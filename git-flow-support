@@ -34,26 +34,26 @@ cmd_list() {
 	typeset support_branches
 	typeset current_branch
 	typeset short_names
-	support_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	support_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$support_branches" | sed "s?^$PREFIX??g")
+	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
 	typeset -i width=0
 	typeset branch
 	for branch in $short_names; do
-		typeset -i len=$(($(echo "$branch" | wc -c) - 1))
+		typeset -i len=${#branch}
 		width=$(max $width $len)
 	done
 	width=width+3
 
 	typeset branch
 	for branch in $short_names; do
-		typeset fullname="$PREFIX$branch"
+		typeset fullname=$PREFIX$branch
 		typeset base=$(git merge-base "$fullname" "$MASTER_BRANCH")
 		typeset master_sha=$(git rev-parse "$MASTER_BRANCH")
 		typeset branch_sha=$(git rev-parse "$fullname")
@@ -67,12 +67,12 @@ cmd_list() {
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
-				typeset tagname=$(git name-rev --tags --no-undefined --name-only $base)
+				typeset tagname=$(git name-rev --tags --no-undefined --name-only "$base")
 				typeset nicename
 				if [ "$tagname" != "" ]; then
-					nicename="$tagname"
+					nicename=$tagname
 				else
-					nicename="$(git rev-parse --short $base)"
+					nicename=$(git rev-parse --short "$base")
 				fi
 				printf "(based on $nicename)"
 			fi
@@ -94,8 +94,8 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	VERSION="$1"
-	BASE="$2"
+	VERSION=$1
+	BASE=$2
 	BRANCH=$PREFIX$VERSION
 }
 
@@ -135,9 +135,9 @@ cmd_start() {
 
 	# fetch remote changes
 	if flag fetch; then
-		git fetch -q $ORIGIN $BASE
+		git fetch -q "$ORIGIN" "$BASE"
 	fi
-	gitflow_require_branch_absent $BRANCH
+	gitflow_require_branch_absent "$BRANCH"
 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"

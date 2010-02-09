@@ -61,8 +61,8 @@ ALL_TAGS=$(git tag)
 # 2: Multiple matches found. These matches are written to stderr
 #
 resolve_nameprefix() {
-	typeset name="$1"
-	typeset prefix="$2"
+	typeset name=$1
+	typeset prefix=$2
 	typeset matches
 	typeset -i num_matches
 
@@ -72,7 +72,7 @@ resolve_nameprefix() {
 		return 0
 	fi
 
-	matches="$(echo "$LOCAL_BRANCHES" | grep "^$prefix$name")"
+	matches=$(echo "$LOCAL_BRANCHES" | grep "^$prefix$name")
 	num_matches=$(echo "$matches" | wc -l)
 	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
