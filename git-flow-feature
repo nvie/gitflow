@@ -35,7 +35,7 @@ cmd_list() {
 	typeset feature_branches
 	typeset current_branch
 	typeset short_names
-	feature_branches="$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")"
+	feature_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		exit 0
@@ -54,7 +54,7 @@ cmd_list() {
 
 	typeset branch
 	for branch in $short_names; do
-		typeset fullname="$PREFIX$branch"
+		typeset fullname=$PREFIX$branch
 		typeset base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
 		typeset develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
 		typeset branch_sha=$(git rev-parse "$fullname")
@@ -133,7 +133,7 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	NAME="$1"
+	NAME=$1
 	BRANCH=$PREFIX$NAME
 }
 
@@ -141,7 +141,7 @@ cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
 	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
-	BASE="${2:-$DEVELOP_BRANCH}"
+	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
 	# sanity checks
@@ -195,7 +195,7 @@ cmd_finish() {
 		# exit code for "unmerged changes in working tree", which we should
 		# actually be testing for here
 		if gitflow_test_clean_working_tree; then
-			FINISH_BASE="$(cat "$GIT_DIR/.gitflow/MERGE_BASE")"
+			FINISH_BASE=$(cat "$GIT_DIR/.gitflow/MERGE_BASE")
 
 			# Since the working tree is now clean, either the user did a
 			# succesfull merge manually, or the merge was cancelled.
