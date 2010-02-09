@@ -56,7 +56,7 @@ cmd_list() {
 	typeset -i width=0
 	typeset branch
 	for branch in $short_names; do
-		typeset -i len=$(($(echo "$branch" | wc -c) - 1))
+		typeset -i len=${#branch}
 		width=$(max $width $len)
 	done
 	width=width+3
