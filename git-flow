@@ -77,7 +77,7 @@ main() {
 	if [ "$1" != "" ] && ! echo "$1" | grep -q "^-"; then
 		SUBACTION="$1"; shift
 	fi
-	if ! typeset -f "cmd_$SUBACTION" 2>&1 >/dev/null; then
+	if ! type "cmd_$SUBACTION" > /dev/null 2>&1; then
 		warn "Unknown subcommand: '$SUBACTION'"
 		usage
 		exit 1

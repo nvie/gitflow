@@ -31,9 +31,9 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	typeset support_branches
-	typeset current_branch
-	typeset short_names
+	local support_branches
+	local current_branch
+	local short_names
 	support_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
@@ -43,20 +43,20 @@ cmd_list() {
 	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
-	typeset -i width=0
-	typeset branch
+	local width=0
+	local branch
 	for branch in $short_names; do
-		typeset -i len=${#branch}
+		local len=${#branch}
 		width=$(max $width $len)
 	done
-	width=width+3
+	width=$(($width+3))
 
-	typeset branch
+	local branch
 	for branch in $short_names; do
-		typeset fullname=$PREFIX$branch
-		typeset base=$(git merge-base "$fullname" "$MASTER_BRANCH")
-		typeset master_sha=$(git rev-parse "$MASTER_BRANCH")
-		typeset branch_sha=$(git rev-parse "$fullname")
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
 		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
@@ -67,8 +67,8 @@ cmd_list() {
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
-				typeset tagname=$(git name-rev --tags --no-undefined --name-only "$base")
-				typeset nicename
+				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+				local nicename
 				if [ "$tagname" != "" ]; then
 					nicename=$tagname
 				else
