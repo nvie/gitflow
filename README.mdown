@@ -12,7 +12,12 @@ blog post").
 
 Installing git-flow
 -------------------
-To install `git-flow` as a real `git` subcommand, run:
+After downloading the sources from Github, also fetch the submodules:
+
+	$ git submodule init
+	$ git submodule update
+
+Then, you can install `git-flow`, using:
 
 	$ sudo make install
 

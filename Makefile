@@ -18,6 +18,7 @@ all:
 	@echo "       make uninstall"
 
 install:
+	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
 	install -d -m 0755 $(GIT_EXEC_PATH)
 	install -m 0755 $(EXEC_FILES) $(GIT_EXEC_PATH)
 	install -m 0644 $(SCRIPT_FILES) $(GIT_EXEC_PATH)
