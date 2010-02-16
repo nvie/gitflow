@@ -18,7 +18,7 @@ die() { warn "$@"; exit 1; }
 
 # set logic
 has() {
-	typeset item=$1; shift
+	local item=$1; shift
 	echo " $@ " | grep -q " $item "
 }
 
@@ -31,8 +31,8 @@ startswith() { [ "$1" != "${1#$2}" ]; }
 endswith() { [ "$1" != "${1#$2}" ]; }
 
 # convenience functions for checking shFlags flags
-flag() { typeset FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -eq $FLAGS_TRUE ]; }
-noflag() { typeset FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
+flag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -eq $FLAGS_TRUE ]; }
+noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 
 #
 # Git specific common functionality
@@ -61,10 +61,10 @@ ALL_TAGS=$(git tag)
 # 2: Multiple matches found. These matches are written to stderr
 #
 resolve_nameprefix() {
-	typeset name=$1
-	typeset prefix=$2
-	typeset matches
-	typeset -i num_matches
+	local name=$1
+	local prefix=$2
+	local matches
+	local num_matches
 
 	# first, check if there is a perfect match
 	if has "$LOCAL_BRANCHES" "$prefix$name"; then
@@ -109,7 +109,7 @@ gitflow_test_clean_working_tree() {
 
 gitflow_require_clean_working_tree() {
 	gitflow_test_clean_working_tree
-	typeset -i result=$?
+	local result=$?
 	if [ $result -eq 1 ]; then
 		die "fatal: Working tree contains unstaged changes. Aborting."
 	fi
@@ -164,10 +164,10 @@ gitflow_tag_exists() {
 # 3    Branch needs a real merge
 #
 gitflow_test_branches_equal() {
-	typeset commit1=$(git rev-parse "$1")
-	typeset commit2=$(git rev-parse "$2")
+	local commit1=$(git rev-parse "$1")
+	local commit2=$(git rev-parse "$2")
 	if [ "$commit1" != "$commit2" ]; then
-		typeset base=$(git merge-base "$commit1" "$commit2")
+		local base=$(git merge-base "$commit1" "$commit2")
 		if [ "$commit1" = "$base" ]; then
 			return 1
 		elif [ "$commit2" = "$base" ]; then
@@ -184,7 +184,7 @@ gitflow_require_branches_equal() {
 	gitflow_require_local_branch "$1"
 	gitflow_require_remote_branch "$2"
 	gitflow_test_branches_equal "$1" "$2"
-	typeset -i status=$?
+	local status=$?
 	if [ $status -gt 0 ]; then
 		warn "Branches '$1' and '$2' have diverged."
 		if [ $status -eq 1 ]; then
@@ -204,8 +204,8 @@ gitflow_require_branches_equal() {
 # Checks whether branch $1 is succesfully merged into $2
 #
 gitflow_is_branch_merged_into() {
-	typeset subject=$1
-	typeset base=$2
-	typeset all_merges=$(git branch --contains $subject | sed 's/^[* ] //')
+	local subject=$1
+	local base=$2
+	local all_merges=$(git branch --contains $subject | sed 's/^[* ] //')
 	has $base $all_merges
 }

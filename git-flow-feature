@@ -32,9 +32,9 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	typeset feature_branches
-	typeset current_branch
-	typeset short_names
+	local feature_branches
+	local current_branch
+	local short_names
 	feature_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
@@ -44,20 +44,20 @@ cmd_list() {
 	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
-	typeset -i width=0
-	typeset branch
+	local width=0
+	local branch
 	for branch in $short_names; do
-		typeset -i len=${#branch}
+		local len=${#branch}
 		width=$(max $width $len)
 	done
-	width=width+3
+	width=$(($width+3))
 
-	typeset branch
+	local branch
 	for branch in $short_names; do
-		typeset fullname=$PREFIX$branch
-		typeset base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
-		typeset develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
-		typeset branch_sha=$(git rev-parse "$fullname")
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
 		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
@@ -97,8 +97,8 @@ require_name_arg() {
 expand_nameprefix_arg() {
 	require_name_arg
 
-	typeset expanded_name
-	typeset -i exitcode
+	local expanded_name
+	local exitcode
 	expanded_name=$(resolve_nameprefix "$NAME" "$PREFIX")
 	exitcode=$?
 	case $exitcode in
@@ -114,7 +114,7 @@ expand_nameprefix_arg_or_current() {
 		expand_nameprefix_arg
 		gitflow_require_branch "$PREFIX$NAME"
 	else
-		typeset current_branch=$(gitflow_current_branch)
+		local current_branch=$(gitflow_current_branch)
 		if startswith "$current_branch" "$PREFIX"; then
 			BRANCH=$current_branch
 			NAME=${BRANCH#$PREFIX}
@@ -368,7 +368,7 @@ cmd_rebase() {
 	gitflow_require_branch "$BRANCH"
 
 	git checkout -q "$BRANCH"
-	typeset OPTS=
+	local OPTS=
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi

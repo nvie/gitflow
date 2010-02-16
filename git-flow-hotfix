@@ -29,9 +29,9 @@ cmd_list() {
 	DEFINE_boolean verbose false 'verbose (more) output' v
 	parse_args "$@"
 
-	typeset hotfix_branches
-	typeset current_branch
-	typeset short_names
+	local hotfix_branches
+	local current_branch
+	local short_names
 	hotfix_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
 	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
@@ -41,20 +41,20 @@ cmd_list() {
 	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
-	typeset -i width=0
-	typeset branch
+	local width=0
+	local branch
 	for branch in $short_names; do
-		typeset -i len=${#branch}
+		local len=${#branch}
 		width=$(max $width $len)
 	done
-	width=width+3
+	width=$(($width+3))
 
-	typeset branch
+	local branch
 	for branch in $short_names; do
-		typeset fullname=$PREFIX$branch
-		typeset base=$(git merge-base "$fullname" "$MASTER_BRANCH")
-		typeset master_sha=$(git rev-parse "$MASTER_BRANCH")
-		typeset branch_sha=$(git rev-parse "$fullname")
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
 		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
 		else
@@ -65,8 +65,8 @@ cmd_list() {
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
-				typeset tagname=$(git name-rev --tags --no-undefined --name-only "$base")
-				typeset nicename
+				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+				local nicename
 				if [ "$tagname" != "" ]; then
 					nicename=$tagname
 				else
@@ -193,9 +193,9 @@ cmd_finish() {
 	# try to tag the release
 	# in case a previous attempt to finish this release branch has failed,
 	# but the tag was set successful, we skip it now
-	typeset tagname=$VERSION_PREFIX$VERSION
+	local tagname=$VERSION_PREFIX$VERSION
 	if ! gitflow_tag_exists "$tagname"; then
-		typeset opts="-a"
+		local opts="-a"
 		flag sign && opts="$opts -s"
 		[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 		[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
