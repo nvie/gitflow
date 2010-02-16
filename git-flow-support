@@ -34,7 +34,7 @@ cmd_list() {
 	local support_branches
 	local current_branch
 	local short_names
-	support_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
+	support_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
 		exit 0

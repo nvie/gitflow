@@ -39,10 +39,10 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 #
 
 # get all available branches
-LOCAL_BRANCHES=$(git branch | sed 's/^[* ] //')
-REMOTE_BRANCHES=$(git branch -r | sed 's/^[* ] //')
-ALL_BRANCHES="$LOCAL_BRANCHES $REMOTE_BRANCHES"
-ALL_TAGS=$(git tag)
+gitflow_local_branches() { git branch | sed 's/^[* ] //'; }
+gitflow_remote_branches() { git branch -r | sed 's/^[* ] //'; }
+gitflow_all_branches() { gitflow_local_branches; gitflow_remote_branches; }
+gitflow_all_tags() { git tag; }
 
 #
 # resolve_nameprefix
@@ -51,8 +51,8 @@ ALL_TAGS=$(git tag)
 # $1 = name prefix to resolve
 # $2 = branch prefix to use
 #
-# Searches branch names from LOCAL_BRANCHES to look for a unique branch
-# name whose name starts with the given name prefix.
+# Searches branch names from gitflow_local_branches() to look for a unique
+# branch name whose name starts with the given name prefix.
 #
 # There are multiple exit codes possible:
 # 0: The unambiguous full name of the branch is written to stdout
@@ -67,12 +67,12 @@ resolve_nameprefix() {
 	local num_matches
 
 	# first, check if there is a perfect match
-	if has "$LOCAL_BRANCHES" "$prefix$name"; then
+	if has "$(gitflow_local_branches)" "$prefix$name"; then
 		echo "$name"
 		return 0
 	fi
 
-	matches=$(echo "$LOCAL_BRANCHES" | grep "^$prefix$name")
+	matches=$(echo "$(gitflow_local_branches)" | grep "^$prefix$name")
 	num_matches=$(echo "$matches" | wc -l)
 	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
@@ -119,37 +119,37 @@ gitflow_require_clean_working_tree() {
 }
 
 gitflow_require_local_branch() {
-	if ! has $1 $LOCAL_BRANCHES; then
+	if ! has $1 $(gitflow_local_branches); then
 		die "fatal: Local branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_remote_branch() {
-	if ! has $1 $REMOTE_BRANCHES; then
+	if ! has $1 $(gitflow_remote_branches); then
 		die "Remote branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_branch() {
-	if ! has $1 $ALL_BRANCHES; then
+	if ! has $1 $(gitflow_all_branches); then
 		die "Branch '$1' does not exist and is required."
 	fi
 }
 
 gitflow_require_branch_absent() {
-	if has $1 $ALL_BRANCHES; then
+	if has $1 $(gitflow_all_branches); then
 		die "Branch '$1' already exists. Pick another name."
 	fi
 }
 
 gitflow_require_tag_absent() {
-	if has $1 $ALL_TAGS; then
+	if has $1 $(gitflow_all_tags); then
 		die "Tag '$1' already exists. Pick another name."
 	fi
 }
 
 gitflow_tag_exists() {
-	has $1 $ALL_TAGS
+	has $1 $(gitflow_all_tags)
 }
 
 #

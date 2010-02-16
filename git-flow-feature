@@ -35,7 +35,7 @@ cmd_list() {
 	local feature_branches
 	local current_branch
 	local short_names
-	feature_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
+	feature_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		exit 0
@@ -231,7 +231,7 @@ cmd_finish() {
 		git fetch -q "$ORIGIN" "$BRANCH"
 	fi
 
-	if has "$ORIGIN/$BRANCH" "$REMOTE_BRANCHES"; then
+	if has "$ORIGIN/$BRANCH" "$(gitflow_remote_branches)"; then
 		gitflow_require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
 	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
