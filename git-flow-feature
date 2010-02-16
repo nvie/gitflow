@@ -12,6 +12,8 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+gitflow_require_git_repo
+gitflow_load_settings
 PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
 
 usage() {
