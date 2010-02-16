@@ -118,12 +118,21 @@ require_base_is_on_develop() {
 	fi
 }
 
+require_no_existing_release_branches() {
+	local release_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
+	local first_branch=$(echo ${release_branches} | head -n1)
+	first_branch=${first_branch#$PREFIX}
+	[ -z "$release_branches" ] || \
+		die "There is an existing release branch ($first_branch). Finish that one first."
+}
+
 cmd_start() {
 	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_version_arg
 	require_base_is_on_develop
+	require_no_existing_release_branches
 
 	# sanity checks
 	gitflow_require_clean_working_tree
