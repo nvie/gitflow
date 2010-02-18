@@ -27,9 +27,14 @@ cmd_default() {
 	local branch_count
 
 	# add a master branch if no such branch exists yet
+	# TODO: Distinguish two cases:
+	#       1. NO BRANCHES EXIST AT ALL! (fresh repo):
+	#          allow a name for the branch-to-be-created
+	#       2. THERE EXIST SOME BRANCHES
+	#          master must be based on (or *be*) one of those!
 	local master_branch
-	if ! git config --get gitflow.branch.master >/dev/null; then
-
+	master_branch=$(git config --get gitflow.branch.master)
+	if [ "$master_branch" = "" ]; then
 		# first, ask how to create the master branch
 		echo
 		echo "Which branch should be used for bringing forth production releases?"
@@ -40,20 +45,16 @@ cmd_default() {
 		fi
 		echo "Branch name for production releases: [master] \c"
 		read master_branch
+		master_branch=${master_branch:-master}
 
-		master_branch=${master_branch:-master}
-		if [ "$master_branch" != "master" ]; then
-			git config gitflow.branch.master "$master_branch"
-		fi
-	else
-		master_branch=$(git config --get gitflow.branch.master)
-		master_branch=${master_branch:-master}
+		# store the name of the master branch
+		git config gitflow.branch.master "$master_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
 	local develop_branch
-	if ! git config --get gitflow.branch.develop; then
-
+	develop_branch=$(git config --get gitflow.branch.develop)
+	if [ "$develop_branch" = "" ]; then
 		# next, ask how to create the develop branch
 		echo
 		echo "Which branch should be used for developing the \"next release\"?"
@@ -64,30 +65,16 @@ cmd_default() {
 		fi
 		echo "Branch name for \"next release\" development: [develop] \c"
 		read develop_branch
+		develop_branch=${develop_branch:-develop}
 
-		develop_branch=${develop_branch:-develop}
-		if [ "$develop_branch" != "develop" ]; then
-			git config gitflow.branch.develop "$develop_branch"
-		fi
-	else
-		develop_branch=$(git config --get gitflow.branch.develop)
-		develop_branch=${develop_branch:-develop}
+		# store the name of the develop branch
+		git config gitflow.branch.develop "$develop_branch"
 	fi
 
-	# perform an initial commit, if no such commit exists
-	local initialfile
+	# create a HEAD now, if it does not exist yet (in a just init'ed repo)
 	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
-		echo "A file is required to perform an initial commit."
-		echo "How would you like to name your initial file? [README] \c"
-		read initialfile
-		initialfile=${initialfile:-README}
-
-		# point HEAD to the not yet existing master branch
 		git symbolic-ref HEAD "refs/heads/$master_branch"
-
-		touch "$initialfile"
-		git add "$initialfile"
-		git commit --quiet -m "initial commit"
+		git commit --allow-empty --quiet -m "Initial commit"
 	fi
 
 	# if the selected master branch exists, it's okay, else create it (base on
@@ -99,8 +86,9 @@ cmd_default() {
 	if ! gitflow_branch_exists "$develop_branch"; then
 		git branch "$develop_branch" "$master_branch"	 # base it on the master branch!
 	else
-		# TODO: Check: it should be based on the master branch (i.e. master and
-		# develop should have a merge base!)
+		# TODO: this test should be moved up, in the selection of the develop
+		# branch! Branches that do not have a merge base with master shouldn't
+		# be allowed to pick in the first place!
 		gitflow_test_branches_equal "$develop_branch" "$master_branch"
 		if [ $? -eq 4 ]; then
 			warn "fatal: $develop_branch and $master_branch have no common ancestors."
@@ -112,6 +100,11 @@ cmd_default() {
 
 	# checkout the develop branch to start working
 	git checkout -q "$develop_branch"
+
+	# TODO: finally, ask the user for naming convention preferences
+	# i.e. tag prefixes, prefixes for supporting branches, etc.
+
+	# TODO: what to do with origin?
 }
 
 cmd_help() {
