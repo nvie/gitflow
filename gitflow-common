@@ -50,7 +50,6 @@ gitflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
-	export README=$(git config --get gitflow.readme || echo README)
 }
 
 #
