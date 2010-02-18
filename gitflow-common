@@ -41,7 +41,7 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 # get all available branches
 gitflow_local_branches() { git branch | sed 's/^[* ] //'; }
 gitflow_remote_branches() { git branch -r | sed 's/^[* ] //'; }
-gitflow_all_branches() { gitflow_local_branches; gitflow_remote_branches; }
+gitflow_all_branches() { git branch -a | sed 's/^[* ] //'; }
 gitflow_all_tags() { git tag; }
 
 # loading settings that can be overridden using git config
@@ -133,6 +133,14 @@ gitflow_require_clean_working_tree() {
 	fi
 }
 
+gitflow_branch_exists() {
+	has $1 $(gitflow_all_branches)
+}
+
+gitflow_tag_exists() {
+	has $1 $(gitflow_all_tags)
+}
+
 gitflow_require_local_branch() {
 	if ! has $1 $(gitflow_local_branches); then
 		die "fatal: Local branch '$1' does not exist and is required."
@@ -163,10 +171,6 @@ gitflow_require_tag_absent() {
 	fi
 }
 
-gitflow_tag_exists() {
-	has $1 $(gitflow_all_tags)
-}
-
 #
 # gitflow_test_branches_equal()
 #
@@ -177,13 +181,16 @@ gitflow_tag_exists() {
 # 1    First given branch needs fast-forwarding
 # 2    Second given branch needs fast-forwarding
 # 3    Branch needs a real merge
+# 4    There is no merge base, i.e. the branches have no common ancestors
 #
 gitflow_test_branches_equal() {
 	local commit1=$(git rev-parse "$1")
 	local commit2=$(git rev-parse "$2")
 	if [ "$commit1" != "$commit2" ]; then
 		local base=$(git merge-base "$commit1" "$commit2")
-		if [ "$commit1" = "$base" ]; then
+		if [ $? -ne 0 ]; then
+			return 4
+		elif [ "$commit1" = "$base" ]; then
 			return 1
 		elif [ "$commit2" = "$base" ]; then
 			return 2
