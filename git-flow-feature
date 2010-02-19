@@ -186,7 +186,7 @@ cmd_finish() {
 	gitflow_require_branch "$BRANCH"
 
 	# detect if we're restoring from a merge conflict
-	if [ -f "$GIT_DIR/.gitflow/MERGE_BASE" ]; then
+	if [ -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE" ]; then
 		#
 		# TODO: detect that we're working on the correct branch here!
 		# The user need not necessarily have given the same $NAME twice here
@@ -197,20 +197,20 @@ cmd_finish() {
 		# exit code for "unmerged changes in working tree", which we should
 		# actually be testing for here
 		if gitflow_test_clean_working_tree; then
-			FINISH_BASE=$(cat "$GIT_DIR/.gitflow/MERGE_BASE")
+			FINISH_BASE=$(cat "$DOT_GIT_DIR/.gitflow/MERGE_BASE")
 
 			# Since the working tree is now clean, either the user did a
 			# succesfull merge manually, or the merge was cancelled.
 			# We detect this using gitflow_is_branch_merged_into()
 			if gitflow_is_branch_merged_into "$BRANCH" "$FINISH_BASE"; then
-				rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
+				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 				helper_finish_cleanup
 				exit 0
 			else
 				# If the user cancelled the merge and decided to wait until later,
 				# that's fine. But we have to acknowledge this by removing the
 				# MERGE_BASE file and continuing normal execution of the finish
-				rm -f "$GIT_DIR/.gitflow/MERGE_BASE"
+				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 			fi
 		else
 			echo
@@ -260,8 +260,8 @@ cmd_finish() {
 	if [ $? -ne 0 ]; then
 		# oops.. we have a merge conflict!
 		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
-		mkdir -p "$GIT_DIR/.gitflow"
-		echo "$DEVELOP_BRANCH" > "$GIT_DIR/.gitflow/MERGE_BASE"
+		mkdir -p "$DOT_GIT_DIR/.gitflow"
+		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 		echo
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
 		echo "    git mergetool"

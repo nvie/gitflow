@@ -46,7 +46,7 @@ gitflow_all_tags() { git tag; }
 
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
-	export GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
+	export DOT_GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
