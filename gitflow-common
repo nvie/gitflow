@@ -41,7 +41,7 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 # get all available branches
 gitflow_local_branches() { git branch | sed 's/^[* ] //'; }
 gitflow_remote_branches() { git branch -r | sed 's/^[* ] //'; }
-gitflow_all_branches() { git branch -a | sed 's/^[* ] //'; }
+gitflow_all_branches() { ( git branch; git branch -r) | sed 's/^[* ] //'; }
 gitflow_all_tags() { git tag; }
 
 # loading settings that can be overridden using git config
