@@ -144,9 +144,11 @@ cmd_default() {
 	# ----------------
 	# We create a HEAD now, if it does not exist yet (in a fresh repo). We need
 	# it to be able to create new branches.
+	local created_gitflow_branch=0
 	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
 		git symbolic-ref HEAD "refs/heads/$master_branch"
 		git commit --allow-empty --quiet -m "Initial commit"
+		created_gitflow_branch=1
 	fi
 
 	# Creation of master
@@ -163,13 +165,16 @@ cmd_default() {
 	# the develop branch now in that case (we base it on master, of course)
 	if ! gitflow_local_branch_exists "$develop_branch"; then
 		git branch "$develop_branch" "$master_branch"
+		created_gitflow_branch=1
 	fi
 
 	# assert the gitflow repo has been correctly initialized
 	gitflow_is_initialized
 
-	# checkout the develop branch to start working
-	git checkout -q "$develop_branch"
+	# switch to develop branch if its newly created
+	if [ $created_gitflow_branch -eq 1 ]; then
+		git checkout -q "$develop_branch"
+	fi
 
 	# TODO: finally, ask the user for naming convention preferences
 	# i.e. tag prefixes, prefixes for supporting branches, etc.
