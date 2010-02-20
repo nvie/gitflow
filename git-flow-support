@@ -13,9 +13,10 @@
 #
 
 gitflow_require_git_repo
+gitflow_require_initialized
 gitflow_load_settings
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
-PREFIX=$(git config --get gitflow.prefix.support || echo support/)
+PREFIX=$(git config --get gitflow.prefix.support)
 
 warn "note: The support subcommand is still very EXPERIMENTAL!"
 warn "note: DO NOT use it in a production situation."

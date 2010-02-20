@@ -13,8 +13,9 @@
 #
 
 gitflow_require_git_repo
+gitflow_require_initialized
 gitflow_load_settings
-PREFIX=$(git config --get gitflow.prefix.feature || echo feature/)
+PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"

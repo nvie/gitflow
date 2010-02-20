@@ -74,8 +74,8 @@ gitflow_all_tags() { git tag; }
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
-	export MASTER_BRANCH=$(git config --get gitflow.branch.master || echo master)
-	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop || echo develop)
+	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
+	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
 }
 
@@ -144,7 +144,13 @@ gitflow_test_clean_working_tree() {
 
 gitflow_require_git_repo() {
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
-		die "Not a git repository"
+		die "fatal: Not a git repository"
+	fi
+}
+
+gitflow_require_initialized() {
+	if ! gitflow_is_initialized; then
+		die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
 	fi
 }
 
