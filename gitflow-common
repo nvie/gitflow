@@ -38,6 +38,25 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 # Git specific common functionality
 #
 
+# check if this repo has been inited for gitflow
+gitflow_has_master_configured() {
+	local master=$(git config --get gitflow.branch.master)
+	[ "$master" != "" ] && gitflow_local_branch_exists "$master"
+}
+
+gitflow_has_develop_configured() {
+	local develop=$(git config --get gitflow.branch.develop)
+	[ "$develop" != "" ] && gitflow_local_branch_exists "$develop"
+}
+
+gitflow_is_initialized() {
+	gitflow_has_master_configured && \
+	gitflow_has_develop_configured && \
+	# they should be different
+	[ "$(git config --get gitflow.branch.master)" != \
+	  "$(git config --get gitflow.branch.develop)" ]
+}
+
 # get all available branches
 gitflow_local_branches() { git branch | sed 's/^[* ] //'; }
 gitflow_remote_branches() { git branch -r | sed 's/^[* ] //'; }
@@ -132,6 +151,10 @@ gitflow_require_clean_working_tree() {
 	fi
 }
 
+gitflow_local_branch_exists() {
+	has $1 $(gitflow_local_branches)
+}
+
 gitflow_branch_exists() {
 	has $1 $(gitflow_all_branches)
 }
@@ -141,7 +164,7 @@ gitflow_tag_exists() {
 }
 
 gitflow_require_local_branch() {
-	if ! has $1 $(gitflow_local_branches); then
+	if ! gitflow_local_branch_exists; then
 		die "fatal: Local branch '$1' does not exist and is required."
 	fi
 }
