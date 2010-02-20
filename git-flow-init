@@ -184,39 +184,53 @@ cmd_default() {
 	local prefix
 
 	# Feature branches
-	default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
-	echo "Feature branches? [$default_suggestion] \c"
-	read answer
-	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-	git config gitflow.prefix.feature "$prefix"
+	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
+		echo "Feature branches? [$default_suggestion] \c"
+		read answer
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.feature "$prefix"
+	fi
 
 	# Release branches
-	default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
-	echo "Release branches? [$default_suggestion] \c"
-	read answer
-	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-	git config gitflow.prefix.release "$prefix"
+	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
+		echo "Release branches? [$default_suggestion] \c"
+		read answer
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.release "$prefix"
+	fi
+
 
 	# Hotfix branches
-	default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-	echo "Hotfix branches? [$default_suggestion] \c"
-	read answer
-	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-	git config gitflow.prefix.hotfix "$prefix"
+	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+		echo "Hotfix branches? [$default_suggestion] \c"
+		read answer
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.hotfix "$prefix"
+	fi
+
 
 	# Support branches
-	default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
-	echo "Support branches? [$default_suggestion] \c"
-	read answer
-	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-	git config gitflow.prefix.support "$prefix"
+	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
+		echo "Support branches? [$default_suggestion] \c"
+		read answer
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.support "$prefix"
+	fi
+
 
 	# Version tag prefix
-	default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
-	echo "Version tag prefix? [$default_suggestion] \c"
-	read answer
-	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-	git config gitflow.prefix.versiontag "$prefix"
+	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
+		echo "Version tag prefix? [$default_suggestion] \c"
+		read answer
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.versiontag "$prefix"
+	fi
+
 
 	# TODO: what to do with origin?
 }
