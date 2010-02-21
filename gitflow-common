@@ -12,6 +12,10 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+#
+# Common functionality
+#
+
 # shell output
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
@@ -38,15 +42,20 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 # Git specific common functionality
 #
 
+git_local_branches() { git branch | sed 's/^[* ] //'; }
+git_remote_branches() { git branch -r | sed 's/^[* ] //'; }
+git_all_branches() { ( git branch; git branch -r) | sed 's/^[* ] //'; }
+git_all_tags() { git tag; }
+
 # check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
-	[ "$master" != "" ] && gitflow_local_branch_exists "$master"
+	[ "$master" != "" ] && git_local_branch_exists "$master"
 }
 
 gitflow_has_develop_configured() {
 	local develop=$(git config --get gitflow.branch.develop)
-	[ "$develop" != "" ] && gitflow_local_branch_exists "$develop"
+	[ "$develop" != "" ] && git_local_branch_exists "$develop"
 }
 
 gitflow_has_prefixes_configured() {
@@ -65,12 +74,6 @@ gitflow_is_initialized() {
 	gitflow_has_prefixes_configured
 }
 
-# get all available branches
-gitflow_local_branches() { git branch | sed 's/^[* ] //'; }
-gitflow_remote_branches() { git branch -r | sed 's/^[* ] //'; }
-gitflow_all_branches() { ( git branch; git branch -r) | sed 's/^[* ] //'; }
-gitflow_all_tags() { git tag; }
-
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
@@ -80,13 +83,13 @@ gitflow_load_settings() {
 }
 
 #
-# resolve_nameprefix
+# gitflow_resolve_nameprefix
 #
 # Inputs:
 # $1 = name prefix to resolve
 # $2 = branch prefix to use
 #
-# Searches branch names from gitflow_local_branches() to look for a unique
+# Searches branch names from git_local_branches() to look for a unique
 # branch name whose name starts with the given name prefix.
 #
 # There are multiple exit codes possible:
@@ -95,19 +98,19 @@ gitflow_load_settings() {
 # 1: No match is found.
 # 2: Multiple matches found. These matches are written to stderr
 #
-resolve_nameprefix() {
+gitflow_resolve_nameprefix() {
 	local name=$1
 	local prefix=$2
 	local matches
 	local num_matches
 
 	# first, check if there is a perfect match
-	if has "$(gitflow_local_branches)" "$prefix$name"; then
+	if has "$(git_local_branches)" "$prefix$name"; then
 		echo "$name"
 		return 0
 	fi
 
-	matches=$(echo "$(gitflow_local_branches)" | grep "^$prefix$name")
+	matches=$(echo "$(git_local_branches)" | grep "^$prefix$name")
 	num_matches=$(echo "$matches" | wc -l)
 	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
@@ -128,11 +131,11 @@ resolve_nameprefix() {
 	fi
 }
 
-gitflow_current_branch() {
+git_current_branch() {
 	git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }
 
-gitflow_test_clean_working_tree() {
+git_is_clean_working_tree() {
 	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
 		return 1
 	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
@@ -142,13 +145,13 @@ gitflow_test_clean_working_tree() {
 	fi
 }
 
-gitflow_require_git_repo() {
+require_git_repo() {
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
 		die "fatal: Not a git repository"
 	fi
 }
 
-gitflow_require_initialized() {
+require_gitflow_initialized() {
 	if ! gitflow_is_initialized; then
 		die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
 	fi
@@ -158,8 +161,8 @@ git_repo_is_headless() {
 	! git rev-parse --quiet --verify HEAD >/dev/null 2>&1
 }
 
-gitflow_require_clean_working_tree() {
-	gitflow_test_clean_working_tree
+require_clean_working_tree() {
+	git_is_clean_working_tree
 	local result=$?
 	if [ $result -eq 1 ]; then
 		die "fatal: Working tree contains unstaged changes. Aborting."
@@ -169,50 +172,50 @@ gitflow_require_clean_working_tree() {
 	fi
 }
 
-gitflow_local_branch_exists() {
-	has $1 $(gitflow_local_branches)
+git_local_branch_exists() {
+	has $1 $(git_local_branches)
 }
 
-gitflow_branch_exists() {
-	has $1 $(gitflow_all_branches)
+git_branch_exists() {
+	has $1 $(git_all_branches)
 }
 
-gitflow_tag_exists() {
-	has $1 $(gitflow_all_tags)
+git_tag_exists() {
+	has $1 $(git_all_tags)
 }
 
-gitflow_require_local_branch() {
-	if ! gitflow_local_branch_exists; then
+require_local_branch() {
+	if ! git_local_branch_exists; then
 		die "fatal: Local branch '$1' does not exist and is required."
 	fi
 }
 
-gitflow_require_remote_branch() {
-	if ! has $1 $(gitflow_remote_branches); then
+require_remote_branch() {
+	if ! has $1 $(git_remote_branches); then
 		die "Remote branch '$1' does not exist and is required."
 	fi
 }
 
-gitflow_require_branch() {
-	if ! has $1 $(gitflow_all_branches); then
+require_branch() {
+	if ! has $1 $(git_all_branches); then
 		die "Branch '$1' does not exist and is required."
 	fi
 }
 
-gitflow_require_branch_absent() {
-	if has $1 $(gitflow_all_branches); then
+require_branch_absent() {
+	if has $1 $(git_all_branches); then
 		die "Branch '$1' already exists. Pick another name."
 	fi
 }
 
-gitflow_require_tag_absent() {
-	if has $1 $(gitflow_all_tags); then
+require_tag_absent() {
+	if has $1 $(git_all_tags); then
 		die "Tag '$1' already exists. Pick another name."
 	fi
 }
 
 #
-# gitflow_test_branches_equal()
+# git_compare_branches()
 #
 # Tests whether branches and their "origin" counterparts have diverged and need
 # merging first. It returns error codes to provide more detail, like so:
@@ -223,7 +226,7 @@ gitflow_require_tag_absent() {
 # 3    Branch needs a real merge
 # 4    There is no merge base, i.e. the branches have no common ancestors
 #
-gitflow_test_branches_equal() {
+git_compare_branches() {
 	local commit1=$(git rev-parse "$1")
 	local commit2=$(git rev-parse "$2")
 	if [ "$commit1" != "$commit2" ]; then
@@ -242,10 +245,10 @@ gitflow_test_branches_equal() {
 	fi
 }
 
-gitflow_require_branches_equal() {
-	gitflow_require_local_branch "$1"
-	gitflow_require_remote_branch "$2"
-	gitflow_test_branches_equal "$1" "$2"
+require_branches_equal() {
+	require_local_branch "$1"
+	require_remote_branch "$2"
+	git_compare_branches "$1" "$2"
 	local status=$?
 	if [ $status -gt 0 ]; then
 		warn "Branches '$1' and '$2' have diverged."
@@ -261,11 +264,11 @@ gitflow_require_branches_equal() {
 }
 
 #
-# gitflow_is_branch_merged_into()
+# git_is_branch_merged_into()
 #
 # Checks whether branch $1 is succesfully merged into $2
 #
-gitflow_is_branch_merged_into() {
+git_is_branch_merged_into() {
 	local subject=$1
 	local base=$2
 	local all_merges=$(git branch --contains $subject | sed 's/^[* ] //')

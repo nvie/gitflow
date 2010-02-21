@@ -31,7 +31,7 @@ cmd_default() {
 		git init
 	else
 		# assure that we are not working in a repo with local changes
-		git_repo_is_headless || gitflow_require_clean_working_tree
+		git_repo_is_headless || require_clean_working_tree
 	fi
 
 	# running git flow init on an already initialized repo is fine
@@ -57,7 +57,7 @@ cmd_default() {
 		#    rather allow to use existing branches for git-flow.
 		local default_suggestion
 		local should_check_existence
-		branch_count=$(gitflow_local_branches | wc -l)
+		branch_count=$(git_local_branches | wc -l)
 		if [ "$branch_count" -eq 0 ]; then
 			echo "No branches exist yet. Base branches must be created now."
 			should_check_existence=NO
@@ -65,12 +65,12 @@ cmd_default() {
 		else
 			echo
 			echo "Which branch should be used for bringing forth production releases?"
-			gitflow_local_branches | sed 's/^.*$/   - &/g'
+			git_local_branches | sed 's/^.*$/   - &/g'
 
 			should_check_existence=YES
 			default_suggestion=
 			for guess in 'production' 'main' 'master'; do
-				if gitflow_local_branch_exists "$guess"; then
+				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
 					break
 				fi
@@ -83,7 +83,7 @@ cmd_default() {
 
 		# check existence in case of an already existing repo
 		if [ "$should_check_existence" = "YES" ]; then
-			gitflow_local_branch_exists "$master_branch" || \
+			git_local_branch_exists "$master_branch" || \
 				die "Local branch '$master_branch' does not exist."
 		fi
 
@@ -100,19 +100,19 @@ cmd_default() {
 		# considered (fresh repo or repo that contains branches)
 		local default_suggestion
 		local should_check_existence
-		branch_count=$(gitflow_local_branches | grep -v "^${master_branch}\$" | wc -l)
+		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
 		if [ "$branch_count" -eq 0 ]; then
 			should_check_existence=NO
 			default_suggestion=develop
 		else
 			echo
 			echo "Which branch should be used for integration of the \"next release\"?"
-			gitflow_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
+			git_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
 
 			should_check_existence=YES
 			default_suggestion=
 			for guess in 'develop' 'int' 'integration' 'master'; do
-				if gitflow_local_branch_exists "$guess"; then
+				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
 					break
 				fi
@@ -129,7 +129,7 @@ cmd_default() {
 
 		# check existence in case of an already existing repo
 		if [ "$should_check_existence" = "YES" ]; then
-			gitflow_local_branch_exists "$develop_branch" || \
+			git_local_branch_exists "$develop_branch" || \
 				die "Local branch '$develop_branch' does not exist."
 		fi
 
@@ -160,7 +160,7 @@ cmd_default() {
 	# in a git init'ed repo with one or more commits, master was picked as the
 	# default production branch and develop was "created".  We should create
 	# the develop branch now in that case (we base it on master, of course)
-	if ! gitflow_local_branch_exists "$develop_branch"; then
+	if ! git_local_branch_exists "$develop_branch"; then
 		git branch "$develop_branch" "$master_branch"
 		created_gitflow_branch=1
 	fi

@@ -12,8 +12,8 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
-gitflow_require_git_repo
-gitflow_require_initialized
+require_git_repo
+require_gitflow_initialized
 gitflow_load_settings
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.release)
@@ -46,7 +46,7 @@ cmd_list() {
 	local release_branches
 	local current_branch
 	local short_names
-	release_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
+	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
 		exit 0
@@ -122,7 +122,7 @@ require_base_is_on_develop() {
 }
 
 require_no_existing_release_branches() {
-	local release_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
+	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	local first_branch=$(echo ${release_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
 	[ -z "$release_branches" ] || \
@@ -138,13 +138,13 @@ cmd_start() {
 	require_no_existing_release_branches
 
 	# sanity checks
-	gitflow_require_clean_working_tree
-	gitflow_require_branch_absent "$BRANCH"
-	gitflow_require_tag_absent "$VERSION_PREFIX$VERSION"
+	require_clean_working_tree
+	require_branch_absent "$BRANCH"
+	require_tag_absent "$VERSION_PREFIX$VERSION"
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
-	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
@@ -179,21 +179,21 @@ cmd_finish() {
 	fi
 
 	# sanity checks
-	gitflow_require_branch "$BRANCH"
-	gitflow_require_clean_working_tree
+	require_branch "$BRANCH"
+	require_clean_working_tree
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	gitflow_require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
-	gitflow_require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
-	if ! gitflow_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
+	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
 		git merge --no-ff "$BRANCH" || \
@@ -205,7 +205,7 @@ cmd_finish() {
 	# in case a previous attempt to finish this release branch has failed,
 	# but the tag was set successful, we skip it now
 	local tagname=$VERSION_PREFIX$VERSION
-	if ! gitflow_tag_exists "$tagname"; then
+	if ! git_tag_exists "$tagname"; then
 		local opts="-a"
 		flag sign && opts="$opts -s"
 		[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
@@ -217,7 +217,7 @@ cmd_finish() {
 	# try to merge into develop
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
-	if ! gitflow_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
 		git checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
