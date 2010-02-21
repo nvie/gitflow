@@ -154,6 +154,10 @@ gitflow_require_initialized() {
 	fi
 }
 
+git_repo_is_headless() {
+	! git rev-parse --quiet --verify HEAD >/dev/null 2>&1
+}
+
 gitflow_require_clean_working_tree() {
 	gitflow_test_clean_working_tree
 	local result=$?

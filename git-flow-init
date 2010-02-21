@@ -30,12 +30,8 @@ cmd_default() {
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
 		git init
 	else
-		# TODO: This still fails when running:
-		# git init
-		# git flow init
-
 		# assure that we are not working in a repo with local changes
-		gitflow_require_clean_working_tree
+		git_repo_is_headless || gitflow_require_clean_working_tree
 	fi
 
 	# running git flow init on an already initialized repo is fine
