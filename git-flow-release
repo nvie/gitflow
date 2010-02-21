@@ -12,8 +12,11 @@
 # Copyright (c) 2010 by Benedikt Böhm
 #
 
+gitflow_require_git_repo
+gitflow_require_initialized
+gitflow_load_settings
 VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
-PREFIX=$(git config --get gitflow.prefix.release || echo release/)
+PREFIX=$(git config --get gitflow.prefix.release)
 
 usage() {
 	echo "usage: git flow release [list] [-v]"
@@ -43,7 +46,7 @@ cmd_list() {
 	local release_branches
 	local current_branch
 	local short_names
-	release_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
+	release_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
 		exit 0
@@ -119,7 +122,7 @@ require_base_is_on_develop() {
 }
 
 require_no_existing_release_branches() {
-	local release_branches=$(echo "$LOCAL_BRANCHES" | grep "^$PREFIX")
+	local release_branches=$(echo "$(gitflow_local_branches)" | grep "^$PREFIX")
 	local first_branch=$(echo ${release_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
 	[ -z "$release_branches" ] || \
