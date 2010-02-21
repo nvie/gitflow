@@ -1,4 +1,5 @@
-GIT_EXEC_PATH=`git --exec-path 2>/dev/null || echo /usr/libexec/git-core`
+AUTO_DETECTED_GIT_EXEC_PATH := $(shell git --exec-path 2>/dev/null || echo /usr/libexec/git-core)
+GIT_EXEC_PATH=$(AUTO_DETECTED_GIT_EXEC_PATH)
 
 # files that need mode 755
 EXEC_FILES=git-flow
