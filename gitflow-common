@@ -236,7 +236,7 @@ require_clean_working_tree() {
 }
 
 require_local_branch() {
-	if ! git_local_branch_exists; then
+	if ! git_local_branch_exists $1; then
 		die "fatal: Local branch '$1' does not exist and is required."
 	fi
 }
