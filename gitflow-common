@@ -47,6 +47,83 @@ git_remote_branches() { git branch -r | sed 's/^[* ] //'; }
 git_all_branches() { ( git branch; git branch -r) | sed 's/^[* ] //'; }
 git_all_tags() { git tag; }
 
+git_current_branch() {
+	git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+}
+
+git_is_clean_working_tree() {
+	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
+		return 1
+	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+		return 2
+	else
+		return 0
+	fi
+}
+
+git_repo_is_headless() {
+	! git rev-parse --quiet --verify HEAD >/dev/null 2>&1
+}
+
+git_local_branch_exists() {
+	has $1 $(git_local_branches)
+}
+
+git_branch_exists() {
+	has $1 $(git_all_branches)
+}
+
+git_tag_exists() {
+	has $1 $(git_all_tags)
+}
+
+#
+# git_compare_branches()
+#
+# Tests whether branches and their "origin" counterparts have diverged and need
+# merging first. It returns error codes to provide more detail, like so:
+#
+# 0    Branch heads point to the same commit
+# 1    First given branch needs fast-forwarding
+# 2    Second given branch needs fast-forwarding
+# 3    Branch needs a real merge
+# 4    There is no merge base, i.e. the branches have no common ancestors
+#
+git_compare_branches() {
+	local commit1=$(git rev-parse "$1")
+	local commit2=$(git rev-parse "$2")
+	if [ "$commit1" != "$commit2" ]; then
+		local base=$(git merge-base "$commit1" "$commit2")
+		if [ $? -ne 0 ]; then
+			return 4
+		elif [ "$commit1" = "$base" ]; then
+			return 1
+		elif [ "$commit2" = "$base" ]; then
+			return 2
+		else
+			return 3
+		fi
+	else
+		return 0
+	fi
+}
+
+#
+# git_is_branch_merged_into()
+#
+# Checks whether branch $1 is succesfully merged into $2
+#
+git_is_branch_merged_into() {
+	local subject=$1
+	local base=$2
+	local all_merges=$(git branch --contains $subject | sed 's/^[* ] //')
+	has $base $all_merges
+}
+
+#
+# gitflow specific common functionality
+#
+
 # check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
@@ -131,19 +208,9 @@ gitflow_resolve_nameprefix() {
 	fi
 }
 
-git_current_branch() {
-	git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
-}
-
-git_is_clean_working_tree() {
-	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
-		return 1
-	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
-		return 2
-	else
-		return 0
-	fi
-}
+#
+# Assertions for use in git-flow subcommands
+#
 
 require_git_repo() {
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
@@ -157,10 +224,6 @@ require_gitflow_initialized() {
 	fi
 }
 
-git_repo_is_headless() {
-	! git rev-parse --quiet --verify HEAD >/dev/null 2>&1
-}
-
 require_clean_working_tree() {
 	git_is_clean_working_tree
 	local result=$?
@@ -170,18 +233,6 @@ require_clean_working_tree() {
 	if [ $result -eq 2 ]; then
 		die "fatal: Index contains uncommited changes. Aborting."
 	fi
-}
-
-git_local_branch_exists() {
-	has $1 $(git_local_branches)
-}
-
-git_branch_exists() {
-	has $1 $(git_all_branches)
-}
-
-git_tag_exists() {
-	has $1 $(git_all_tags)
 }
 
 require_local_branch() {
@@ -214,37 +265,6 @@ require_tag_absent() {
 	fi
 }
 
-#
-# git_compare_branches()
-#
-# Tests whether branches and their "origin" counterparts have diverged and need
-# merging first. It returns error codes to provide more detail, like so:
-#
-# 0    Branch heads point to the same commit
-# 1    First given branch needs fast-forwarding
-# 2    Second given branch needs fast-forwarding
-# 3    Branch needs a real merge
-# 4    There is no merge base, i.e. the branches have no common ancestors
-#
-git_compare_branches() {
-	local commit1=$(git rev-parse "$1")
-	local commit2=$(git rev-parse "$2")
-	if [ "$commit1" != "$commit2" ]; then
-		local base=$(git merge-base "$commit1" "$commit2")
-		if [ $? -ne 0 ]; then
-			return 4
-		elif [ "$commit1" = "$base" ]; then
-			return 1
-		elif [ "$commit2" = "$base" ]; then
-			return 2
-		else
-			return 3
-		fi
-	else
-		return 0
-	fi
-}
-
 require_branches_equal() {
 	require_local_branch "$1"
 	require_remote_branch "$2"
@@ -261,16 +281,4 @@ require_branches_equal() {
 			die "Branches need merging first."
 		fi
 	fi
-}
-
-#
-# git_is_branch_merged_into()
-#
-# Checks whether branch $1 is succesfully merged into $2
-#
-git_is_branch_merged_into() {
-	local subject=$1
-	local base=$2
-	local all_merges=$(git branch --contains $subject | sed 's/^[* ] //')
-	has $base $all_merges
 }
