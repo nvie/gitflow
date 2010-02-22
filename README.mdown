@@ -52,10 +52,14 @@ Feel free to fork this repo and to commit your additions.
 Example uses:
 -------------
 
-* To initialize a new repo with the basic branch structure, instead of using
-  `git init`, use:
+* To initialize a new repo with the basic branch structure, use:
   
   		git flow init
+  
+  This will then interactively prompt you with some questions on which branches
+  you would like to use as development and production branches, and how you
+  would like your prefixes be named. You may simply press Return on any of
+  those questions to accept the (sane) default suggestions.
 
 * To list/start/finish feature branches, use:
   
