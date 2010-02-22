@@ -32,7 +32,7 @@ max() { [ "$1" -ge "$2" ] && echo "$1" || echo "$2"; }
 
 # basic string matching
 startswith() { [ "$1" != "${1#$2}" ]; }
-endswith() { [ "$1" != "${1#$2}" ]; }
+endswith() { [ "$1" != "${1%$2}" ]; }
 
 # convenience functions for checking shFlags flags
 flag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -eq $FLAGS_TRUE ]; }
