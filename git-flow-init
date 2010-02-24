@@ -13,7 +13,7 @@
 #
 
 usage() {
-	echo "usage: git flow init"
+	echo "usage: git flow init [-f]"
 }
 
 parse_args() {

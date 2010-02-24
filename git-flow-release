@@ -20,19 +20,8 @@ PREFIX=$(git config --get gitflow.prefix.release)
 
 usage() {
 	echo "usage: git flow release [list] [-v]"
-	echo "       git flow release start <version>"
-	echo "       git flow release finish <version>"
-	# TODO
-	#echo ""
-	#echo "options:"
-	#echo "--option    Explanation"
-	#echo ""
-	#echo "start-only options:"
-	#echo "--bump <script>"
-	#echo "            Run the given script to auto-update the version number"
-	#echo ""
-	#echo "finish-only options:"
-	#echo "--push      Push to the origin repo when finished"
+	echo "       git flow release start [-F] <version>"
+	echo "       git flow release finish [-Fsump] <version>"
 }
 
 cmd_default() {

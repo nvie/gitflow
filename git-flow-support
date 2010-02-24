@@ -23,7 +23,7 @@ warn "note: DO NOT use it in a production situation."
 
 usage() {
 	echo "usage: git flow support [list] [-v]"
-	echo "       git flow support start <version> <base>"
+	echo "       git flow support start [-F] <version> <base>"
 }
 
 cmd_default() {
