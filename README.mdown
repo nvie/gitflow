@@ -37,29 +37,30 @@ directory.
 
 Please help out
 ---------------
-This project is still under development. What is available today is merely its
-foundation. However, it is functional in its current form and should be usable
-under normal use. (Don't try to create multiple release branches next to each
-other and stuff like that, yet.)
-
-Feedback and suggestions are very welcome and I encourage you to use the
-[Issues list](http://github.com/nvie/gitflow/issues) on Github to provide that
+This project is still under development. Feedback and suggestions are very
+welcome and I encourage you to use the [Issues
+list](http://github.com/nvie/gitflow/issues) on Github to provide that
 feedback.
 
 Feel free to fork this repo and to commit your additions.
 
 
-Example uses:
--------------
+Typical usage:
+--------------
 
-* To initialize a new repo with the basic branch structure, use:
+### Initialization
+
+To initialize a new repo with the basic branch structure, use:
   
-  		git flow init
+		git flow init
   
-  This will then interactively prompt you with some questions on which branches
-  you would like to use as development and production branches, and how you
-  would like your prefixes be named. You may simply press Return on any of
-  those questions to accept the (sane) default suggestions.
+This will then interactively prompt you with some questions on which branches
+you would like to use as development and production branches, and how you
+would like your prefixes be named. You may simply press Return on any of
+those questions to accept the (sane) default suggestions.
+
+
+### Creating feature/release/hotfix/support branches
 
 * To list/start/finish feature branches, use:
   
