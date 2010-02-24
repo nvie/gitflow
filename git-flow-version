@@ -1,0 +1,27 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+GITFLOW_VERSION=0.2
+
+usage() {
+	echo "usage: git flow version"
+}
+
+cmd_default() {
+	echo "$GITFLOW_VERSION"
+}
+
+cmd_help() {
+	usage
+	exit 0
+}

@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+# enable debug mode
+if [ "$DEBUG" = "yes" ]; then
+	set -x
+fi
+
+export GITFLOW_DIR=$(dirname "$0")
+
+usage() {
+	echo "usage: git flow <subcommand>"
+	echo
+	echo "Available subcommands are:"
+	echo "   init      Initialize a new git repo with support for the branching model."
+	echo "   feature   Manage your feature branches."
+	echo "   release   Manage your release branches."
+	echo "   hotfix    Manage your hotfix branches."
+	echo "   support   Manage your support branches."
+	echo "   version   Shows version information."
+	echo
+	echo "Try 'git flow <subcommand> help' for details."
+}
+
+main() {
+	if [ $# -lt 1 ]; then
+		usage
+		exit 1
+	fi
+
+	# load common functionality
+	. "$GITFLOW_DIR/gitflow-common"
+
+	# use the shFlags project to parse the command line arguments
+	. "$GITFLOW_DIR/gitflow-shFlags"
+	FLAGS_PARENT="git flow"
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# sanity checks
+	SUBCOMMAND="$1"; shift
+
+	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
+		usage
+		exit 1
+	fi
+
+	# run command
+	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
+	FLAGS_PARENT="git flow $SUBCOMMAND"
+
+	# test if the first argument is a flag (i.e. starts with '-')
+	# in that case, we interpret this arg as a flag for the default
+	# command
+	SUBACTION="default"
+	if [ "$1" != "" ] && ! echo "$1" | grep -q "^-"; then
+		SUBACTION="$1"; shift
+	fi
+	if ! type "cmd_$SUBACTION" >/dev/null 2>&1; then
+		warn "Unknown subcommand: '$SUBACTION'"
+		usage
+		exit 1
+	fi
+
+	# run the specified action
+	cmd_$SUBACTION "$@"
+}
+
+# helper functions for common reuse
+max() { if [ "$1" -gt "$2" ]; then echo "$1"; else echo "$2"; fi; }
+
+# convenience functions for checking whether flags have been set or not
+flag() { eval FLAG=\$FLAGS_$1; [ $FLAG -eq $FLAGS_TRUE ]; }
+noflag() { eval FLAG=\$FLAGS_$1; [ $FLAG -ne $FLAGS_TRUE ]; }
+
+main "$@"

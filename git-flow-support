@@ -1,0 +1,153 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+require_git_repo
+require_gitflow_initialized
+gitflow_load_settings
+VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+PREFIX=$(git config --get gitflow.prefix.support)
+
+warn "note: The support subcommand is still very EXPERIMENTAL!"
+warn "note: DO NOT use it in a production situation."
+
+usage() {
+	echo "usage: git flow support [list] [-v]"
+	echo "       git flow support start [-F] <version> <base>"
+}
+
+cmd_default() {
+	cmd_list "$@"
+}
+
+cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
+	local support_branches
+	local current_branch
+	local short_names
+	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	if [ -z "$support_branches" ]; then
+		warn "No support branches exist."
+		exit 0
+	fi
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
+
+	# determine column width first
+	local width=0
+	local branch
+	for branch in $short_names; do
+		local len=${#branch}
+		width=$(max $width $len)
+	done
+	width=$(($width+3))
+
+	local branch
+	for branch in $short_names; do
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$master_sha" ]; then
+				printf "(no commits yet)"
+			else
+				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+				local nicename
+				if [ "$tagname" != "" ]; then
+					nicename=$tagname
+				else
+					nicename=$(git rev-parse --short "$base")
+				fi
+				printf "(based on $nicename)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	VERSION=$1
+	BASE=$2
+	BRANCH=$PREFIX$VERSION
+}
+
+require_version_arg() {
+	if [ "$VERSION" = "" ]; then
+		warn "Missing argument <version>"
+		usage
+		exit 1
+	fi
+}
+
+require_base_arg() {
+	if [ "$BASE" = "" ]; then
+		warn "Missing argument <base>"
+		usage
+		exit 1
+	fi
+}
+
+require_base_is_on_master() {
+	if ! git branch --contains "$BASE" 2>/dev/null \
+			| sed 's/[* ] //g' \
+	  		| grep -q "^$MASTER_BRANCH\$"; then
+		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	fi
+}
+
+cmd_start() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	parse_args "$@"
+	require_version_arg
+	require_base_arg
+	require_base_is_on_master
+
+	# sanity checks
+	require_clean_working_tree
+
+	# fetch remote changes
+	if flag fetch; then
+		git fetch -q "$ORIGIN" "$BASE"
+	fi
+	require_branch_absent "$BRANCH"
+
+	# create branch
+	git checkout -b "$BRANCH" "$BASE"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}

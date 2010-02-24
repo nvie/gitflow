@@ -1,84 +1,95 @@
-gitflow
-=======
-A collection of Git wrapper scripts to provide high-level repository operations
-for Vincent Driessen's [branching model](http://nvie.com/archives/323 "original
+git-flow
+========
+A collection of Git extensions to provide high-level repository operations
+for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
-Release 0.1
------------
-A quick release of version 0.1 has arrived. The main script are functional and
-should be usable under "normal" use.
-
-There have barely been any real-world tests, but I encourage you to start using
-it actively. [Feedback](http://github.com/nvie/gitflow/issues) is also very
-welcome. See the "Please help out" section below, also.
-
-**Make sure to validate the modifications to your repo after running any of the
-`gitflow` commands, before pushing them permanently.**
+> **IMPORTANT NOTE:**  
+> In release 0.2, the order of the arguments has changed to provide a logical
+> subcommand hierarchy.
 
 
-Installing gitflow
-------------------
-There isn't a real Unix installer available, but the project is so small that
-installing it is easy.
+Installing git-flow
+-------------------
+After downloading the sources from Github, also fetch the submodules:
 
-Either:
+	$ git submodule init
+	$ git submodule update
 
-- Put the `gitflow` directory anywhere on your Unix `PATH` variable; or
-- Run:
-  
-	$ git clone git://github.com/nvie/gitflow
-	$ cd gitflow
-	$ cp gitflow* /usr/local/bin
+Then, you can install `git-flow`, using:
+
+	$ sudo make install
+
+By default, this will look for the directory where Git is already installed,
+and install the git-flow extension alongside the other Git subcommands. If git
+is not on the system's `PATH`, it tries `/usr/libexec/git-core`. To explicitly
+override this setting in case you have installed Git in another location, use:
+
+	$ sudo make GIT_EXEC_PATH=/your/custom/path install
+
+You rarely need to override this manually, the default 'make install' should do
+fine.
+
+Or simply point your `PATH` environment variable to your git-flow checkout
+directory.
 
 
 Please help out
 ---------------
-This project is still under development. What is available today is merely its
-foundation. However, it is functional in its current form and should be usable
-under normal use. (Don't try to create multiple release branches next to each
-other and stuff like that, yet.)
-
-Feedback and suggestions are very welcome and I encourage you to use the
-[Issues list](http://github.com/nvie/gitflow/issues) on Github to provide that
+This project is still under development. Feedback and suggestions are very
+welcome and I encourage you to use the [Issues
+list](http://github.com/nvie/gitflow/issues) on Github to provide that
 feedback.
 
 Feel free to fork this repo and to commit your additions.
 
 
-Example uses:
--------------
+Typical usage:
+--------------
 
-* To start a new feature branch, use:
-  
-  		gitflow start feature <name> [<base>]
-  		gitflow start feature foo-support
-  
-  `base` is `develop` by default.
+### Initialization
 
-* To finish this feature and have it merged into `develop`, use:
+To initialize a new repo with the basic branch structure, use:
   
-  		gitflow finish feature <name>
-  		gitflow finish feature foo-support
+		git flow init
   
-* To start a new release branch for 2.0, based on the 1.1 production release, use:
+This will then interactively prompt you with some questions on which branches
+you would like to use as development and production branches, and how you
+would like your prefixes be named. You may simply press Return on any of
+those questions to accept the (sane) default suggestions.
+
+
+### Creating feature/release/hotfix/support branches
+
+* To list/start/finish feature branches, use:
   
-  		gitflow start release <release>
-  		gitflow start release 2.0
+  		git flow feature
+  		git flow feature start <name> [<base>]
+  		git flow feature finish <name>
   
-* To finish the release branch (i.e. to make an actual production release), use:
+  For feature branches, the `<base>` arg must be a commit on `develop`.
+
+* To list/start/finish release branches, use:
   
-  		gitflow finish release <release>
-  		gitflow finish release 2.0
+  		git flow release
+  		git flow release start <release> [<base>]
+  		git flow release finish <release>
   
-* To start a new hotfix branch for 2.1, based on the 2.0 production release, use:
+  For release branches, the `<base>` arg must be a commit on `develop`.
   
-  		gitflow start hotfix <release> [<base-release>]
-  		gitflow start hotfix 2.1 2.0
+* To list/start/finish hotfix branches, use:
   
-* To finish the hotfix branch, use:
+  		git flow hotfix
+  		git flow hotfix start <release> [<base>]
+  		git flow hotfix finish <release>
   
-  		gitflow finish hotfix <release>
-  		gitflow finish hotfix 2.1
+  For hotfix branches, the `<base>` arg must be a commit on `master`.
+
+* To list/start support branches, use:
+  
+  		git flow support
+  		git flow support start <release> <base>
+  
+  For support branches, the `<base>` arg must be a commit on `master`.
 

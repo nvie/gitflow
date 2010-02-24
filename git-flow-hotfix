@@ -1,0 +1,247 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/archives/323
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright (c) 2010 by Vincent Driessen
+# Copyright (c) 2010 by Benedikt Böhm
+#
+
+require_git_repo
+require_gitflow_initialized
+gitflow_load_settings
+VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+PREFIX=$(git config --get gitflow.prefix.hotfix)
+
+usage() {
+	echo "usage: git flow hotfix [list] [-v]"
+	echo "       git flow hotfix start [-F] <version> [<base>]"
+	echo "       git flow hotfix finish [-Fsump] <version>"
+}
+
+cmd_default() {
+	cmd_list "$@"
+}
+
+cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
+	local hotfix_branches
+	local current_branch
+	local short_names
+	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	if [ -z "$hotfix_branches" ]; then
+		warn "No hotfix branches exist."
+		exit 0
+	fi
+	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX  g")
+
+	# determine column width first
+	local width=0
+	local branch
+	for branch in $short_names; do
+		local len=${#branch}
+		width=$(max $width $len)
+	done
+	width=$(($width+3))
+
+	local branch
+	for branch in $short_names; do
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$master_sha" ]; then
+				printf "(no commits yet)"
+			else
+				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+				local nicename
+				if [ "$tagname" != "" ]; then
+					nicename=$tagname
+				else
+					nicename=$(git rev-parse --short "$base")
+				fi
+				printf "(based on $nicename)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	VERSION=$1
+	BRANCH=$PREFIX$VERSION
+}
+
+require_version_arg() {
+	if [ "$VERSION" = "" ]; then
+		warn "Missing argument <version>"
+		usage
+		exit 1
+	fi
+}
+
+require_base_is_on_master() {
+	if ! git branch --contains "$BASE" 2>/dev/null \
+			| sed 's/[* ] //g' \
+	  		| grep -q "^$MASTER_BRANCH\$"; then
+		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	fi
+}
+
+require_no_existing_hotfix_branches() {
+	local hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local first_branch=$(echo ${hotfix_branches} | head -n1)
+	first_branch=${first_branch#$PREFIX}
+	[ -z "$hotfix_branches" ] || \
+		die "There is an existing hotfix branch ($first_branch). Finish that one first."
+}
+
+cmd_start() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	parse_args "$@"
+	BASE=${2:-$MASTER_BRANCH}
+	require_version_arg
+	require_base_is_on_master
+	require_no_existing_hotfix_branches
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch_absent "$BRANCH"
+	require_tag_absent "$VERSION_PREFIX$VERSION"
+	if flag fetch; then
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
+	fi
+	require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+
+	# create branch
+	git checkout -b "$BRANCH" "$BASE"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+	echo "Follow-up actions:"
+	echo "- Bump the version number now!"
+	echo "- Start committing your hot fixes"
+	echo "- When done, run:"
+	echo
+	echo "     git flow hotfix finish '$VERSION'"
+	echo
+}
+
+cmd_finish() {
+	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean sign false "sign the release tag cryptographically" s
+	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
+	DEFINE_string message "" "use the given tag message" m
+	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
+	parse_args "$@"
+	require_version_arg
+
+	# handle flags that imply other flags
+	if [ "$FLAGS_signingkey" != "" ]; then
+		FLAGS_sign=$FLAGS_TRUE
+	fi
+
+	# sanity checks
+	require_branch "$BRANCH"
+	require_clean_working_tree
+	if flag fetch; then
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
+		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
+		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+	fi
+	require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+
+	# try to merge into master
+	# in case a previous attempt to finish this release branch has failed,
+	# but the merge into master was successful, we skip it now
+	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
+		git checkout "$MASTER_BRANCH" || \
+		  die "Could not check out $MASTER_BRANCH."
+		git merge --no-ff "$BRANCH" || \
+		  die "There were merge conflicts."
+		  # TODO: What do we do now?
+	fi
+
+	# try to tag the release
+	# in case a previous attempt to finish this release branch has failed,
+	# but the tag was set successful, we skip it now
+	local tagname=$VERSION_PREFIX$VERSION
+	if ! git_tag_exists "$tagname"; then
+		local opts="-a"
+		flag sign && opts="$opts -s"
+		[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
+		[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+		git tag $opts "$VERSION_PREFIX$VERSION" || \
+		  die "Tagging failed. Please run finish again to retry."
+	fi
+
+	# try to merge into develop
+	# in case a previous attempt to finish this release branch has failed,
+	# but the merge into develop was successful, we skip it now
+	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+		git checkout "$DEVELOP_BRANCH" || \
+		  die "Could not check out $DEVELOP_BRANCH."
+
+		# TODO: Actually, accounting for 'git describe' pays, so we should
+		# ideally git merge --no-ff $tagname here, instead!
+		git merge --no-ff "$BRANCH" || \
+		  die "There were merge conflicts."
+		  # TODO: What do we do now?
+	fi
+
+	# delete branch
+	git branch -d "$BRANCH"
+
+	if flag push; then
+		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
+			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
+		git push "$ORIGIN" "$MASTER_BRANCH" || \
+			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+		git push --tags "$ORIGIN" || \
+			die "Could not push tags to $ORIGIN."
+	fi
+
+	echo
+	echo "Summary of actions:"
+	echo "- Latest objects have been fetched from '$ORIGIN'"
+	echo "- Hotfix branch has been merged into '$MASTER_BRANCH'"
+	echo "- The hotfix was tagged '$VERSION_PREFIX$VERSION'"
+	echo "- Hotfix branch has been back-merged into '$DEVELOP_BRANCH'"
+	echo "- Hotfix branch '$BRANCH' has been deleted"
+	if flag push; then
+		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
+	fi
+	echo
+}
