@@ -11,7 +11,7 @@
 # Copyright (c) 2010 by Vincent Driessen
 # Copyright (c) 2010 by Benedikt Böhm
 #
-GITFLOW_VERSION=0.2-dirty
+GITFLOW_VERSION=0.2
 
 usage() {
 	echo "usage: git flow version"
