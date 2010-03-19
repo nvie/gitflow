@@ -21,15 +21,10 @@ Then, you can install `git-flow`, using:
 
 	$ sudo make install
 
-By default, this will look for the directory where Git is already installed,
-and install the git-flow extension alongside the other Git subcommands. If git
-is not on the system's `PATH`, it tries `/usr/libexec/git-core`. To explicitly
-override this setting in case you have installed Git in another location, use:
+By default, git-flow will be installed in /usr/local. To change the prefix
+where git-flow will be installed, simply specify it explicitly, using:
 
-	$ sudo make GIT_EXEC_PATH=/your/custom/path install
-
-You rarely need to override this manually, the default 'make install' should do
-fine.
+	$ sudo make prefix=/opt/local install
 
 Or simply point your `PATH` environment variable to your git-flow checkout
 directory.
