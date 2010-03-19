@@ -1,5 +1,4 @@
-AUTO_DETECTED_GIT_EXEC_PATH := $(shell git --exec-path 2>/dev/null || echo /usr/libexec/git-core)
-GIT_EXEC_PATH=$(AUTO_DETECTED_GIT_EXEC_PATH)
+prefix=/usr/local
 
 # files that need mode 755
 EXEC_FILES=git-flow
@@ -20,11 +19,11 @@ all:
 
 install:
 	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
-	install -d -m 0755 $(GIT_EXEC_PATH)
-	install -m 0755 $(EXEC_FILES) $(GIT_EXEC_PATH)
-	install -m 0644 $(SCRIPT_FILES) $(GIT_EXEC_PATH)
+	install -d -m 0755 $(prefix)/bin
+	install -m 0755 $(EXEC_FILES) $(prefix)/bin
+	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
 
 uninstall:
-	test -d $(GIT_EXEC_PATH) && \
-	cd $(GIT_EXEC_PATH) && \
+	test -d $(prefix)/bin && \
+	cd $(prefix)/bin && \
 	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
