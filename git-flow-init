@@ -78,7 +78,7 @@ cmd_default() {
 			done
 		fi
 
-		echo "Branch name for production releases: [$default_suggestion] \c"
+		printf "Branch name for production releases: [$default_suggestion] "
 		read answer
 		master_branch=${answer:-$default_suggestion}
 
@@ -121,7 +121,7 @@ cmd_default() {
 			done
 		fi
 
-		echo "Branch name for \"next release\" development: [$default_suggestion] \c"
+		printf "Branch name for \"next release\" development: [$default_suggestion] "
 		read answer
 		develop_branch=${answer:-$default_suggestion}
 
@@ -191,7 +191,7 @@ cmd_default() {
 	# Feature branches
 	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
-		echo "Feature branches? [$default_suggestion] \c"
+		printf "Feature branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.feature "$prefix"
@@ -200,7 +200,7 @@ cmd_default() {
 	# Release branches
 	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
-		echo "Release branches? [$default_suggestion] \c"
+		printf "Release branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.release "$prefix"
@@ -210,7 +210,7 @@ cmd_default() {
 	# Hotfix branches
 	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-		echo "Hotfix branches? [$default_suggestion] \c"
+		printf "Hotfix branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.hotfix "$prefix"
@@ -220,7 +220,7 @@ cmd_default() {
 	# Support branches
 	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
-		echo "Support branches? [$default_suggestion] \c"
+		printf "Support branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.support "$prefix"
@@ -230,7 +230,7 @@ cmd_default() {
 	# Version tag prefix
 	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
-		echo "Version tag prefix? [$default_suggestion] \c"
+		printf "Version tag prefix? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.versiontag "$prefix"
