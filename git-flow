@@ -78,11 +78,4 @@ main() {
 	cmd_$SUBACTION "$@"
 }
 
-# helper functions for common reuse
-max() { if [ "$1" -gt "$2" ]; then echo "$1"; else echo "$2"; fi; }
-
-# convenience functions for checking whether flags have been set or not
-flag() { eval FLAG=\$FLAGS_$1; [ $FLAG -eq $FLAGS_TRUE ]; }
-noflag() { eval FLAG=\$FLAGS_$1; [ $FLAG -ne $FLAGS_TRUE ]; }
-
 main "$@"
