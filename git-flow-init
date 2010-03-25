@@ -163,7 +163,7 @@ cmd_default() {
 	# default production branch and develop was "created".  We should create
 	# the develop branch now in that case (we base it on master, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
-		git branch "$develop_branch" "$master_branch"
+		git branch --no-track "$develop_branch" "$master_branch"
 		created_gitflow_branch=1
 	fi
 
