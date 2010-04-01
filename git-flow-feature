@@ -172,7 +172,7 @@ cmd_start() {
 	echo ""
 	echo "Now, start committing on your feature. When done, use:"
 	echo ""
-	echo "     git flow finish feature $NAME"
+	echo "     git flow feature finish $NAME"
 	echo
 }
 
