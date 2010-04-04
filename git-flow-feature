@@ -182,7 +182,11 @@ cmd_start() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
-	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	# if the origin branch counterpart exists, assert that the local branch
+	# isn't behind it (to avoid unnecessary rebasing)
+	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
 
 	# create branch
 	if ! git checkout -b "$BRANCH" "$BASE"; then
