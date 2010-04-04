@@ -37,7 +37,8 @@ welcome and I encourage you to use the [Issues
 list](http://github.com/nvie/gitflow/issues) on Github to provide that
 feedback.
 
-Feel free to fork this repo and to commit your additions.
+Feel free to fork this repo and to commit your additions. For a list of all
+contributors, please see the [AUTHORS](AUTHORS) file.
 
 
 License terms
