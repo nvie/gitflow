@@ -206,7 +206,7 @@ gitflow_resolve_nameprefix() {
 	local num_matches
 
 	# first, check if there is a perfect match
-	if has "$(git_local_branches)" "$prefix$name"; then
+	if git_local_branch_exists "$prefix$name"; then
 		echo "$name"
 		return 0
 	fi
