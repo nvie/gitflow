@@ -401,6 +401,11 @@ cmd_checkout() {
 	fi
 }
 
+cmd_co() {
+	# Alias for checkout
+	cmd_checkout "$@"
+}
+
 cmd_rebase() {
 	DEFINE_boolean interactive false 'do an interactive rebase' i
 	parse_args "$@"
