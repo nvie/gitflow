@@ -64,6 +64,10 @@ cmd_list() {
 	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
+                warn ""
+                warn "You can start a new support branch:"
+                warn ""
+                warn "    git flow support start <name> <base>"
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')

@@ -62,6 +62,11 @@ cmd_list() {
 	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
+                warn ""
+                warn "You can start a new release branch:"
+                warn ""
+                warn "    git flow release start <name> [<base>]"
+
 		exit 0
 	fi
 

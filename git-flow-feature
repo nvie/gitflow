@@ -66,6 +66,10 @@ cmd_list() {
 	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
+		warn ""
+		warn "You can start a new feature branch:"
+		warn ""
+		warn "    git flow feature start <name> [<base>]"
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
