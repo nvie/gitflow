@@ -70,6 +70,7 @@ cmd_list() {
 		warn "You can start a new feature branch:"
 		warn ""
 		warn "    git flow feature start <name> [<base>]"
+		warn ""
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
