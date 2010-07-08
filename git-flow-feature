@@ -320,7 +320,7 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	git branch -d "$BRANCH"
+	git branch -D "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
