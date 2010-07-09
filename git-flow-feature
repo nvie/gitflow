@@ -50,6 +50,7 @@ usage() {
 	echo "       git flow feature diff [<name|nameprefix>]"
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
+	echo "       git flow feature pull <remote> [<name>]"
 }
 
 cmd_default() {
@@ -142,31 +143,53 @@ expand_nameprefix_arg() {
 	esac
 }
 
+use_current_feature_branch_name() {
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		BRANCH=$current_branch
+		NAME=${BRANCH#$PREFIX}
+	else
+		warn "The current HEAD is no feature branch."
+		warn "Please specify a <name> argument."
+		exit 1
+	fi
+}
+
 expand_nameprefix_arg_or_current() {
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
 		require_branch "$PREFIX$NAME"
 	else
-		local current_branch=$(git_current_branch)
-		if startswith "$current_branch" "$PREFIX"; then
-			BRANCH=$current_branch
-			NAME=${BRANCH#$PREFIX}
-		else
-			warn "The current HEAD is no feature branch."
-			warn "To diff a feature, specify a <name> argument."
-			usage
-			exit 1
-		fi
+		use_current_feature_branch_name
 	fi
 }
 
-parse_args() {
+name_or_current() {
+	if [ -z "$NAME" ]; then
+		use_current_feature_branch_name
+	fi
+}
+
+parse_cmdline() {
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
+}
+
+parse_args() {
+	parse_cmdline "$@"
 
 	# read arguments into global variables
 	NAME=$1
+	BRANCH=$PREFIX$NAME
+}
+
+parse_remote_name() {
+	parse_cmdline "$@"
+
+	# read arguments into global variables
+	REMOTE=$1
+	NAME=$2
 	BRANCH=$PREFIX$NAME
 }
 
@@ -421,4 +444,52 @@ cmd_rebase() {
 		OPTS="$OPTS -i"
 	fi
 	git rebase $OPTS "$DEVELOP_BRANCH"
+}
+
+avoid_accidental_cross_branch_action() {
+	local current_branch=$(git_current_branch)
+	if [ "$BRANCH" != "$current_branch" ]; then
+		warn "Trying to pull from '$BRANCH' while currently on branch '$current_branch'."
+		warn "To avoid unintended merges, git-flow aborted."
+		return 1
+	fi
+	return 0
+}
+
+cmd_pull() {
+	#DEFINE_string prefix false 'alternative remote feature branch name prefix' p
+	parse_remote_name "$@"
+
+	if [ -z "$REMOTE" ]; then
+		die "Name a remote explicitly."
+	fi
+	name_or_current
+
+	# To avoid accidentally merging different feature branches into each other,
+	# die if the current feature branch differs from the requested $NAME
+	# argument.
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		# we are on a local feature branch already, so $BRANCH must be equal to
+		# the current branch
+		avoid_accidental_cross_branch_action || die
+	fi
+
+	require_clean_working_tree
+
+	if git_branch_exists "$BRANCH"; then
+		# Again, avoid accidental merges
+		avoid_accidental_cross_branch_action || die
+
+		# we already have a local branch called like this, so simply pull the
+		# remote changes in
+		git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+		echo "Pulled $REMOTE's changes into $BRANCH."
+	else
+		# setup the local branch clone for the first time
+		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+		git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
+		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+	fi
 }
