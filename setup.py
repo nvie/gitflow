@@ -15,6 +15,12 @@ if os.path.exists("README.rst"):
 else:
     long_description = "See http://github.com/nvie/gitflow/tree/master"
 
+install_requires = []
+try:
+    import argparse
+except ImportError:
+    install_requires.append('argparse')
+
 setup(
     name="gitflow",
     version=distmeta.__version__,
