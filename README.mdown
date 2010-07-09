@@ -5,29 +5,15 @@ for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
-> **IMPORTANT NOTE:**  
-> In release 0.2, the order of the arguments has changed to provide a logical
-> subcommand hierarchy.
-
-
 Installing git-flow
 -------------------
-After downloading the sources from Github, also fetch the submodules:
+You can install `git-flow`, using:
 
-	$ git submodule init
-	$ git submodule update
+	$ easy_install gitflow
 
-Then, you can install `git-flow`, using:
+Or, if you'd like to use `pip` instead:
 
-	$ sudo make install
-
-By default, git-flow will be installed in /usr/local. To change the prefix
-where git-flow will be installed, simply specify it explicitly, using:
-
-	$ sudo make prefix=/opt/local install
-
-Or simply point your `PATH` environment variable to your git-flow checkout
-directory.
+	$ pip install gitflow
 
 
 Please help out
