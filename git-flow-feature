@@ -172,15 +172,11 @@ parse_args() {
 
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
-	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
 	# sanity checks
-	if noflag force; then
-		require_clean_working_tree
-	fi
 	require_branch_absent "$BRANCH"
 
 	# update the local repo with remote changes, if asked
