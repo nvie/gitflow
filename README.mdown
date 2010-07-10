@@ -12,6 +12,12 @@ blog post").
 
 Installing git-flow
 -------------------
+The easiest way to install git-flow is using Rick Osborne's excellent
+git-flow installer, which can be run using the following command:
+
+	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+
+If you prefer a manual installation, please use the following instructions.
 After downloading the sources from Github, also fetch the submodules:
 
 	$ git submodule init
