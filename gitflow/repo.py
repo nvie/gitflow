@@ -1,4 +1,5 @@
 from git import Repo
+from git.exc import InvalidGitRepositoryError
 from ConfigParser import NoSectionError, DuplicateSectionError, \
    NoOptionError, MissingSectionHeaderError, ParsingError
 from gitflow.utils import memoized
@@ -6,7 +7,10 @@ from gitflow.utils import memoized
 
 @memoized
 def get_repo():
-    repo = Repo('.')
+    try:
+        repo = Repo()
+    except InvalidGitRepositoryError:
+        raise SystemExit("fatal: Not a git repository.")
     return repo
 
 
