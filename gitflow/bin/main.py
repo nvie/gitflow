@@ -61,7 +61,6 @@ main() {
 
 main "$@"
 """
-import sys
 import argparse
 
 from gitflow.commands import feature, release, init
