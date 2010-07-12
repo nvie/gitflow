@@ -15,7 +15,7 @@ if os.path.exists("README.rst"):
 else:
     long_description = "See http://github.com/nvie/gitflow/tree/master"
 
-install_requires = []
+install_requires = ['GitPython']
 try:
     import argparse
 except ImportError:
