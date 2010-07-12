@@ -1,9 +1,18 @@
 from git import Repo
 from ConfigParser import NoSectionError, DuplicateSectionError, \
    NoOptionError, MissingSectionHeaderError, ParsingError
+from gitflow.utils import memoized
 
-repo = Repo('.')
-config = repo.config_reader()
+
+@memoized
+def get_repo():
+    repo = Repo('.')
+    return repo
+
+
+@memoized
+def get_config():
+    return get_repo().config_reader()
 
 
 def get_setting(setting, default=None):
@@ -17,7 +26,7 @@ def get_setting(setting, default=None):
         raise ValueError('Invalid setting name: %s' % setting)
 
     try:
-        setting = config.get('%s "%s"' % (section, subsection), option)
+        setting = get_config().get('%s "%s"' % (section, subsection), option)
         return setting
     except (NoSectionError, DuplicateSectionError, NoOptionError,
             MissingSectionHeaderError, ParsingError):
@@ -25,7 +34,7 @@ def get_setting(setting, default=None):
 
 
 def branch_exists(branchname):
-    for branch in repo.branches:
+    for branch in get_repo().branches:
         if branch.name == branchname:
             return True
     return False

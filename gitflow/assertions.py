@@ -1,4 +1,4 @@
-from gitflow.repo import repo, get_setting, branch_exists
+from gitflow.repo import get_setting, branch_exists
 from gitflow.core import master_branchname, develop_branchname
 
 

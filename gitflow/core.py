@@ -1,4 +1,4 @@
-from gitflow.repo import repo, get_setting
+from gitflow.repo import get_repo, get_setting
 
 DEFAULT_MASTER_BRANCH = 'master'
 DEFAULT_DEVELOP_BRANCH = 'develop'
@@ -70,7 +70,7 @@ def versiontag_prefix():
 
 def branches_with_prefix(prefix):
     fbs = []
-    for b in repo.branches:
+    for b in get_repo().branches:
         if b.name.startswith(prefix):
             fbs.append(SpecialBranch(b))
     return fbs
@@ -81,4 +81,4 @@ def feature_branches():
 
 
 def active_branch():
-    return repo.active_branch
+    return get_repo().active_branch
