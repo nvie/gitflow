@@ -2,6 +2,7 @@ from gitflow.repo import repo, get_setting
 
 DEFAULT_MASTER_BRANCH = 'master'
 DEFAULT_DEVELOP_BRANCH = 'develop'
+DEFAULT_ORIGIN_REMOTE = 'origin'
 
 DEFAULT_FEATURE_PREFIX = 'feature/'
 DEFAULT_RELEASE_PREFIX = 'release/'
@@ -41,6 +42,10 @@ def master_branchname():
 
 def develop_branchname():
     return get_setting('gitflow.branch.develop', DEFAULT_DEVELOP_BRANCH)
+
+
+def origin_remotename():
+    return get_setting('gitflow.origin', DEFAULT_ORIGIN_REMOTE)
 
 
 def feature_prefix():
