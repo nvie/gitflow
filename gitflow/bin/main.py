@@ -5,7 +5,7 @@ usage() {
     echo "usage: git flow <subcommand>"
     echo
     echo "Available subcommands are:"
-    echo "   init      Initialize a new git repo with support for the branching model."
+    echo "   init      Initialize a new git repo."
     echo "   feature   Manage your feature branches."
     echo "   release   Manage your release branches."
     echo "   hotfix    Manage your hotfix branches."
@@ -69,6 +69,7 @@ COMMAND_CLASSES = (
    feature.FeatureCommand,
    release.ReleaseCommand,
 )
+
 
 def main():
     parser = argparse.ArgumentParser(prog='git flow')

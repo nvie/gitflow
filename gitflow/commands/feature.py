@@ -1,6 +1,7 @@
 from gitflow.assertions import require_gitflow_initialized
 from gitflow.core import active_branch, feature_branches
 
+
 class FeatureCommand(object):
 
     def register_parser(self, parent):

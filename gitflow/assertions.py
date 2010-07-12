@@ -39,4 +39,6 @@ def is_gitflow_initialized():
 
 def require_gitflow_initialized():
     if not is_gitflow_initialized():
-        raise NotInitializedException('This repository is not yet enabled for use with git-flow. To initialize this repo, run "git flow init" first.')
+        msg = "This repository is not yet enabled for use with git-flow. " + \
+              "To initialize this repo, run \"git flow init\" first.')"
+        raise NotInitializedException(msg)
