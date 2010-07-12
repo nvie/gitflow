@@ -1,3 +1,5 @@
+import sys
+
 class memoized(object):
     """Decorator that caches a function's return value each time it is
     called.  If called later with the same arguments, the cached value
@@ -19,5 +21,9 @@ class memoized(object):
             return self.func(*args)
 
     def __repr__(self):
-        """Return the function's docstring."""
+        # Return the function's docstring
         return self.func.__doc__
+
+
+def warn(self, message):
+    sys.stderr.write('%s\n' % message)

@@ -1,5 +1,8 @@
+from git import Git
 from gitflow.assertions import require_gitflow_initialized
-from gitflow.core import active_branch, feature_branches
+from gitflow.core import feature_branches, develop_branch
+from gitflow.repo import get_repo
+from gitflow.utils import warn
 
 
 class FeatureCommand(object):
@@ -71,23 +74,51 @@ class FeatureCommand(object):
 
     def run_list(self, args):
         require_gitflow_initialized()
-        for branch in feature_branches():
-            is_active = active_branch().name == branch.fullname
+        branches = feature_branches()
+        if not branches:
+            warn('No feature branches exist.')
+            warn('')
+            warn('You can start a new feature branch:')
+            warn('')
+            warn('    git flow feature start <name> [<base>]')
+            warn('')
+            raise SystemExit()
+
+        # determine the longest branch name
+        lenfunc = lambda b: len(b.name)
+        width = max(map(lenfunc, branches)) + 3
+
+        # lookup the SHA's that don't change
+        g = Git()
+        develop_commit = develop_branch().object
+        develop_sha = develop_commit.hexsha
+
+        for branch in branches:
+            is_active = get_repo().active_branch.name == branch.fullname
+            prefix = '  '
             if is_active:
                 prefix = '* '
-            else:
-                prefix = '  '
+
+            name = branch.name
+            extra_info = ''
+
             if args.verbose:
-                extra_info = ''
-                print(prefix + branch.fullname + extra_info)
-            else:
-                print(prefix + branch.name)
+                name = name.ljust(width)
+                commit = branch.branch.object
+                branch_sha = commit.hexsha
+                base_sha = g.merge_base(develop_sha, branch_sha)
+                if branch_sha == develop_sha:
+                    extra_info = '(no commits yet)'
+                elif base_sha == branch_sha:
+                    extra_info = '(is behind develop, may ff)'
+                elif base_sha == develop_sha:
+                    extra_info = '(based on latest develop)'
+                else:
+                    extra_info = '(may be rebased)'
 
-    def run_start(self, args):
-        print('Starting new FB!')
-        print(args)
-        print('-------------------')
+            print(prefix + name + extra_info)
 
+    def run_start(self, args): pass
     def run_finish(self, args): pass
     def run_publish(self, args): pass
     def run_track(self, args): pass

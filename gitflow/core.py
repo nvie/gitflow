@@ -40,8 +40,16 @@ def master_branchname():
     return get_setting('gitflow.branch.master', DEFAULT_MASTER_BRANCH)
 
 
+def master_branch():
+    return get_repo().heads[master_branchname()]
+
+
 def develop_branchname():
     return get_setting('gitflow.branch.develop', DEFAULT_DEVELOP_BRANCH)
+
+
+def develop_branch():
+    return get_repo().heads[develop_branchname()]
 
 
 def origin_remotename():
@@ -78,7 +86,3 @@ def branches_with_prefix(prefix):
 
 def feature_branches():
     return branches_with_prefix(feature_prefix())
-
-
-def active_branch():
-    return get_repo().active_branch
