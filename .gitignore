@@ -1,6 +1,7 @@
 # Python junk
 *.pyc
 *.pyo
+*.egg
 *.egg-info
 /build
 /dist
