@@ -1,6 +1,6 @@
 """Git extensions to provide high-level repository operations for Vincent Driessen's branching model."""
 
-VERSION = (0, 0, 'pre-1')
+VERSION = (0, 3, 0)
 
 __version__ = ".".join(map(str, VERSION[0:3])) + "".join(VERSION[3:])
 __author__ = "Vincent Driessen"
