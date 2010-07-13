@@ -63,11 +63,12 @@ main "$@"
 """
 import argparse
 
-from gitflow.commands import feature, release, init
+from gitflow.commands import feature, release, init, version
 COMMAND_CLASSES = (
    init.InitCommand,
    feature.FeatureCommand,
    release.ReleaseCommand,
+   version.VersionCommand,
 )
 
 
