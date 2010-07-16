@@ -46,6 +46,9 @@ feedback.
 Feel free to fork this repo and to commit your additions. For a list of all
 contributors, please see the [AUTHORS](AUTHORS) file.
 
+Any questions, tips, or general discussion can be posted to our Google group:
+    http://groups.google.com/group/gitflow-users
+
 
 License terms
 -------------
