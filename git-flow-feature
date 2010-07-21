@@ -283,17 +283,17 @@ cmd_finish() {
 
 	# update local repo with remote changes first, if asked
 	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
-    	if flag fetch; then
-	    	git fetch -q "$ORIGIN" "$BRANCH"
-	    fi
+		if flag fetch; then
+			git fetch -q "$ORIGIN" "$BRANCH"
+		fi
 	fi
 
 	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
 	if has "$ORIGIN/$DEVELOP_BRANCH" "$(git_remote_branches)"; then
-    	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
-    fi
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
