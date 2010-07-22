@@ -31,6 +31,21 @@ Or simply point your `PATH` environment variable to your git-flow checkout
 directory.
 
 
+Integration with your shell
+---------------------------
+For those who use the [Bash](http://www.gnu.org/software/bash/) shell, please
+check out the excellent work on the
+[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
+by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
+git-flow subcommands and branch names.
+
+If you are a [zsh](http://www.zsh.org) user with some plugin-writing
+experience, please help us develop a
+[completion plugin](http://github.com/bobthecow/git-flow-completion/issues#issue/1)
+for zsh, too.  Please contact me on [Github](http://github.com/inbox/new/nvie)
+or [Twitter](http://twitter.com/nvie) to discuss details.
+
+
 Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
