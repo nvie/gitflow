@@ -156,7 +156,7 @@ require_base_is_on_master() {
 }
 
 cmd_start() {
-	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	require_version_arg
 	require_base_arg
