@@ -3,13 +3,37 @@
 # repository operations for Vincent Driessen's branching model.
 #
 # Original blog post presenting this model is found at:
-#    http://nvie.com/archives/323
+#    http://nvie.com/git-model
 #
 # Feel free to contribute to this project at:
 #    http://github.com/nvie/gitflow
 #
-# Copyright (c) 2010 by Vincent Driessen
-# Copyright (c) 2010 by Benedikt Böhm
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
 #
 
 usage() {
@@ -61,7 +85,7 @@ cmd_default() {
 		if [ "$branch_count" -eq 0 ]; then
 			echo "No branches exist yet. Base branches must be created now."
 			should_check_existence=NO
-			default_suggestion=master
+			default_suggestion=$(git config --get gitflow.branch.master || echo master)
 		else
 			echo
 			echo "Which branch should be used for bringing forth production releases?"
@@ -69,7 +93,8 @@ cmd_default() {
 
 			should_check_existence=YES
 			default_suggestion=
-			for guess in 'production' 'main' 'master'; do
+			for guess in $(git config --get gitflow.branch.master) \
+			             'production' 'main' 'master'; do
 				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
 					break
@@ -77,7 +102,7 @@ cmd_default() {
 			done
 		fi
 
-		echo "Branch name for production releases: [$default_suggestion] \c"
+		printf "Branch name for production releases: [$default_suggestion] "
 		read answer
 		master_branch=${answer:-$default_suggestion}
 
@@ -103,7 +128,7 @@ cmd_default() {
 		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
 		if [ "$branch_count" -eq 0 ]; then
 			should_check_existence=NO
-			default_suggestion=develop
+			default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
 		else
 			echo
 			echo "Which branch should be used for integration of the \"next release\"?"
@@ -111,7 +136,8 @@ cmd_default() {
 
 			should_check_existence=YES
 			default_suggestion=
-			for guess in 'develop' 'int' 'integration' 'master'; do
+			for guess in $(git config --get gitflow.branch.develop) \
+			             'develop' 'int' 'integration' 'master'; do
 				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
 					break
@@ -119,7 +145,7 @@ cmd_default() {
 			done
 		fi
 
-		echo "Branch name for \"next release\" development: [$default_suggestion] \c"
+		printf "Branch name for \"next release\" development: [$default_suggestion] "
 		read answer
 		develop_branch=${answer:-$default_suggestion}
 
@@ -161,7 +187,7 @@ cmd_default() {
 	# default production branch and develop was "created".  We should create
 	# the develop branch now in that case (we base it on master, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
-		git branch "$develop_branch" "$master_branch"
+		git branch --no-track "$develop_branch" "$master_branch"
 		created_gitflow_branch=1
 	fi
 
@@ -174,15 +200,22 @@ cmd_default() {
 	fi
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
-	echo
-	echo "How to name your supporting branch prefixes?"
+	if flag force || \
+	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
+	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
+	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
+	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
+	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+		echo
+		echo "How to name your supporting branch prefixes?"
+	fi
 
 	local prefix
 
 	# Feature branches
 	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
-		echo "Feature branches? [$default_suggestion] \c"
+		printf "Feature branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.feature "$prefix"
@@ -191,7 +224,7 @@ cmd_default() {
 	# Release branches
 	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
-		echo "Release branches? [$default_suggestion] \c"
+		printf "Release branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.release "$prefix"
@@ -201,7 +234,7 @@ cmd_default() {
 	# Hotfix branches
 	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-		echo "Hotfix branches? [$default_suggestion] \c"
+		printf "Hotfix branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.hotfix "$prefix"
@@ -211,7 +244,7 @@ cmd_default() {
 	# Support branches
 	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
-		echo "Support branches? [$default_suggestion] \c"
+		printf "Support branches? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.support "$prefix"
@@ -221,7 +254,7 @@ cmd_default() {
 	# Version tag prefix
 	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
-		echo "Version tag prefix? [$default_suggestion] \c"
+		printf "Version tag prefix? [$default_suggestion] "
 		read answer
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git config gitflow.prefix.versiontag "$prefix"

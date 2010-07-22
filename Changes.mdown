@@ -1,0 +1,50 @@
+0.3:
+----
+Release date: **2010/07/22**
+
+* New subcommands for `git flow feature`:  
+  - **checkout**:  
+    For easily checking out features by their short name.  Even allows
+    unique prefixes as arguments (see below).
+
+  - **pull**:  
+    This subcommand allows you to painlessly work on a feature branch
+    together with another peer.  This is especially valuable for doing
+    peer reviews of other people's code.  For more detailed info, see the
+    [commit log][1].
+
+* Easier addressing of branch names by using name prefixes.  
+  For example, when using:  
+  
+  	git flow feature finish fo
+  
+  this automatically finishes the feature branch `foobar` if that's the only
+  feature branch name starting with `fo`.
+
+* No force flag anymore for new feature branches  
+  `git flow feature start` lost its `-f` (force) flag.  You now don't
+  have to be in a clean repo anymore to start a new feature branch. This
+  avoids the manual `git stash`, `git flow feature start`, `git stash
+  pop` cycle.
+
+* You can use `git-flow` in stand-alone repo's now.  
+  This means it does not assume you have an `origin` repository.
+  (Thanks [Mark][2].)
+
+* No commands fetch from `origin` by default anymore.  
+  There were some issues related to disabling this flag on some platforms.
+
+* Init guesses branch names you may want to use for `develop` and `master`.
+
+* Added super-easy installation script. (Thanks [Rick][3].)
+
+* Added BSD license.
+
+[1]: http://github.com/nvie/gitflow/commit/f68d405cc3a11e9df3671f567658a6ab6ed8e0a1
+[2]: http://github.com/talios
+[3]: http://github.com/rickosborne
+
+
+Older versions
+--------------
+No change history is recorded for pre-0.3 releases.

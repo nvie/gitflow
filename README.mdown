@@ -5,13 +5,14 @@ for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
-> **IMPORTANT NOTE:**  
-> In release 0.2, the order of the arguments has changed to provide a logical
-> subcommand hierarchy.
-
-
 Installing git-flow
 -------------------
+The easiest way to install git-flow is using Rick Osborne's excellent
+git-flow installer, which can be run using the following command:
+
+	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+
+If you prefer a manual installation, please use the following instructions.
 After downloading the sources from Github, also fetch the submodules:
 
 	$ git submodule init
@@ -30,6 +31,21 @@ Or simply point your `PATH` environment variable to your git-flow checkout
 directory.
 
 
+Integration with your shell
+---------------------------
+For those who use the [Bash](http://www.gnu.org/software/bash/) shell, please
+check out the excellent work on the
+[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
+by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
+git-flow subcommands and branch names.
+
+If you are a [zsh](http://www.zsh.org) user with some plugin-writing
+experience, please help us develop a
+[completion plugin](http://github.com/bobthecow/git-flow-completion/issues#issue/1)
+for zsh, too.  Please contact me on [Github](http://github.com/inbox/new/nvie)
+or [Twitter](http://twitter.com/nvie) to discuss details.
+
+
 Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
@@ -37,7 +53,20 @@ welcome and I encourage you to use the [Issues
 list](http://github.com/nvie/gitflow/issues) on Github to provide that
 feedback.
 
-Feel free to fork this repo and to commit your additions.
+Feel free to fork this repo and to commit your additions. For a list of all
+contributors, please see the [AUTHORS](AUTHORS) file.
+
+Any questions, tips, or general discussion can be posted to our Google group:
+http://groups.google.com/group/gitflow-users
+
+
+License terms
+-------------
+git-flow is published under the liberal terms of the BSD License, see the
+[LICENSE](LICENSE) file. Although the BSD License does not require you to share
+any modifications you make to the source code, you are very much encouraged and
+invited to contribute back your modifications to the community, preferably
+in a Github fork, of course.
 
 
 Typical usage:

@@ -3,13 +3,37 @@
 # repository operations for Vincent Driessen's branching model.
 #
 # Original blog post presenting this model is found at:
-#    http://nvie.com/archives/323
+#    http://nvie.com/git-model
 #
 # Feel free to contribute to this project at:
 #    http://github.com/nvie/gitflow
 #
-# Copyright (c) 2010 by Vincent Driessen
-# Copyright (c) 2010 by Benedikt Böhm
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
 #
 
 require_git_repo
@@ -19,12 +43,14 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-Ff] <name> [<base>]"
+	echo "       git flow feature start [-F] <name> [<base>]"
 	echo "       git flow feature finish [-rF] <name|nameprefix>"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
+	echo "       git flow feature checkout [<name|nameprefix>]"
+	echo "       git flow feature pull <remote> [<name>]"
 }
 
 cmd_default() {
@@ -41,6 +67,11 @@ cmd_list() {
 	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
+		warn ""
+		warn "You can start a new feature branch:"
+		warn ""
+		warn "    git flow feature start <name> [<base>]"
+		warn ""
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
@@ -112,45 +143,63 @@ expand_nameprefix_arg() {
 	esac
 }
 
+use_current_feature_branch_name() {
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		BRANCH=$current_branch
+		NAME=${BRANCH#$PREFIX}
+	else
+		warn "The current HEAD is no feature branch."
+		warn "Please specify a <name> argument."
+		exit 1
+	fi
+}
+
 expand_nameprefix_arg_or_current() {
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
 		require_branch "$PREFIX$NAME"
 	else
-		local current_branch=$(git_current_branch)
-		if startswith "$current_branch" "$PREFIX"; then
-			BRANCH=$current_branch
-			NAME=${BRANCH#$PREFIX}
-		else
-			warn "The current HEAD is no feature branch."
-			warn "To diff a feature, specify a <name> argument."
-			usage
-			exit 1
-		fi
+		use_current_feature_branch_name
 	fi
 }
 
-parse_args() {
+name_or_current() {
+	if [ -z "$NAME" ]; then
+		use_current_feature_branch_name
+	fi
+}
+
+parse_cmdline() {
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
+}
+
+parse_args() {
+	parse_cmdline "$@"
 
 	# read arguments into global variables
 	NAME=$1
 	BRANCH=$PREFIX$NAME
 }
 
+parse_remote_name() {
+	parse_cmdline "$@"
+
+	# read arguments into global variables
+	REMOTE=$1
+	NAME=$2
+	BRANCH=$PREFIX$NAME
+}
+
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
-	DEFINE_boolean force false 'force creation of feature branch (ignores dirty working tree)' f
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
 	# sanity checks
-	if noflag force; then
-		require_clean_working_tree
-	fi
 	require_branch_absent "$BRANCH"
 
 	# update the local repo with remote changes, if asked
@@ -158,7 +207,11 @@ cmd_start() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
-	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	# if the origin branch counterpart exists, assert that the local branch
+	# isn't behind it (to avoid unnecessary rebasing)
+	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
 
 	# create branch
 	if ! git checkout -b "$BRANCH" "$BASE"; then
@@ -172,7 +225,7 @@ cmd_start() {
 	echo ""
 	echo "Now, start committing on your feature. When done, use:"
 	echo ""
-	echo "     git flow finish feature $NAME"
+	echo "     git flow feature finish $NAME"
 	echo
 }
 
@@ -229,14 +282,18 @@ cmd_finish() {
 	require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if flag fetch; then
-		git fetch -q "$ORIGIN" "$BRANCH"
+	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
+		if flag fetch; then
+			git fetch -q "$ORIGIN" "$BRANCH"
+		fi
 	fi
 
 	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	if has "$ORIGIN/$DEVELOP_BRANCH" "$(git_remote_branches)"; then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
@@ -286,7 +343,7 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	git branch -d "$BRANCH"
+	git branch -D "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -361,6 +418,22 @@ cmd_diff() {
 	fi
 }
 
+cmd_checkout() {
+	parse_args "$@"
+
+	if [ "$NAME" != "" ]; then
+		expand_nameprefix_arg
+		git checkout "$BRANCH"
+	else
+		die "Name a feature branch explicitly."
+	fi
+}
+
+cmd_co() {
+	# Alias for checkout
+	cmd_checkout "$@"
+}
+
 cmd_rebase() {
 	DEFINE_boolean interactive false 'do an interactive rebase' i
 	parse_args "$@"
@@ -375,4 +448,52 @@ cmd_rebase() {
 		OPTS="$OPTS -i"
 	fi
 	git rebase $OPTS "$DEVELOP_BRANCH"
+}
+
+avoid_accidental_cross_branch_action() {
+	local current_branch=$(git_current_branch)
+	if [ "$BRANCH" != "$current_branch" ]; then
+		warn "Trying to pull from '$BRANCH' while currently on branch '$current_branch'."
+		warn "To avoid unintended merges, git-flow aborted."
+		return 1
+	fi
+	return 0
+}
+
+cmd_pull() {
+	#DEFINE_string prefix false 'alternative remote feature branch name prefix' p
+	parse_remote_name "$@"
+
+	if [ -z "$REMOTE" ]; then
+		die "Name a remote explicitly."
+	fi
+	name_or_current
+
+	# To avoid accidentally merging different feature branches into each other,
+	# die if the current feature branch differs from the requested $NAME
+	# argument.
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		# we are on a local feature branch already, so $BRANCH must be equal to
+		# the current branch
+		avoid_accidental_cross_branch_action || die
+	fi
+
+	require_clean_working_tree
+
+	if git_branch_exists "$BRANCH"; then
+		# Again, avoid accidental merges
+		avoid_accidental_cross_branch_action || die
+
+		# we already have a local branch called like this, so simply pull the
+		# remote changes in
+		git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+		echo "Pulled $REMOTE's changes into $BRANCH."
+	else
+		# setup the local branch clone for the first time
+		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+		git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
+		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+	fi
 }

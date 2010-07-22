@@ -3,13 +3,37 @@
 # repository operations for Vincent Driessen's branching model.
 #
 # Original blog post presenting this model is found at:
-#    http://nvie.com/archives/323
+#    http://nvie.com/git-model
 #
 # Feel free to contribute to this project at:
 #    http://github.com/nvie/gitflow
 #
-# Copyright (c) 2010 by Vincent Driessen
-# Copyright (c) 2010 by Benedikt Böhm
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
 #
 
 require_git_repo
@@ -38,6 +62,11 @@ cmd_list() {
 	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
+                warn ""
+                warn "You can start a new hotfix branch:"
+                warn ""
+                warn "    git flow hotfix start <name> [<base>]"
+                warn ""
 		exit 0
 	fi
 	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
@@ -124,7 +153,7 @@ require_no_existing_hotfix_branches() {
 }
 
 cmd_start() {
-	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	BASE=${2:-$MASTER_BRANCH}
 	require_version_arg
@@ -138,7 +167,9 @@ cmd_start() {
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
 	fi
-	require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	if has "$ORIGIN/$MASTER_BRANCH" "$(git_remote_branches)"; then
+		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	fi
 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
@@ -158,7 +189,7 @@ cmd_start() {
 }
 
 cmd_finish() {
-	DEFINE_boolean fetch true "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
@@ -180,8 +211,12 @@ cmd_finish() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
-	require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	if has "$ORIGIN/$MASTER_BRANCH" "$(git_remote_branches)"; then
+		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	fi
+	if has "$ORIGIN/$DEVELOP_BRANCH" "$(git_remote_branches)"; then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
 
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
