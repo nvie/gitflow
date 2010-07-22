@@ -5,11 +5,6 @@ for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
-> **IMPORTANT NOTE:**  
-> In release 0.2, the order of the arguments has changed to provide a logical
-> subcommand hierarchy.
-
-
 Installing git-flow
 -------------------
 The easiest way to install git-flow is using Rick Osborne's excellent
