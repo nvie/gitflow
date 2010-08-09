@@ -1,4 +1,4 @@
-<mockup version="1.0" skin="sketch" measuredW="1229" measuredH="606" mockupW="1177" mockupH="592">
+<mockup version="1.0" skin="sketch" measuredW="1229" measuredH="572" mockupW="1177" mockupH="558">
   <controls>
     <control controlID="0" controlTypeID="com.balsamiq.mockups::Label" x="42" y="73" w="-1" h="-1" measuredW="66" measuredH="32" zOrder="2" locked="false" isInGroup="-1">
       <controlProperties>
@@ -131,12 +131,12 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="19" controlTypeID="com.balsamiq.mockups::CallOut" x="961" y="316" w="26" h="26" measuredW="29" measuredH="40" zOrder="21" locked="false" isInGroup="-1">
+    <control controlID="19" controlTypeID="com.balsamiq.mockups::CallOut" x="961" y="316" w="26" h="26" measuredW="29" measuredH="45" zOrder="21" locked="false" isInGroup="-1">
       <controlProperties>
         <text/>
       </controlProperties>
     </control>
-    <control controlID="20" controlTypeID="com.balsamiq.mockups::CallOut" x="1193" y="318" w="26" h="26" measuredW="29" measuredH="40" zOrder="22" locked="false" isInGroup="-1">
+    <control controlID="20" controlTypeID="com.balsamiq.mockups::CallOut" x="1193" y="318" w="26" h="26" measuredW="29" measuredH="45" zOrder="22" locked="false" isInGroup="-1">
       <controlProperties>
         <text/>
       </controlProperties>
@@ -149,7 +149,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="22" controlTypeID="com.balsamiq.mockups::CallOut" x="448" y="313" w="26" h="26" measuredW="29" measuredH="40" zOrder="24" locked="false" isInGroup="-1">
+    <control controlID="22" controlTypeID="com.balsamiq.mockups::CallOut" x="448" y="313" w="26" h="26" measuredW="29" measuredH="45" zOrder="24" locked="false" isInGroup="-1">
       <controlProperties>
         <text/>
       </controlProperties>
@@ -189,7 +189,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="28" controlTypeID="com.balsamiq.mockups::CallOut" x="380" y="312" w="26" h="26" measuredW="29" measuredH="45" zOrder="30" locked="false" isInGroup="-1">
+    <control controlID="28" controlTypeID="com.balsamiq.mockups::CallOut" x="380" y="312" w="26" h="26" measuredW="29" measuredH="39" zOrder="30" locked="false" isInGroup="-1">
       <controlProperties>
         <text/>
       </controlProperties>
@@ -266,7 +266,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="38" controlTypeID="com.balsamiq.mockups::CallOut" x="902" y="218" w="26" h="26" measuredW="29" measuredH="45" zOrder="38" locked="false" isInGroup="-1">
+    <control controlID="38" controlTypeID="com.balsamiq.mockups::CallOut" x="902" y="218" w="26" h="26" measuredW="29" measuredH="40" zOrder="38" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -280,7 +280,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="40" controlTypeID="com.balsamiq.mockups::CallOut" x="760" y="217" w="26" h="26" measuredW="29" measuredH="40" zOrder="40" locked="false" isInGroup="-1">
+    <control controlID="40" controlTypeID="com.balsamiq.mockups::CallOut" x="760" y="217" w="26" h="26" measuredW="29" measuredH="39" zOrder="40" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -294,7 +294,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="42" controlTypeID="com.balsamiq.mockups::CallOut" x="834" y="217" w="26" h="26" measuredW="29" measuredH="39" zOrder="42" locked="false" isInGroup="-1">
+    <control controlID="42" controlTypeID="com.balsamiq.mockups::CallOut" x="834" y="217" w="26" h="26" measuredW="29" measuredH="40" zOrder="42" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -344,7 +344,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="49" controlTypeID="com.balsamiq.mockups::CallOut" x="787" y="316" w="26" h="26" measuredW="29" measuredH="40" zOrder="49" locked="false" isInGroup="-1">
+    <control controlID="49" controlTypeID="com.balsamiq.mockups::CallOut" x="787" y="316" w="26" h="26" measuredW="29" measuredH="45" zOrder="49" locked="false" isInGroup="-1">
       <controlProperties>
         <text/>
       </controlProperties>
@@ -373,7 +373,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="53" controlTypeID="com.balsamiq.mockups::CallOut" x="1119" y="217" w="26" h="26" measuredW="29" measuredH="40" zOrder="53" locked="false" isInGroup="-1">
+    <control controlID="53" controlTypeID="com.balsamiq.mockups::CallOut" x="1119" y="217" w="26" h="26" measuredW="29" measuredH="45" zOrder="53" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -495,7 +495,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="69" controlTypeID="com.balsamiq.mockups::CallOut" x="524" y="376" w="26" h="26" measuredW="29" measuredH="39" zOrder="68" locked="false" isInGroup="-1">
+    <control controlID="69" controlTypeID="com.balsamiq.mockups::CallOut" x="524" y="376" w="26" h="26" measuredW="29" measuredH="40" zOrder="68" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -515,7 +515,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="87" controlTypeID="com.balsamiq.mockups::CallOut" x="870" y="376" w="26" h="26" measuredW="29" measuredH="40" zOrder="71" locked="false" isInGroup="-1">
+    <control controlID="87" controlTypeID="com.balsamiq.mockups::CallOut" x="870" y="376" w="26" h="26" measuredW="29" measuredH="45" zOrder="71" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -529,7 +529,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="89" controlTypeID="com.balsamiq.mockups::CallOut" x="938" y="376" w="26" h="26" measuredW="29" measuredH="40" zOrder="73" locked="false" isInGroup="-1">
+    <control controlID="89" controlTypeID="com.balsamiq.mockups::CallOut" x="938" y="376" w="26" h="26" measuredW="29" measuredH="39" zOrder="73" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -543,7 +543,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="91" controlTypeID="com.balsamiq.mockups::CallOut" x="1012" y="376" w="26" h="26" measuredW="29" measuredH="40" zOrder="75" locked="false" isInGroup="-1">
+    <control controlID="91" controlTypeID="com.balsamiq.mockups::CallOut" x="1012" y="376" w="26" h="26" measuredW="29" measuredH="39" zOrder="75" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -569,7 +569,7 @@
         <text/>
       </controlProperties>
     </control>
-    <control controlID="95" controlTypeID="com.balsamiq.mockups::CallOut" x="776" y="431" w="26" h="26" measuredW="29" measuredH="45" zOrder="79" locked="false" isInGroup="-1">
+    <control controlID="95" controlTypeID="com.balsamiq.mockups::CallOut" x="776" y="431" w="26" h="26" measuredW="29" measuredH="40" zOrder="79" locked="false" isInGroup="-1">
       <controlProperties>
         <color>65280</color>
         <text/>
@@ -708,15 +708,15 @@
         <backgroundAlpha>0.5</backgroundAlpha>
       </controlProperties>
     </control>
-    <control controlID="122" controlTypeID="com.balsamiq.mockups::FieldSet" x="684" y="475" w="375" h="105" measuredW="200" measuredH="170" zOrder="100" locked="false" isInGroup="-1">
+    <control controlID="122" controlTypeID="com.balsamiq.mockups::FieldSet" x="684" y="475" w="392" h="87" measuredW="200" measuredH="170" zOrder="100" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Git%20branch%20model</text>
       </controlProperties>
     </control>
-    <control controlID="126" controlTypeID="com.balsamiq.mockups::Paragraph" x="694" y="489" w="348" h="107" measuredW="200" measuredH="140" zOrder="101" locked="false" isInGroup="-1">
+    <control controlID="126" controlTypeID="com.balsamiq.mockups::Paragraph" x="694" y="489" w="348" h="73" measuredW="200" measuredH="140" zOrder="101" locked="false" isInGroup="-1">
       <controlProperties>
         <state>up</state>
-        <text>Author%3A%20%5BLarry%20Cai%20%3Clarry.caiyu@gmail.com%3E%5D%0AAuthor%3A%20Vincent%20Driessen%20%0AOriginal%20blog%20post%3A%20%5Bhttp%3A//nvie.com/archives/323%5D%0ALicense%2CCreative%20Commons%20Attribution-ShareAlike</text>
+        <text>BMML%20format%20by%20Larry%20Cai%20%5Blarry.caiyu@gmail.com%5D%0ASource%20from%20Vincent%27s%20%5Bhttp%3A//nvie.com/git-flow%5D%0ALicense%2CCreative%20Commons%20Attribution-ShareAlike</text>
       </controlProperties>
     </control>
   </controls>

@@ -3,7 +3,7 @@ Vincent created nice figures to describe git model using keynotes format, it is 
 
 Larry Cai <larry.caiyu@gmail.com> is fans of <http://www.balsamiq.com/>.
 
-So balsamiq's bmml format are created during my study of git.
+So balsamiq's bmml format are created during my study of git, also the horizontal flow is used instead of vertical to be more easy to fit into slides or other documents.
 
 Hopefully it can be merged back by Vincent ;-)
 
