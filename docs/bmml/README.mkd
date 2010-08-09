@@ -1,0 +1,8 @@
+** Introduction
+Vincent created nice figures to describe git model using keynotes format, it is a pity for non-Apple guys.
+
+Larry Cai mailto:larry.caiyu@gmail.com is [balsamiq](http://www.balsamiq.com/) fans.
+
+So balsamiq's bmml format are created during my study of git.
+
+
