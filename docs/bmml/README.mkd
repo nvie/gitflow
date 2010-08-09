@@ -1,8 +1,15 @@
-** Introduction
+### Introduction
 Vincent created nice figures to describe git model using keynotes format, it is a pity for non-Apple guys.
 
-Larry Cai mailto:larry.caiyu@gmail.com is [balsamiq](http://www.balsamiq.com/) fans.
+Larry Cai <larry.caiyu@gmail.com> is fans of <http://www.balsamiq.com/>.
 
 So balsamiq's bmml format are created during my study of git.
 
+Hopefully it can be merged back by Vincent ;-)
+
+Several good features for bmml format
+* It is cool same as keynotes, and availability under more platform (depends on Adobe AIR)
+* plain text (XML format), keep small size in git and transfer
+* balsamiq is friendly to open source development, could get it free
+* .. (you can add it)
 
