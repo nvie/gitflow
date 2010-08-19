@@ -71,6 +71,11 @@ in a Github fork, of course.
 
 Typical usage:
 --------------
+For the best introduction to get started to `git flow`, please read Jeff
+Kreeftmeijer's blog post:
+
+http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/
+
 
 ### Initialization
 
