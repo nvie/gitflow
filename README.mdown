@@ -12,7 +12,7 @@ git-flow installer, which can be run using the following command:
 
 	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
-For Windows users who wish to use the automated install, it is suggested that you install Cygwin http://www.cygwin.com/
+For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
 first to install tools like sh and wget. Then simply follow the command:
 
 	c:\Users\<user> wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
@@ -49,6 +49,8 @@ experience, please help us develop a
 [completion plugin](http://github.com/bobthecow/git-flow-completion/issues#issue/1)
 for zsh, too.  Please contact me on [Github](http://github.com/inbox/new/nvie)
 or [Twitter](http://twitter.com/nvie) to discuss details.
+
+For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good starting place for installing git.
 
 
 Please help out
