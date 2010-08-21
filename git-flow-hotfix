@@ -69,7 +69,7 @@ cmd_list() {
                 warn ""
 		exit 0
 	fi
-	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	current_branch=$(git branch --color=never | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
@@ -137,7 +137,7 @@ require_version_arg() {
 }
 
 require_base_is_on_master() {
-	if ! git branch --contains "$BASE" 2>/dev/null \
+	if ! git branch --color=never --contains "$BASE" 2>/dev/null \
 			| sed 's/[* ] //g' \
 	  		| grep -q "^$MASTER_BRANCH\$"; then
 		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
