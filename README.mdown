@@ -35,6 +35,12 @@ where git-flow will be installed, simply specify it explicitly, using:
 Or simply point your `PATH` environment variable to your git-flow checkout
 directory.
 
+*Installation note:*  
+git-flow depends on the availability of the command line utility `getopt`,
+which may not be available in your Unix/Linux environment.  Please use your
+favorite package manager to install `getopt`.  For Cygwin, install the
+`util-linux` package to get `getopt`.
+
 
 Integration with your shell
 ---------------------------
