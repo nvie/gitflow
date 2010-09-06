@@ -61,7 +61,7 @@ starting place for installing git.
 FAQ
 ---
 * **Can I still do manual branches and merges when I use git-flow?**  
-  Of course you can. ``git-flow`` does not forbid you to keep using vanilla Git
+  Of course you can. `git-flow` does not forbid you to keep using vanilla Git
   commands!
 
   So if you want to merge `master` into `develop` for whatever reason you want
@@ -71,7 +71,7 @@ FAQ
   finishing those branches later on.
 
 * **I'm getting errors when I use flags with git-flow!**  
-  ``git-flow`` uses the [shFlags](http://code.google.com/p/shflags/) library to
+  `git-flow` uses the [shFlags](http://code.google.com/p/shflags/) library to
   provide platform independent flag parsing (using wichever low-level flag
   parsing libraries like `getopt` or `getopts` are available).  However,
   `shFlags` does not work too well on a few platforms that haven't been tested
