@@ -85,9 +85,11 @@ FAQ
   - Ubuntu
   - Redhat Enterprise Linux
 
-  There are open issues related to this: #28 and #39. Unfortunately, there is
-  no simple fix for it and all hope is placed on the Python rewrite of
-  `git-flow`, see issue #33.
+  There are open issues related to this:
+  [#28](http://github.com/nvie/gitflow/issues/28) and
+  [#39](http://github.com/nvie/gitflow/issues/39). Unfortunately, there is no
+  simple fix for it and all hope is placed on the Python rewrite of `git-flow`,
+  see issue [#33](http://github.com/nvie/gitflow/issues/33).
 
 
 Please help out
