@@ -58,6 +58,38 @@ For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
 starting place for installing git.
 
 
+FAQ
+---
+* **Can I still do manual branches and merges when I use git-flow?**  
+  Of course you can. ``git-flow`` does not forbid you to keep using vanilla Git
+  commands!
+
+  So if you want to merge `master` into `develop` for whatever reason you want
+  to, you can safely do so without breaking `git-flow` compatibility.  Do you
+  want to manually merge a feature branch X into another feature branch Y?  Not
+  a problem.  As long as you do it conciously and realize what this means for
+  finishing those branches later on.
+
+* **I'm getting errors when I use flags with git-flow!**  
+  ``git-flow`` uses the [shFlags](http://code.google.com/p/shflags/) library to
+  provide platform independent flag parsing (using wichever low-level flag
+  parsing libraries like `getopt` or `getopts` are available).  However,
+  `shFlags` does not work too well on a few platforms that haven't been tested
+  originally.  This results in errors like this:
+
+      flags:WARN getopt: option invalide -- 'f' -- 'init' flags:FATAL unable to parse provided options with getopt
+
+  The platforms that suffer these errors include:
+
+  - Gentoo
+  - Ubuntu
+  - Redhat Enterprise Linux
+
+  There are open issues related to this: #28 and #39. Unfortunately, there is
+  no simple fix for it and all hope is placed on the Python rewrite of
+  `git-flow`, see issue #33.
+
+
 Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
