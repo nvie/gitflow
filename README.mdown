@@ -118,6 +118,12 @@ FAQ
   simple fix for it and all hope is placed on the Python rewrite of `git-flow`,
   see issue [#33](http://github.com/nvie/gitflow/issues/33).
 
+* **Can I use it with Windows?**  
+  There have been reports of Windows users using `git-flow`.
+  <del>Un</del>fortunately, I have no Windows environment to test it on, but
+  this [issue](http://github.com/nvie/gitflow/issues/issue/25) should be
+  helpful in setting it up.
+
 
 Please help out
 ---------------
