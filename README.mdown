@@ -10,7 +10,7 @@ Installing git-flow
 The easiest way to install git-flow is using Rick Osborne's excellent
 git-flow installer, which can be run using the following command:
 
-	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+	$ wget -q -O - http://github.com/strands-lab/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
 For __OSX__ users, the `wget` command isn't available by default, but `curl` is, so you can run:
 
@@ -19,7 +19,7 @@ For __OSX__ users, the `wget` command isn't available by default, but `curl` is,
 For __Windows__ users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
 first to install tools like sh and wget. Then simply follow the command:
 
-	c:\Users\<user> wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+	c:\Users\<user> wget -q -O - http://github.com/strands-lab/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
 
 If you prefer a manual installation, please use the following instructions.
 After downloading the sources from Github, also fetch the submodules:
