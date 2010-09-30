@@ -306,26 +306,3 @@ require_branches_equal() {
 		fi
 	fi
 }
-
-expand_nameprefix_arg() {
-	require_name_arg
-
-	local expanded_name
-	local exitcode
-	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX")
-	exitcode=$?
-	case $exitcode in
-		0) NAME=$expanded_name
-		   BRANCH=$PREFIX$NAME
-		   ;;
-		*) exit 1 ;;
-	esac
-}
-
-require_name_arg() {
-	if [ "$NAME" = "" ]; then
-		warn "Missing argument <name>"
-		usage
-		exit 1
-	fi
-}
