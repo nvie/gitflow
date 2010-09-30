@@ -281,7 +281,7 @@ cmd_finish() {
 
 cmd_publish() {
 	parse_args "$@"
-	expand_nameprefix_arg
+	require_version_arg
 
 	# sanity checks
 	require_clean_working_tree
@@ -308,7 +308,7 @@ cmd_publish() {
 
 cmd_track() {
 	parse_args "$@"
-	require_name_arg
+	require_version_arg
 
 	# sanity checks
 	require_clean_working_tree
