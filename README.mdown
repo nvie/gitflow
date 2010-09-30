@@ -14,7 +14,7 @@ git-flow installer, which can be run using the following command:
 
 For __OSX__ users, the `wget` command isn't available by default, but `curl` is, so you can run:
 
-	$ curl http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+	$ curl http://github.com/strands-lab/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
 For __Windows__ users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
 first to install tools like sh and wget. Then simply follow the command:
