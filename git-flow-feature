@@ -120,29 +120,6 @@ cmd_help() {
 	exit 0
 }
 
-require_name_arg() {
-	if [ "$NAME" = "" ]; then
-		warn "Missing argument <name>"
-		usage
-		exit 1
-	fi
-}
-
-expand_nameprefix_arg() {
-	require_name_arg
-
-	local expanded_name
-	local exitcode
-	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX")
-	exitcode=$?
-	case $exitcode in
-		0) NAME=$expanded_name
-		   BRANCH=$PREFIX$NAME
-		   ;;
-		*) exit 1 ;;
-	esac
-}
-
 use_current_feature_branch_name() {
 	local current_branch=$(git_current_branch)
 	if startswith "$current_branch" "$PREFIX"; then
