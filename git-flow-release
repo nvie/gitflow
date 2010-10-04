@@ -45,7 +45,7 @@ PREFIX=$(git config --get gitflow.prefix.release)
 usage() {
 	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start [-F] <version>"
-	echo "       git flow release finish [-Fsump] <version>"
+	echo "       git flow release finish [-Fsumpk] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
@@ -121,7 +121,7 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	VERSION=$1
+	VERSION=${!#}
 	BRANCH=$PREFIX$VERSION
 }
 
@@ -200,6 +200,7 @@ cmd_finish() {
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
+	DEFINE_boolean keep false 'keep branch after performing finish' k
 
 	parse_args "$@"
 	require_version_arg
@@ -265,7 +266,11 @@ cmd_finish() {
 	fi
 
 	# delete branch
-	git branch -d "$BRANCH"
+	if flag keep; then
+		echo "Keep this branch" > /dev/null
+	else
+		git branch -d "$BRANCH"
+	fi
 
 	if flag push; then
 		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
@@ -284,7 +289,11 @@ cmd_finish() {
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
 	echo "- The release was tagged '$tagname'"
 	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
-	echo "- Release branch '$BRANCH' has been deleted"
+	if flag keep; then
+		echo "- Release branch '$BRANCH' has been kept"
+	else
+		echo "- Release branch '$BRANCH' has been deleted"
+	fi
 	if flag push; then
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
 		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
