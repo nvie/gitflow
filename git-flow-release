@@ -151,7 +151,7 @@ require_no_existing_release_branches() {
 
 require_not_being_in_release_branch() {
 	if [ "$BRANCH" = "$(git_current_branch)"]; then
-		die "You cannot be in the '$BRANCH' branch when you finnish it."
+		die "You cannot be in the '$BRANCH' branch when you finish it."
 	fi
 }
 
