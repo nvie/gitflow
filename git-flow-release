@@ -149,7 +149,7 @@ require_no_existing_release_branches() {
 		die "There is an existing release branch ($first_branch). Finish that one first."
 }
 
-require_not_being_in_release_branch() {
+require_not_on_release_branch() {
 	if [ "$BRANCH" = "$(git_current_branch)"]; then
 		die "You cannot be in the '$BRANCH' branch when you finish it."
 	fi
@@ -209,7 +209,7 @@ cmd_finish() {
 	# sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
-	require_not_being_in_release_branch
+	require_not_on_release_branch
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
