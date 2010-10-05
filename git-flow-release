@@ -149,11 +149,8 @@ require_no_existing_release_branches() {
 		die "There is an existing release branch ($first_branch). Finish that one first."
 }
 
-git_actual_branch(){
-	git branch --no-color | grep '^*' | sed 's/^[* ] //'
-}
 require_not_being_in_release_branch() {
-	if has $BRANCH $(git_actual_branch); then
+	if [ "$BRANCH" = "$(git_current_branch)"]; then
 		die "You cannot be in the '$BRANCH' branch when you finnish it."
 	fi
 }
