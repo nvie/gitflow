@@ -46,6 +46,8 @@ usage() {
 	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start [-F] <version>"
 	echo "       git flow release finish [-Fsump] <version>"
+	echo "       git flow release publish <name>"
+	echo "       git flow release track <name>"
 }
 
 cmd_default() {
@@ -147,6 +149,12 @@ require_no_existing_release_branches() {
 		die "There is an existing release branch ($first_branch). Finish that one first."
 }
 
+require_not_on_release_branch() {
+	if [ "$BRANCH" = "$(git_current_branch)"]; then
+		die "You cannot be in the '$BRANCH' branch when you finish it."
+	fi
+}
+
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
@@ -201,6 +209,7 @@ cmd_finish() {
 	# sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
+	require_not_on_release_branch
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
@@ -262,6 +271,8 @@ cmd_finish() {
 			die "Could not push to $MASTER_BRANCH from $ORIGIN."
 		git push --tags "$ORIGIN" || \
 			die "Could not push tags to $ORIGIN."
+		git push "$ORIGIN" :"$BRANCH" || \
+			die "Could not delete the remote $BRANCH in $ORIGIN."
 	fi
 
 	echo
@@ -273,6 +284,54 @@ cmd_finish() {
 	echo "- Release branch '$BRANCH' has been deleted"
 	if flag push; then
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
+		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	fi
+	echo
+}
+
+cmd_publish() {
+	parse_args "$@"
+	require_version_arg
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch "$BRANCH"
+	git fetch -q "$ORIGIN"
+	require_branch_absent "$ORIGIN/$BRANCH"
+
+	# create remote branch
+	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+	git fetch -q "$ORIGIN"
+
+	# configure remote tracking
+	git config "branch.$BRANCH.remote" "$ORIGIN"
+	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+	git checkout "$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote branch '$BRANCH' was created"
+	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
+cmd_track() {
+	parse_args "$@"
+	require_version_arg
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch_absent "$BRANCH"
+	git fetch -q "$ORIGIN"
+	require_branch "$ORIGIN/$BRANCH"
+
+	# create tracking branch
+	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote tracking branch '$BRANCH' was created"
+	echo "- You are now on branch '$BRANCH'"
 	echo
 }
