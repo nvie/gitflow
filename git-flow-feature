@@ -231,8 +231,8 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
-	DEFINE_boolean rebase false 'rebase instead of merge' r
-	DEFINE_boolean keep false 'keep branch after performing finish' k
+	DEFINE_boolean rebase false "rebase instead of merge" r
+	DEFINE_boolean keep false "keep branch after performing finish" k
 	parse_args "$@"
 	expand_nameprefix_arg
 
@@ -346,9 +346,7 @@ helper_finish_cleanup() {
 	fi
 	
 	
-	if flag keep; then
-		echo "Keep this branch" > /dev/null
-	else
+	if noflag keep; then
 		git branch -d "$BRANCH"
 	fi
 
@@ -357,7 +355,7 @@ helper_finish_cleanup() {
 	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
 	if flag keep; then
-		echo "- Feature branch '$BRANCH' has been kept"
+		echo "- Feature branch '$BRANCH' is still available"
 	else
 		echo "- Feature branch '$BRANCH' has been removed"
 	fi

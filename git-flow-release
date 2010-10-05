@@ -197,7 +197,7 @@ cmd_finish() {
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
-	DEFINE_boolean keep false 'keep branch after performing finish' k
+	DEFINE_boolean keep false "keep branch after performing finish" k
 
 	parse_args "$@"
 	require_version_arg
@@ -263,9 +263,7 @@ cmd_finish() {
 	fi
 
 	# delete branch
-	if flag keep; then
-		echo "Keep this branch" > /dev/null
-	else
+	if noflag keep; then
 		git branch -d "$BRANCH"
 	fi
 
@@ -287,7 +285,7 @@ cmd_finish() {
 	echo "- The release was tagged '$tagname'"
 	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
 	if flag keep; then
-		echo "- Release branch '$BRANCH' has been kept"
+		echo "- Release branch '$BRANCH' is still available"
 	else
 		echo "- Release branch '$BRANCH' has been deleted"
 	fi
