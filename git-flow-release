@@ -192,6 +192,7 @@ cmd_finish() {
 	DEFINE_string message "" "use the given tag message" m
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean notag false "don't tag this release" n
 
 	parse_args "$@"
 	require_version_arg
@@ -228,17 +229,19 @@ cmd_finish() {
 		  # TODO: What do we do now?
 	fi
 
-	# try to tag the release
-	# in case a previous attempt to finish this release branch has failed,
-	# but the tag was set successful, we skip it now
-	local tagname=$VERSION_PREFIX$VERSION
-	if ! git_tag_exists "$tagname"; then
-		local opts="-a"
-		flag sign && opts="$opts -s"
-		[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
-		[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
-		git tag $opts "$tagname" || \
-		  die "Tagging failed. Please run finish again to retry."
+	if noflag notag; then
+		# try to tag the release
+		# in case a previous attempt to finish this release branch has failed,
+		# but the tag was set successful, we skip it now
+		local tagname=$VERSION_PREFIX$VERSION
+		if ! git_tag_exists "$tagname"; then
+			local opts="-a"
+			flag sign && opts="$opts -s"
+			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
+			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+			git tag $opts "$tagname" || \
+			die "Tagging failed. Please run finish again to retry."
+		fi
 	fi
 
 	# try to merge into develop
@@ -268,8 +271,10 @@ cmd_finish() {
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
 		git push "$ORIGIN" "$MASTER_BRANCH" || \
 			die "Could not push to $MASTER_BRANCH from $ORIGIN."
-		git push --tags "$ORIGIN" || \
-			die "Could not push tags to $ORIGIN."
+		if noflag notag; then
+			git push --tags "$ORIGIN" || \
+			  die "Could not push tags to $ORIGIN."
+		fi
 		git push "$ORIGIN" :"$BRANCH" || \
 			die "Could not delete the remote $BRANCH in $ORIGIN."
 	fi
@@ -278,7 +283,9 @@ cmd_finish() {
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
-	echo "- The release was tagged '$tagname'"
+	if noflag notag; then
+		echo "- The release was tagged '$tagname'"
+	fi
 	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
 	if flag keep; then
 		echo "- Release branch '$BRANCH' is still available"
