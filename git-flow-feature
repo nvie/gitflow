@@ -180,7 +180,7 @@ parse_args() {
 	parse_cmdline "$@"
 
 	# read arguments into global variables
-	NAME=${!#}
+	NAME=$(last_arg "$@")
 	BRANCH=$PREFIX$NAME
 }
 
