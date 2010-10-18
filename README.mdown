@@ -98,27 +98,6 @@ FAQ
 	on the [git-flow-users](http://groups.google.com/group/gitflow-users)
 	mailinglist.
 
-* **I'm getting errors when I use flags with git-flow!**  
-  `git-flow` uses the [shFlags](http://code.google.com/p/shflags/) library to
-  provide platform independent flag parsing (using wichever low-level flag
-  parsing libraries like `getopt` or `getopts` are available).  However,
-  `shFlags` does not work too well on a few platforms that haven't been tested
-  originally.  This results in errors like this:
-
-      flags:WARN getopt: option invalide -- 'f' -- 'init' flags:FATAL unable to parse provided options with getopt
-
-  The platforms that suffer these errors include:
-
-  - Gentoo
-  - Ubuntu
-  - Redhat Enterprise Linux
-
-  There are open issues related to this:
-  [#28](http://github.com/nvie/gitflow/issues/28) and
-  [#39](http://github.com/nvie/gitflow/issues/39). Unfortunately, there is no
-  simple fix for it and all hope is placed on the Python rewrite of `git-flow`,
-  see issue [#33](http://github.com/nvie/gitflow/issues/33).
-
 * **Can I use it with Windows?**  
   There have been reports of Windows users using `git-flow`.
   <del>Un</del>fortunately, I have no Windows environment to test it on, but
