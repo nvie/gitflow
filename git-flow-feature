@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rF] <name|nameprefix>"
+	echo "       git flow feature finish [-rFk] <name|nameprefix>"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -74,7 +74,7 @@ cmd_list() {
 		warn ""
 		exit 0
 	fi
-	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
@@ -180,7 +180,7 @@ parse_args() {
 	parse_cmdline "$@"
 
 	# read arguments into global variables
-	NAME=$1
+	NAME=$(last_arg "$@")
 	BRANCH=$PREFIX$NAME
 }
 
@@ -231,7 +231,8 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
-	DEFINE_boolean rebase false 'rebase instead of merge' r
+	DEFINE_boolean rebase false "rebase instead of merge" r
+	DEFINE_boolean keep false "keep branch after performing finish" k
 	parse_args "$@"
 	expand_nameprefix_arg
 
@@ -343,13 +344,21 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	git branch -D "$BRANCH"
+	
+	
+	if noflag keep; then
+		git branch -d "$BRANCH"
+	fi
 
 	echo
 	echo "Summary of actions:"
 	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
-	echo "- Feature branch '$BRANCH' has been removed"
+	if flag keep; then
+		echo "- Feature branch '$BRANCH' is still available"
+	else
+		echo "- Feature branch '$BRANCH' has been removed"
+	fi
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo
 }

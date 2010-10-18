@@ -12,6 +12,15 @@ git-flow installer, which can be run using the following command:
 
 	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
+For __OSX__ users, the `wget` command isn't available by default, but `curl` is, so you can run:
+
+	$ curl http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+
+For __Windows__ users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
+first to install tools like sh and wget. Then simply follow the command:
+
+	c:\Users\<user> wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+
 If you prefer a manual installation, please use the following instructions.
 After downloading the sources from Github, also fetch the submodules:
 
@@ -30,20 +39,91 @@ where git-flow will be installed, simply specify it explicitly, using:
 Or simply point your `PATH` environment variable to your git-flow checkout
 directory.
 
+*Installation note:*  
+git-flow depends on the availability of the command line utility `getopt`,
+which may not be available in your Unix/Linux environment.  Please use your
+favorite package manager to install `getopt`.  For Cygwin, install the
+`util-linux` package to get `getopt`.  If you use `apt-get` as your install
+manager, the package name is `opt`.
+
 
 Integration with your shell
 ---------------------------
-For those who use the [Bash](http://www.gnu.org/software/bash/) shell, please
-check out the excellent work on the
+For those who use the [Bash](http://www.gnu.org/software/bash/) or
+[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
-If you are a [zsh](http://www.zsh.org) user with some plugin-writing
-experience, please help us develop a
-[completion plugin](http://github.com/bobthecow/git-flow-completion/issues#issue/1)
-for zsh, too.  Please contact me on [Github](http://github.com/inbox/new/nvie)
-or [Twitter](http://twitter.com/nvie) to discuss details.
+For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
+starting place for installing git.
+
+
+FAQ
+---
+* **Can I still do manual branches and merges when I use git-flow?**  
+  Of course you can. `git-flow` does not forbid you to keep using vanilla Git
+  commands!
+
+  So if you want to merge `master` into `develop` for whatever reason you want
+  to, you can safely do so without breaking `git-flow` compatibility.  Do you
+  want to manually merge a feature branch X into another feature branch Y?  Not
+  a problem.  As long as you do it conciously and realize what this means for
+  finishing those branches later on.
+
+* **Why does git-describe not work for me?**  
+  When finishing release and hotfix branches, that branch's HEAD is first
+  merged into `master` and then into `develop`.  It is not the resulting new
+  merge commit from `master` that is merged back into `develop`.  This means
+  that a linear path from the new `develop` branch to the new `master` commit
+  is not created.  Even worse, a linear path is created from the new `develop`
+  branch to the *previous* `master` commit.  Although unintended, this is
+  simply an effect of using the current branching rules.
+
+  When using `git-describe` in these cases, you can get very confusing and
+  misleading results, since `git-describe` scans the current commits linear
+  history for the most recent tag it finds, which will always be the *previous*
+  tag.
+
+  I will change this behaviour in the next version of the branching model
+  explicitly and I will include this behavioural change in the first version of
+  the Python rewrite.
+
+  For more references to this problem, see:
+
+  - Issue [#49](http://github.com/nvie/gitflow/issues/49)
+  - These
+  	[two](http://groups.google.com/group/gitflow-users/browse\_thread/thread/9920a7df3d1c4908/0bb18a0bf7275ad6#0bb18a0bf7275ad6)
+  	[discussions](http://groups.google.com/group/gitflow-users/browse\_thread/thread/19efac724bb6418a)
+	on the [git-flow-users](http://groups.google.com/group/gitflow-users)
+	mailinglist.
+
+* **I'm getting errors when I use flags with git-flow!**  
+  `git-flow` uses the [shFlags](http://code.google.com/p/shflags/) library to
+  provide platform independent flag parsing (using wichever low-level flag
+  parsing libraries like `getopt` or `getopts` are available).  However,
+  `shFlags` does not work too well on a few platforms that haven't been tested
+  originally.  This results in errors like this:
+
+      flags:WARN getopt: option invalide -- 'f' -- 'init' flags:FATAL unable to parse provided options with getopt
+
+  The platforms that suffer these errors include:
+
+  - Gentoo
+  - Ubuntu
+  - Redhat Enterprise Linux
+
+  There are open issues related to this:
+  [#28](http://github.com/nvie/gitflow/issues/28) and
+  [#39](http://github.com/nvie/gitflow/issues/39). Unfortunately, there is no
+  simple fix for it and all hope is placed on the Python rewrite of `git-flow`,
+  see issue [#33](http://github.com/nvie/gitflow/issues/33).
+
+* **Can I use it with Windows?**  
+  There have been reports of Windows users using `git-flow`.
+  <del>Un</del>fortunately, I have no Windows environment to test it on, but
+  this [issue](http://github.com/nvie/gitflow/issues/issue/25) should be
+  helpful in setting it up.
 
 
 Please help out
@@ -57,7 +137,7 @@ Feel free to fork this repo and to commit your additions. For a list of all
 contributors, please see the [AUTHORS](AUTHORS) file.
 
 Any questions, tips, or general discussion can be posted to our Google group:
-http://groups.google.com/group/gitflow-users
+[http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
 
 
 License terms
@@ -71,6 +151,11 @@ in a Github fork, of course.
 
 Typical usage:
 --------------
+For the best introduction to get started to `git flow`, please read Jeff
+Kreeftmeijer's blog post:
+
+[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
+
 
 ### Initialization
 
@@ -117,3 +202,17 @@ those questions to accept the (sane) default suggestions.
   
   For support branches, the `<base>` arg must be a commit on `master`.
 
+
+Showing your appreciation
+=========================
+A few people already requested it, so now it's here: a Flattr button.
+
+Of course, the best way to show your appreciation for the original
+[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
+contributing to the community.  If you'd like to show your appreciation in
+another way, however, consider Flattr'ing me:
+
+[![Flattr this][2]][1]
+
+[1]: http://flattr.com/thing/53771/git-flow
+[2]: http://api.flattr.com/button/button-static-50x60.png

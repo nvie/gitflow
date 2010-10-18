@@ -67,6 +67,11 @@ main() {
 	# load common functionality
 	. "$GITFLOW_DIR/gitflow-common"
 
+	# This environmental variable fixes non-POSIX getopt style argument
+	# parsing, effectively breaking git-flow subcommand parsing on several
+	# Linux platforms.
+	export POSIXLY_CORRECT=1
+
 	# use the shFlags project to parse the command line arguments
 	. "$GITFLOW_DIR/gitflow-shFlags"
 	FLAGS_PARENT="git flow"

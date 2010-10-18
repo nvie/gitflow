@@ -1,3 +1,21 @@
+0.4:
+---
+Release date: **2010/10/18**
+
+* The flag parsing issues of git-flow subcommands are solved for most
+  platforms.
+
+* `git flow {feature,hotfix,release} finish` now takes a `-k` flag, to keep the
+  branch around after finishing.
+
+* `git flow release finish` takes a `-n` flag, to skip tagging.
+
+* For consistency, `git flow {release,hotfix}` now, too, have a `publish` and
+  `track` subcommand, just like `feature`.
+
+* Various minor fixes.
+
+
 0.3:
 ----
 Release date: **2010/07/22**
