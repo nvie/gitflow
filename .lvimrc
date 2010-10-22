@@ -1,0 +1,2 @@
+let g:PyUnitTestsRoot = 'tests'
+let g:PyUnitSourceRoot = 'gitflow'
