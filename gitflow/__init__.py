@@ -7,3 +7,7 @@ __author__ = "Vincent Driessen"
 __contact__ = "vincent@datafox.nl"
 __homepage__ = "http://github.com/nvie/gitflow/"
 __docformat__ = "restructuredtext"
+
+from core import GitFlow
+
+__all__ = ['GitFlow']

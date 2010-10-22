@@ -1,88 +1,85 @@
-from gitflow.repo import get_repo, get_setting
-
-DEFAULT_MASTER_BRANCH = 'master'
-DEFAULT_DEVELOP_BRANCH = 'develop'
-DEFAULT_ORIGIN_REMOTE = 'origin'
-
-DEFAULT_FEATURE_PREFIX = 'feature/'
-DEFAULT_RELEASE_PREFIX = 'release/'
-DEFAULT_HOTFIX_PREFIX = 'hotfix/'
-DEFAULT_SUPPORT_PREFIX = 'support/'
-DEFAULT_VERSIONTAG_PREFIX = ''
+from config import Config
+from git import Repo
+from ConfigParser import NoOptionError, NoSectionError, DuplicateSectionError, \
+                         MissingSectionHeaderError, ParsingError
 
 
-class InvalidSpecialBranchException(Exception):
+class NotInitialized(Exception):
     pass
 
 
-class SpecialBranch(object):
-    def __init__(self, branch):
-        supported_types = (
-           DEFAULT_FEATURE_PREFIX,
-           DEFAULT_RELEASE_PREFIX,
-           DEFAULT_HOTFIX_PREFIX,
-           DEFAULT_SUPPORT_PREFIX)
-        for type_ in supported_types:
-            fullname = branch.name
-            if fullname.startswith(feature_prefix()):
-                self.type = 'feature'
-                self.branch = branch
-                self.name = fullname[len(feature_prefix()):]
-                self.fullname = fullname
-                return
-        raise InvalidSpecialBranchException('Invalid special branch name.')
+class GitFlow(object):
+    def __init__(self, repo):
+        self.repo = repo
+        self.config = Config(repo)
+        self.initialized = False
 
-    def __str__(self):
-        return self.fullname
+    def init(self):
+        self.initialized = True
+        self.set('gitflow.branch.master', 'master')
+        self.set('gitflow.branch.develop', 'develop')
 
+    def get(self, setting, default=None):
+        groups = setting.split('.', 2)
+        if len(groups) == 2:
+            subsection = None
+            section, option = groups
+        elif len(groups) == 3:
+            section, subsection, option = groups
+        else:
+            raise ValueError('Invalid setting name: %s' % setting)
 
-def master_branchname():
-    return get_setting('gitflow.branch.master', DEFAULT_MASTER_BRANCH)
+        try:
+            if subsection:
+                lookup_key = '%s "%s"' % (section, subsection)
+            else:
+                lookup_key = section
+            setting = self.repo.config_reader().get(lookup_key, option)
+            return setting
+        except (NoSectionError, DuplicateSectionError, NoOptionError,
+                MissingSectionHeaderError, ParsingError):
+            if not default is None:
+                return default
+            raise
 
+    def set(self, setting, value):
+        groups = setting.split('.', 2)
+        if len(groups) == 2:
+            subsection = None
+            section, option = groups
+        elif len(groups) == 3:
+            section, subsection, option = groups
+        else:
+            raise ValueError('Invalid setting name: %s' % setting)
 
-def master_branch():
-    return get_repo().heads[master_branchname()]
+        if subsection:
+            lookup_key = '%s "%s"' % (section, subsection)
+        else:
+            lookup_key = section
 
-
-def develop_branchname():
-    return get_setting('gitflow.branch.develop', DEFAULT_DEVELOP_BRANCH)
-
-
-def develop_branch():
-    return get_repo().heads[develop_branchname()]
-
-
-def origin_remotename():
-    return get_setting('gitflow.origin', DEFAULT_ORIGIN_REMOTE)
-
-
-def feature_prefix():
-    return get_setting('gitflow.prefix.feature', DEFAULT_FEATURE_PREFIX)
-
-
-def release_prefix():
-    return get_setting('gitflow.prefix.release', DEFAULT_RELEASE_PREFIX)
-
-
-def hotfix_prefix():
-    return get_setting('gitflow.prefix.hotfix', DEFAULT_HOTFIX_PREFIX)
-
-
-def support_prefix():
-    return get_setting('gitflow.prefix.support', DEFAULT_SUPPORT_PREFIX)
+        writer = self.repo.config_writer()
+        if not lookup_key in writer.sections():
+            writer.add_section(lookup_key)
+        writer.set(lookup_key, option, value)
 
 
-def versiontag_prefix():
-    return get_setting('gitflow.prefix.versiontag', DEFAULT_VERSIONTAG_PREFIX)
+    def _get_branch_name(self, easy_name):
+        return self.get('gitflow.branch.%s' % easy_name, easy_name)
 
+    def _get_prefix_name(self, easy_name):
+        return self.get('gitflow.prefix.%s' % easy_name, easy_name + '/')
 
-def branches_with_prefix(prefix):
-    fbs = []
-    for b in get_repo().branches:
-        if b.name.startswith(prefix):
-            fbs.append(SpecialBranch(b))
-    return fbs
+    def master(self):
+        return self._get_branch_name('master')
 
+    def develop(self):
+        return self._get_branch_name('develop')
 
-def feature_branches():
-    return branches_with_prefix(feature_prefix())
+    def hotfix_prefix(self):
+        return self._get_prefix_name('hotfix')
+
+    def release_prefix(self):
+        return self._get_prefix_name('release')
+
+    def support_prefix(self):
+        return self._get_prefix_name('support')
