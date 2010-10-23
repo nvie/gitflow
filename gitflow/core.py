@@ -14,19 +14,23 @@ class GitFlow(object):
         self.config = Config(repo)
 
     def init(self,
-            master='master', develop='develop',
-            feature='feature/', release='release/', hotfix='hotfix/',
-            support='support/'):
-        defaults = {
-            'gitflow.branch.master': master,
-            'gitflow.branch.develop': develop,
-            'gitflow.prefix.feature': feature,
-            'gitflow.prefix.release': release,
-            'gitflow.prefix.hotfix': hotfix,
-            'gitflow.prefix.support': support,
-        }
-        for key in sorted(defaults):
-            self.set(key, defaults[key])
+            master=None, develop=None,
+            feature=None, release=None, hotfix=None,
+            support=None, force_defaults=False):
+        defaults = [
+            ('gitflow.branch.master', 'master', master),
+            ('gitflow.branch.develop', 'develop', develop),
+            ('gitflow.prefix.feature', 'feature/', feature),
+            ('gitflow.prefix.release', 'release/', release),
+            ('gitflow.prefix.hotfix', 'hotfix/', hotfix),
+            ('gitflow.prefix.support', 'support/', support),
+        ]
+        for setting, default, value in defaults:
+            if not value is None:
+                self.set(setting, value)
+            else:
+                if force_defaults or self.get(setting, null=True) is None:
+                    self.set(setting, default)
 
     def is_initialized(self):
         return self.get('gitflow.branch.master', null=True) \

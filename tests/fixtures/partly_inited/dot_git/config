@@ -1,0 +1,12 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+[gitflow "branch"]
+	master = production
+[gitflow "prefix"]
+	feature = f-
+[foo]
+	bar = qux

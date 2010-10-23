@@ -114,3 +114,32 @@ class TestGitFlow(TestCase):
         self.assertEquals('rel-', gitflow.release_prefix())
         self.assertEquals('supp-', gitflow.support_prefix())
 
+    def test_gitflow_init_with_partly_inited(self):
+        repo = self.copy_from_fixture('partly_inited')
+        gitflow = GitFlow(repo)
+        gitflow.init()
+
+        # Already set in fixture, shouldn't change
+        self.assertEquals('production', gitflow.master())
+        self.assertEquals('f-', gitflow.feature_prefix())
+
+        # Implicit defaults
+        self.assertEquals('develop', gitflow.develop())
+        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
+        self.assertEquals('release/', gitflow.release_prefix())
+        self.assertEquals('support/', gitflow.support_prefix())
+
+    def test_gitflow_force_reinit_partly_inited(self):
+        repo = self.copy_from_fixture('partly_inited')
+        gitflow = GitFlow(repo)
+        gitflow.init(force_defaults=True)
+
+        # Implicit defaults
+        self.assertEquals('develop', gitflow.develop())
+        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
+        self.assertEquals('release/', gitflow.release_prefix())
+        self.assertEquals('support/', gitflow.support_prefix())
+
+        # Explicitly forced back to defaults
+        self.assertEquals('master', gitflow.master())
+        self.assertEquals('feature/', gitflow.feature_prefix())
