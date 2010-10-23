@@ -106,3 +106,7 @@ class GitFlow(object):
     def support_prefix(self):
         return self._safe_get('gitflow.prefix.support')
 
+
+    def feature_branches(self):
+        return [h.name for h in self.repo.heads \
+                    if h.name.startswith(self.feature_prefix())]

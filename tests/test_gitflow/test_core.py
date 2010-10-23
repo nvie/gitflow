@@ -143,3 +143,17 @@ class TestGitFlow(TestCase):
         # Explicitly forced back to defaults
         self.assertEquals('master', gitflow.master())
         self.assertEquals('feature/', gitflow.feature_prefix())
+
+
+    # git flow feature
+    def test_gitflow_empty_repo_has_no_feature_branches(self):
+        repo = self.empty_repo()
+        gitflow = GitFlow(repo)
+        self.assertItemsEqual([], gitflow.feature_branches())
+
+    def test_gitflow_sample_repo_has_feature_branches(self):
+        repo = self.copy_from_fixture('sample_repo')
+        gitflow = GitFlow(repo)
+        self.assertItemsEqual(['feature/even', 'feature/recursion'],
+                gitflow.feature_branches())
+

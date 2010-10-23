@@ -1,0 +1,14 @@
+0000000000000000000000000000000000000000 296586bb164c946cad10d37e82570f60e6348df9 Vincent Driessen <vincent@datafox.nl> 1287801794 +0200	commit (initial): Initial commit
+296586bb164c946cad10d37e82570f60e6348df9 296586bb164c946cad10d37e82570f60e6348df9 Vincent Driessen <vincent@datafox.nl> 1287801794 +0200	checkout: moving from master to develop
+296586bb164c946cad10d37e82570f60e6348df9 2e2fc06b0b33a9ebcc83d7c3e184f6e6fda8e94a Vincent Driessen <vincent@datafox.nl> 1287801822 +0200	commit: Initial commit
+2e2fc06b0b33a9ebcc83d7c3e184f6e6fda8e94a 2c716b745ef3c3152a893c01539d1d8ab7725d45 Vincent Driessen <vincent@datafox.nl> 1287801841 +0200	commit: Describe intentions.
+2c716b745ef3c3152a893c01539d1d8ab7725d45 296586bb164c946cad10d37e82570f60e6348df9 Vincent Driessen <vincent@datafox.nl> 1287801886 +0200	checkout: moving from develop to 296586bb164c946cad10d37e82570f60e6348df9
+296586bb164c946cad10d37e82570f60e6348df9 2e2fc06b0b33a9ebcc83d7c3e184f6e6fda8e94a Vincent Driessen <vincent@datafox.nl> 1287801886 +0200	cherry-pick
+2e2fc06b0b33a9ebcc83d7c3e184f6e6fda8e94a 84b34bcf34473c68d5a2c64db4dd411a8719e191 Vincent Driessen <vincent@datafox.nl> 1287801886 +0200	rebase -i (reword): Add README file.
+84b34bcf34473c68d5a2c64db4dd411a8719e191 c8b6deac7ef94f078a426d52c0b1fb3e1221133c Vincent Driessen <vincent@datafox.nl> 1287801892 +0200	rebase -i (reword): Describe intentions.
+c8b6deac7ef94f078a426d52c0b1fb3e1221133c 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1287802014 +0200	commit: Add naive initial implementation of the odd function.
+2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1287802041 +0200	checkout: moving from develop to feature/even
+2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 2ca717f82f6d94c457b0d9ff1fbc5f101480bae1 Vincent Driessen <vincent@datafox.nl> 1287802086 +0200	commit: Add even function.
+2ca717f82f6d94c457b0d9ff1fbc5f101480bae1 e56be18dada9e81ca7969760ddea357b0c4c9412 Vincent Driessen <vincent@datafox.nl> 1287802101 +0200	commit: Rename file, to match both functions.
+e56be18dada9e81ca7969760ddea357b0c4c9412 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1287802121 +0200	checkout: moving from feature/even to feature/recursion
+2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 54d59c872469c7bf34d540d2fb3128a97502b73f Vincent Driessen <vincent@datafox.nl> 1287802214 +0200	commit: Made the definition of odd recursive.
