@@ -12,14 +12,31 @@ class GitFlow(object):
     def __init__(self, repo):
         self.repo = repo
         self.config = Config(repo)
-        self.initialized = False
 
-    def init(self):
-        self.initialized = True
-        self.set('gitflow.branch.master', 'master')
-        self.set('gitflow.branch.develop', 'develop')
+    def init(self,
+            master='master', develop='develop',
+            feature='feature/', release='release/', hotfix='hotfix/',
+            support='support/'):
+        defaults = {
+            'gitflow.branch.master': master,
+            'gitflow.branch.develop': develop,
+            'gitflow.prefix.feature': feature,
+            'gitflow.prefix.release': release,
+            'gitflow.prefix.hotfix': hotfix,
+            'gitflow.prefix.support': support,
+        }
+        for key in sorted(defaults):
+            self.set(key, defaults[key])
 
-    def get(self, setting, default=None):
+    def is_initialized(self):
+        return self.get('gitflow.branch.master', null=True) \
+           and self.get('gitflow.branch.develop', null=True) \
+           and self.get('gitflow.prefix.feature', null=True) \
+           and self.get('gitflow.prefix.release', null=True) \
+           and self.get('gitflow.prefix.hotfix', null=True) \
+           and self.get('gitflow.prefix.support', null=True)
+
+    def get(self, setting, default=None, null=False):
         groups = setting.split('.', 2)
         if len(groups) == 2:
             subsection = None
@@ -38,7 +55,9 @@ class GitFlow(object):
             return setting
         except (NoSectionError, DuplicateSectionError, NoOptionError,
                 MissingSectionHeaderError, ParsingError):
-            if not default is None:
+            if null:
+                return None
+            elif not default is None:
                 return default
             raise
 
@@ -63,23 +82,27 @@ class GitFlow(object):
         writer.set(lookup_key, option, value)
 
 
-    def _get_branch_name(self, easy_name):
-        return self.get('gitflow.branch.%s' % easy_name, easy_name)
-
-    def _get_prefix_name(self, easy_name):
-        return self.get('gitflow.prefix.%s' % easy_name, easy_name + '/')
+    def _safe_get(self, setting_name):
+        try:
+            return self.get(setting_name)
+        except NoSectionError, NoOptionError:
+            raise NotInitialized('This repo has not yet been initialized.')
 
     def master(self):
-        return self._get_branch_name('master')
+        return self._safe_get('gitflow.branch.master')
 
     def develop(self):
-        return self._get_branch_name('develop')
+        return self._safe_get('gitflow.branch.develop')
+
+    def feature_prefix(self):
+        return self._safe_get('gitflow.prefix.feature')
 
     def hotfix_prefix(self):
-        return self._get_prefix_name('hotfix')
+        return self._safe_get('gitflow.prefix.hotfix')
 
     def release_prefix(self):
-        return self._get_prefix_name('release')
+        return self._safe_get('gitflow.prefix.release')
 
     def support_prefix(self):
-        return self._get_prefix_name('support')
+        return self._safe_get('gitflow.prefix.support')
+

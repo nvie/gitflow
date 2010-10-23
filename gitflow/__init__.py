@@ -8,6 +8,6 @@ __contact__ = "vincent@datafox.nl"
 __homepage__ = "http://github.com/nvie/gitflow/"
 __docformat__ = "restructuredtext"
 
-from core import GitFlow
+from core import GitFlow, NotInitialized
 
-__all__ = ['GitFlow']
+__all__ = ['GitFlow', 'NotInitialized']

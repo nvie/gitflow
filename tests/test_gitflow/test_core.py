@@ -4,7 +4,7 @@ import tempfile
 from ConfigParser import NoOptionError, NoSectionError
 from git import Repo
 import shutil
-from gitflow import GitFlow
+from gitflow import GitFlow, NotInitialized
 
 
 class TestGitFlow(TestCase):
@@ -52,15 +52,6 @@ class TestGitFlow(TestCase):
 
 
     # Configuration
-    def test_default_branchnames(self):
-        repo = self.empty_repo()
-        cfg = GitFlow(repo)
-        self.assertEquals('master', cfg.master())
-        self.assertEquals('develop', cfg.develop())
-        self.assertEquals('hotfix/', cfg.hotfix_prefix())
-        self.assertEquals('release/', cfg.release_prefix())
-        self.assertEquals('support/', cfg.support_prefix())
-
     def test_config_reader(self):
         repo = self.copy_from_fixture('custom_repo')
         gitflow = GitFlow(repo)
@@ -72,31 +63,54 @@ class TestGitFlow(TestCase):
         self.assertEquals('qux', gitflow.get('foo.bar'))
 
     def test_custom_branchnames(self):
-        cfg = GitFlow(Repo('tests/fixtures/custom_repo/dot_git'))
-        self.assertEquals('production', cfg.master())
-        self.assertEquals('master', cfg.develop())
-        self.assertEquals('hf-', cfg.hotfix_prefix())
-        self.assertEquals('rel-', cfg.release_prefix())
-        self.assertEquals('supp-', cfg.support_prefix())
+        repo = self.copy_from_fixture('custom_repo')
+        gitflow = GitFlow(repo)
+        self.assertEquals('production', gitflow.master())
+        self.assertEquals('master', gitflow.develop())
+        self.assertEquals('f-', gitflow.feature_prefix())
+        self.assertEquals('hf-', gitflow.hotfix_prefix())
+        self.assertEquals('rel-', gitflow.release_prefix())
+        self.assertEquals('supp-', gitflow.support_prefix())
 
 
     # git flow init
     def test_gitflow_init_marks_initialized(self):
         repo = self.empty_repo()
         gitflow = GitFlow(repo)
-        self.assertFalse(gitflow.initialized)
+        self.assertFalse(gitflow.is_initialized())
         gitflow.init()
-        self.assertTrue(gitflow.initialized)
+        self.assertTrue(gitflow.is_initialized())
 
-    def test_gitflow_init_initializes(self):
+    def test_gitflow_throws_errors_before_init(self):
         repo = self.empty_repo()
         gitflow = GitFlow(repo)
-        self.assertRaises(NoSectionError,
-                gitflow.repo.config_reader().get, 'gitflow "branch"', 'master')
-        self.assertRaises(NoSectionError,
-                gitflow.repo.config_reader().get, 'gitflow "branch"', 'develop')
+        self.assertRaises(NotInitialized, gitflow.master)
+        self.assertRaises(NotInitialized, gitflow.develop)
+        self.assertRaises(NotInitialized, gitflow.feature_prefix)
+        self.assertRaises(NotInitialized, gitflow.hotfix_prefix)
+        self.assertRaises(NotInitialized, gitflow.release_prefix)
+        self.assertRaises(NotInitialized, gitflow.support_prefix)
+
+    def test_gitflow_init_initializes_default_config(self):
+        repo = self.empty_repo()
+        gitflow = GitFlow(repo)
         gitflow.init()
-        self.assertEquals('master',
-                gitflow.repo.config_reader().get('gitflow "branch"', 'master'))
-        self.assertEquals('develop',
-                gitflow.repo.config_reader().get('gitflow "branch"', 'develop'))
+        self.assertEquals('master', gitflow.master())
+        self.assertEquals('develop', gitflow.develop())
+        self.assertEquals('feature/', gitflow.feature_prefix())
+        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
+        self.assertEquals('release/', gitflow.release_prefix())
+        self.assertEquals('support/', gitflow.support_prefix())
+
+    def test_gitflow_init_with_alternative_config(self):
+        repo = self.empty_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init(master='foo', develop='bar', feature='f-', hotfix='hf-',
+                release='rel-', support='supp-')
+        self.assertEquals('foo', gitflow.master())
+        self.assertEquals('bar', gitflow.develop())
+        self.assertEquals('f-', gitflow.feature_prefix())
+        self.assertEquals('hf-', gitflow.hotfix_prefix())
+        self.assertEquals('rel-', gitflow.release_prefix())
+        self.assertEquals('supp-', gitflow.support_prefix())
+
