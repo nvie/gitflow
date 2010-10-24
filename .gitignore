@@ -6,3 +6,4 @@
 /build
 /dist
 /pip-log.txt
+.coverage
