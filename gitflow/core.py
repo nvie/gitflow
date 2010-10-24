@@ -1,4 +1,3 @@
-from config import Config
 from git import Repo
 from ConfigParser import NoOptionError, NoSectionError, DuplicateSectionError, \
                          MissingSectionHeaderError, ParsingError
@@ -11,7 +10,6 @@ class NotInitialized(Exception):
 class GitFlow(object):
     def __init__(self, repo):
         self.repo = repo
-        self.config = Config(repo)
 
     def init(self,
             master=None, develop=None,
