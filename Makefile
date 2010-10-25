@@ -1,13 +1,13 @@
-all:
+all: cover
 
 clean:
 	find . -name '*.pyc' -exec rm {} \;
 
 test:
-	nosetests
+	nosetests --with-achievements
 
 cover:
-	nosetests --with-coverage3 --cover3-package=gitflow
+	nosetests --with-coverage3 --cover-package=gitflow --with-achievements
 
 dump-requirements:
 	pip freeze -l > .requirements

@@ -7,3 +7,4 @@
 /dist
 /pip-log.txt
 .coverage
+.achievements
