@@ -1,6 +1,17 @@
+from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError
 from ConfigParser import NoOptionError, NoSectionError, DuplicateSectionError, \
                          MissingSectionHeaderError, ParsingError
+
+
+def requires_repo(f):
+    @wraps(f)
+    def _inner(self, *args, **kwargs):
+        if self.repo is None:
+            msg = 'This repo has not yet been initialized for git-flow.'
+            raise NotInitialized(msg)
+        return f(self, *args, **kwargs)
+    return _inner
 
 
 class NotInitialized(Exception):
@@ -81,9 +92,6 @@ class GitFlow(object):
         self._init_develop_branch()
 
     def is_initialized(self):
-        if self.repo is None:
-            return False
-
         return self.is_set('gitflow.branch.master') \
            and self.is_set('gitflow.branch.develop') \
            and self.is_set('gitflow.prefix.feature') \
@@ -108,6 +116,7 @@ class GitFlow(object):
 
         return (section, option)
 
+    @requires_repo
     def get(self, setting, null=False):
         section, option = self._parse_setting(setting)
         try:
@@ -119,6 +128,7 @@ class GitFlow(object):
                 return None
             raise
 
+    @requires_repo
     def set(self, setting, value):
         section, option = self._parse_setting(setting)
         writer = self.repo.config_writer()
@@ -130,10 +140,8 @@ class GitFlow(object):
         return not self.get(setting, null=True) is None
 
 
+    @requires_repo
     def _safe_get(self, setting_name):
-        if self.repo is None:
-            raise NotInitialized('This repo has not yet been initialized.')
-
         try:
             return self.get(setting_name)
         except (NoSectionError, NoOptionError):
@@ -158,11 +166,11 @@ class GitFlow(object):
         return self._safe_get('gitflow.prefix.support')
 
 
+    @requires_repo
     def branch_names(self):
-        if self.repo is None:
-            return []
         return map(lambda h: h.name, self.repo.heads)
 
+    @requires_repo
     def feature_branches(self):
         return [h.name for h in self.repo.heads \
                     if h.name.startswith(self.feature_prefix())]

@@ -84,6 +84,11 @@ class TestGitFlow(TestCase):
 
 
     # Initialization
+    def test_branch_names_fails_in_new_sandbox(self):
+        repo = self.new_sandbox()
+        gitflow = GitFlow(repo)
+        self.assertRaises(NotInitialized, gitflow.branch_names)
+
     def test_empty_repo_has_no_branches(self):
         repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
