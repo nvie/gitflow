@@ -1,0 +1,4 @@
+GitPython==0.3.0-beta2
+async==0.6.1
+gitdb==0.5.1
+nose==0.11.4
