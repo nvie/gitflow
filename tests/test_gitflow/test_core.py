@@ -11,7 +11,11 @@ class TestGitFlow(TestCase):
 
     # Pick your fixture
     def new_sandbox(self):
-        tmp = tempfile.mkdtemp()
+        ram_disk = '/Volumes/RAM_Disk'
+        dir = None
+        if os.path.exists(ram_disk):
+            dir = ram_disk
+        tmp = tempfile.mkdtemp(dir=dir)
         self.addCleanup(shutil.rmtree, tmp)
         return tmp
 
