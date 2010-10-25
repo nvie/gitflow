@@ -9,15 +9,13 @@ from gitflow import GitFlow, NotInitialized
 
 class TestGitFlow(TestCase):
 
-    #
-    # Sandboxing helpers
-    #
+    # Pick your fixture
     def new_sandbox(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp)
         return tmp
 
-    def empty_repo(self):
+    def fresh_git_repo(self):
         """
         This method sets up an temporary, self-destructing empty sandbox.  There
         hasn't been any git flow initialization yet.
@@ -26,7 +24,7 @@ class TestGitFlow(TestCase):
         repo = Repo.init(tmp)
         return repo
 
-    def copy_from_fixture(self, fixture_name):
+    def git_repo_copy_from_fixture(self, fixture_name):
         """
         This method sets up a temporary, self-destructing sandbox and copies
         a given fixture recursively into it.  This is useful for fixtures that
@@ -39,7 +37,7 @@ class TestGitFlow(TestCase):
         cpy = Repo(dest)
         return cpy
 
-    def clone_from_fixture(self, fixture_name):
+    def git_repo_clone_from_fixture(self, fixture_name):
         """
         This method sets up a temporary, self-destructing sandbox, cloned from
         a given fixture.  In contrast to a filesystem copy, a clone always has
@@ -53,7 +51,7 @@ class TestGitFlow(TestCase):
 
     # Configuration
     def test_config_reader(self):
-        repo = self.copy_from_fixture('custom_repo')
+        repo = self.git_repo_copy_from_fixture('custom_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertRaises(NoSectionError, gitflow.get,
@@ -64,7 +62,7 @@ class TestGitFlow(TestCase):
         self.assertEquals('qux', gitflow.get('foo.bar'))
 
     def test_custom_branchnames(self):
-        repo = self.copy_from_fixture('custom_repo')
+        repo = self.git_repo_copy_from_fixture('custom_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertEquals('production', gitflow.master_name())
@@ -77,13 +75,13 @@ class TestGitFlow(TestCase):
 
     # Initialization
     def test_empty_repo_has_no_branches(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertItemsEqual([], gitflow.branch_names())
 
     def test_custom_repo_has_branches(self):
-        repo = self.copy_from_fixture('custom_repo')
+        repo = self.git_repo_copy_from_fixture('custom_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertItemsEqual(['master', 'production'],
@@ -101,14 +99,14 @@ class TestGitFlow(TestCase):
         self.assertTrue(gitflow.is_initialized())
 
     def test_gitflow_init_marks_initialized(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         self.assertFalse(gitflow.is_initialized())
         gitflow.init()
         self.assertTrue(gitflow.is_initialized())
 
     def test_gitflow_throws_errors_before_init(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         self.assertRaises(NotInitialized, gitflow.master_name)
         self.assertRaises(NotInitialized, gitflow.develop_name)
@@ -118,7 +116,7 @@ class TestGitFlow(TestCase):
         self.assertRaises(NotInitialized, gitflow.support_prefix)
 
     def test_gitflow_init_initializes_default_config(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertEquals('master', gitflow.master_name())
@@ -129,7 +127,7 @@ class TestGitFlow(TestCase):
         self.assertEquals('support/', gitflow.support_prefix())
 
     def test_gitflow_init_with_alternative_config(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         gitflow.init(master='foo', develop='bar', feature='f-', hotfix='hf-',
                 release='rel-', support='supp-')
@@ -141,7 +139,7 @@ class TestGitFlow(TestCase):
         self.assertEquals('supp-', gitflow.support_prefix())
 
     def test_gitflow_init_config_with_partly_inited(self):
-        repo = self.copy_from_fixture('partly_inited')
+        repo = self.git_repo_copy_from_fixture('partly_inited')
         gitflow = GitFlow(repo)
         gitflow.init()
 
@@ -156,7 +154,7 @@ class TestGitFlow(TestCase):
         self.assertEquals('support/', gitflow.support_prefix())
 
     def test_gitflow_force_reinit_partly_inited(self):
-        repo = self.copy_from_fixture('partly_inited')
+        repo = self.git_repo_copy_from_fixture('partly_inited')
         gitflow = GitFlow(repo)
         gitflow.init(force_defaults=True)
 
@@ -173,13 +171,13 @@ class TestGitFlow(TestCase):
 
     # git flow feature
     def test_gitflow_empty_repo_has_no_feature_branches(self):
-        repo = self.empty_repo()
+        repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertItemsEqual([], gitflow.feature_branches())
 
     def test_gitflow_sample_repo_has_feature_branches(self):
-        repo = self.copy_from_fixture('sample_repo')
+        repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
         self.assertItemsEqual(['feature/even', 'feature/recursion'],
