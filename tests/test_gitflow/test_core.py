@@ -77,7 +77,6 @@ class TestGitFlow(TestCase):
     def test_empty_repo_has_no_branches(self):
         repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
-        gitflow.init()
         self.assertItemsEqual([], gitflow.branch_names())
 
     def test_custom_repo_has_branches(self):
