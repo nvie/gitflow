@@ -49,6 +49,14 @@ class TestGitFlow(TestCase):
         return clone
 
 
+    # Helper methods
+    def all_commits(self, repo):
+        s = set([])
+        for h in repo.heads:
+            s |= set(repo.iter_commits(h))
+        return s
+
+
     # Configuration
     def test_config_reader(self):
         repo = self.git_repo_copy_from_fixture('custom_repo')
@@ -154,10 +162,29 @@ class TestGitFlow(TestCase):
         self.assertEquals('release/', gitflow.release_prefix())
         self.assertEquals('support/', gitflow.support_prefix())
 
-    def test_gitflow_init_creates_initial_commit(self):
-        repo = self.fresh_git_repo()
+    def test_gitflow_init_creates_no_extra_commits(self):
+        repo = self.git_repo_copy_from_fixture('sample_repo')
+        all_commits_before_init = self.all_commits(repo)
         gitflow = GitFlow(repo)
         gitflow.init()
+        all_commits_after_init = self.all_commits(repo)
+        self.assertEquals(all_commits_before_init, all_commits_after_init)
+
+    def test_gitflow_init_creates_no_extra_branches(self):
+        repo = self.git_repo_copy_from_fixture('sample_repo')
+        heads_before_init = [h.name for h in repo.heads]
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        heads_after_init = [h.name for h in repo.heads]
+        self.assertItemsEqual(heads_before_init, heads_after_init)
+
+    def test_gitflow_init_creates_initial_commit(self):
+        repo = self.fresh_git_repo()
+        all_commits_before_init = self.all_commits(repo)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        all_commits_after_init = self.all_commits(repo)
+        self.assertNotEquals(all_commits_before_init, all_commits_after_init)
         self.assertEquals('Initial commit', repo.heads.master.commit.message)
 
     def test_gitflow_init_creates_branches(self):

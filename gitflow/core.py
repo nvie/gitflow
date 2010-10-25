@@ -16,6 +16,12 @@ class GitFlow(object):
         else:
             self.working_dir = working_dir
 
+        self.git = Git(self.working_dir)
+        try:
+            self.repo = Repo(self.working_dir)
+        except InvalidGitRepositoryError:
+            pass
+
     def _init_config(self,
             master=None, develop=None,
             feature=None, release=None, hotfix=None,
@@ -59,15 +65,15 @@ class GitFlow(object):
             feature=None, release=None, hotfix=None,
             support=None, force_defaults=False):
 
-        self.git = Git(self.working_dir)
-        try:
-            self.repo = Repo(self.working_dir)
-        except InvalidGitRepositoryError:
-            # Git repo is not yet initialized
-            self.git.init()
+        if self.repo is None:
+            try:
+                self.repo = Repo(self.working_dir)
+            except InvalidGitRepositoryError:
+                # Git repo is not yet initialized
+                self.git.init()
 
-            # Try it again with an inited git repo
-            self.repo = Repo(self.working_dir)
+                # Try it again with an inited git repo
+                self.repo = Repo(self.working_dir)
 
         self._init_config(master, develop, feature, release, hotfix, support,
                 force_defaults)
@@ -128,7 +134,10 @@ class GitFlow(object):
         if self.repo is None:
             raise NotInitialized('This repo has not yet been initialized.')
 
-        return self.get(setting_name)
+        try:
+            return self.get(setting_name)
+        except (NoSectionError, NoOptionError):
+            raise NotInitialized('This repo has not yet been initialized.')
 
     def master_name(self):
         return self._safe_get('gitflow.branch.master')
