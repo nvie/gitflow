@@ -1,2 +1,2 @@
-let g:PyUnitCmd = 'workon gitflow && nosetests --with-machineout -q'
+let g:PyUnitCmd = 'nosetests --with-machineout -q'
 let g:PyUnitTestsRoot = 'tests'
