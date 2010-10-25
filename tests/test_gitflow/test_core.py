@@ -153,6 +153,19 @@ class TestGitFlow(TestCase):
         self.assertEquals('release/', gitflow.release_prefix())
         self.assertEquals('support/', gitflow.support_prefix())
 
+    def test_gitflow_init_creates_initial_commit(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertEquals('Initial commit', repo.heads.master.commit.message)
+
+    def test_gitflow_init_creates_branches(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertItemsEqual(['master', 'develop'],
+                gitflow.branch_names())
+
     def test_gitflow_force_reinit_partly_inited(self):
         repo = self.git_repo_copy_from_fixture('partly_inited')
         gitflow = GitFlow(repo)

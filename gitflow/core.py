@@ -1,4 +1,4 @@
-from git import Git, Repo, GitCommandError, InvalidGitRepositoryError
+from git import Git, Repo, InvalidGitRepositoryError
 from ConfigParser import NoOptionError, NoSectionError, DuplicateSectionError, \
                          MissingSectionHeaderError, ParsingError
 
@@ -35,22 +35,24 @@ class GitFlow(object):
                 if force_defaults or not self.is_set(setting):
                     self.set(setting, default)
 
-    def _init_branches(self):
-        master_found, develop_found = False, False
-        branches = self.repo.heads
-        master_name = self.master_name()
+    def _init_initial_commit(self):
+        master = self.master_name()
+        try:
+            self.repo.heads[master]
+        except:
+            # Only if 'master' branch does not exist
+            c = self.repo.index.commit('Initial commit', head=False)
+            self.repo.create_head(master, c)
+
+    def _init_develop_branch(self):
+        # NOTE: This function assumes master already exists
         develop_name = self.develop_name()
-        for b in branches:
-            if b.name == master_name:
-                master_found = True
-            elif b.name == develop_name:
-                develop_found = True
-        if not master_found:
-            master_head = self.repo.create_head('master')
-        else:
-            master_head = self.repo.heads.master
-        if not develop_found:
-            self.repo.create_head('develop', commit=master_head.commit)
+        for head in self.repo.heads:
+            if head.name == develop_name:
+                return    # Nothing to do
+
+        # Else, if there's no develop yet, base it off of the current master
+        self.repo.create_head(self.develop_name(), self.master_name())
 
     def init(self,
             master=None, develop=None,
@@ -69,6 +71,8 @@ class GitFlow(object):
 
         self._init_config(master, develop, feature, release, hotfix, support,
                 force_defaults)
+        self._init_initial_commit()
+        self._init_develop_branch()
 
     def is_initialized(self):
         if self.repo is None:
@@ -128,7 +132,7 @@ class GitFlow(object):
 
         try:
             return self.get(setting_name)
-        except NoSectionError, NoOptionError:
+        except (NoSectionError, NoOptionError):
             raise NotInitialized('This repo has not yet been initialized.')
 
     def master_name(self):
@@ -151,6 +155,8 @@ class GitFlow(object):
 
 
     def branch_names(self):
+        if self.repo is None:
+            return []
         return map(lambda h: h.name, self.repo.heads)
 
     def feature_branches(self):
