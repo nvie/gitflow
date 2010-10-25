@@ -54,6 +54,8 @@ class TestGitFlow(TestCase):
         repo = self.git_repo_copy_from_fixture('custom_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
+        self.assertRaises(ValueError, gitflow.get,
+                'invalid_setting_since_this_has_no_dot')
         self.assertRaises(NoSectionError, gitflow.get,
                 'nonexisting.nonexisting')
         self.assertRaises(NoSectionError, gitflow.get,

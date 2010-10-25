@@ -102,7 +102,7 @@ class GitFlow(object):
 
         return (section, option)
 
-    def get(self, setting, default=None, null=False):
+    def get(self, setting, null=False):
         section, option = self._parse_setting(setting)
         try:
             setting = self.repo.config_reader().get(section, option)
@@ -111,8 +111,6 @@ class GitFlow(object):
                 MissingSectionHeaderError, ParsingError):
             if null:
                 return None
-            elif not default is None:
-                return default
             raise
 
     def set(self, setting, value):
@@ -130,10 +128,7 @@ class GitFlow(object):
         if self.repo is None:
             raise NotInitialized('This repo has not yet been initialized.')
 
-        try:
-            return self.get(setting_name)
-        except (NoSectionError, NoOptionError):
-            raise NotInitialized('This repo has not yet been initialized.')
+        return self.get(setting_name)
 
     def master_name(self):
         return self._safe_get('gitflow.branch.master')
