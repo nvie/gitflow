@@ -17,6 +17,9 @@ def requires_repo(f):
 class NotInitialized(Exception):
     pass
 
+class BranchExists(Exception):
+    pass
+
 
 class GitFlow(object):
     def __init__(self, working_dir='.'):
@@ -166,11 +169,28 @@ class GitFlow(object):
         return self._safe_get('gitflow.prefix.support')
 
 
+    def branch_exists(self, name):
+        for b in self.repo.branches:
+            if b.name == name:
+                return True
+        return False
+
     @requires_repo
     def branch_names(self):
-        return map(lambda h: h.name, self.repo.heads)
+        return map(lambda h: h.name, self.repo.branches)
+
 
     @requires_repo
     def feature_branches(self):
         return [h.name for h in self.repo.heads \
                     if h.name.startswith(self.feature_prefix())]
+    @requires_repo
+    def new_feature_branch(self, name, base=None):
+        full_name = self.feature_prefix() + name
+        if self.branch_exists(full_name):
+            raise BranchExists('Branch %s already exists.' % full_name)
+
+        if base is None:
+            base = self.develop_name()
+        fb = self.repo.create_head(full_name, base)
+        return fb

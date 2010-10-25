@@ -4,7 +4,7 @@ import tempfile
 from ConfigParser import NoOptionError, NoSectionError
 from git import Repo
 import shutil
-from gitflow import GitFlow, NotInitialized
+from gitflow import GitFlow, NotInitialized, BranchExists
 
 
 class TestGitFlow(TestCase):
@@ -226,6 +226,32 @@ class TestGitFlow(TestCase):
         repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
-        self.assertItemsEqual(['feature/even', 'feature/recursion'],
-                gitflow.feature_branches())
+        self.assertItemsEqual(['feature/even', 'feature/recursion'], gitflow.feature_branches())
+
+    def test_gitflow_create_feature_branch(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        gitflow.new_feature_branch('foo')
+        branches = gitflow.feature_branches()
+        self.assertIn('feature/foo', branches)
+
+    def test_gitflow_cant_create_existing_feature_branch(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        gitflow.new_feature_branch('foo')
+        self.assertRaises(BranchExists, gitflow.new_feature_branch, 'foo')
+
+    def test_gitflow_create_feature_from_alt_base(self):
+        repo = self.git_repo_copy_from_fixture('sample_repo')
+        gitflow = GitFlow(repo)
+        gitflow.init()
+
+        existing_tip = repo.commit('feature/even')
+        new_branch = gitflow.new_feature_branch('foo', 'feature/even')
+        branches = gitflow.feature_branches()
+        self.assertIn('feature/even', branches)
+        self.assertIn('feature/foo', branches)
+        self.assertEquals(repo.commit('feature/even'), new_branch.commit)
 
