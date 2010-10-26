@@ -2,10 +2,9 @@ from unittest2 import TestCase, skip
 import os
 import tempfile
 from ConfigParser import NoOptionError, NoSectionError
-from git import Repo
+from git import Repo, GitCommandError
 import shutil
-from gitflow import GitFlow, NotInitialized, BranchExists, InvalidOperation, \
-        DirtyWorkingTreeError
+from gitflow import GitFlow, NotInitialized, BranchExists, InvalidOperation
 
 
 class TestGitFlow(TestCase):
@@ -309,8 +308,8 @@ class TestGitFlow(TestCase):
     def test_gitflow_cannot_create_feature_if_this_leads_to_data_loss(self):
         repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
         gitflow = GitFlow(repo)
-        self.assertRaisesRegexp(DirtyWorkingTreeError,
-                "Cannot merge. Entry .* would be overwritten",
+        self.assertRaisesRegexp(GitCommandError,
+                "Entry .* would be overwritten by merge.",
                 gitflow.new_feature_branch, 'foo')
 
     def test_gitflow_delete_feature(self):
