@@ -277,3 +277,11 @@ class TestGitFlow(TestCase):
         self.assertIn('feature/foo', branches)
         self.assertEquals(repo.commit('feature/even'), new_branch.commit)
 
+    def test_gitflow_create_feature_changes_active_branch(self):
+        repo = self.git_repo_copy_from_fixture('sample_repo')
+        gitflow = GitFlow(repo)
+
+        self.assertEquals('feature/recursion', repo.active_branch.name)
+        gitflow.new_feature_branch('foo')
+        self.assertEquals('feature/foo', repo.active_branch.name)
+

@@ -202,4 +202,5 @@ class GitFlow(object):
         if base is None:
             base = self.develop_name()
         fb = self.repo.create_head(full_name, base)
+        fb.checkout()
         return fb
