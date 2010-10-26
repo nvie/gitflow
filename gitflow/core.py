@@ -20,6 +20,9 @@ class NotInitialized(Exception):
 class BranchExists(Exception):
     pass
 
+class DirtyWorkingTreeError(Exception):
+    pass
+
 class InvalidOperation(Exception):
     pass
 
@@ -209,6 +212,10 @@ class GitFlow(object):
         full_name = self.feature_prefix() + name
         if self.branch_exists(full_name):
             raise BranchExists('Branch %s already exists.' % full_name)
+
+        if self.is_dirty():
+            raise DirtyWorkingTreeError("Cannot merge. Entry '%s' would be "
+                    "overwritten by merge." % full_name)
 
         if base is None:
             base = self.develop_name()

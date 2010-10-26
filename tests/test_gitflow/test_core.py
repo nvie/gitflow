@@ -4,7 +4,8 @@ import tempfile
 from ConfigParser import NoOptionError, NoSectionError
 from git import Repo
 import shutil
-from gitflow import GitFlow, NotInitialized, BranchExists, InvalidOperation
+from gitflow import GitFlow, NotInitialized, BranchExists, InvalidOperation, \
+        DirtyWorkingTreeError
 
 
 class TestGitFlow(TestCase):
@@ -304,6 +305,13 @@ class TestGitFlow(TestCase):
         self.assertEquals('feature/recursion', repo.active_branch.name)
         gitflow.new_feature_branch('foo')
         self.assertEquals('feature/foo', repo.active_branch.name)
+
+    def test_gitflow_cannot_create_feature_if_this_leads_to_data_loss(self):
+        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
+        gitflow = GitFlow(repo)
+        self.assertRaisesRegexp(DirtyWorkingTreeError,
+                "Cannot merge. Entry .* would be overwritten",
+                gitflow.new_feature_branch, 'foo')
 
     def test_gitflow_delete_feature(self):
         repo = self.git_repo_copy_from_fixture('sample_repo')
