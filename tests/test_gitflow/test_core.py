@@ -338,3 +338,25 @@ class TestGitFlow(TestCase):
         self.assertRaisesRegexp(InvalidOperation, 'Branch .* not found',
                 gitflow.delete_feature_branch, 'nonexisting')
 
+
+    """
+    Use case:
+
+    $ git flow init
+    $ git flow feature start foo
+    $ git flow status
+      develop: 4826bdf
+      master: 4826bdf
+    * feature/foo: 7c8928a
+    $ git commit -m 'foo'
+    $ git commit -m 'bar'
+    $ git flow feature start bar
+    $ git commit -m 'qux'
+    $ git flow feature finish foo
+    $ git flow undo        # new!
+    $ git flow feature finish bar
+    There were merge conflicts, resolve them now!
+    $ git flow abort       # new!
+
+    """
+
