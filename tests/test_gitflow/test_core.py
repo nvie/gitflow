@@ -124,6 +124,39 @@ class TestGitFlow(TestCase):
         self.assertTrue(gitflow.is_dirty())
 
 
+    def test_gitflow_cannot_get_status_on_empty_sandbox(self):
+        repo = self.new_sandbox()
+        gitflow = GitFlow(repo)
+        self.assertRaises(NotInitialized, gitflow.status)
+
+    def test_gitflow_status_on_fresh_repo(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        self.assertEquals([], gitflow.status())
+
+    def test_gitflow_status_on_inited_repo(self):
+        repo = self.fresh_git_repo()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+
+        # TODO: Make this test case compare to a *fixed* sha, not a calculated one!
+        sha = gitflow.repo.branches['develop'].commit.hexsha
+        self.assertItemsEqual([
+                ('master', sha, True),
+                ('develop', sha, False),
+            ], gitflow.status())
+
+    def test_gitflow_status_on_sample_repo(self):
+        repo = self.git_repo_copy_from_fixture('sample_repo')
+        gitflow = GitFlow(repo)
+        self.assertItemsEqual([
+                ('master', '296586bb164c946cad10d37e82570f60e6348df9', False),
+                ('develop', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False),
+                ('feature/recursion', '54d59c872469c7bf34d540d2fb3128a97502b73f', True),
+                ('feature/even', 'e56be18dada9e81ca7969760ddea357b0c4c9412', False),
+            ], gitflow.status())
+
+
     # git flow init
     def test_gitflow_init_inits_underlying_git_repo(self):
         empty_dir = self.new_sandbox()

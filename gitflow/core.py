@@ -192,6 +192,14 @@ class GitFlow(object):
 
 
     @requires_repo
+    def status(self):
+        result = []
+        for b in self.repo.branches:
+            tup = (b.name, b.commit.hexsha, b == self.repo.active_branch)
+            result.append(tup)
+        return result
+
+    @requires_repo
     def feature_branches(self):
         return [h.name for h in self.repo.heads \
                     if h.name.startswith(self.feature_prefix())]
