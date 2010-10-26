@@ -247,7 +247,6 @@ class TestGitFlow(TestCase):
     def test_gitflow_sample_repo_has_features(self):
         repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(repo)
-        gitflow.init()
         self.assertItemsEqual(['feature/even', 'feature/recursion'],
                 gitflow.feature_branches())
 
