@@ -169,6 +169,14 @@ class GitFlow(object):
         return self._safe_get('gitflow.prefix.support')
 
 
+    @requires_repo
+    def is_dirty(self):
+        """
+        Returns whether or not the current working directory contains
+        uncommitted changes.
+        """
+        return self.repo.is_dirty()
+
     def branch_exists(self, name):
         for b in self.repo.branches:
             if b.name == name:

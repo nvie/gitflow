@@ -106,6 +106,19 @@ class TestGitFlow(TestCase):
                 gitflow.branch_names())
 
 
+    # Sanity checking
+    def test_new_repo_is_not_dirty(self):
+        repo = self.new_sandbox()
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertFalse(gitflow.is_dirty())
+
+    def test_existing_repo_is_not_dirty(self):
+        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
+        gitflow = GitFlow(repo)
+        self.assertTrue(gitflow.is_dirty())
+
+
     # git flow init
     def test_gitflow_init_inits_underlying_git_repo(self):
         empty_dir = self.new_sandbox()
