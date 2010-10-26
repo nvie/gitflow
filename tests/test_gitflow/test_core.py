@@ -11,6 +11,11 @@ class TestGitFlow(TestCase):
 
     # Pick your fixture
     def new_sandbox(self):
+        """
+        This method sets up a temporary, self-destructing empty directory, to be
+        used as a sandbox.  Files created/modified outside of the sandbox aren't
+        cleaned up by this method.
+        """
         ram_disk = '/Volumes/RAM_Disk'
         dir = None
         if os.path.exists(ram_disk):
@@ -21,7 +26,7 @@ class TestGitFlow(TestCase):
 
     def fresh_git_repo(self):
         """
-        This method sets up an temporary, self-destructing empty sandbox.  There
+        This method sets up a temporary, self-destructing empty sandbox.  There
         hasn't been any git flow initialization yet.
         """
         tmp = self.new_sandbox()
