@@ -134,18 +134,6 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(repo)
         self.assertEquals([], gitflow.status())
 
-    def test_gitflow_status_on_inited_repo(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
-        gitflow.init()
-
-        # TODO: Make this test case compare to a *fixed* sha, not a calculated one!
-        sha = gitflow.repo.branches['develop'].commit.hexsha
-        self.assertItemsEqual([
-                ('master', sha, True),
-                ('develop', sha, False),
-            ], gitflow.status())
-
     def test_gitflow_status_on_sample_repo(self):
         repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(repo)
