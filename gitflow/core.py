@@ -61,7 +61,7 @@ class GitFlow(object):
     def _init_initial_commit(self):
         master = self.master_name()
         try:
-            self.repo.heads[master]
+            self.repo.branches[master]
         except:
             # Only if 'master' branch does not exist
             c = self.repo.index.commit('Initial commit', head=False)
@@ -70,8 +70,8 @@ class GitFlow(object):
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
         develop_name = self.develop_name()
-        for head in self.repo.heads:
-            if head.name == develop_name:
+        for branch in self.repo.branches:
+            if branch.name == develop_name:
                 return    # Nothing to do
 
         # Else, if there's no develop yet, base it off of the current master
@@ -201,8 +201,8 @@ class GitFlow(object):
 
     @requires_repo
     def feature_branches(self):
-        return [h.name for h in self.repo.heads \
-                    if h.name.startswith(self.feature_prefix())]
+        return [b.name for b in self.repo.branches \
+                    if b.name.startswith(self.feature_prefix())]
 
     @requires_repo
     def new_feature_branch(self, name, base=None):
