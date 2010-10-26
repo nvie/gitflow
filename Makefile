@@ -4,10 +4,10 @@ clean:
 	find . -name '*.pyc' -exec rm {} \;
 
 test:
-	nosetests --with-achievements
+	nosetests
 
 cover:
-	nosetests --with-coverage3 --cover-package=gitflow --with-achievements
+	nosetests --with-coverage3 --cover-package=gitflow
 
 dump-requirements:
 	pip freeze -l > .requirements
