@@ -12,9 +12,9 @@ class TestGitFlow(TestCase):
     # Pick your fixture
     def new_sandbox(self):
         """
-        This method sets up a temporary, self-destructing empty directory, to be
-        used as a sandbox.  Files created/modified outside of the sandbox aren't
-        cleaned up by this method.
+        This method sets up a temporary, self-destructing empty directory, to
+        be used as a sandbox.  Files created/modified outside of the sandbox
+        aren't cleaned up by this method.
         """
         ram_disk = '/Volumes/RAM_Disk'
         dir = None
@@ -248,7 +248,8 @@ class TestGitFlow(TestCase):
         repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(repo)
         gitflow.init()
-        self.assertItemsEqual(['feature/even', 'feature/recursion'], gitflow.feature_branches())
+        self.assertItemsEqual(['feature/even', 'feature/recursion'],
+                gitflow.feature_branches())
 
     def test_gitflow_create_feature_branch(self):
         repo = self.fresh_git_repo()
@@ -270,7 +271,6 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(repo)
         gitflow.init()
 
-        existing_tip = repo.commit('feature/even')
         new_branch = gitflow.new_feature_branch('foo', 'feature/even')
         branches = gitflow.feature_branches()
         self.assertIn('feature/even', branches)

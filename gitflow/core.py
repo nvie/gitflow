@@ -1,7 +1,7 @@
 from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError
-from ConfigParser import NoOptionError, NoSectionError, DuplicateSectionError, \
-                         MissingSectionHeaderError, ParsingError
+from ConfigParser import NoOptionError, NoSectionError, \
+        DuplicateSectionError, MissingSectionHeaderError, ParsingError
 
 
 def requires_repo(f):
@@ -192,6 +192,7 @@ class GitFlow(object):
     def feature_branches(self):
         return [h.name for h in self.repo.heads \
                     if h.name.startswith(self.feature_prefix())]
+
     @requires_repo
     def new_feature_branch(self, name, base=None):
         full_name = self.feature_prefix() + name
