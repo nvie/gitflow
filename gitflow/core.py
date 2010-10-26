@@ -20,6 +20,9 @@ class NotInitialized(Exception):
 class BranchExists(Exception):
     pass
 
+class InvalidOperation(Exception):
+    pass
+
 
 class GitFlow(object):
     def __init__(self, working_dir='.'):
@@ -204,3 +207,16 @@ class GitFlow(object):
         fb = self.repo.create_head(full_name, base)
         fb.checkout()
         return fb
+    @requires_repo
+    def delete_feature_branch(self, name):
+        full_name = self.feature_prefix() + name
+        if not full_name in self.feature_branches():
+            raise InvalidOperation("Branch '%s' not found." % full_name)
+
+        if self.repo.active_branch.name == full_name:
+            raise InvalidOperation("Cannot delete the branch '%s' which you "
+                    "are currently on." % full_name)
+
+        self.repo.delete_head(full_name, force=True)
+
+
