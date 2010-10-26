@@ -279,7 +279,7 @@ class TestGitFlow(TestCase):
         branches = gitflow.feature_branches()
         self.assertIn('feature/foo', branches)
 
-    def test_gitflow_cant_create_existing_feature(self):
+    def test_gitflow_cannot_create_existing_feature(self):
         repo = self.fresh_git_repo()
         gitflow = GitFlow(repo)
         gitflow.init()
