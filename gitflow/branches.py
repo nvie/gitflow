@@ -1,11 +1,15 @@
 class Branch(object):
-    __slots__ = ('prefix', 'name', 'fullname')
+    __slots__ = ('prefix', 'name', 'shortname')
 
-    def __init__(self, name, prefix=None):
-        self.name = name
+    def __init__(self, shortname, prefix=None):
+        self.shortname = shortname
         if not prefix is None:
             self.prefix = prefix
-        self.fullname = self.prefix + name
+        self.name = self.prefix + shortname
+
+    def __str__(self):
+        return '<%s.%s "%s">' % (self.__class__.__module__,
+                self.__class__.__name__, self.name)
 
 
 class FeatureBranch(Branch):
