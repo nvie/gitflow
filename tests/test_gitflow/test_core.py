@@ -6,6 +6,7 @@ from git import Repo, GitCommandError
 import shutil
 from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
 from gitflow.branches import Branch
+from helpers import sandboxed, sandboxed_git_repo
 
 
 class TestGitFlow(TestCase):
@@ -25,15 +26,6 @@ class TestGitFlow(TestCase):
         self.addCleanup(shutil.rmtree, tmp)
         return tmp
 
-    def fresh_git_repo(self):
-        """
-        This method sets up a temporary, self-destructing empty sandbox.  There
-        hasn't been any git flow initialization yet.
-        """
-        tmp = self.new_sandbox()
-        repo = Repo.init(tmp)
-        return repo
-
     def git_repo_copy_from_fixture(self, fixture_name):
         """
         This method sets up a temporary, self-destructing sandbox and copies
@@ -47,6 +39,7 @@ class TestGitFlow(TestCase):
         cpy = Repo(dest)
         return cpy
 
+    @sandboxed
     def git_repo_clone_from_fixture(self, fixture_name):
         """
         This method sets up a temporary, self-destructing sandbox, cloned from
@@ -99,9 +92,9 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(repo)
         self.assertRaises(NotInitialized, gitflow.branch_names)
 
+    @sandboxed_git_repo
     def test_empty_repo_has_no_branches(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertItemsEqual([], gitflow.branch_names())
 
     def test_custom_repo_has_branches(self):
@@ -125,14 +118,14 @@ class TestGitFlow(TestCase):
         self.assertTrue(gitflow.is_dirty())
 
 
+    @sandboxed
     def test_gitflow_cannot_get_status_on_empty_sandbox(self):
-        repo = self.new_sandbox()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.sandbox)
         self.assertRaises(NotInitialized, gitflow.status)
 
+    @sandboxed_git_repo
     def test_gitflow_status_on_fresh_repo(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertEquals([], gitflow.status())
 
     def test_gitflow_status_on_sample_repo(self):
@@ -156,16 +149,16 @@ class TestGitFlow(TestCase):
         self.assertTrue(os.path.exists(dot_git_dir))
         self.assertTrue(gitflow.is_initialized())
 
+    @sandboxed_git_repo
     def test_gitflow_init_marks_initialized(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertFalse(gitflow.is_initialized())
         gitflow.init()
         self.assertTrue(gitflow.is_initialized())
 
+    @sandboxed_git_repo
     def test_gitflow_throws_errors_before_init(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertRaises(NotInitialized, gitflow.master_name)
         self.assertRaises(NotInitialized, gitflow.develop_name)
         self.assertRaises(NotInitialized, gitflow.feature_prefix)
@@ -173,9 +166,9 @@ class TestGitFlow(TestCase):
         self.assertRaises(NotInitialized, gitflow.release_prefix)
         self.assertRaises(NotInitialized, gitflow.support_prefix)
 
+    @sandboxed_git_repo
     def test_gitflow_init_initializes_default_config(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('develop', gitflow.develop_name())
@@ -184,9 +177,9 @@ class TestGitFlow(TestCase):
         self.assertEquals('release/', gitflow.release_prefix())
         self.assertEquals('support/', gitflow.support_prefix())
 
+    @sandboxed_git_repo
     def test_gitflow_init_with_alternative_config(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init(master='foo', develop='bar', feature='f-', hotfix='hf-',
                 release='rel-', support='supp-')
         self.assertEquals('foo', gitflow.master_name())
@@ -227,25 +220,25 @@ class TestGitFlow(TestCase):
         heads_after_init = [h.name for h in repo.heads]
         self.assertItemsEqual(heads_before_init, heads_after_init)
 
+    @sandboxed_git_repo
     def test_gitflow_init_creates_initial_commit(self):
-        repo = self.fresh_git_repo()
-        all_commits_before_init = self.all_commits(repo)
-        gitflow = GitFlow(repo)
+        all_commits_before_init = self.all_commits(self.repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
-        all_commits_after_init = self.all_commits(repo)
+        all_commits_after_init = self.all_commits(self.repo)
         self.assertNotEquals(all_commits_before_init, all_commits_after_init)
-        self.assertEquals('Initial commit', repo.heads.master.commit.message)
+        self.assertEquals('Initial commit', self.repo.heads.master.commit.message)
 
+    @sandboxed_git_repo
     def test_gitflow_init_creates_branches(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertItemsEqual(['master', 'develop'],
                 gitflow.branch_names())
 
     def test_gitflow_force_reinit_partly_inited(self):
-        repo = self.git_repo_copy_from_fixture('partly_inited')
-        gitflow = GitFlow(repo)
+        self.repo = self.git_repo_copy_from_fixture('partly_inited')
+        gitflow = GitFlow(self.repo)
         gitflow.init(force_defaults=True)
 
         # Implicit defaults
@@ -279,29 +272,29 @@ class TestGitFlow(TestCase):
 
 
     # git flow feature
+    @sandboxed_git_repo
     def test_gitflow_empty_repo_has_no_features(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertItemsEqual([], gitflow.feature_branches())
 
     def test_gitflow_sample_repo_has_features(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        self.repo = self.git_repo_copy_from_fixture('sample_repo')
+        gitflow = GitFlow(self.repo)
         self.assertItemsEqual(['feature/even', 'feature/recursion'],
                 gitflow.feature_branches())
 
+    @sandboxed_git_repo
     def test_gitflow_create_feature_branch(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         gitflow.new_feature_branch('foo')
         branches = gitflow.feature_branches()
         self.assertIn('feature/foo', branches)
 
+    @sandboxed_git_repo
     def test_gitflow_cannot_create_existing_feature(self):
-        repo = self.fresh_git_repo()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         gitflow.new_feature_branch('foo')
         self.assertRaises(BranchExists, gitflow.new_feature_branch, 'foo')
