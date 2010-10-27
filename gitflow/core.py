@@ -1,7 +1,6 @@
 from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError
-from ConfigParser import NoOptionError, NoSectionError, \
-        DuplicateSectionError, MissingSectionHeaderError, ParsingError
+from ConfigParser import NoOptionError, NoSectionError
 
 
 def requires_repo(f):
@@ -126,10 +125,9 @@ class GitFlow(object):
     def get(self, setting, null=False):
         section, option = self._parse_setting(setting)
         try:
-            setting = self.repo.config_reader().get(section, option)
+            setting = self.repo.config_reader().get_value(section, option)
             return setting
-        except (NoSectionError, DuplicateSectionError, NoOptionError,
-                MissingSectionHeaderError, ParsingError):
+        except Exception:
             if null:
                 return None
             raise
@@ -137,10 +135,7 @@ class GitFlow(object):
     @requires_repo
     def set(self, setting, value):
         section, option = self._parse_setting(setting)
-        writer = self.repo.config_writer()
-        if not section in writer.sections():
-            writer.add_section(section)
-        writer.set(section, option, value)
+        self.repo.config_writer().set_value(section, option, value)
 
     def is_set(self, setting):
         return not self.get(setting, null=True) is None
