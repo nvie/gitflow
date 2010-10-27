@@ -2,6 +2,8 @@ from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError
 from ConfigParser import NoOptionError, NoSectionError, \
         DuplicateSectionError, MissingSectionHeaderError, ParsingError
+from gitflow.branches import Branch
+from gitflow.util import itersubclasses
 
 
 def requires_repo(f):
@@ -25,6 +27,13 @@ class InvalidOperation(Exception):
 
 
 class GitFlow(object):
+    def _discover_branch_types(self):
+        types = {}
+        for cls in itersubclasses(Branch):
+            types[cls.identifier] = cls
+        return types
+
+
     def __init__(self, working_dir='.'):
         # Allow Repos to be passed in instead of strings
         self.repo = None
@@ -38,6 +47,8 @@ class GitFlow(object):
             self.repo = Repo(self.working_dir)
         except InvalidGitRepositoryError:
             pass
+
+        self.branch_types = self._discover_branch_types()
 
     def _init_config(self,
             master=None, develop=None,

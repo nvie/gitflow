@@ -4,7 +4,8 @@ import tempfile
 from ConfigParser import NoOptionError, NoSectionError
 from git import Repo, GitCommandError
 import shutil
-from gitflow import GitFlow, NotInitialized, BranchExists, InvalidOperation
+from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
+from gitflow.branches import Branch
 
 
 class TestGitFlow(TestCase):
@@ -256,6 +257,25 @@ class TestGitFlow(TestCase):
         # Explicitly forced back to defaults
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('feature/', gitflow.feature_prefix())
+
+
+    # branch type detection
+    def test_detect_branch_types(self):
+        gitflow = GitFlow()
+
+        # The types that "ship" with git-flow
+        self.assertIn('feature', gitflow.branch_types)
+        self.assertIn('release', gitflow.branch_types)
+        self.assertIn('hotfix', gitflow.branch_types)
+        self.assertIn('support', gitflow.branch_types)
+
+    def test_detect_custom_branch_types(self):
+        # Declare a custom branch type inline
+        class FooBar(Branch):
+            identifier = 'foobar'
+
+        gitflow = GitFlow()
+        self.assertIn('foobar', gitflow.branch_types)
 
 
     # git flow feature
