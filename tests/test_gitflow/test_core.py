@@ -6,7 +6,7 @@ from git import Repo, GitCommandError
 import shutil
 from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
 from gitflow.branches import Branch
-from helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
+from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
 
 
 class TestGitFlow(TestCase):

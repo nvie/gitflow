@@ -1,7 +1,7 @@
 from unittest2 import TestCase, skip
 from gitflow.core import GitFlow
 from gitflow.branches import Branch
-from helpers import sandboxed_git_repo
+from tests.helpers import sandboxed_git_repo
 
 
 class FooBranch(Branch):
@@ -31,5 +31,16 @@ class TestBranch(TestCase):
 
     def test_branch_describes_itself(self):
         fb = FooBranch('foo')
-        self.assertEquals('<test_branches.FooBranch "xyz/foo">', str(fb))
+        self.assertEquals('<tests.test_gitflow.test_branches.FooBranch "xyz/foo">', str(fb))
+
+
+
+class FeatureBranch(TestCase):
+    @skip
+    @sandboxed_git_repo
+    def test_feature_branch(self):
+        gitflow = GitFlow()
+        fb = FeatureBranch('foo')
+        self.assertEquals('<gitflow.branches.FeatureBranch "feature/foo">',
+                str(fb))
 
