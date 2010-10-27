@@ -1,8 +1,7 @@
 class Branch(object):
-    __slots__ = ('gitflow', 'prefix', 'name', 'fullname')
+    __slots__ = ('prefix', 'name', 'fullname')
 
-    def __init__(self, gitflow, name, prefix=None):
-        self.gitflow = gitflow
+    def __init__(self, name, prefix=None):
         self.name = name
         if not prefix is None:
             self.prefix = prefix
