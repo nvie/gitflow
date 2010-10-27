@@ -305,11 +305,21 @@ class TestGitFlow(TestCase):
         gitflow.new_feature_branch('foo')
         self.assertEquals('feature/foo', repo.active_branch.name)
 
-    def test_gitflow_cannot_create_feature_if_this_leads_to_data_loss(self):
+    def test_gitflow_create_feature_changes_active_branch_even_if_dirty_but_without_conflicts(self):
+        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
+        gitflow = GitFlow(repo)
+        # TODO: This should really be something like
+        # repo.head.reset(paths=['odd.py'])
+        repo.git.reset('-q', 'HEAD', '--', 'odd.py')
+        repo.git.checkout('odd.py')
+        gitflow.new_feature_branch('foo')
+        self.assertIn('feature/foo', gitflow.feature_branches())
+
+    def test_gitflow_cannot_create_feature_if_local_changes_would_be_overwritten(self):
         repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
         gitflow = GitFlow(repo)
         self.assertRaisesRegexp(GitCommandError,
-                "Entry .* would be overwritten by merge.",
+                "Your local changes to the following files would be overwritten",
                 gitflow.new_feature_branch, 'foo')
 
     def test_gitflow_delete_feature(self):
