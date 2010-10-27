@@ -6,51 +6,10 @@ from git import Repo, GitCommandError
 import shutil
 from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
 from gitflow.branches import Branch
-from helpers import sandboxed, sandboxed_git_repo
+from helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
 
 
 class TestGitFlow(TestCase):
-
-    # Pick your fixture
-    def new_sandbox(self):
-        """
-        This method sets up a temporary, self-destructing empty directory, to
-        be used as a sandbox.  Files created/modified outside of the sandbox
-        aren't cleaned up by this method.
-        """
-        ram_disk = '/Volumes/RAM_Disk'
-        dir = None
-        if os.path.exists(ram_disk):
-            dir = ram_disk
-        tmp = tempfile.mkdtemp(dir=dir)
-        self.addCleanup(shutil.rmtree, tmp)
-        return tmp
-
-    def git_repo_copy_from_fixture(self, fixture_name):
-        """
-        This method sets up a temporary, self-destructing sandbox and copies
-        a given fixture recursively into it.  This is useful for fixtures that
-        represent changes in the configuration or dirty working directories.
-        """
-        src = 'tests/fixtures/%s' % fixture_name
-        dest = os.path.join(self.new_sandbox(), fixture_name)
-        shutil.copytree(src, dest)
-        shutil.move(os.path.join(dest, 'dot_git'), os.path.join(dest, '.git'))
-        cpy = Repo(dest)
-        return cpy
-
-    @sandboxed
-    def git_repo_clone_from_fixture(self, fixture_name):
-        """
-        This method sets up a temporary, self-destructing sandbox, cloned from
-        a given fixture.  In contrast to a filesystem copy, a clone always has
-        fresh configuration and a clean working directory.
-        """
-        tmp = self.new_sandbox()
-        fixture_repo = 'tests/fixtures/%s/dot_git' % fixture_name
-        clone = Repo(fixture_repo).clone(tmp)
-        return clone
-
 
     # Helper methods
     def all_commits(self, repo):
@@ -61,9 +20,9 @@ class TestGitFlow(TestCase):
 
 
     # Configuration
+    @copy_from_fixture('custom_repo')
     def test_config_reader(self):
-        repo = self.git_repo_copy_from_fixture('custom_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertRaises(ValueError, gitflow.get,
                 'invalid_setting_since_this_has_no_dot')
@@ -74,9 +33,9 @@ class TestGitFlow(TestCase):
         self.assertRaises(NoOptionError, gitflow.get, 'foo.nonexisting')
         self.assertEquals('qux', gitflow.get('foo.bar'))
 
+    @copy_from_fixture('custom_repo')
     def test_custom_branchnames(self):
-        repo = self.git_repo_copy_from_fixture('custom_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertEquals('production', gitflow.master_name())
         self.assertEquals('master', gitflow.develop_name())
@@ -87,9 +46,9 @@ class TestGitFlow(TestCase):
 
 
     # Initialization
+    @sandboxed
     def test_branch_names_fails_in_new_sandbox(self):
-        repo = self.new_sandbox()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.sandbox)
         self.assertRaises(NotInitialized, gitflow.branch_names)
 
     @sandboxed_git_repo
@@ -97,24 +56,24 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(self.repo)
         self.assertItemsEqual([], gitflow.branch_names())
 
+    @copy_from_fixture('custom_repo')
     def test_custom_repo_has_branches(self):
-        repo = self.git_repo_copy_from_fixture('custom_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertItemsEqual(['master', 'production'],
                 gitflow.branch_names())
 
 
     # Sanity checking
+    @sandboxed
     def test_new_repo_is_not_dirty(self):
-        repo = self.new_sandbox()
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.sandbox)
         gitflow.init()
         self.assertFalse(gitflow.is_dirty())
 
+    @copy_from_fixture('dirty_sample_repo')
     def test_existing_repo_is_not_dirty(self):
-        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertTrue(gitflow.is_dirty())
 
 
@@ -128,9 +87,9 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(self.repo)
         self.assertEquals([], gitflow.status())
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_status_on_sample_repo(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertItemsEqual([
                 ('master', '296586bb164c946cad10d37e82570f60e6348df9', False),
                 ('develop', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False),
@@ -140,10 +99,10 @@ class TestGitFlow(TestCase):
 
 
     # git flow init
+    @sandboxed
     def test_gitflow_init_inits_underlying_git_repo(self):
-        empty_dir = self.new_sandbox()
-        gitflow = GitFlow(empty_dir)
-        dot_git_dir = os.path.join(empty_dir, '.git')
+        gitflow = GitFlow(self.sandbox)
+        dot_git_dir = os.path.join(self.sandbox, '.git')
         self.assertFalse(os.path.exists(dot_git_dir))
         gitflow.init()
         self.assertTrue(os.path.exists(dot_git_dir))
@@ -189,9 +148,9 @@ class TestGitFlow(TestCase):
         self.assertEquals('rel-', gitflow.release_prefix())
         self.assertEquals('supp-', gitflow.support_prefix())
 
+    @copy_from_fixture('partly_inited')
     def test_gitflow_init_config_with_partly_inited(self):
-        repo = self.git_repo_copy_from_fixture('partly_inited')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
 
         # Already set in fixture, shouldn't change
@@ -204,20 +163,20 @@ class TestGitFlow(TestCase):
         self.assertEquals('release/', gitflow.release_prefix())
         self.assertEquals('support/', gitflow.support_prefix())
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_commits(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        all_commits_before_init = self.all_commits(repo)
-        gitflow = GitFlow(repo)
+        all_commits_before_init = self.all_commits(self.repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
-        all_commits_after_init = self.all_commits(repo)
+        all_commits_after_init = self.all_commits(self.repo)
         self.assertEquals(all_commits_before_init, all_commits_after_init)
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_branches(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        heads_before_init = [h.name for h in repo.heads]
-        gitflow = GitFlow(repo)
+        heads_before_init = [h.name for h in self.repo.heads]
+        gitflow = GitFlow(self.repo)
         gitflow.init()
-        heads_after_init = [h.name for h in repo.heads]
+        heads_after_init = [h.name for h in self.repo.heads]
         self.assertItemsEqual(heads_before_init, heads_after_init)
 
     @sandboxed_git_repo
@@ -236,8 +195,8 @@ class TestGitFlow(TestCase):
         self.assertItemsEqual(['master', 'develop'],
                 gitflow.branch_names())
 
+    @copy_from_fixture('partly_inited')
     def test_gitflow_force_reinit_partly_inited(self):
-        self.repo = self.git_repo_copy_from_fixture('partly_inited')
         gitflow = GitFlow(self.repo)
         gitflow.init(force_defaults=True)
 
@@ -253,6 +212,7 @@ class TestGitFlow(TestCase):
 
 
     # branch type detection
+    @sandboxed_git_repo
     def test_detect_branch_types(self):
         gitflow = GitFlow()
 
@@ -262,6 +222,7 @@ class TestGitFlow(TestCase):
         self.assertIn('hotfix', gitflow.branch_types)
         self.assertIn('support', gitflow.branch_types)
 
+    @sandboxed_git_repo
     def test_detect_custom_branch_types(self):
         # Declare a custom branch type inline
         class FooBar(Branch):
@@ -278,8 +239,8 @@ class TestGitFlow(TestCase):
         gitflow.init()
         self.assertItemsEqual([], gitflow.feature_branches())
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_sample_repo_has_features(self):
-        self.repo = self.git_repo_copy_from_fixture('sample_repo')
         gitflow = GitFlow(self.repo)
         self.assertItemsEqual(['feature/even', 'feature/recursion'],
                 gitflow.feature_branches())
@@ -299,60 +260,61 @@ class TestGitFlow(TestCase):
         gitflow.new_feature_branch('foo')
         self.assertRaises(BranchExists, gitflow.new_feature_branch, 'foo')
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_create_feature_from_alt_base(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
 
         new_branch = gitflow.new_feature_branch('foo', 'feature/even')
         branches = gitflow.feature_branches()
         self.assertIn('feature/even', branches)
         self.assertIn('feature/foo', branches)
-        self.assertEquals(repo.commit('feature/even'), new_branch.commit)
+        self.assertEquals(self.repo.commit('feature/even'), new_branch.commit)
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_create_feature_changes_active_branch(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
 
-        self.assertEquals('feature/recursion', repo.active_branch.name)
+        self.assertEquals('feature/recursion', self.repo.active_branch.name)
         gitflow.new_feature_branch('foo')
-        self.assertEquals('feature/foo', repo.active_branch.name)
+        self.assertEquals('feature/foo', self.repo.active_branch.name)
 
+    @copy_from_fixture('dirty_sample_repo')
     def test_gitflow_create_feature_changes_active_branch_even_if_dirty_but_without_conflicts(self):
-        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         # TODO: This should really be something like
-        # repo.head.reset(paths=['odd.py'])
-        repo.git.reset('-q', 'HEAD', '--', 'odd.py')
-        repo.git.checkout('odd.py')
+        # self.repo.head.reset(paths=['odd.py'])
+        self.repo.git.reset('-q', 'HEAD', '--', 'odd.py')
+        self.repo.git.checkout('odd.py')
         gitflow.new_feature_branch('foo')
         self.assertIn('feature/foo', gitflow.feature_branches())
 
+
+    @copy_from_fixture('dirty_sample_repo')
     def test_gitflow_cannot_create_feature_if_local_changes_would_be_overwritten(self):
-        repo = self.git_repo_copy_from_fixture('dirty_sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertRaisesRegexp(GitCommandError,
                 "Your local changes to the following files would be overwritten",
                 gitflow.new_feature_branch, 'foo')
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_delete_feature(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
 
         self.assertIn('feature/even', gitflow.feature_branches())
         gitflow.delete_feature_branch('even')
         self.assertNotIn('feature/even', gitflow.feature_branches())
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_cannot_delete_current_feature(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertRaisesRegexp(InvalidOperation, 'Cannot delete the branch .* '
                 'which you are currently on',
                 gitflow.delete_feature_branch, 'recursion')
 
+    @copy_from_fixture('sample_repo')
     def test_gitflow_cannot_delete_non_existing_feature(self):
-        repo = self.git_repo_copy_from_fixture('sample_repo')
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         self.assertRaisesRegexp(InvalidOperation, 'Branch .* not found',
                 gitflow.delete_feature_branch, 'nonexisting')
 

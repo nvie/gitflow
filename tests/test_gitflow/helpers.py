@@ -6,13 +6,12 @@ from unittest2 import TestCase
 from git import Repo
 
 
-# Pick your fixture
 def sandboxed(f):
     """
-    This decorator sets up a temporary, self-destructing empty directory, to be
-    used as a sandbox.  The name of the directory is stored in self.sandbox
-    attribute.  Files created/modified outside of the sandbox aren't cleaned up
-    by this method.
+    This decorator sets up a temporary, self-destructing empty directory and
+    switches the current directory to it.  The name of the directory is stored
+    in self.sandbox attribute.  Files created/modified outside of the sandbox
+    aren't cleaned up by this method.
     """
     @wraps(f)
     def _inner(self, *args, **kwargs):
@@ -24,47 +23,62 @@ def sandboxed(f):
         self.sandbox = tempfile.mkdtemp(dir=dir)
         self.addCleanup(shutil.rmtree, self.sandbox)
 
+        os.chdir(self.sandbox)
+
         # Call the function
         f(self, *args, **kwargs)
     return _inner
 
-
 def sandboxed_git_repo(f):
+    """
+    This decorator sets up a temporary, self-destructing empty Git repository
+    using "git init".  There hasn't been any git flow initialization yet.
+    """
     @wraps(f)
     @sandboxed
     def _inner(self, *args, **kwargs):
-        """
-        This method sets up a temporary, self-destructing empty sandbox.  There
-        hasn't been any git flow initialization yet.
-        """
-        self.repo = Repo.init(self.sandbox)
+        self.repo = Repo.init()
         f(self, *args, **kwargs)
     return _inner
 
-
-def git_repo_copy_from_fixture(self, fixture_name):
+def copy_from_fixture(fixture_name):
     """
-    This method sets up a temporary, self-destructing sandbox and copies
-    a given fixture recursively into it.  This is useful for fixtures that
-    represent changes in the configuration or dirty working directories.
+    This decorator sets up a temporary, self-destructing sandbox and copies
+    a given fixture into it.  The repo is accessible inside the function via the
+    self.repo attribute.  This is useful for fixtures that represent changes in
+    the configuration or dirty working directories.
     """
-    src = 'tests/fixtures/%s' % fixture_name
-    dest = os.path.join(self.new_sandbox(), fixture_name)
-    shutil.copytree(src, dest)
-    shutil.move(os.path.join(dest, 'dot_git'), os.path.join(dest, '.git'))
-    cpy = Repo(dest)
-    return cpy
+    def _outer(f):
+        @wraps(f)
+        @sandboxed
+        def _inner(self, *args, **kwargs):
+            root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            src = os.path.join(root, 'fixtures', fixture_name)
+            dest = os.path.join(self.sandbox, fixture_name)
+            shutil.copytree(src, dest)
+            os.chdir(dest)
+            shutil.move('dot_git', '.git')
+            self.repo = Repo(dest)
+            f(self, *args, **kwargs)
+        return _inner
+    return _outer
 
-
-def git_repo_clone_from_fixture(self, fixture_name):
+def clone_from_fixture(fixture_name):
     """
-    This method sets up a temporary, self-destructing sandbox, cloned from
-    a given fixture.  In contrast to a filesystem copy, a clone always has
-    fresh configuration and a clean working directory.
-    """
-    tmp = self.new_sandbox()
-    fixture_repo = 'tests/fixtures/%s/dot_git' % fixture_name
-    clone = Repo(fixture_repo).clone(tmp)
-    return clone
+    This decorator sets up a temporary, self-destructing sandbox, cloned from
+    a given fixture.  In contrast to a filesystem copy, a clone always has fresh
+    configuration and a clean working directory.
 
+    The repo is accesible via the self.repo attribute inside the tests.
+    """
+    def _outer(f):
+        @wraps(f)
+        @sandboxed
+        def _inner(self, *args, **kwargs):
+            root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            git_dir = os.path.join(root, 'fixtures', fixture_name, 'dot_git')
+            self.repo = Repo(git_dir).clone(self.sandbox)
+            f(self, *args, **kwargs)
+        return _inner
+    return _outer
 
