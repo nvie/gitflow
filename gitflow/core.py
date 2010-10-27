@@ -221,6 +221,7 @@ class GitFlow(object):
         fb = self.repo.create_head(full_name, base)
         fb.checkout()
         return fb
+
     @requires_repo
     def delete_feature_branch(self, name):
         full_name = self.feature_prefix() + name
