@@ -31,7 +31,7 @@ class TestBranch(TestCase):
 
     def test_branch_describes_itself(self):
         fb = FooBranch('foo')
-        self.assertEquals('<tests.test_gitflow.test_branches.FooBranch "xyz/foo">', str(fb))
+        self.assertEquals('<tests.gitflow.test_branches.FooBranch "xyz/foo">', str(fb))
 
 
 
