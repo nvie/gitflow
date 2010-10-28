@@ -1,5 +1,5 @@
 from functools import wraps
-from git import Git, Repo, InvalidGitRepositoryError
+from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
 from gitflow.branches import Branch
 from gitflow.util import itersubclasses
@@ -80,12 +80,12 @@ class GitFlow(object):
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
         develop_name = self.develop_name()
-        for branch in self.repo.branches:
-            if branch.name == develop_name:
-                return    # Nothing to do
-
-        # Else, if there's no develop yet, base it off of the current master
-        self.repo.create_head(self.develop_name(), self.master_name())
+        try:
+            self.repo.create_head(self.develop_name(), self.master_name())
+        except GitCommandError:
+            # on error, the branch existed already
+            pass
+        
 
     def init(self,
             master=None, develop=None,
@@ -187,10 +187,7 @@ class GitFlow(object):
         return self.repo.is_dirty()
 
     def branch_exists(self, name):
-        for b in self.repo.branches:
-            if b.name == name:
-                return True
-        return False
+        return Head(self.repo, Head.to_full_path(name)).is_valid()
 
     @requires_repo
     def branch_names(self):
@@ -200,15 +197,16 @@ class GitFlow(object):
     @requires_repo
     def status(self):
         result = []
+        active_branch = self.repo.active_branch
         for b in self.repo.branches:
-            tup = (b.name, b.commit.hexsha, b == self.repo.active_branch)
+            tup = (b.name, b.commit.hexsha, b == active_branch)
             result.append(tup)
         return result
 
     @requires_repo
     def feature_branches(self):
-        return [b.name for b in self.repo.branches \
-                    if b.name.startswith(self.feature_prefix())]
+        # TODO: Return feature branch instances here (?)
+        return list(h.name for h in Head.iter_items(self.repo, Head.to_full_path(self.feature_prefix())))
 
     @requires_repo
     def new_feature_branch(self, name, base=None):
