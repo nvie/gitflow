@@ -16,10 +16,6 @@ else:
     long_description = "See http://github.com/nvie/gitflow/tree/master"
 
 install_requires = ['GitPython']
-try:
-    import argparse
-except ImportError:
-    install_requires.append('argparse')
 
 setup(
     name="gitflow",
