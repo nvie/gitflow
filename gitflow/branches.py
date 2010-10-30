@@ -12,6 +12,9 @@ class BranchManager(object):
             assert isinstance(prefix, basestring), 'Argument \'prefix\' must be a string.'
             self.prefix = prefix
 
+    def default_base(self):
+        return self.gitflow.develop_name()
+
     def list(self):
         return list(self.iter())
 
@@ -25,7 +28,7 @@ class BranchManager(object):
 
         full_name = self.prefix + name
         if base is None:
-            base = self.gitflow.develop_name()
+            base = self.default_base()
         branch = repo.create_head(full_name, base)
         branch.checkout()
         return branch
@@ -52,6 +55,9 @@ class ReleaseBranchManager(BranchManager):
 class HotfixBranchManager(BranchManager):
     identifier = 'hotfix'
     prefix = 'hotfix/'
+
+    def default_base(self):
+        return self.gitflow.master_name()
 
 
 class SupportBranchManager(BranchManager):

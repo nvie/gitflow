@@ -2,7 +2,7 @@ from unittest2 import TestCase, skip
 from git import GitCommandError
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager, FeatureBranchManager, \
-        ReleaseBranchManager
+        ReleaseBranchManager, HotfixBranchManager
 from tests.helpers import sandboxed_git_repo, copy_from_fixture
 
 
@@ -257,4 +257,33 @@ class TestReleaseBranchManager(TestCase):
         mgr = ReleaseBranchManager(gitflow)
         self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
                 mgr.delete, 'nonexisting')
+
+
+class TestHotfixBranchManager(TestCase):
+    @sandboxed_git_repo
+    def test_create_new_hotfix_branch(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        mgr = HotfixBranchManager(gitflow)
+        self.assertEqual(0, len(mgr.list()))
+        new_branch = mgr.create('3.14-beta5')
+        self.assertEqual(1, len(mgr.list()))
+        self.assertEqual('hotfix/3.14-beta5', mgr.list()[0].name)
+
+    @copy_from_fixture('sample_repo')
+    def test_hotfixes_branch_off_from_master(self):
+        gitflow = GitFlow()
+        mgr = HotfixBranchManager(gitflow)
+        new_branch = mgr.create('3.14-beta5')
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['master'].commit)
+
+    @copy_from_fixture('sample_repo')
+    def test_create_new_release_from_alt_base(self):
+        gitflow = GitFlow(self.repo)
+        mgr = HotfixBranchManager(gitflow)
+        new_branch = mgr.create('1.0',
+                'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')  # develop~1
+        self.assertEqual(new_branch.commit.hexsha,
+                'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')
 
