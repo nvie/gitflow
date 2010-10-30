@@ -61,9 +61,20 @@ class TestFeatureBranchManager(TestCase):
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         self.assertEqual(0, len(mgr.list()))
-        mgr.create('foo')
+        new_branch = mgr.create('foo')
         self.assertEqual(1, len(mgr.list()))
         self.assertEqual('feature/foo', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['develop'].commit)
+
+    @copy_from_fixture('sample_repo')
+    def test_create_new_feature_from_alt_base(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        new_branch = mgr.create('foo', 'feature/even')
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['feature/even'].commit)
 
     @sandboxed_git_repo
     def test_create_existing_feature_branch_yields_raises_error(self):

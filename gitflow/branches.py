@@ -20,11 +20,12 @@ class BranchManager(object):
             if branch.name.startswith(self.prefix):
                 yield branch
 
-    def create(self, name):
+    def create(self, name, base=None):
         repo = self.gitflow.repo
 
         full_name = self.prefix + name
-        base = self.gitflow.develop_name()
+        if base is None:
+            base = self.gitflow.develop_name()
         branch = repo.create_head(full_name, base)
         branch.checkout()
         return branch
