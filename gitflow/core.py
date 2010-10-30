@@ -191,9 +191,6 @@ class GitFlow(object):
         """
         return self.repo.is_dirty()
 
-    def branch_exists(self, name):
-        return Head(self.repo, Head.to_full_path(name)).is_valid()
-
     @requires_repo
     def branch_names(self):
         return map(lambda h: h.name, self.repo.branches)
