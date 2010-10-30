@@ -1,7 +1,7 @@
 from functools import wraps
 from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
-from gitflow.branches import Branch
+from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
 
 
@@ -28,7 +28,7 @@ class InvalidOperation(Exception):
 class GitFlow(object):
     def _discover_branch_types(self):
         types = {}
-        for cls in itersubclasses(Branch):
+        for cls in itersubclasses(BranchManager):
             types[cls.identifier] = cls
         return types
 

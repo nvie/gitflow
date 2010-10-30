@@ -1,33 +1,52 @@
-class Branch(object):
-    __slots__ = ('prefix', 'name', 'shortname')
+from git import GitCommandError
 
-    def __init__(self, shortname, prefix=None):
-        self.shortname = shortname
+
+class BranchManager(object):
+    __slots__ = ('gitflow', 'prefix')
+
+    def __init__(self, gitflow, prefix=None):
+        from gitflow.core import GitFlow
+        assert isinstance(gitflow, GitFlow), 'Argument \'gitflow\' must be a GitFlow instance.'
+        self.gitflow = gitflow
         if not prefix is None:
+            assert isinstance(prefix, basestring), 'Argument \'prefix\' must be a string.'
             self.prefix = prefix
-        self.name = self.prefix + shortname
 
-    def __str__(self):
-        return '<%s.%s "%s">' % (self.__class__.__module__,
-                self.__class__.__name__, self.name)
+    def list(self):
+        return list(self.iter())
+
+    def iter(self):
+        for branch in self.gitflow.repo.branches:
+            if branch.name.startswith(self.prefix):
+                yield branch
+
+    def create(self, name):
+        repo = self.gitflow.repo
+
+        full_name = self.prefix + name
+        base = self.gitflow.develop_name()
+        branch = repo.create_head(full_name, base)
+        branch.checkout()
+        return branch
 
 
-class FeatureBranch(Branch):
+
+class FeatureBranchManager(BranchManager):
     identifier = 'feature'
     prefix = 'feature/'
 
 
-class ReleaseBranch(Branch):
+class ReleaseBranchManager(BranchManager):
     identifier = 'release'
     prefix = 'release/'
 
 
-class HotfixBranch(Branch):
+class HotfixBranchManager(BranchManager):
     identifier = 'hotfix'
     prefix = 'hotfix/'
 
 
-class SupportBranch(Branch):
+class SupportBranchManager(BranchManager):
     identifier = 'support'
     prefix = 'support/'
 
