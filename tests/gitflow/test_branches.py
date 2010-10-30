@@ -122,7 +122,7 @@ class TestFeatureBranchManager(TestCase):
 
         self.assertEquals(2, len(mgr.list()))
         mgr.create('foo')
-        gitflow.repo.branches[gitflow.develop_name()].checkout()
+        gitflow.develop().checkout()
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
         self.assertEquals(2, len(mgr.list()))

@@ -166,6 +166,10 @@ class GitFlow(object):
     def develop_name(self):
         return self._safe_get('gitflow.branch.develop')
 
+    @requires_repo
+    def develop(self):
+        return self.repo.branches[self.develop_name()]
+
     def feature_prefix(self):
         return self._safe_get('gitflow.prefix.feature')
 
