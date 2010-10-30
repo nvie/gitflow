@@ -1,0 +1,3 @@
+0000000000000000000000000000000000000000 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1288460237 +0200	branch: Created from develop
+2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 198acb256d7bdac728fb62d64d7f0b013a96efda Vincent Driessen <vincent@datafox.nl> 1288460293 +0200	commit: Add 1.0 release to README.
+198acb256d7bdac728fb62d64d7f0b013a96efda 194bba9e050a6c46636d28e3e5ce0048d7073d75 Vincent Driessen <vincent@datafox.nl> 1288460309 +0200	commit: Add VERSION file.
