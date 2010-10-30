@@ -26,11 +26,12 @@ class InvalidOperation(Exception):
 
 
 class GitFlow(object):
-    def _discover_branch_types(self):
-        types = {}
+    def _discover_branch_managers(self):
+        managers = {}
         for cls in itersubclasses(BranchManager):
-            types[cls.identifier] = cls
-        return types
+            # TODO: Initialize managers with the gitflow branch prefixes
+            managers[cls.identifier] = cls(self)
+        return managers
 
 
     def __init__(self, working_dir='.'):
@@ -47,7 +48,7 @@ class GitFlow(object):
         except InvalidGitRepositoryError:
             pass
 
-        self.branch_types = self._discover_branch_types()
+        self.managers = self._discover_branch_managers()
 
     def _init_config(self,
             master=None, develop=None,
@@ -202,34 +203,5 @@ class GitFlow(object):
             tup = (b.name, b.commit.hexsha, b == active_branch)
             result.append(tup)
         return result
-
-    @requires_repo
-    def feature_branches(self):
-        # TODO: Return feature branch instances here (?)
-        return list(h.name for h in Head.iter_items(self.repo, Head.to_full_path(self.feature_prefix())))
-
-    @requires_repo
-    def new_feature_branch(self, name, base=None):
-        full_name = self.feature_prefix() + name
-        if self.branch_exists(full_name):
-            raise BranchExists('Branch %s already exists.' % full_name)
-
-        if base is None:
-            base = self.develop_name()
-        fb = self.repo.create_head(full_name, base)
-        fb.checkout()
-        return fb
-
-    @requires_repo
-    def delete_feature_branch(self, name):
-        full_name = self.feature_prefix() + name
-        if not full_name in self.feature_branches():
-            raise InvalidOperation("Branch '%s' not found." % full_name)
-
-        if self.repo.active_branch.name == full_name:
-            raise InvalidOperation("Cannot delete the branch '%s' which you "
-                    "are currently on." % full_name)
-
-        self.repo.delete_head(full_name, force=True)
 
 

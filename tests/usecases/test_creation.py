@@ -8,6 +8,7 @@ class TestGitFlow(TestCase):
     @sandboxed_git_repo
     def test_create(self):
         gitflow = GitFlow()
+        repo = gitflow.repo
 
         self.assertEquals([], self.repo.branches)
 
@@ -16,5 +17,6 @@ class TestGitFlow(TestCase):
         self.assertEquals(['develop', 'master'],
                 [b.name for b in self.repo.branches])
 
-        #fb = gitflow.create('feature', 'foo')
+        fb = gitflow.create('feature', 'foo')
+
 

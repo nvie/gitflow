@@ -5,7 +5,7 @@ from ConfigParser import NoOptionError, NoSectionError
 from git import Repo, GitCommandError
 import shutil
 from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
-from gitflow.branches import Branch
+from gitflow.branches import BranchManager
 from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
 
 
@@ -217,106 +217,19 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow()
 
         # The types that "ship" with git-flow
-        self.assertIn('feature', gitflow.branch_types)
-        self.assertIn('release', gitflow.branch_types)
-        self.assertIn('hotfix', gitflow.branch_types)
-        self.assertIn('support', gitflow.branch_types)
+        self.assertIn('feature', gitflow.managers)
+        self.assertIn('release', gitflow.managers)
+        self.assertIn('hotfix', gitflow.managers)
+        self.assertIn('support', gitflow.managers)
 
     @sandboxed_git_repo
     def test_detect_custom_branch_types(self):
         # Declare a custom branch type inline
-        class FooBar(Branch):
+        class FooBarManager(BranchManager):
             identifier = 'foobar'
 
         gitflow = GitFlow()
-        self.assertIn('foobar', gitflow.branch_types)
-
-
-    # git flow feature
-    @sandboxed_git_repo
-    def test_gitflow_empty_repo_has_no_features(self):
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-        self.assertItemsEqual([], gitflow.feature_branches())
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_sample_repo_has_features(self):
-        gitflow = GitFlow(self.repo)
-        self.assertItemsEqual(['feature/even', 'feature/recursion'],
-                gitflow.feature_branches())
-
-    @sandboxed_git_repo
-    def test_gitflow_create_feature_branch(self):
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-        gitflow.new_feature_branch('foo')
-        branches = gitflow.feature_branches()
-        self.assertIn('feature/foo', branches)
-
-    @sandboxed_git_repo
-    def test_gitflow_cannot_create_existing_feature(self):
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-        gitflow.new_feature_branch('foo')
-        self.assertRaises(BranchExists, gitflow.new_feature_branch, 'foo')
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_create_feature_from_alt_base(self):
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-
-        new_branch = gitflow.new_feature_branch('foo', 'feature/even')
-        branches = gitflow.feature_branches()
-        self.assertIn('feature/even', branches)
-        self.assertIn('feature/foo', branches)
-        self.assertEquals(self.repo.commit('feature/even'), new_branch.commit)
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_create_feature_changes_active_branch(self):
-        gitflow = GitFlow(self.repo)
-
-        self.assertEquals('feature/recursion', self.repo.active_branch.name)
-        gitflow.new_feature_branch('foo')
-        self.assertEquals('feature/foo', self.repo.active_branch.name)
-
-    @copy_from_fixture('dirty_sample_repo')
-    def test_gitflow_create_feature_changes_active_branch_even_if_dirty_but_without_conflicts(self):
-        gitflow = GitFlow(self.repo)
-        # TODO: This should really be something like
-        # self.repo.head.reset(paths=['odd.py'])
-        self.repo.git.reset('-q', 'HEAD', '--', 'odd.py')
-        self.repo.git.checkout('odd.py')
-        gitflow.new_feature_branch('foo')
-        self.assertIn('feature/foo', gitflow.feature_branches())
-
-
-    @copy_from_fixture('dirty_sample_repo')
-    def test_gitflow_cannot_create_feature_if_local_changes_would_be_overwritten(self):
-        gitflow = GitFlow(self.repo)
-        self.assertRaisesRegexp(GitCommandError,
-                "Your local changes to the following files would be overwritten",
-                gitflow.new_feature_branch, 'foo')
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_delete_feature(self):
-        gitflow = GitFlow(self.repo)
-
-        self.assertIn('feature/even', gitflow.feature_branches())
-        gitflow.delete_feature_branch('even')
-        self.assertNotIn('feature/even', gitflow.feature_branches())
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_cannot_delete_current_feature(self):
-        gitflow = GitFlow(self.repo)
-        self.assertRaisesRegexp(InvalidOperation, 'Cannot delete the branch .* '
-                'which you are currently on',
-                gitflow.delete_feature_branch, 'recursion')
-
-    @copy_from_fixture('sample_repo')
-    def test_gitflow_cannot_delete_non_existing_feature(self):
-        gitflow = GitFlow(self.repo)
-        self.assertRaisesRegexp(InvalidOperation, 'Branch .* not found',
-                gitflow.delete_feature_branch, 'nonexisting')
+        self.assertIn('foobar', gitflow.managers)
 
 
     """
