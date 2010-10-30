@@ -30,6 +30,13 @@ class BranchManager(object):
         branch.checkout()
         return branch
 
+    def delete(self, name):
+        repo = self.gitflow.repo
+        develop = self.gitflow.develop_name()
+
+        full_name = self.prefix + name
+        repo.delete_head(full_name)
+
 
 
 class FeatureBranchManager(BranchManager):

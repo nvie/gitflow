@@ -115,3 +115,32 @@ class TestFeatureBranchManager(TestCase):
         mgr.create('foo')
         self.assertIn('feature/foo', [b.name for b in mgr.iter()])
 
+    @copy_from_fixture('sample_repo')
+    def test_delete_feature(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        self.assertEquals(2, len(mgr.list()))
+        mgr.create('foo')
+        gitflow.repo.branches[gitflow.develop_name()].checkout()
+        self.assertEquals(3, len(mgr.list()))
+        mgr.delete('foo')
+        self.assertEquals(2, len(mgr.list()))
+        self.assertNotIn('feature/foo', mgr.list()[0].name)
+
+    @copy_from_fixture('sample_repo')
+    def test_cannot_delete_current_feature(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('foo').checkout()
+        self.assertRaisesRegexp(GitCommandError,
+                'Cannot delete the branch .* which you are currently on',
+                mgr.delete, 'foo')
+
+    @copy_from_fixture('sample_repo')
+    def test_cannot_delete_non_existing_feature(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+        self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
+                mgr.delete, 'nonexisting')
+
