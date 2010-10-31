@@ -65,7 +65,8 @@ starting place for installing git.
 
 FAQ
 ---
-See the [FAQ](http://github.com/nvie/gitflow/wiki) section of the project Wiki.
+See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+Wiki.
 
 
 Please help out
