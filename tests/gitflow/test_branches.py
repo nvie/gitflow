@@ -117,7 +117,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertIn('feature/foo', [b.name for b in mgr.iter()])
 
     @copy_from_fixture('sample_repo')
-    def test_delete_feature(self):
+    def test_delete_feature_without_commits(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
 
@@ -126,6 +126,44 @@ class TestFeatureBranchManager(TestCase):
         gitflow.develop().checkout()
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
+        self.assertEquals(2, len(mgr.list()))
+        self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
+
+    @copy_from_fixture('sample_repo')
+    def test_delete_feature_with_commits_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        self.assertEquals(2, len(mgr.list()))
+        mgr.create('foo')
+        f = open('newfile.py', 'w')
+        f.write('This is a dummy file.\n')
+        f.close()
+        self.repo.index.add(['newfile.py'])
+        self.repo.index.commit('A commit on the feature branch.')
+
+        gitflow.develop().checkout()
+        self.assertEquals(3, len(mgr.list()))
+        self.assertRaisesRegexp(GitCommandError,
+                'The branch .* is not fully merged',
+                mgr.delete, 'foo')
+
+    @copy_from_fixture('sample_repo')
+    def test_delete_feature_with_commits_forcefully(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        self.assertEquals(2, len(mgr.list()))
+        mgr.create('foo')
+        f = open('newfile.py', 'w')
+        f.write('This is a dummy file.\n')
+        f.close()
+        self.repo.index.add(['newfile.py'])
+        self.repo.index.commit('A commit on the feature branch.')
+
+        gitflow.develop().checkout()
+        self.assertEquals(3, len(mgr.list()))
+        mgr.delete('foo', force=True)
         self.assertEquals(2, len(mgr.list()))
         self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
 
