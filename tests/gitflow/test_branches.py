@@ -108,8 +108,7 @@ class TestFeatureBranchManager(TestCase):
     def test_create_feature_raises_error_if_local_changes_would_be_overwritten(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
-        self.assertRaisesRegexp(GitCommandError,
-                "Your local changes to the following files would be overwritten",
+        self.assertRaises(GitCommandError,
                 mgr.create, 'foo')
 
     @copy_from_fixture('dirty_sample_repo')
@@ -339,8 +338,7 @@ class TestReleaseBranchManager(TestCase):
     def test_create_release_raises_error_if_local_changes_would_be_overwritten(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
-        self.assertRaisesRegexp(GitCommandError,
-                "Your local changes to the following files would be overwritten",
+        self.assertRaises(GitCommandError,
                 mgr.create, '1.0')
 
     @copy_from_fixture('dirty_sample_repo')
