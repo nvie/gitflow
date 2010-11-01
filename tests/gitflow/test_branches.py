@@ -137,7 +137,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
         self.assertEquals(2, len(mgr.list()))
-        self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
+        self.assertNotIn('feature/foo', [b.name for b in self.repo.branches])
 
 
     @copy_from_fixture('sample_repo')
@@ -192,7 +192,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo', force=True)
         self.assertEquals(2, len(mgr.list()))
-        self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
+        self.assertNotIn('feature/foo', [b.name for b in self.repo.branches])
 
     @copy_from_fixture('sample_repo')
     def test_delete_current_feature_raises_error(self):
