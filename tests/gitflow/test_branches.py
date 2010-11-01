@@ -45,12 +45,6 @@ class TestFeatureBranchManager(TestCase):
 
 
     # Tests
-    @sandboxed_git_repo
-    def test_empty_repo_has_no_features(self):
-        gitflow = GitFlow()
-        mgr = FeatureBranchManager(gitflow)
-        self.assertItemsEqual([], mgr.list())
-
     @copy_from_fixture('sample_repo')
     def test_list(self):
         gitflow = GitFlow()
@@ -58,12 +52,19 @@ class TestFeatureBranchManager(TestCase):
         expected = ['feature/even', 'feature/recursion']
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
 
+    @sandboxed_git_repo
+    def test_list_empty_repo(self):
+        gitflow = GitFlow()
+        mgr = FeatureBranchManager(gitflow)
+        self.assertItemsEqual([], mgr.list())
+
     @copy_from_fixture('sample_repo')
     def test_list_without_matching_prefix(self):
         gitflow = GitFlow()
         mgr = FeatureBranchManager(gitflow, 'fb-')
         expected = []
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
+
 
     @sandboxed_git_repo
     def test_create_new_feature_branch(self):
@@ -138,6 +139,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEquals(2, len(mgr.list()))
         self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
 
+
     @copy_from_fixture('sample_repo')
     def test_delete_already_merged_feature(self):
         gitflow = GitFlow(self.repo)
@@ -193,7 +195,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
 
     @copy_from_fixture('sample_repo')
-    def test_cannot_delete_current_feature(self):
+    def test_delete_current_feature_raises_error(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
         mgr.create('foo').checkout()
@@ -202,7 +204,7 @@ class TestFeatureBranchManager(TestCase):
                 mgr.delete, 'foo')
 
     @copy_from_fixture('sample_repo')
-    def test_cannot_delete_non_existing_feature(self):
+    def test_delete_non_existing_feature_raises_error(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
         self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
