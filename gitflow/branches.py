@@ -33,6 +33,18 @@ class BranchManager(object):
         branch.checkout()
         return branch
 
+    def merge(self, name, into, message=None):
+        repo = self.gitflow.repo
+        repo.branches[into].checkout()
+        full_name = self.prefix + name
+        kwargs = dict()
+        kwargs['no_ff'] = True
+        if not message is None:
+            message = message % \
+                        dict(name=full_name, identifier=self.identifier)
+            kwargs['message'] = message
+        repo.git.merge(full_name, **kwargs)
+
     def delete(self, name, force=False):
         repo = self.gitflow.repo
         develop = self.gitflow.develop_name()

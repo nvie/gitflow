@@ -209,6 +209,69 @@ class TestFeatureBranchManager(TestCase):
                 mgr.delete, 'nonexisting')
 
 
+    @sandboxed_git_repo
+    def test_merge_feature_with_multiple_commits(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+
+        old_develop_commit = gitflow.develop().commit
+
+        mgr.create('newstuff')
+        self.fake_commit('Foo commit')
+        self.fake_commit('Bar commit')
+        self.fake_commit('Qux commit')
+        mgr.merge('newstuff', 'develop')
+
+        develop_commit = gitflow.develop().commit
+
+        # Assert merge commit has been made
+        self.assertEqual(2, len(develop_commit.parents))
+        self.assertEqual(
+                "Merge branch 'feature/newstuff' into develop\n",
+                develop_commit.message)
+
+        # Assert develop branch advanced
+        self.assertNotEqual(old_develop_commit, develop_commit)
+
+    @sandboxed_git_repo
+    def test_merge_feature_with_single_commit(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+
+        old_develop_commit = gitflow.develop().commit
+
+        mgr.create('newstuff')
+        self.fake_commit('Foo commit')
+        mgr.merge('newstuff', 'develop')
+
+        develop_commit = gitflow.develop().commit
+
+        # Assert no merge commit has been made
+        self.assertEqual(1, len(develop_commit.parents))
+        self.assertEqual('Foo commit', develop_commit.message)
+
+        # Assert develop branch advanced
+        self.assertNotEqual(old_develop_commit, develop_commit)
+
+    @sandboxed_git_repo
+    def test_merge_feature_without_commits(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+
+        old_develop_commit = gitflow.develop().commit
+
+        mgr.create('newstuff')
+        mgr.merge('newstuff', 'develop')
+
+        develop_commit = gitflow.develop().commit
+
+        # Assert the develop tip is unchanged by the merge
+        self.assertEqual(old_develop_commit, develop_commit)
+
+
 class TestReleaseBranchManager(TestCase):
     @sandboxed_git_repo
     def test_empty_repo_has_no_releases(self):
