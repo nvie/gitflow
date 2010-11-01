@@ -5,6 +5,7 @@ from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
 
 class TestGitFlow(TestCase):
 
+    @skip
     @sandboxed_git_repo
     def test_create(self):
         gitflow = GitFlow()
