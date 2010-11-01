@@ -210,51 +210,41 @@ class TestFeatureBranchManager(TestCase):
                 mgr.delete, 'nonexisting')
 
 
-    @sandboxed_git_repo
+    @copy_from_fixture('sample_repo')
     def test_merge_feature_with_multiple_commits(self):
         gitflow = GitFlow(self.repo)
-        gitflow.init()
         mgr = FeatureBranchManager(gitflow)
 
-        old_develop_commit = gitflow.develop().commit
-
-        mgr.create('newstuff')
-        self.fake_commit('Foo commit')
-        self.fake_commit('Bar commit')
-        self.fake_commit('Qux commit')
-        mgr.merge('newstuff', 'develop')
-
-        develop_commit = gitflow.develop().commit
+        dc0 = gitflow.develop().commit
+        mgr.merge('even', 'develop')
+        dc1 = gitflow.develop().commit
 
         # Assert merge commit has been made
-        self.assertEqual(2, len(develop_commit.parents))
+        self.assertEqual(2, len(dc1.parents))
         self.assertEqual(
-                "Merge branch 'feature/newstuff' into develop\n",
-                develop_commit.message)
+                "Merge branch 'feature/even' into develop\n",
+                dc1.message)
 
         # Assert develop branch advanced
-        self.assertNotEqual(old_develop_commit, develop_commit)
+        self.assertNotEqual(dc0, dc1)
 
-    @sandboxed_git_repo
+    @copy_from_fixture('sample_repo')
     def test_merge_feature_with_single_commit(self):
         gitflow = GitFlow(self.repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
 
-        old_develop_commit = gitflow.develop().commit
-
-        mgr.create('newstuff')
-        self.fake_commit('Foo commit')
-        mgr.merge('newstuff', 'develop')
-
-        develop_commit = gitflow.develop().commit
+        dc0 = gitflow.develop().commit
+        mgr.merge('recursion', 'develop')
+        dc1 = gitflow.develop().commit
 
         # Assert no merge commit has been made
-        self.assertEqual(1, len(develop_commit.parents))
-        self.assertEqual('Foo commit', develop_commit.message)
+        self.assertEqual(1, len(dc1.parents))
+        self.assertEqual('Made the definition of odd recursive.\n',
+                dc1.message)
 
         # Assert develop branch advanced
-        self.assertNotEqual(old_develop_commit, develop_commit)
+        self.assertNotEqual(dc0, dc1)
 
     @sandboxed_git_repo
     def test_merge_feature_without_commits(self):
@@ -262,15 +252,36 @@ class TestFeatureBranchManager(TestCase):
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
 
-        old_develop_commit = gitflow.develop().commit
-
+        dc0 = gitflow.develop().commit
         mgr.create('newstuff')
         mgr.merge('newstuff', 'develop')
-
-        develop_commit = gitflow.develop().commit
+        dc1 = gitflow.develop().commit
 
         # Assert the develop tip is unchanged by the merge
-        self.assertEqual(old_develop_commit, develop_commit)
+        self.assertEqual(dc0, dc1)
+
+
+    @copy_from_fixture('sample_repo')
+    def test_finish_feature(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+        mgr.finish('even')
+        mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+
+        # Feature finishes don't advance master, but develop
+        self.assertEqual(mc0, mc1)
+        self.assertNotEqual(dc0, dc1)
+
+        # Finishing removes the feature branch
+        self.assertNotIn('feature/even',
+                [b.name for b in self.repo.branches])
+
+        # Merge commit message
+        self.assertEquals('Finished feature even.\n', dc1.message)
 
 
 class TestReleaseBranchManager(TestCase):

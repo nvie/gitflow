@@ -170,6 +170,10 @@ class GitFlow(object):
     def develop(self):
         return self.repo.branches[self.develop_name()]
 
+    @requires_repo
+    def master(self):
+        return self.repo.branches[self.master_name()]
+
     def feature_prefix(self):
         return self._safe_get('gitflow.prefix.feature')
 

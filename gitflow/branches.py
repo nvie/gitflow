@@ -48,7 +48,8 @@ class BranchManager(object):
             kwargs['no_ff'] = True
         if not message is None:
             message = message % \
-                        dict(name=full_name, identifier=self.identifier)
+                        dict(name=full_name, identifier=self.identifier,
+                                short_name=name)
             kwargs['message'] = message
         repo.git.merge(full_name, **kwargs)
 
@@ -57,6 +58,10 @@ class BranchManager(object):
         full_name = self.prefix + name
         repo.delete_head(full_name, force=force)
 
+    def finish(self, name):
+        self.merge(name, self.gitflow.develop_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.delete(name)
 
 
 class FeatureBranchManager(BranchManager):
