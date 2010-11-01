@@ -33,12 +33,19 @@ class BranchManager(object):
         branch.checkout()
         return branch
 
+    def is_single_commit_branch(self, from_, to):
+        git = self.gitflow.repo.git
+        commits = git.rev_list('%s...%s' % (from_, to), n=2).split()
+        return len(commits) == 1
+
     def merge(self, name, into, message=None):
         repo = self.gitflow.repo
         repo.branches[into].checkout()
         full_name = self.prefix + name
+
         kwargs = dict()
-        kwargs['no_ff'] = True
+        if not self.is_single_commit_branch(into, full_name):
+            kwargs['no_ff'] = True
         if not message is None:
             message = message % \
                         dict(name=full_name, identifier=self.identifier)
