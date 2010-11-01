@@ -20,8 +20,8 @@ if [ -z "$REPO_HOME" ] ; then
 	REPO_HOME="http://github.com/nvie/gitflow.git"
 fi
 
-EXEC_FILES="git-flow"
-SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-release git-flow-support git-flow-version gitflow-common gitflow-shFlags"
+EXEC_FILES="git-flow getopt.exe"
+SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-release git-flow-support git-flow-version gitflow-common gitflow-shFlags cyggcc_s-1.dll cygiconv-2.dll cygintl-8.dll cygwin1.dll"
 SUBMODULE_FILE="gitflow-shFlags"
 
 echo "### gitflow no-make installer ###"
