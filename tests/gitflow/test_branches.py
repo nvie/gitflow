@@ -130,6 +130,37 @@ class TestFeatureBranchManager(TestCase):
         self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
 
     @copy_from_fixture('sample_repo')
+    def test_delete_already_merged_feature(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        self.assertEquals(2, len(mgr.list()))
+        mgr.create('foo')
+        f = open('newfile.py', 'w')
+        f.write('This is a dummy file.\n')
+        f.close()
+        self.repo.index.add(['newfile.py'])
+        self.repo.index.commit('Add new file.')
+
+        f = open('odd.py', 'a')
+        f.write('# Dummy change to the file\n')
+        f.close()
+        self.repo.index.add(['odd.py'])
+        self.repo.index.commit('Add comment to odd.py.')
+
+        gitflow.develop().checkout()
+
+        self.repo.index.merge_tree('feature/foo')
+        self.repo.index.commit('Merge text',
+                parent_commits=(gitflow.develop().commit,
+                                self.repo.branches['feature/foo'].commit))
+
+        self.assertEquals(3, len(mgr.list()))
+        mgr.delete('foo')
+        self.assertEquals(2, len(mgr.list()))
+        self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
+
+    @copy_from_fixture('sample_repo')
     def test_delete_feature_with_commits_raises_error(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
