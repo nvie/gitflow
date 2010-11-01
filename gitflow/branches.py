@@ -47,8 +47,6 @@ class BranchManager(object):
 
     def delete(self, name, force=False):
         repo = self.gitflow.repo
-        develop = self.gitflow.develop_name()
-
         full_name = self.prefix + name
         repo.delete_head(full_name, force=force)
 
