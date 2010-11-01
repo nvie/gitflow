@@ -36,6 +36,15 @@ class TestGenericBranchManager(TestCase):
 
 
 class TestFeatureBranchManager(TestCase):
+    # Helper methods
+    def fake_commit(self, message):
+        with open('newfile.py', 'a') as f:
+            f.write('This is a dummy change.\n')
+        self.repo.index.add(['newfile.py'])
+        self.repo.index.commit(message)
+
+
+    # Tests
     @sandboxed_git_repo
     def test_empty_repo_has_no_features(self):
         gitflow = GitFlow()
@@ -136,24 +145,9 @@ class TestFeatureBranchManager(TestCase):
 
         self.assertEquals(2, len(mgr.list()))
         mgr.create('foo')
-        f = open('newfile.py', 'w')
-        f.write('This is a dummy file.\n')
-        f.close()
-        self.repo.index.add(['newfile.py'])
-        self.repo.index.commit('Add new file.')
-
-        f = open('odd.py', 'a')
-        f.write('# Dummy change to the file\n')
-        f.close()
-        self.repo.index.add(['odd.py'])
-        self.repo.index.commit('Add comment to odd.py.')
-
-        gitflow.develop().checkout()
-
-        self.repo.index.merge_tree('feature/foo')
-        self.repo.index.commit('Merge text',
-                parent_commits=(gitflow.develop().commit,
-                                self.repo.branches['feature/foo'].commit))
+        self.fake_commit('Dummy commit #1')
+        self.fake_commit('Dummy commit #2')
+        mgr.merge('foo', 'develop')
 
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
