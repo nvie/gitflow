@@ -11,9 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
-.. automodule:: gitflow
-   :members:
+   reference/index.rst
 
 
 Indices and tables
