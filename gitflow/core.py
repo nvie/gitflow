@@ -26,6 +26,18 @@ class InvalidOperation(Exception):
 
 
 class GitFlow(object):
+    """
+    Creates a :class:`GitFlow` instance.
+
+    :param working_dir:
+        The directory where the Git repo is located.  If not specified, the
+        current working directory is used.
+
+    When a :class:`GitFlow` class is instantiated, it autodiscovers all
+    subclasses of :class:`gitflow.branches.BranchManager`, so there is no
+    explicit registration required.
+    """
+
     def _discover_branch_managers(self):
         managers = {}
         for cls in itersubclasses(BranchManager):
