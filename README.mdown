@@ -7,24 +7,59 @@ blog post").
 
 Installing git-flow
 -------------------
-If you're on a Mac and use "homebrew":http://github.com/mxcl/homebrew, it's simple:
+
+### Mac OS
+If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
 
     $ brew install git-flow
 
-If you're on a Mac and use "MacPorts":http://macports.org/, it's simple:
+If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
 
     $ port install git-flow
 
+### Linux, etc.
 Another easy way to install git-flow is using Rick Osborne's excellent git-flow
 installer, which can be run using the following command:
 
 	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
-For __Windows__ users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
-first to install tools like sh and wget. Then simply follow the command:
+### Windows
+#### Using Cygwin
+For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
+first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
+during installation). Then simply run this command from a Cygwin shell:
 
-	C:\> wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
 
+#### Using msysgit
+This is much like the manual installation below, but there are additional steps required to install some extra tools that
+are not distributed with [msysgit](http://code.google.com/p/msysgit/).
+
+After cloning the git-flow sources from Github, also fetch the submodules:
+
+	$ git submodule init
+	$ git submodule update
+
+Copy git-flow's relevant files to your msysgit installation directory:
+
+	$ mkdir /usr/local/bin
+	$ cp git-flow* gitflow* /usr/local/bin/
+	$ cp shFlags/src/shflags /usr/local/bin/gitflow-shFlags
+
+Next up we need to borrow a couple of binaries from [Cygwin](http://www.cygwin.com/). If you don't have Cygwin installed, please 
+install it including the `util-linux` package. Apart from `util-linux`'s dependencies, no other packages are required. When you
+finished installation, copy the following files using msysgit's _Git Bash_. We assume the Cygwin's default installation path in C:\cygwin.
+
+	$ cd /c/cygwin/
+	$ cp bin/getopt.exe /usr/local/bin/
+	$ cp bin/cyggcc_s-1.dll /usr/local/bin/
+	$ cp bin/cygiconv-2.dll /usr/local/bin/
+	$ cp bin/cygintl-8.dll /usr/local/bin/
+	$ cp bin/cygwin1.dll /usr/local/bin/
+
+After copying the files above, you can safely uninstall your Cygwin installation by deleting the C:\cygwin directory.
+
+### Manual installation
 If you prefer a manual installation, please use the following instructions.
 After downloading the sources from Github, also fetch the submodules:
 
