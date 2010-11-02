@@ -62,18 +62,14 @@ class GitFlow(object):
 
         self.managers = self._discover_branch_managers()
 
-    def _init_config(self,
-            master=None, develop=None,
-            feature=None, release=None, hotfix=None,
-            support=None, force_defaults=False):
+    def _init_config(self, master=None, develop=None, prefixes={}, force_defaults=False):
         defaults = [
             ('gitflow.branch.master', 'master', master),
             ('gitflow.branch.develop', 'develop', develop),
-            ('gitflow.prefix.feature', 'feature/', feature),
-            ('gitflow.prefix.release', 'release/', release),
-            ('gitflow.prefix.hotfix', 'hotfix/', hotfix),
-            ('gitflow.prefix.support', 'support/', support),
         ]
+        defaults += [('gitflow.prefix.%s' % i, self.managers[i].prefix,
+                        prefixes.get(i, None))
+                     for i in self.managers]
         for setting, default, value in defaults:
             if not value is None:
                 self.set(setting, value)
@@ -100,11 +96,7 @@ class GitFlow(object):
             pass
         
 
-    def init(self,
-            master=None, develop=None,
-            feature=None, release=None, hotfix=None,
-            support=None, force_defaults=False):
-
+    def init(self, master=None, develop=None, prefixes={}, force_defaults=False):
         if self.repo is None:
             try:
                 self.repo = Repo(self.working_dir)
@@ -115,8 +107,7 @@ class GitFlow(object):
                 # Try it again with an inited git repo
                 self.repo = Repo(self.working_dir)
 
-        self._init_config(master, develop, feature, release, hotfix, support,
-                force_defaults)
+        self._init_config(master, develop, prefixes, force_defaults)
         self._init_initial_commit()
         self._init_develop_branch()
 
@@ -186,17 +177,8 @@ class GitFlow(object):
     def master(self):
         return self.repo.branches[self.master_name()]
 
-    def feature_prefix(self):
-        return self._safe_get('gitflow.prefix.feature')
-
-    def hotfix_prefix(self):
-        return self._safe_get('gitflow.prefix.hotfix')
-
-    def release_prefix(self):
-        return self._safe_get('gitflow.prefix.release')
-
-    def support_prefix(self):
-        return self._safe_get('gitflow.prefix.support')
+    def get_prefix(self, identifier):
+        return self._safe_get('gitflow.prefix.%s' % (identifier,))
 
 
     @requires_repo

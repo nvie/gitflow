@@ -39,10 +39,10 @@ class TestGitFlow(TestCase):
         gitflow.init()
         self.assertEquals('production', gitflow.master_name())
         self.assertEquals('master', gitflow.develop_name())
-        self.assertEquals('f-', gitflow.feature_prefix())
-        self.assertEquals('hf-', gitflow.hotfix_prefix())
-        self.assertEquals('rel-', gitflow.release_prefix())
-        self.assertEquals('supp-', gitflow.support_prefix())
+        self.assertEquals('f-', gitflow.get_prefix('feature'))
+        self.assertEquals('rel-', gitflow.get_prefix('release'))
+        self.assertEquals('hf-', gitflow.get_prefix('hotfix'))
+        self.assertEquals('supp-', gitflow.get_prefix('support'))
 
 
     # Initialization
@@ -120,10 +120,7 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(self.repo)
         self.assertRaises(NotInitialized, gitflow.master_name)
         self.assertRaises(NotInitialized, gitflow.develop_name)
-        self.assertRaises(NotInitialized, gitflow.feature_prefix)
-        self.assertRaises(NotInitialized, gitflow.hotfix_prefix)
-        self.assertRaises(NotInitialized, gitflow.release_prefix)
-        self.assertRaises(NotInitialized, gitflow.support_prefix)
+        self.assertRaises(NotInitialized, gitflow.get_prefix, 'feature')
 
     @sandboxed_git_repo
     def test_gitflow_init_initializes_default_config(self):
@@ -131,22 +128,22 @@ class TestGitFlow(TestCase):
         gitflow.init()
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('develop', gitflow.develop_name())
-        self.assertEquals('feature/', gitflow.feature_prefix())
-        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
-        self.assertEquals('release/', gitflow.release_prefix())
-        self.assertEquals('support/', gitflow.support_prefix())
+        self.assertEquals('feature/', gitflow.get_prefix('feature'))
+        self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
+        self.assertEquals('release/', gitflow.get_prefix('release'))
+        self.assertEquals('support/', gitflow.get_prefix('support'))
 
     @sandboxed_git_repo
     def test_gitflow_init_with_alternative_config(self):
         gitflow = GitFlow(self.repo)
-        gitflow.init(master='foo', develop='bar', feature='f-', hotfix='hf-',
-                release='rel-', support='supp-')
+        prefixes = dict(feature='f-', hotfix='hf-', release='rel-', support='supp-')
+        gitflow.init(master='foo', develop='bar', prefixes=prefixes)
         self.assertEquals('foo', gitflow.master_name())
         self.assertEquals('bar', gitflow.develop_name())
-        self.assertEquals('f-', gitflow.feature_prefix())
-        self.assertEquals('hf-', gitflow.hotfix_prefix())
-        self.assertEquals('rel-', gitflow.release_prefix())
-        self.assertEquals('supp-', gitflow.support_prefix())
+        self.assertEquals('f-', gitflow.get_prefix('feature'))
+        self.assertEquals('rel-', gitflow.get_prefix('release'))
+        self.assertEquals('hf-', gitflow.get_prefix('hotfix'))
+        self.assertEquals('supp-', gitflow.get_prefix('support'))
 
     @copy_from_fixture('partly_inited')
     def test_gitflow_init_config_with_partly_inited(self):
@@ -155,13 +152,13 @@ class TestGitFlow(TestCase):
 
         # Already set in fixture, shouldn't change
         self.assertEquals('production', gitflow.master_name())
-        self.assertEquals('f-', gitflow.feature_prefix())
+        self.assertEquals('f-', gitflow.get_prefix('feature'))
 
         # Implicit defaults
         self.assertEquals('develop', gitflow.develop_name())
-        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
-        self.assertEquals('release/', gitflow.release_prefix())
-        self.assertEquals('support/', gitflow.support_prefix())
+        self.assertEquals('release/', gitflow.get_prefix('release'))
+        self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
+        self.assertEquals('support/', gitflow.get_prefix('support'))
 
     @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_commits(self):
@@ -202,13 +199,13 @@ class TestGitFlow(TestCase):
 
         # Implicit defaults
         self.assertEquals('develop', gitflow.develop_name())
-        self.assertEquals('hotfix/', gitflow.hotfix_prefix())
-        self.assertEquals('release/', gitflow.release_prefix())
-        self.assertEquals('support/', gitflow.support_prefix())
+        self.assertEquals('release/', gitflow.get_prefix('release'))
+        self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
+        self.assertEquals('support/', gitflow.get_prefix('support'))
 
         # Explicitly forced back to defaults
         self.assertEquals('master', gitflow.master_name())
-        self.assertEquals('feature/', gitflow.feature_prefix())
+        self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
 
     # branch type detection
@@ -227,6 +224,7 @@ class TestGitFlow(TestCase):
         # Declare a custom branch type inline
         class FooBarManager(BranchManager):
             identifier = 'foobar'
+            prefix = 'xyz/'
 
         gitflow = GitFlow()
         self.assertIn('foobar', gitflow.managers)
