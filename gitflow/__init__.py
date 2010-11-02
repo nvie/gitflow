@@ -7,7 +7,3 @@ __author__ = "Vincent Driessen"
 __contact__ = "vincent@datafox.nl"
 __homepage__ = "http://github.com/nvie/gitflow/"
 __docformat__ = "restructuredtext"
-
-from core import GitFlow, NotInitialized, BranchExists, InvalidOperation
-
-__all__ = ['GitFlow', 'NotInitialized', 'BranchExists', 'InvalidOperation']
