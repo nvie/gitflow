@@ -39,6 +39,16 @@ class BranchManager(object):
         return len(commits) == 1
 
     def merge(self, name, into, message=None):
+        """
+        This merges the branch named :name: into the branch named :into:, using
+        commit message :message:.  If :message: is not given, a default merge
+        message is used.  If :message: is given, you can use the following
+        string placeholders, which merge will expand:
+
+        %(name)s       = The full name of the branch, including the prefix
+        %(short_name)s = The friendly name of the branch, without prefix
+        %(identifier)s = The kind of branch
+        """
         repo = self.gitflow.repo
         repo.branches[into].checkout()
         full_name = self.prefix + name
