@@ -38,8 +38,11 @@ class TestGenericBranchManager(TestCase):
 class TestFeatureBranchManager(TestCase):
     # Helper methods
     def fake_commit(self, message):
-        with open('newfile.py', 'a') as f:
+        f = open('newfile.py', 'a')
+        try:
             f.write('This is a dummy change.\n')
+        finally:
+            f.close()
         self.repo.index.add(['newfile.py'])
         self.repo.index.commit(message)
 
