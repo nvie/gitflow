@@ -7,11 +7,6 @@ class BranchManager(object):
     manager is responsible for listing, creating, merging, deleting,
     finishing (i.e. merging+deleting) branches of a given type.
 
-    :class:`BranchManager` is the abstract base class for all concrete
-    branch managers.  Each type of branch in git-flow (e.g. feature,
-    release, hotfix and support branches) has a corresponding branch
-    manager.
-
     :param gitflow:
         The :class:`gitflow.core.GitFlow` instance that this branch
         manager belongs to.
@@ -55,6 +50,18 @@ class BranchManager(object):
                 yield branch
 
     def create(self, name, base=None):
+        """
+        Creates a branch of the type that this manager manages and checks it
+        out.
+
+        :param name:
+            The (short) name of the branch to create.
+
+        :param base:
+            The base commit or ref to base the branch off from.  If a base is
+            not provided explicitly, the default base for this type of branch is
+            used.  See also :meth:`default_base`.
+        """
         repo = self.gitflow.repo
 
         full_name = self.prefix + name
@@ -64,7 +71,7 @@ class BranchManager(object):
         branch.checkout()
         return branch
 
-    def is_single_commit_branch(self, from_, to):
+    def _is_single_commit_branch(self, from_, to):
         git = self.gitflow.repo.git
         commits = git.rev_list('%s...%s' % (from_, to), n=2).split()
         return len(commits) == 1
@@ -85,7 +92,7 @@ class BranchManager(object):
 
                 %(name)s = The full name of the branch (e.g. "feature/foo")
                 %(short_name)s = The friendly name of the branch (e.g. "foo")
-                %(identifier)s = The kind (e.g. "feature", "hotfix", etc.)
+                %(identifier)s = The type (e.g. "feature", "hotfix", etc.)
 
         You typically don't need to override this method in a subclass.
         """
@@ -94,7 +101,7 @@ class BranchManager(object):
         full_name = self.prefix + name
 
         kwargs = dict()
-        if not self.is_single_commit_branch(into, full_name):
+        if not self._is_single_commit_branch(into, full_name):
             kwargs['no_ff'] = True
         if not message is None:
             message = message % \
@@ -104,11 +111,33 @@ class BranchManager(object):
         repo.git.merge(full_name, **kwargs)
 
     def delete(self, name, force=False):
+        """
+        This deletes a branch of the type that this manager manages named
+        :attr:`name`.
+
+        :param name:
+            The (short) name of the branch to delete.
+
+        :param force:
+            Delete the branch, even if this would lead to data loss.
+        """
         repo = self.gitflow.repo
         full_name = self.prefix + name
         repo.delete_head(full_name, force=force)
 
     def finish(self, name):
+        """
+        Finishes the branch of the type that this manager manages named
+        :attr:`name`.  Finishing means that:
+
+        * The branch is merged into all branches that require it to be merged
+          in to.  The model prescribes the branching/merging rules for each
+          branch type, so this depends on the implementing subclass.
+        * The branch is deleted if all merges are successful.
+
+        :param name:
+            The (short) name of the branch to finish.
+        """
         self.merge(name, self.gitflow.develop_name(),
                 'Finished %(identifier)s %(short_name)s.')
         self.delete(name)
