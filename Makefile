@@ -1,7 +1,15 @@
 all: cover
 
-clean:
+doc:
+	cd docs && make html
+
+clean-docs:
+	cd docs && make clean
+
+clean-files:
 	find . -name '*.pyc' -exec rm {} \;
+
+clean: clean-files clean-docs
 
 test:
 	nosetests

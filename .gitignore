@@ -9,3 +9,4 @@
 /.coverage
 /.achievements
 /.tox
+/docs/_build
