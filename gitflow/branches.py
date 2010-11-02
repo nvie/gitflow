@@ -30,6 +30,7 @@ class BranchManager(object):
         from in case no explicit base is specified.
 
         This method can be overriden in a subclass of :class:`BranchManager`.
+        If not overriden, the default is to use the "develop" branch.
         """
         return self.gitflow.develop_name()
 
