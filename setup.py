@@ -15,7 +15,7 @@ if os.path.exists("README.rst"):
 else:
     long_description = "See http://github.com/nvie/gitflow/tree/master"
 
-install_requires = ['GitPython >= 0.3.0-beta3']
+install_requires = ['GitPython']
 
 setup(
     name="gitflow",

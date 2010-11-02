@@ -6,5 +6,6 @@
 /build
 /dist
 /pip-log.txt
-.coverage
-.achievements
+/.coverage
+/.achievements
+/.tox
