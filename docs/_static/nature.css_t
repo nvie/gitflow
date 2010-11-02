@@ -178,7 +178,7 @@ a.headerlink:hover {
 div.body p, div.body dd, div.body li {
     line-height: 1.5em;
 }
- 
+
 div.admonition p.admonition-title + p {
     display: inline;
 }
@@ -230,8 +230,8 @@ tt {
     background-color: #ecf0f3;
     color: #222;
     /* padding: 1px 2px; */
-    font-size: 1.1em;
-    font-family: monospace;
+    font-family: Consolas, Inconsolata, monospace;
+    font-size: 1.0em;
 }
 
 .viewcode-back {
@@ -242,4 +242,26 @@ div.viewcode-block:target {
     background-color: #f4debf;
     border-top: 1px solid #ac9;
     border-bottom: 1px solid #ac9;
+}
+
+/* ------------------ Custom CSS profile ------------------ */
+
+div.body p, div.body div {
+    font-family: 'Lucida Grande', Geneva, Helvetica, Arial, sans-serif;
+    font-size: 1.0em;
+}
+ 
+pre {
+    font-family: Consolas, Inconsolata, monospace;
+    font-size: 1.0em;
+}
+
+dl.method {
+    border-top: 1px solid #ddd;
+    padding-top: 8px;
+}
+
+table {
+    font-family: 'Lucida Grande', Geneva, Helvetica, Arial, sans-serif;
+    font-size: 1.0em;
 }
