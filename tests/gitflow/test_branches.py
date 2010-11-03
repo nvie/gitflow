@@ -424,11 +424,11 @@ class TestReleaseBranchManager(TestCase):
         mc1 = gitflow.master().commit
         dc1 = gitflow.develop().commit
 
-        # Feature finishes don't advance master, but develop
+        # Release finishes advance both master and develop
         self.assertNotEqual(mc0, mc1)
         self.assertNotEqual(dc0, dc1)
 
-        # Finishing removes the feature branch
+        # Finishing removes the release branch
         self.assertNotIn('release/1.0',
                 [b.name for b in self.repo.branches])
 
@@ -455,6 +455,33 @@ class TestHotfixBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['master'].commit)
 
+    @copy_from_fixture('sample_repo')
+    def test_finish_release(self):
+        gitflow = GitFlow(self.repo)
+        mgr = HotfixBranchManager(gitflow)
+        mgr.create('1.2.3')
+        fake_commit(self.repo, 'Bogus commit')
+        fake_commit(self.repo, 'Foo commit')
+        fake_commit(self.repo, 'Fake commit')
+        fake_commit(self.repo, 'Dummy commit')
+
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+        mgr.finish('1.2.3')
+        mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+
+        # Hotfix finishes advance both master and develop
+        self.assertNotEqual(mc0, mc1)
+        self.assertNotEqual(dc0, dc1)
+
+        # Finishing removes the hotfix branch
+        self.assertNotIn('hotfix/1.2.3',
+                [b.name for b in self.repo.branches])
+
+        # Merge commit message
+        self.assertEquals('Finished hotfix 1.2.3.\n', dc1.message)
+
 
 class TestSupportBranchManager(TestCase):
     @sandboxed_git_repo
@@ -474,4 +501,12 @@ class TestSupportBranchManager(TestCase):
         new_branch = mgr.create('legacy')
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['master'].commit)
+
+    @sandboxed_git_repo
+    def test_support_branches_cannot_be_finished(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = SupportBranchManager(gitflow)
+        mgr.create('1.x')
+        self.assertRaises(NotImplementedError, mgr.finish, '1.x')
 

@@ -168,6 +168,13 @@ class HotfixBranchManager(BranchManager):
     def default_base(self):
         return self.gitflow.master_name()
 
+    def finish(self, name):
+        self.merge(name, self.gitflow.master_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.merge(name, self.gitflow.develop_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.delete(name)
+
 
 class SupportBranchManager(BranchManager):
     identifier = 'support'
@@ -176,5 +183,7 @@ class SupportBranchManager(BranchManager):
     def default_base(self):
         return self.gitflow.master_name()
 
-        return self.gitflow.master_name()
+    def finish(self, name):
+        raise NotImplementedError("Finishing support branches does not make "
+                "any sense.")
 
