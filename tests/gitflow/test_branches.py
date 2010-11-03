@@ -78,8 +78,6 @@ class TestFeatureBranchManager(TestCase):
         new_branch = mgr.create('foo')
         self.assertEqual(1, len(mgr.list()))
         self.assertEqual('feature/foo', mgr.list()[0].name)
-        self.assertEqual(new_branch.commit,
-                gitflow.repo.branches['develop'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_create_new_feature_from_alt_base(self):
@@ -89,6 +87,15 @@ class TestFeatureBranchManager(TestCase):
         new_branch = mgr.create('foo', 'feature/even')
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['feature/even'].commit)
+
+    @sandboxed_git_repo
+    def test_feature_branch_origin(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        new_branch = mgr.create('foobar')
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['develop'].commit)
 
     @sandboxed_git_repo
     def test_create_existing_feature_branch_yields_raises_error(self):
@@ -329,6 +336,15 @@ class TestReleaseBranchManager(TestCase):
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')  # develop~1
         self.assertEqual(new_branch.commit.hexsha,
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')
+
+    @sandboxed_git_repo
+    def test_release_branch_origin(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        new_branch = mgr.create('1.1')
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['develop'].commit)
 
     @sandboxed_git_repo
     def test_create_existing_release_branch_yields_raises_error(self):
