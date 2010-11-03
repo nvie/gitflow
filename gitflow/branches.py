@@ -166,4 +166,8 @@ class SupportBranchManager(BranchManager):
     identifier = 'support'
     prefix = 'support/'
 
+    def default_base(self):
+        return self.gitflow.master_name()
+
+        return self.gitflow.master_name()
 
