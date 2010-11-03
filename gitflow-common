@@ -148,7 +148,7 @@ git_compare_branches() {
 git_is_branch_merged_into() {
 	local subject=$1
 	local base=$2
-	local all_merges=$(git branch --no-color --contains $subject | sed 's/^[* ] //')
+	local all_merges="$(git branch --no-color --contains $subject | sed 's/^[* ] //')"
 	has $base $all_merges
 }
 
