@@ -6,6 +6,16 @@ from gitflow.branches import BranchManager, FeatureBranchManager, \
 from tests.helpers import sandboxed_git_repo, copy_from_fixture
 
 
+def fake_commit(repo, message):
+    f = open('newfile.py', 'a')
+    try:
+        f.write('This is a dummy change.\n')
+    finally:
+        f.close()
+    repo.index.add(['newfile.py'])
+    repo.index.commit(message)
+
+
 class DummyBranchManager(BranchManager):
     """
     A fictious Dummy branch, used to test Branch functionality, but we need
@@ -36,18 +46,6 @@ class TestAbstractBranchManager(TestCase):
 
 
 class TestFeatureBranchManager(TestCase):
-    # Helper methods
-    def fake_commit(self, message):
-        f = open('newfile.py', 'a')
-        try:
-            f.write('This is a dummy change.\n')
-        finally:
-            f.close()
-        self.repo.index.add(['newfile.py'])
-        self.repo.index.commit(message)
-
-
-    # Tests
     @copy_from_fixture('sample_repo')
     def test_list(self):
         gitflow = GitFlow()
@@ -156,8 +154,8 @@ class TestFeatureBranchManager(TestCase):
 
         self.assertEquals(2, len(mgr.list()))
         mgr.create('foo')
-        self.fake_commit('Dummy commit #1')
-        self.fake_commit('Dummy commit #2')
+        fake_commit(self.repo, 'Dummy commit #1')
+        fake_commit(self.repo, 'Dummy commit #2')
         mgr.merge('foo', 'develop')
 
         self.assertEquals(3, len(mgr.list()))
