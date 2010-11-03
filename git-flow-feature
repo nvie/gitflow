@@ -184,6 +184,32 @@ parse_args() {
 	BRANCH=$PREFIX$NAME
 }
 
+parse_base_name () {
+	parse_cmdline "$@"
+	
+	if [ $# -eq 1 ]; then
+		NAME=$1
+		BRANCH=$PREFIX$NAME
+		BASE=$DEVELOP_BRANCH
+	fi
+	if [ $# -eq 2 ]; then
+		if [ $1 == "-F" ]; then
+			NAME=$2
+			BRANCH=$PREFIX$NAME
+			BASE=$DEVELOP_BRANCH
+		else
+			NAME=$1
+			BRANCH=$PREFIX$NAME
+			BASE=$2
+		fi
+	fi
+	if [ $# -eq 3 ]; then
+		NAME=$2
+		BRANCH=$PREFIX$NAME
+		BASE=$3
+	fi
+}
+
 parse_remote_name() {
 	parse_cmdline "$@"
 
@@ -195,13 +221,12 @@ parse_remote_name() {
 
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
-	parse_args "$@"
-	BASE=${2:-$DEVELOP_BRANCH}
+	parse_base_name "$@"
 	require_name_arg
-
-	# sanity checks
+	
+	#sanity checks
 	require_branch_absent "$BRANCH"
-
+	
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
