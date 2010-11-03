@@ -131,6 +131,32 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
+parse_base_name() {
+    parse_cmdline "$@"
+
+    if [ $# -eq 1 ]; then
+        VERSION=$1
+        BRANCH=$PREFIX$VERSION
+        BASE=$DEVELOP_BRANCH
+    fi
+    if [ $# -eq 2 ]; then
+        if [ $1 == "-F" ]; then
+            VERSION=$2
+            BRANCH=$PREFIX$VERSION
+            BASE=$DEVELOP_BRANCH
+        else
+            VERSION=$1
+            BRANCH=$PREFIX$VERSION
+            BASE=$2
+        fi
+    fi
+    if [ $# -eq 3 ]; then
+        VERSION=$2
+        BRANCH=$PREFIX$VERSION
+        BASE=$3
+    fi
+}
+
 require_version_arg() {
 	if [ "$VERSION" = "" ]; then
 		warn "Missing argument <version>"
@@ -157,7 +183,7 @@ require_base_is_on_master() {
 
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
-	parse_args "$@"
+	parse_base_name "$@"
 	require_version_arg
 	require_base_arg
 	require_base_is_on_master
