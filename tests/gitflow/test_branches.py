@@ -6,32 +6,32 @@ from gitflow.branches import BranchManager, FeatureBranchManager, \
 from tests.helpers import sandboxed_git_repo, copy_from_fixture
 
 
-class FooBranchManager(BranchManager):
+class DummyBranchManager(BranchManager):
     """
-    A fictious Foo branch, used to test Branch functionality, but we need
+    A fictious Dummy branch, used to test Branch functionality, but we need
     a concrete class, since Branch is an "abstract" class.
     """
     identifier = 'abc'
     prefix = 'xyz/'
 
 
-class TestGenericBranchManager(TestCase):
+class TestAbstractBranchManager(TestCase):
     @sandboxed_git_repo
     def test_default_prefix(self):
         gitflow = GitFlow()
-        fb = FooBranchManager(gitflow)
+        fb = DummyBranchManager(gitflow)
         self.assertEquals('xyz/', fb.prefix)
 
     @sandboxed_git_repo
     def test_explicit_prefix(self):
         gitflow = GitFlow()
-        fb = FooBranchManager(gitflow, 'xyz-')
+        fb = DummyBranchManager(gitflow, 'xyz-')
         self.assertEquals('xyz-', fb.prefix)
 
     @sandboxed_git_repo
     def test_explicit_empty_prefix(self):
         gitflow = GitFlow()
-        fb = FooBranchManager(gitflow, '')
+        fb = DummyBranchManager(gitflow, '')
         self.assertEquals('', fb.prefix)
 
 
