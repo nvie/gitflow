@@ -153,6 +153,13 @@ class ReleaseBranchManager(BranchManager):
     identifier = 'release'
     prefix = 'release/'
 
+    def finish(self, name):
+        self.merge(name, self.gitflow.master_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.merge(name, self.gitflow.develop_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.delete(name)
+
 
 class HotfixBranchManager(BranchManager):
     identifier = 'hotfix'
