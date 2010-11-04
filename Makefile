@@ -11,6 +11,9 @@ clean-files:
 
 clean: clean-files clean-docs
 
+xunit-test:
+	nosetests --with-xunit
+
 test:
 	nosetests
 
