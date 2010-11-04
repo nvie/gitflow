@@ -242,6 +242,18 @@ class TestGitFlow(TestCase):
         self.assertIn('release/1.0',
                 [h.name for h in gitflow.repo.branches])
 
+    @sandboxed_git_repo
+    def test_create_branches_from_alt_base(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        gitflow.create('feature', 'foo', 'master')
+        self.assertIn('feature/foo',
+                [h.name for h in gitflow.repo.branches])
+        gitflow.repo.index.commit('Foo')
+        gitflow.create('release', '1.0', 'feature/foo')
+        self.assertIn('release/1.0',
+                [h.name for h in gitflow.repo.branches])
+
 
     """
     Use case:
