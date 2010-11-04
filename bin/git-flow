@@ -36,9 +36,6 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
 #
-import sys
-sys.path.insert(0, '/Users/nvie/Projects/gitflow')
-
 try:
     from gitflow.bin import main
     main()
