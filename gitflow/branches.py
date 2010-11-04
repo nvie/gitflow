@@ -26,8 +26,9 @@ class BranchManager(object):
 
     def default_base(self):
         """
-        Returns the name of branch to use as the default base for branching off
-        from in case no explicit base is specified.
+        :returns:
+            The name of branch to use as the default base for branching off from
+            in case no explicit base is specified.
 
         This method can be overriden in a subclass of :class:`BranchManager`.
         If not overriden, the default is to use the "develop" branch.
@@ -36,15 +37,17 @@ class BranchManager(object):
 
     def list(self):
         """
-        Returns a list of all branches of the type that this manager
-        manages.  See also :meth:`iter`.
+        :returns:
+            A list of all branches of the type that this manager manages.  See
+            also :meth:`iter`.
         """
         return list(self.iter())
 
     def iter(self):
         """
-        Returns an iterator, iterating over all branches of the type that
-        this manager manages.
+        :returns:
+            An iterator, iterating over all branches of the type that this
+            manager manages.
         """
         for branch in self.gitflow.repo.branches:
             if branch.name.startswith(self.prefix):
@@ -62,6 +65,9 @@ class BranchManager(object):
             The base commit or ref to base the branch off from.  If a base is
             not provided explicitly, the default base for this type of branch is
             used.  See also :meth:`default_base`.
+
+        :returns:
+            The newly created :class:`git.refs.Head` reference.
         """
         repo = self.gitflow.repo
 
