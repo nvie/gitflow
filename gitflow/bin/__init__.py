@@ -48,19 +48,6 @@ class InitCommand(GitFlowCommand):
         print('-------------------')
 
 
-class ReleaseCommand(GitFlowCommand):
-    def register_parser(self, parent):
-        p = parent.add_parser('release', help='Manage your release branches.')
-        p.add_argument('-v', '--verbose', action='store_true',
-           help='be verbose (more output)')
-        p.set_defaults(func=self.run)
-        return p
-
-    def run(self, args):
-        print 'release ran'
-        print(args)
-
-
 class FeatureCommand(GitFlowCommand):
     def register_parser(self, parent):
         p = parent.add_parser('feature', help='Manage your feature branches.')
@@ -180,6 +167,19 @@ class FeatureCommand(GitFlowCommand):
     def run_rebase(self, args): pass
     def run_checkout(self, args): pass
     def run_pull(self, args): pass
+
+
+class ReleaseCommand(GitFlowCommand):
+    def register_parser(self, parent):
+        p = parent.add_parser('release', help='Manage your release branches.')
+        p.add_argument('-v', '--verbose', action='store_true',
+           help='be verbose (more output)')
+        p.set_defaults(func=self.run)
+        return p
+
+    def run(self, args):
+        print 'release ran'
+        print(args)
 
 
 class VersionCommand(GitFlowCommand):
