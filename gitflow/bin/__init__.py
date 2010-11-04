@@ -14,6 +14,7 @@ git-flow
 
 """
 import argparse
+from gitflow.core import GitFlow
 from gitflow.util import itersubclasses
 
 
@@ -128,8 +129,9 @@ class FeatureCommand(GitFlowCommand):
         p.add_argument('name', nargs='?')
 
     def run_list(self, args):
-        require_gitflow_initialized()
-        branches = feature_branches()
+        gitflow = GitFlow()
+        manager = gitflow.managers['feature']
+        branches = manager.list()
         if not branches:
             warn('No feature branches exist.')
             warn('')
@@ -141,27 +143,24 @@ class FeatureCommand(GitFlowCommand):
 
         # determine the longest branch name
         lenfunc = lambda b: len(b.name)
-        width = max(map(lenfunc, branches)) + 3
+        width = max(map(lenfunc, branches)) - len(manager.prefix) + 3
 
-        # lookup the SHA's that don't change
-        g = Git()
-        develop_commit = develop_branch().object
-        develop_sha = develop_commit.hexsha
+        develop_sha = gitflow.develop().commit.hexsha
 
         for branch in branches:
-            is_active = get_repo().active_branch.name == branch.fullname
-            prefix = '  '
+            is_active = gitflow.repo.active_branch == branch
             if is_active:
                 prefix = '* '
+            else:
+                prefix = '  '
 
-            name = branch.name
+            name = manager.shorten(branch.name)
             extra_info = ''
 
             if args.verbose:
                 name = name.ljust(width)
-                commit = branch.branch.object
-                branch_sha = commit.hexsha
-                base_sha = g.merge_base(develop_sha, branch_sha)
+                branch_sha = branch.commit.hexsha
+                base_sha = gitflow.repo.git.merge_base(develop_sha, branch_sha)
                 if branch_sha == develop_sha:
                     extra_info = '(no commits yet)'
                 elif base_sha == branch_sha:
