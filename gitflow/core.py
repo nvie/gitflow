@@ -194,6 +194,23 @@ class GitFlow(object):
         return map(lambda h: h.name, self.repo.branches)
 
 
+    def create(self, identifier, name):
+        """
+        Creates a branch of the given type, with the given short name.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+
+        :returns:
+            The newly created :class:`git.refs.Head` branch.
+        """
+        return self.managers[identifier].create(name)
+
     @requires_repo
     def status(self):
         result = []

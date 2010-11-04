@@ -230,6 +230,19 @@ class TestGitFlow(TestCase):
         self.assertIn('foobar', gitflow.managers)
 
 
+    # branch creation
+    @sandboxed_git_repo
+    def test_create_branches(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        gitflow.create('feature', 'foo')
+        self.assertIn('feature/foo',
+                [h.name for h in gitflow.repo.branches])
+        gitflow.create('release', '1.0')
+        self.assertIn('release/1.0',
+                [h.name for h in gitflow.repo.branches])
+
+
     """
     Use case:
 
