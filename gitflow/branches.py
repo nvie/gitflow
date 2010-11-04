@@ -143,6 +143,23 @@ class BranchManager(object):
                 'Finished %(identifier)s %(short_name)s.')
         self.delete(name)
 
+    def shorten(self, full_name):
+        """
+        Returns the friendly (short) name of this branch, without the prefix,
+        given the fully qualified branch name.
+
+        :param full_name:
+            The full name of the branch as it is known to Git, including the
+            prefix.
+
+        :returns:
+            The friendly name of the branch.
+        """
+        if full_name.startswith(self.prefix):
+            return full_name[len(self.prefix):]
+        else:
+            return full_name
+
 
 class FeatureBranchManager(BranchManager):
     identifier = 'feature'

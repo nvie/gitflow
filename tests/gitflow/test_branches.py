@@ -44,6 +44,13 @@ class TestAbstractBranchManager(TestCase):
         fb = DummyBranchManager(gitflow, '')
         self.assertEquals('', fb.prefix)
 
+    @sandboxed_git_repo
+    def test_shorten(self):
+        gitflow = GitFlow()
+        fb = DummyBranchManager(gitflow)
+        self.assertEquals('foo', fb.shorten('xyz/foo'))
+        self.assertEquals('feature/foo', fb.shorten('feature/foo'))
+
 
 class TestFeatureBranchManager(TestCase):
     @copy_from_fixture('sample_repo')
