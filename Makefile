@@ -14,6 +14,10 @@ clean: clean-files clean-docs
 test:
 	nosetests
 
+test-dist:
+	PIP_DOWNLOAD_CACHE=~/Projects/pkgrepo/pkgs
+	tox
+
 cover:
 	nosetests --with-coverage3 --cover-package=gitflow
 
