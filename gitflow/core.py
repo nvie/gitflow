@@ -1,3 +1,6 @@
+import datetime
+import os
+import simplejson
 from functools import wraps
 from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
@@ -23,6 +26,65 @@ class BranchExists(Exception):
 
 class InvalidOperation(Exception):
     pass
+
+
+class Snapshot(object):
+    __slots__ = ('gitflow', 'date', 'description', 'state')
+
+    def __init__(self, gitflow, snapdate, description, state=None):
+        self.gitflow = gitflow
+        self.date = snapdate
+        self.description = description
+        if state is None:
+            self.state = self.gitflow.status()
+        else:
+            self.state = state
+
+    @classmethod
+    def snap(cls, gitflow, description, snapdate=None):
+        if snapdate is None:
+            snapdate = datetime.datetime.now()
+        snapshot = Snapshot(gitflow, snapdate, description)
+        snapshot.write()
+        return Snapshot
+
+
+    def __hash__(self, other):
+        return hash(self.gitflow) ^ hash(self.date) ^ \
+                hash(self.description) ^ hash(self.state)
+
+    def __eq__(self, other):
+        return self.gitflow == other.gitflow and \
+            self.date == other.date and \
+            self.description == other.description and \
+            self.state == other.state
+
+
+    def write(self):
+        git_dir = self.gitflow.repo.git_dir
+        undofile = 'gitflow.undo'
+        undofile = os.path.join(git_dir, undofile)
+        f = open(undofile, 'w')
+        simplejson.dump(self.gitflow.status(), f)
+        f.close()
+
+    @classmethod
+    def read(self, gitflow):
+        git_dir = gitflow.repo.git_dir
+        undofile = 'gitflow.undo'
+        undofile = os.path.join(git_dir, undofile)
+        f = open(undofile, 'r')
+        try:
+            # simplejson can only store lists, so convert them back to tuples to
+            # be able to compare them
+            state = [tuple(l) for l in simplejson.load(f)]
+        finally:
+            f.close()
+        snapshot = Snapshot(gitflow,
+                # TODO: Read date + description from file!
+                datetime.datetime.now(),
+                'Some message', state)
+        return snapshot
 
 
 class GitFlow(object):
@@ -240,5 +302,16 @@ class GitFlow(object):
             tup = (b.name, b.commit.hexsha, b == active_branch)
             result.append(tup)
         return result
+
+
+    @requires_repo
+    def make_snapshot(self):
+        import simplejson
+        status = self.status()
+        simplejson.dumps(status)
+
+    @requires_repo
+    def start_transaction(self):
+        make_snapshot()
 
 
