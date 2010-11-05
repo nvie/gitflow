@@ -215,7 +215,7 @@ class GitFlow(object):
         """
         return self.managers[identifier].create(name, base)
 
-    def finish(self, identifier, name):
+    def finish(self, identifier, nameprefix):
         """
         Finishes a branch of the given type, with the given short name.
 
@@ -227,7 +227,9 @@ class GitFlow(object):
         :param name:
             The friendly (short) name to finish.
         """
-        self.managers[identifier].finish(name)
+        mgr = self.managers[identifier]
+        branch = mgr.by_name_prefix(nameprefix)
+        mgr.finish(mgr.shorten(branch.name))
 
 
     @requires_repo
