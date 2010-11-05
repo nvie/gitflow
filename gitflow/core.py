@@ -34,14 +34,11 @@ class InvalidOperation(Exception):
 class Snapshot(object):
     __slots__ = ('gitflow', 'date', 'description', 'state')
 
-    def __init__(self, gitflow, snapdate, description, state=None):
+    def __init__(self, gitflow, snapdate, description):
         self.gitflow = gitflow
         self.date = snapdate
         self.description = description
-        if state is None:
-            self.state = self.gitflow.status()
-        else:
-            self.state = state
+        self.state = self.gitflow.status()
 
     @classmethod
     def snap(cls, gitflow, description, snapdate=None):
