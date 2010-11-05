@@ -1,6 +1,13 @@
 from git import GitCommandError
 
 
+class NoSuchBranchError(Exception):
+    pass
+
+class PrefixNotUniqueError(Exception):
+    pass
+
+
 class BranchManager(object):
     """
     Initializes an instance of :class:`BranchManager`.  A branch
@@ -42,6 +49,34 @@ class BranchManager(object):
             also :meth:`iter`.
         """
         return list(self.iter())
+
+    def by_name_prefix(self, nameprefix):
+        """
+        If exactly one branch of the type that this manager manages starts with
+        the given name prefix, returns that branch.  Raises
+        :exc:`NoSuchBranchError` in case no branches exist with the given
+        prefix, or :exc:`PrefixNotUniqueError` in case multiple matches are
+        found.
+
+        :param nameprefix:
+            The name prefix (or full name) of the short branch name to match.
+
+        :returns:
+            The :class:`git.refs.Head` instance of the branch that can be
+            uniquely identified by the given name prefix.
+        """
+        matches = filter(lambda b: self.shorten(b.name).startswith(nameprefix),
+                self.iter())
+        num_matches = len(matches)
+        if num_matches == 1:
+            return matches[0]
+        elif num_matches < 1:
+            raise NoSuchBranchError('There is no %s branch matching the '
+                    'prefix "%s"' % (self.identifier, nameprefix))
+        else:
+            raise PrefixNotUniqueError('There are multiple %s branches '
+                    'matching the prefix "%s": %s' % (self.identifier,
+                        nameprefix, matches))
 
     def iter(self):
         """

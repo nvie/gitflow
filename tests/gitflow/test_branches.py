@@ -2,7 +2,8 @@ from unittest2 import TestCase, skip
 from git import GitCommandError
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager, FeatureBranchManager, \
-        ReleaseBranchManager, HotfixBranchManager, SupportBranchManager
+        ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
+        PrefixNotUniqueError, NoSuchBranchError
 from tests.helpers import sandboxed_git_repo, copy_from_fixture
 
 
@@ -72,6 +73,22 @@ class TestFeatureBranchManager(TestCase):
         mgr = FeatureBranchManager(gitflow, 'fb-')
         expected = []
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
+
+
+    @copy_from_fixture('sample_repo')
+    def test_by_nameprefix(self):
+        gitflow = GitFlow()
+        mgr = FeatureBranchManager(gitflow)
+        self.assertEquals('feature/even', mgr.by_name_prefix('e').name)
+        self.assertEquals('feature/recursion', mgr.by_name_prefix('re').name)
+
+    @copy_from_fixture('sample_repo')
+    def test_by_nameprefix_not_unique_enough(self):
+        gitflow = GitFlow()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('rescue')
+        self.assertRaises(PrefixNotUniqueError, mgr.by_name_prefix, 're')
+        self.assertRaises(NoSuchBranchError, mgr.by_name_prefix, 'nonexisting')
 
 
     @sandboxed_git_repo
