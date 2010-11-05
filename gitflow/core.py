@@ -215,6 +215,21 @@ class GitFlow(object):
         """
         return self.managers[identifier].create(name, base)
 
+    def finish(self, identifier, name):
+        """
+        Finishes a branch of the given type, with the given short name.
+
+        :param identifier:
+            The identifier for the type of branch to finish.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to finish.
+        """
+        self.managers[identifier].finish(name)
+
+
     @requires_repo
     def status(self):
         result = []

@@ -163,7 +163,10 @@ class FeatureCommand(GitFlowCommand):
         gitflow = GitFlow()
         gitflow.create('feature', args.name, args.base)
 
-    def run_finish(self, args): pass
+    def run_finish(self, args):
+        gitflow = GitFlow()
+        gitflow.finish('feature', args.nameprefix)
+
     def run_publish(self, args): pass
     def run_track(self, args): pass
     def run_diff(self, args): pass
