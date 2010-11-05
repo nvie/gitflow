@@ -1,6 +1,9 @@
 import datetime
 import os
-import pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from functools import wraps
 from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
