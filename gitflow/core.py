@@ -1,6 +1,6 @@
 import datetime
 import os
-import simplejson
+import pickle
 from functools import wraps
 from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
@@ -55,17 +55,29 @@ class Snapshot(object):
 
     def __eq__(self, other):
         return self.gitflow == other.gitflow and \
-            self.date == other.date and \
-            self.description == other.description and \
-            self.state == other.state
+                self.date == other.date and \
+                self.description == other.description and \
+                self.state == other.state
 
+
+    def __getstate__(self):
+        return dict(date=self.date,
+                description=self.description,
+                state=self.state,
+                gitflow=None)
+
+    def __setstate__(self, obj):
+        self.date = obj['date']
+        self.description = obj['description']
+        self.state = obj['state']
+        self.gitflow = None
 
     def write(self):
         git_dir = self.gitflow.repo.git_dir
         undofile = 'gitflow.undo'
         undofile = os.path.join(git_dir, undofile)
         f = open(undofile, 'w')
-        simplejson.dump(self.gitflow.status(), f)
+        pickle.dump(self, f)
         f.close()
 
     @classmethod
@@ -75,15 +87,10 @@ class Snapshot(object):
         undofile = os.path.join(git_dir, undofile)
         f = open(undofile, 'r')
         try:
-            # simplejson can only store lists, so convert them back to tuples to
-            # be able to compare them
-            state = [tuple(l) for l in simplejson.load(f)]
+            snapshot = pickle.load(f)
+            snapshot.gitflow = gitflow
         finally:
             f.close()
-        snapshot = Snapshot(gitflow,
-                # TODO: Read date + description from file!
-                datetime.datetime.now(),
-                'Some message', state)
         return snapshot
 
 

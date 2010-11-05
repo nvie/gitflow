@@ -312,5 +312,4 @@ class TestSnapshot(TestCase):
 
         # Read it in again and compare the Snapshot objects
         s2 = Snapshot.read(gitflow)
-        # TODO: self.assertEquals(s, s2)
-        self.assertEquals(s.state, s2.state)
+        self.assertEquals(s, s2)
