@@ -10,6 +10,41 @@ from gitflow.core import Snapshot
 from gitflow.branches import BranchManager
 from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
 
+class TestSnapshot(TestCase):
+    @copy_from_fixture('sample_repo')
+    def test_create(self):
+        gitflow = GitFlow()
+
+        now = datetime.datetime.now()
+        s = Snapshot(gitflow, now, 'Some message')
+        self.assertEquals(s.date, now)
+        self.assertEquals(s.description, 'Some message')
+
+        # Just test for a single branch's existence here
+        tup = ('develop', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False)
+        self.assertIn(tup, s.state)
+
+    @copy_from_fixture('sample_repo')
+    def test_read_write(self):
+        gitflow = GitFlow()
+
+        # Write the snapshot to disk
+        now = datetime.datetime.now()
+        s = Snapshot(gitflow, now, 'Some message')
+        s.write()
+
+        git_dir = gitflow.repo.git_dir
+        undofile = os.path.join(git_dir, 'gitflow.undo')
+        self.assertTrue(os.path.exists(undofile))
+
+        contents = open(undofile, 'r').read()
+        found = contents.find('2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3') >= 0
+        self.assertTrue(found)
+
+        # Read it in again and compare the Snapshot objects
+        s2 = Snapshot.read(gitflow)
+        self.assertEquals(s, s2)
+
 
 class TestGitFlow(TestCase):
 
@@ -278,38 +313,3 @@ class TestGitFlow(TestCase):
 
     """
 
-
-class TestSnapshot(TestCase):
-    @copy_from_fixture('sample_repo')
-    def test_create(self):
-        gitflow = GitFlow()
-
-        now = datetime.datetime.now()
-        s = Snapshot(gitflow, now, 'Some message')
-        self.assertEquals(s.date, now)
-        self.assertEquals(s.description, 'Some message')
-
-        # Just test for a single branch's existence here
-        tup = ('develop', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False)
-        self.assertIn(tup, s.state)
-
-    @copy_from_fixture('sample_repo')
-    def test_read_write(self):
-        gitflow = GitFlow()
-
-        # Write the snapshot to disk
-        now = datetime.datetime.now()
-        s = Snapshot(gitflow, now, 'Some message')
-        s.write()
-
-        git_dir = gitflow.repo.git_dir
-        undofile = os.path.join(git_dir, 'gitflow.undo')
-        self.assertTrue(os.path.exists(undofile))
-
-        contents = open(undofile, 'r').read()
-        found = contents.find('2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3') >= 0
-        self.assertTrue(found)
-
-        # Read it in again and compare the Snapshot objects
-        s2 = Snapshot.read(gitflow)
-        self.assertEquals(s, s2)
