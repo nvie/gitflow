@@ -21,7 +21,7 @@ If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
 Another easy way to install git-flow is using Rick Osborne's excellent git-flow
 installer, which can be run using the following command:
 
-	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh --no-check-certificate | sudo sh
 
 ### Windows
 #### Using Cygwin
@@ -29,7 +29,7 @@ For Windows users who wish to use the automated install, it is suggested that yo
 first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
 during installation). Then simply run this command from a Cygwin shell:
 
-	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh --no-check-certificate | sh
 
 #### Using msysgit
 This is much like the manual installation below, but there are additional steps required to install some extra tools that
