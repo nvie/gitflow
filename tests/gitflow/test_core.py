@@ -5,6 +5,7 @@ import datetime
 from ConfigParser import NoOptionError, NoSectionError
 from git import Repo, GitCommandError
 import shutil
+from StringIO import StringIO
 from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
 from gitflow.core import Snapshot
 from gitflow.branches import BranchManager
@@ -30,29 +31,22 @@ class TestSnapshot(TestCase):
 
         # Write the snapshot to disk
         now = datetime.datetime.now()
+
+        f = StringIO()
+        self.addCleanup(f.close)
+
         s = Snapshot(gitflow, now, 'Some message')
+        s.write(f)
+        f.seek(0)  # Fake "reopen"
 
-        git_dir = gitflow.repo.git_dir
-        undofile = 'gitflow.undo'
-        undofile = os.path.join(git_dir, undofile)
-        f = open(undofile, 'w')
-        try:
-            s.write(f)
-        finally:
-            f.close()
-
-        self.assertTrue(os.path.exists(undofile))
-
-        contents = open(undofile, 'r').read()
+        # Test contents
+        contents = f.read()
         found = contents.find('2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3') >= 0
         self.assertTrue(found)
 
         # Read it in again and compare the Snapshot objects
-        f = open(undofile, 'r')
-        try:
-            s2 = Snapshot.read(gitflow, f)
-        finally:
-            f.close()
+        f.seek(0)  # Fake "reopen"
+        s2 = Snapshot.read(gitflow, f)
         self.assertEquals(s, s2)
 
 
