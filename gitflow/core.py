@@ -72,25 +72,13 @@ class Snapshot(object):
         self.state = obj['state']
         self.gitflow = None
 
-    def write(self):
-        git_dir = self.gitflow.repo.git_dir
-        undofile = 'gitflow.undo'
-        undofile = os.path.join(git_dir, undofile)
-        f = open(undofile, 'w')
-        pickle.dump(self, f)
-        f.close()
+    def write(self, writeable):
+        pickle.dump(self, writeable)
 
     @classmethod
-    def read(self, gitflow):
-        git_dir = gitflow.repo.git_dir
-        undofile = 'gitflow.undo'
-        undofile = os.path.join(git_dir, undofile)
-        f = open(undofile, 'r')
-        try:
-            snapshot = pickle.load(f)
-            snapshot.gitflow = gitflow
-        finally:
-            f.close()
+    def read(self, gitflow, readable):
+        snapshot = pickle.load(readable)
+        snapshot.gitflow = gitflow
         return snapshot
 
 

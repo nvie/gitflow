@@ -31,10 +31,16 @@ class TestSnapshot(TestCase):
         # Write the snapshot to disk
         now = datetime.datetime.now()
         s = Snapshot(gitflow, now, 'Some message')
-        s.write()
 
         git_dir = gitflow.repo.git_dir
-        undofile = os.path.join(git_dir, 'gitflow.undo')
+        undofile = 'gitflow.undo'
+        undofile = os.path.join(git_dir, undofile)
+        f = open(undofile, 'w')
+        try:
+            s.write(f)
+        finally:
+            f.close()
+
         self.assertTrue(os.path.exists(undofile))
 
         contents = open(undofile, 'r').read()
@@ -42,7 +48,11 @@ class TestSnapshot(TestCase):
         self.assertTrue(found)
 
         # Read it in again and compare the Snapshot objects
-        s2 = Snapshot.read(gitflow)
+        f = open(undofile, 'r')
+        try:
+            s2 = Snapshot.read(gitflow, f)
+        finally:
+            f.close()
         self.assertEquals(s, s2)
 
 
