@@ -9,7 +9,7 @@ from gitflow.util import itersubclasses
 
 
 def datetime_to_timestamp(d):
-    return time.mktime(d.timetuple())
+    return time.mktime(d.timetuple()) + d.microsecond / 1e6
 
 
 def requires_repo(f):
@@ -42,10 +42,6 @@ class Snapshot(object):
             self.date = datetime.datetime.now()
         else:
             self.date = snapdate
-
-        # Since datetime_to_timestamp loses the microsecond part, we rather lose
-        # it now, because it makes Snapshot object comparisons more predictable
-        self.date = datetime.datetime.fromtimestamp(datetime_to_timestamp(self.date))
 
         if state is None:
             self.state = self.gitflow.status()

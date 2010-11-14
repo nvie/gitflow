@@ -16,9 +16,7 @@ class TestSnapshot(TestCase):
 
         now = datetime.datetime.now()
         s = Snapshot(gitflow, 'Some message', now)
-        # TODO: add this check (currently fails because the microsecond parts is
-        # lost)
-        #self.assertEquals(s.date, now)
+        self.assertEquals(s.date, now)
         self.assertEquals(s.description, 'Some message')
 
         # Just test for a single branch's existence here
