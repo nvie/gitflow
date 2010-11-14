@@ -1,14 +1,15 @@
+import time
 import datetime
 import os
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError, GitCommandError
-from ConfigParser import NoOptionError, NoSectionError
+import ConfigParser
 from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
+
+
+def datetime_to_timestamp(d):
+    return time.mktime(d.timetuple())
 
 
 def requires_repo(f):
@@ -34,14 +35,22 @@ class InvalidOperation(Exception):
 class Snapshot(object):
     __slots__ = ('gitflow', 'date', 'description', 'state')
 
-    def __init__(self, gitflow, description, snapdate=None):
+    def __init__(self, gitflow, description, snapdate=None, state=None):
         self.gitflow = gitflow
         self.description = description
         if snapdate is None:
             self.date = datetime.datetime.now()
         else:
             self.date = snapdate
-        self.state = self.gitflow.status()
+
+        # Since datetime_to_timestamp loses the microsecond part, we rather lose
+        # it now, because it makes Snapshot object comparisons more predictable
+        self.date = datetime.datetime.fromtimestamp(datetime_to_timestamp(self.date))
+
+        if state is None:
+            self.state = self.gitflow.status()
+        else:
+            self.state = state
 
     def __hash__(self, other):
         return hash(self.gitflow) ^ hash(self.date) ^ \
@@ -51,28 +60,38 @@ class Snapshot(object):
         return self.gitflow == other.gitflow and \
                 self.date == other.date and \
                 self.description == other.description and \
-                self.state == other.state
+                set(self.state) == set(other.state)
 
 
-    def __getstate__(self):
-        return dict(date=self.date,
-                description=self.description,
-                state=self.state,
-                gitflow=None)
-
-    def __setstate__(self, obj):
-        self.date = obj['date']
-        self.description = obj['description']
-        self.state = obj['state']
-        self.gitflow = None
-
-    def write(self, writeable):
-        pickle.dump(self, writeable)
+    def write(self, config, index):
+        section = 'meta%d' % index
+        heads_section = 'heads%d' % index
+        config.add_section(section)
+        config.add_section(heads_section)
+        config.set(section, 'description', self.description)
+        config.set(section, 'date', repr(datetime_to_timestamp(self.date)))
+        active = None
+        for name, hexsha, is_active in self.state:
+            config.set(heads_section, name, hexsha)
+            if is_active:
+                active = name
+        if active:
+            config.set(section, 'active', active)
 
     @classmethod
-    def read(self, gitflow, readable):
-        snapshot = pickle.load(readable)
-        snapshot.gitflow = gitflow
+    def read(self, gitflow, config, index):
+        meta = 'meta%d' % index
+        heads = 'heads%d' % index
+
+        description = config.get(meta, 'description')
+        snapdate = datetime.datetime.fromtimestamp(float(config.get(meta, 'date')))
+        active = config.get(meta, 'active')
+        state = []
+        for name, hexsha in config.items(heads):
+            tup = (name, hexsha, active == name)
+            state.append(tup)
+
+        snapshot = Snapshot(gitflow, description, snapdate, state)
         return snapshot
 
 
@@ -212,7 +231,7 @@ class GitFlow(object):
     def _safe_get(self, setting_name):
         try:
             return self.get(setting_name)
-        except (NoSectionError, NoOptionError):
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             raise NotInitialized('This repo has not yet been initialized.')
 
     def master_name(self):
@@ -297,29 +316,15 @@ class GitFlow(object):
     def _store_snapshots(self):
         git_dir = self.repo.git_dir
         path = os.path.join(git_dir, 'snapshots')
-        import ConfigParser
         config = ConfigParser.ConfigParser()
         config.add_section('snapshots')
         config.set('snapshots', 'num', repr(len(self.snapshots)))
 
         for index, snapshot in enumerate(self.snapshots):
-            section = 'meta%d' % index
-            heads_section = 'heads%d' % index
-            config.add_section(section)
-            config.add_section(heads_section)
-            config.set(section, 'description', snapshot.description)
-            config.set(section, 'date', snapshot.date.isoformat())
-            active = None
-            for name, hexsha, is_active in snapshot.state:
-                config.set(heads_section, name, hexsha)
-                if is_active:
-                    active = name
-            if active:
-                config.set(section, 'active', active)
+            snapshot.write(config, index)
 
         f = open(path, 'wb')
         try:
-            #pickle.dump(self.snapshots, f)
             config.write(f)
         finally:
             f.close()
