@@ -1,12 +1,9 @@
 from unittest2 import TestCase, skip
 import os
-import tempfile
 import datetime
 from ConfigParser import NoOptionError, NoSectionError
-from git import Repo, GitCommandError
-import shutil
 from StringIO import StringIO
-from gitflow.core import GitFlow, NotInitialized, BranchExists, InvalidOperation
+from gitflow.core import GitFlow, NotInitialized
 from gitflow.core import Snapshot
 from gitflow.branches import BranchManager
 from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture

@@ -1,11 +1,11 @@
 import datetime
-import os
+#import os
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 from functools import wraps
-from git import Git, Repo, Head, InvalidGitRepositoryError, GitCommandError
+from git import Git, Repo, InvalidGitRepositoryError, GitCommandError
 from ConfigParser import NoOptionError, NoSectionError
 from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
@@ -147,7 +147,7 @@ class GitFlow(object):
         # NOTE: This function assumes master already exists
         develop_name = self.develop_name()
         try:
-            self.repo.create_head(self.develop_name(), self.master_name())
+            self.repo.create_head(develop_name, self.master_name())
         except GitCommandError:
             # on error, the branch existed already
             pass
