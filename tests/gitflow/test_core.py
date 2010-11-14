@@ -307,10 +307,15 @@ class TestGitFlow(TestCase):
         self.assertEquals(1, len(gitflow.snapshots))
 
     @copy_from_fixture('sample_repo')
-    def test_make_snapshot(self):
+    def test_snapshot_writes_ini_file(self):
         gitflow = GitFlow()
         gitflow.snap('Some message')
         self.assertTrue(os.path.exists('.git/snapshots'))
+
+        import ConfigParser
+        cfg = ConfigParser.ConfigParser()
+        cfg.read('.git/snapshots')
+        self.assertEquals('Some message', cfg.get('meta0', 'description'))
 
 
 

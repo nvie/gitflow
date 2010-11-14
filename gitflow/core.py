@@ -1,5 +1,5 @@
 import datetime
-#import os
+import os
 try:
     import cPickle as pickle
 except ImportError:
@@ -294,9 +294,42 @@ class GitFlow(object):
         return result
 
 
+    def _store_snapshots(self):
+        git_dir = self.repo.git_dir
+        path = os.path.join(git_dir, 'snapshots')
+        import ConfigParser
+        config = ConfigParser.ConfigParser()
+        config.add_section('snapshots')
+        config.set('snapshots', 'num', repr(len(self.snapshots)))
+
+        for index, snapshot in enumerate(self.snapshots):
+            section = 'meta%d' % index
+            heads_section = 'heads%d' % index
+            config.add_section(section)
+            config.add_section(heads_section)
+            config.set(section, 'description', snapshot.description)
+            config.set(section, 'date', snapshot.date.isoformat())
+            active = None
+            for name, hexsha, is_active in snapshot.state:
+                config.set(heads_section, name, hexsha)
+                if is_active:
+                    active = name
+            if active:
+                config.set(section, 'active', active)
+
+        f = open(path, 'wb')
+        try:
+            #pickle.dump(self.snapshots, f)
+            config.write(f)
+        finally:
+            f.close()
+
+        print open(path).read()
+
     def snap(self, description):
         snapshot = Snapshot(self, description)
         self.snapshots.append(snapshot)
+        self._store_snapshots()
 
 
     @requires_repo
