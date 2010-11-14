@@ -418,8 +418,3 @@ class GitFlow(object):
         self.snapshots().append(snapshot)
         self._store_snapshots()
 
-
-    @requires_repo
-    def start_transaction(self, description):
-        snapshot = Snapshot.snap(self, description)
-        return snapshot

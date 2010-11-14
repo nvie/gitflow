@@ -313,7 +313,6 @@ class TestGitFlow(TestCase):
         cfg.read('.git/snapshots')
         self.assertEquals('Some message', cfg.get('meta0', 'description'))
 
-
     @copy_from_fixture('sample_repo')
     def test_snapshot_read_from_ini_file(self):
         gitflow = GitFlow()
