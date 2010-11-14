@@ -329,8 +329,6 @@ class GitFlow(object):
         finally:
             f.close()
 
-        print open(path).read()
-
     def snap(self, description):
         snapshot = Snapshot(self, description)
         self.snapshots().append(snapshot)
