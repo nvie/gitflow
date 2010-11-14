@@ -249,7 +249,7 @@ class TestGitFlow(TestCase):
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
 
-    # branch type detection
+    # Branch type detection
     @sandboxed_git_repo
     def test_detect_branch_types(self):
         gitflow = GitFlow()
@@ -271,7 +271,7 @@ class TestGitFlow(TestCase):
         self.assertIn('foobar', gitflow.managers)
 
 
-    # branch creation
+    # Branch creation
     @sandboxed_git_repo
     def test_create_branches(self):
         gitflow = GitFlow()
