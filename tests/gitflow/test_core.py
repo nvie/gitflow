@@ -295,13 +295,13 @@ class TestGitFlow(TestCase):
     def test_empty_repo_has_empty_snapshot_stack(self):
         gitflow = GitFlow()
         gitflow.init()
-        self.assertEquals([], gitflow.snapshots)
+        self.assertEquals([], gitflow.snapshots())
 
     @copy_from_fixture('sample_repo')
     def test_make_snapshot_increases_stack_size(self):
         gitflow = GitFlow()
         gitflow.snap('Some message')
-        self.assertEquals(1, len(gitflow.snapshots))
+        self.assertEquals(1, len(gitflow.snapshots()))
 
     @copy_from_fixture('sample_repo')
     def test_snapshot_writes_ini_file(self):
@@ -312,6 +312,7 @@ class TestGitFlow(TestCase):
         cfg = ConfigParser.ConfigParser()
         cfg.read('.git/snapshots')
         self.assertEquals('Some message', cfg.get('meta0', 'description'))
+
 
 
 

@@ -127,7 +127,7 @@ class GitFlow(object):
             pass
 
         self.managers = self._discover_branch_managers()
-        self.snapshots = []
+        self._snapshots = None
 
     def _init_config(self, master=None, develop=None, prefixes={}, force_defaults=False):
         defaults = [
@@ -299,6 +299,10 @@ class GitFlow(object):
         mgr.finish(mgr.shorten(branch.name))
 
 
+    def snapshots(self):
+        if self._snapshots is None:
+            self._snapshots = []
+        return self._snapshots
     @requires_repo
     def status(self):
         result = []
@@ -314,9 +318,9 @@ class GitFlow(object):
         path = os.path.join(git_dir, 'snapshots')
         config = ConfigParser.ConfigParser()
         config.add_section('snapshots')
-        config.set('snapshots', 'num', repr(len(self.snapshots)))
+        config.set('snapshots', 'num', repr(len(self.snapshots())))
 
-        for index, snapshot in enumerate(self.snapshots):
+        for index, snapshot in enumerate(self.snapshots()):
             snapshot.write(config, index)
 
         f = open(path, 'wb')
@@ -329,7 +333,7 @@ class GitFlow(object):
 
     def snap(self, description):
         snapshot = Snapshot(self, description)
-        self.snapshots.append(snapshot)
+        self.snapshots().append(snapshot)
         self._store_snapshots()
 
 
