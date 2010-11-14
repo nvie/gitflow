@@ -33,6 +33,25 @@ class InvalidOperation(Exception):
 
 
 class Snapshot(object):
+    """
+    Initializes a new Snapshot instance, used to store/restore data required to
+    undo git-flow actions.
+
+    :param gitflow:
+        The :class:`GitFlow` instance that this snapshot belongs to.
+
+    :param description:
+        A message to describe the snap shot.
+
+    :param snapdate:
+        The date to use for this snapshot.  If not given, use the current date.
+
+    :param state:
+        A list of (:attr:`head`, :attr:`hexsha`, :attr:`is_active`) tuples
+        describing the state.  If not provided, it asks the :class:`GitFlow`
+        instance for the state.  Use this explicit parameter when restoring
+        a :class:`Snapshot` from disk, for example.
+    """
     __slots__ = ('gitflow', 'date', 'description', 'state')
 
     def __init__(self, gitflow, description, snapdate=None, state=None):
@@ -53,6 +72,13 @@ class Snapshot(object):
                 hash(self.description) ^ hash(self.state)
 
     def __eq__(self, other):
+        """
+        Compares this :class:`Snapshot` instance to the instance in
+        :attr:`other`.
+
+        :param other:
+            The :class:`Snapshot` instance to compare to.
+        """
         return self.gitflow == other.gitflow and \
                 self.date == other.date and \
                 self.description == other.description and \
@@ -60,6 +86,18 @@ class Snapshot(object):
 
 
     def write(self, config, index):
+        """
+        Write this :class:`Snapshot` instance to the :class:`ConfigParser`
+        instance given in :attr:`config`.
+
+        :param config:
+            The :class:`ConfigParser` instance to write to.
+
+        :param index:
+            The index position of this snapshot in the snapshot stack.  The
+            calling object (typically :class:`GitFlow`) is responsible for
+            providing the index number this instance should write itself under.
+        """
         section = 'meta%d' % index
         heads_section = 'heads%d' % index
         config.add_section(section)
@@ -76,6 +114,22 @@ class Snapshot(object):
 
     @classmethod
     def read(self, gitflow, config, index):
+        """
+        Create a new :class:`Snapshot` instance by reading it from the
+        :class:`ConfigParser` (at index :attr:`index`).
+
+        :param gitflow:
+            The :class:`GitFlow` instance to register the :class:`Snapshot`
+            under.
+
+        :param config:
+            The :class:`ConfigParser` instance to read from.
+
+        :param index:
+            The index position of this snapshot in the snapshot stack.  The
+            calling object (typically :class:`GitFlow`) is responsible for
+            providing the index number this instance should write itself under.
+        """
         meta = 'meta%d' % index
         heads = 'heads%d' % index
 
@@ -300,6 +354,12 @@ class GitFlow(object):
 
 
     def snapshots(self):
+        """
+        Returns the snapshot stack.
+
+        The contents will be read from disk upon first access and will be cached
+        for all further access.
+        """
         if self._snapshots is None:
             self._snapshots = self._read_snapshots()
         return self._snapshots
@@ -347,6 +407,13 @@ class GitFlow(object):
             f.close()
 
     def snap(self, description):
+        """
+        Make a snapshot of the current state of the repository, push it on the
+        snapshot stack, and write it to disk.
+
+        :param description:
+            The description to use for this snapshot.
+        """
         snapshot = Snapshot(self, description)
         self.snapshots().append(snapshot)
         self._store_snapshots()
