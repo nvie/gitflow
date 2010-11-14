@@ -314,6 +314,14 @@ class TestGitFlow(TestCase):
         self.assertEquals('Some message', cfg.get('meta0', 'description'))
 
 
+    @copy_from_fixture('sample_repo')
+    def test_snapshot_read_from_ini_file(self):
+        gitflow = GitFlow()
+        gitflow.snap('Some message')
+
+        new_gitflow = GitFlow()
+        new_gitflow.snapshots()
+        self.assertEquals(1, len(new_gitflow.snapshots()))
 
 
     """

@@ -301,8 +301,9 @@ class GitFlow(object):
 
     def snapshots(self):
         if self._snapshots is None:
-            self._snapshots = []
+            self._snapshots = self._read_snapshots()
         return self._snapshots
+
     @requires_repo
     def status(self):
         result = []
@@ -312,6 +313,22 @@ class GitFlow(object):
             result.append(tup)
         return result
 
+
+    def _read_snapshots(self):
+        git_dir = self.repo.git_dir
+        path = os.path.join(git_dir, 'snapshots')
+        if not os.path.exists(path):
+            # That's fine, there are not snapshots yet
+            return []
+
+        config = ConfigParser.ConfigParser()
+        config.read(path)
+        num = int(config.get('snapshots', 'num'))
+        snapshots = []
+        for index in range(num):
+            snap = Snapshot.read(self, config, index)
+            snapshots.append(snap)
+        return snapshots
 
     def _store_snapshots(self):
         git_dir = self.repo.git_dir
