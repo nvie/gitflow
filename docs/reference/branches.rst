@@ -13,8 +13,6 @@ functionality is already implemented by the base :class:`BranchManager
 <gitflow.branches.BranchManager>`, so that subclassing a branch manager is
 easy.
 
-----
-
 .. automodule:: gitflow.branches
    :members:
 

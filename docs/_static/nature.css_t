@@ -256,7 +256,12 @@ pre {
     font-size: 1.0em;
 }
 
-dl.method {
+dl.class {
+    border-top: 2px solid #ddd;
+    padding-top: 8px;
+}
+
+dl.method, dl.classmethod {
     border-top: 1px solid #ddd;
     padding-top: 8px;
 }
