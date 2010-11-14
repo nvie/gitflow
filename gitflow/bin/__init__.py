@@ -117,6 +117,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_list(self, args):
         gitflow = GitFlow()
+        gitflow.start_transaction()
         manager = gitflow.managers['feature']
         branches = manager.list()
         if not branches:
@@ -161,10 +162,14 @@ class FeatureCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
+        gitflow.start_transaction('create feature branch %s (from %s)' % \
+                (args.name, args.base))
         gitflow.create('feature', args.name, args.base)
 
     def run_finish(self, args):
         gitflow = GitFlow()
+        gitflow.start_transaction('finishing feature branch %s'
+                % args.nameprefix)
         gitflow.finish('feature', args.nameprefix)
 
     def run_publish(self, args): pass

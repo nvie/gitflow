@@ -34,20 +34,14 @@ class InvalidOperation(Exception):
 class Snapshot(object):
     __slots__ = ('gitflow', 'date', 'description', 'state')
 
-    def __init__(self, gitflow, snapdate, description):
+    def __init__(self, gitflow, description, snapdate=None):
         self.gitflow = gitflow
-        self.date = snapdate
         self.description = description
-        self.state = self.gitflow.status()
-
-    @classmethod
-    def snap(cls, gitflow, description, snapdate=None):
         if snapdate is None:
-            snapdate = datetime.datetime.now()
-        snapshot = Snapshot(gitflow, snapdate, description)
-        snapshot.write()
-        return Snapshot
-
+            self.date = datetime.datetime.now()
+        else:
+            self.date = snapdate
+        self.state = self.gitflow.status()
 
     def __hash__(self, other):
         return hash(self.gitflow) ^ hash(self.date) ^ \
@@ -118,6 +112,7 @@ class GitFlow(object):
             pass
 
         self.managers = self._discover_branch_managers()
+        self.snapshots = []
 
     def _init_config(self, master=None, develop=None, prefixes={}, force_defaults=False):
         defaults = [
@@ -299,14 +294,12 @@ class GitFlow(object):
         return result
 
 
+    def snap(self, description):
+        snapshot = Snapshot(self, description)
+        self.snapshots.append(snapshot)
+
+
     @requires_repo
-    def make_snapshot(self):
-        import simplejson
-        status = self.status()
-        simplejson.dumps(status)
-
-    @requires_repo
-    def start_transaction(self):
-        make_snapshot()
-
-
+    def start_transaction(self, description):
+        snapshot = Snapshot.snap(self, description)
+        return snapshot

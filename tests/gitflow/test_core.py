@@ -14,7 +14,7 @@ class TestSnapshot(TestCase):
         gitflow = GitFlow()
 
         now = datetime.datetime.now()
-        s = Snapshot(gitflow, now, 'Some message')
+        s = Snapshot(gitflow, 'Some message', now)
         self.assertEquals(s.date, now)
         self.assertEquals(s.description, 'Some message')
 
@@ -291,6 +291,27 @@ class TestGitFlow(TestCase):
         gitflow.create('release', '1.0', 'feature/foo')
         self.assertIn('release/1.0',
                 [h.name for h in gitflow.repo.branches])
+
+
+    # Snapshots
+    @sandboxed_git_repo
+    def test_empty_repo_has_empty_snapshot_stack(self):
+        gitflow = GitFlow()
+        gitflow.init()
+        self.assertEquals([], gitflow.snapshots)
+
+    @copy_from_fixture('sample_repo')
+    def test_make_snapshot_increases_stack_size(self):
+        gitflow = GitFlow()
+        gitflow.snap('Some message')
+        self.assertEquals(1, len(gitflow.snapshots))
+
+    @copy_from_fixture('sample_repo')
+    def test_make_snapshot(self):
+        gitflow = GitFlow()
+        gitflow.snap('Some message')
+        self.assertTrue(os.path.exists('.git/snapshots'))
+
 
 
     """
