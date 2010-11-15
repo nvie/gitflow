@@ -341,6 +341,26 @@ class TestGitFlow(TestCase):
         self.assertEquals(orig_develop_sha, gitflow.develop().commit.hexsha)
         self.assertEquals(orig_master_sha, gitflow.master().commit.hexsha)
 
+    @copy_from_fixture('sample_repo')
+    def test_restore_snapshot_with_backup(self):
+        gitflow = GitFlow()
+        snap = gitflow.snap('Some message')
+
+        gitflow.create('release', '1.0')
+        gitflow.repo.index.commit('Foo')
+        gitflow.repo.index.commit('Bar')
+        gitflow.finish('release', '1.0')
+
+        develop_sha_before_restore = gitflow.develop().commit.hexsha
+        master_sha_before_restore = gitflow.master().commit.hexsha
+
+        gitflow.restore(snap, backup=True)
+
+        self.assertEquals(develop_sha_before_restore,
+                gitflow.repo.branches['backup/develop'].commit.hexsha)
+        self.assertEquals(master_sha_before_restore,
+                gitflow.repo.branches['backup/master'].commit.hexsha)
+
 
     """
     Use case:

@@ -434,6 +434,8 @@ class GitFlow(object):
             discarded during the next garbage collection.
         """
         for name, hexsha, is_active in snap.state:
+            if backup:
+                self.repo.create_head('backup/' + name, commit=name)
             if name == self.repo.active_branch.name:
                 # reset --hard :)
                 self.repo.head.reset(hexsha, index=True, working_tree=True)
