@@ -3,7 +3,6 @@ import os
 import datetime
 import ConfigParser
 from ConfigParser import NoOptionError, NoSectionError
-from StringIO import StringIO
 from gitflow.core import GitFlow, NotInitialized
 from gitflow.core import Snapshot
 from gitflow.branches import BranchManager
