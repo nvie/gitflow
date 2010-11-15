@@ -322,6 +322,26 @@ class TestGitFlow(TestCase):
         self.assertEquals(1, len(new_gitflow.snapshots()))
 
 
+    # Restore
+    @copy_from_fixture('sample_repo')
+    def test_restore_snapshot(self):
+        gitflow = GitFlow()
+        snap = gitflow.snap('Some message')
+
+        orig_develop_sha = gitflow.develop().commit.hexsha
+        orig_master_sha = gitflow.master().commit.hexsha
+
+        gitflow.create('release', '1.0')
+        gitflow.repo.index.commit('Foo')
+        gitflow.repo.index.commit('Bar')
+        gitflow.finish('release', '1.0')
+
+        gitflow.restore(snap, backup=False)
+
+        self.assertEquals(orig_develop_sha, gitflow.develop().commit.hexsha)
+        self.assertEquals(orig_master_sha, gitflow.master().commit.hexsha)
+
+
     """
     Use case:
 

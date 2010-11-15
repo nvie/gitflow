@@ -417,4 +417,28 @@ class GitFlow(object):
         snapshot = Snapshot(self, description)
         self.snapshots().append(snapshot)
         self._store_snapshots()
+        return snapshot
+
+    def restore(self, snap, backup=True):
+        """
+        Restores the state of the current repository to the state captured in
+        the snapshot.
+
+        :param snap:
+            The :class:`Snapshot` instance representing the state to restore the
+            current repository to.
+
+        :param backup:
+            If :const:`True`, the references to the current heads are kept
+            around in special `backup/` branches, so no objects will be
+            discarded during the next garbage collection.
+        """
+        for name, hexsha, is_active in snap.state:
+            if name == self.repo.active_branch.name:
+                # reset --hard :)
+                self.repo.head.reset(hexsha, index=True, working_tree=True)
+            else:
+                self.repo.create_head(name, commit=hexsha, force=True)
+            #print name, hexsha, '* '[not is_active]
+
 
