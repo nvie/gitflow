@@ -311,6 +311,8 @@ class TestGitFlow(TestCase):
         cfg = ConfigParser.ConfigParser()
         cfg.read('.git/snapshots')
         self.assertEquals('Some message', cfg.get('meta0', 'description'))
+        self.assertEquals('2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3',
+                cfg.get('heads0', 'develop'))
 
     @copy_from_fixture('sample_repo')
     def test_snapshot_read_from_ini_file(self):
