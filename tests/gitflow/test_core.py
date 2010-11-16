@@ -395,6 +395,16 @@ class TestGitFlow(TestCase):
         self.assertEquals(master_sha_before_restore,
                 gitflow.repo.branches['backup/master'].commit.hexsha)
 
+    @copy_from_fixture('sample_repo')
+    def test_restore_snapshot_restores_current_branch(self):
+        gitflow = GitFlow()
+        snap = gitflow.snap('Some message')
+        gitflow.repo.index.commit('Foo')
+        gitflow.repo.branches['develop'].checkout()
+        self.assertEquals(gitflow.repo.active_branch.name, 'develop')
+        gitflow.restore(snap, backup=False)
+        self.assertEquals(gitflow.repo.active_branch.name, 'feature/recursion')
+
 
     """
     Use case:

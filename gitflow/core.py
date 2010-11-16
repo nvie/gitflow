@@ -459,11 +459,15 @@ class GitFlow(object):
         for name, hexsha, is_active in snap.state:
             if backup:
                 self.repo.create_head('backup/' + name, commit=name)
+
             if name == self.repo.active_branch.name:
                 # reset --hard :)
-                self.repo.head.reset(hexsha, index=True, working_tree=True)
+                self.repo.head.reset(hexsha, index=True, working_tree=False)
             else:
                 self.repo.create_head(name, commit=hexsha, force=True)
-            #print name, hexsha, '* '[not is_active]
+
+            # Change the active branch, if applicable
+            if is_active:
+                self.repo.branches[name].checkout()
 
 
