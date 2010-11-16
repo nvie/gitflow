@@ -51,10 +51,16 @@ class Snapshot(object):
         describing the state.  If not provided, it asks the :class:`GitFlow`
         instance for the state.  Use this explicit parameter when restoring
         a :class:`Snapshot` from disk, for example.
+
+    :param heads:
+        A list of heads to store in the :class:`Snapshot`.  If not specified
+        explicitly, all branches are snapped.  Only used when :attr:`state` is
+        :const:`None`.
     """
     __slots__ = ('gitflow', 'date', 'description', 'state')
 
-    def __init__(self, gitflow, description, snapdate=None, state=None):
+    def __init__(self, gitflow, description, snapdate=None, state=None,
+            heads=None):
         self.gitflow = gitflow
         self.description = description
         if snapdate is None:
@@ -63,7 +69,13 @@ class Snapshot(object):
             self.date = snapdate
 
         if state is None:
-            self.state = self.gitflow.status()
+            if heads is None:
+                self.state = self.gitflow.status()
+            else:
+                # Only store the branches that are explicitly specified.
+                self.state = []
+                for head in heads:
+                    self.state.append(self.gitflow.branch_info(head))
         else:
             self.state = state
 
@@ -367,11 +379,17 @@ class GitFlow(object):
     @requires_repo
     def status(self):
         result = []
-        active_branch = self.repo.active_branch
         for b in self.repo.branches:
-            tup = (b.name, b.commit.hexsha, b == active_branch)
+            tup = self.branch_info(b.name)
             result.append(tup)
         return result
+
+
+    @requires_repo
+    def branch_info(self, name):
+        active_branch = self.repo.active_branch
+        b = self.repo.heads[name]
+        return (name, b.commit.hexsha, b == active_branch)
 
 
     def _read_snapshots(self):
@@ -406,18 +424,23 @@ class GitFlow(object):
         finally:
             f.close()
 
-    def snap(self, description):
+    def snap(self, description, heads=None):
         """
         Make a snapshot of the current state of the repository, push it on the
         snapshot stack, and write it to disk.
 
         :param description:
             The description to use for this snapshot.
+
+        :param heads:
+            A list of heads to store in the snapshot.  If not specified
+            explicitly, all branches are snapped.
         """
-        snapshot = Snapshot(self, description)
+        snapshot = Snapshot(self, description, heads=heads)
         self.snapshots().append(snapshot)
         self._store_snapshots()
         return snapshot
+
 
     def restore(self, snap, backup=True):
         """

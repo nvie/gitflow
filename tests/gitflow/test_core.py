@@ -23,6 +23,24 @@ class TestSnapshot(TestCase):
         self.assertIn(tup, s.state)
 
     @copy_from_fixture('sample_repo')
+    def test_create_specific_branches(self):
+        gitflow = GitFlow()
+
+        s = Snapshot(gitflow, 'Some message', heads=['master'])
+        self.assertEquals(s.description, 'Some message')
+
+        # Just test for a single branch's existence here
+        self.assertEquals(1, len(s.state))
+        tup = ('master', '296586bb164c946cad10d37e82570f60e6348df9', False)
+        self.assertIn(tup, s.state)
+
+    @copy_from_fixture('sample_repo')
+    def test_create_with_invalid_heads_list_raises(self):
+        gitflow = GitFlow()
+        self.assertRaises(IndexError, Snapshot, gitflow, 'Some message',
+                heads=['foo'])
+
+    @copy_from_fixture('sample_repo')
     def test_read_write(self):
         gitflow = GitFlow()
 
@@ -297,10 +315,24 @@ class TestGitFlow(TestCase):
         self.assertEquals([], gitflow.snapshots())
 
     @copy_from_fixture('sample_repo')
-    def test_make_snapshot_increases_stack_size(self):
+    def test_make_simple_snapshot_increases_stack_size(self):
         gitflow = GitFlow()
         gitflow.snap('Some message')
         self.assertEquals(1, len(gitflow.snapshots()))
+
+    @copy_from_fixture('sample_repo')
+    def test_make_simple_snapshot_stores_all_heads(self):
+        gitflow = GitFlow()
+        gitflow.snap('Some message')
+
+        # ...containing 4 snapped branches
+        self.assertEquals(4, len(gitflow.snapshots()[0].state))
+
+    @copy_from_fixture('sample_repo')
+    def test_make_specific_snapshot(self):
+        gitflow = GitFlow()
+        gitflow.snap('Some message', ['feature/even', 'develop'])
+        self.assertEquals(2, len(gitflow.snapshots()[0].state))
 
     @copy_from_fixture('sample_repo')
     def test_snapshot_writes_ini_file(self):
