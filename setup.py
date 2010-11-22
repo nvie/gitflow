@@ -15,10 +15,11 @@ if os.path.exists("README.rst"):
 else:
     long_description = "See http://github.com/nvie/gitflow/tree/master"
 
-install_requires = ['GitPython']
+install_requires = ['GitPython', 'argparse']
 
 setup(
     name="gitflow",
+    scripts=['bin/git-flow'],
     version=distmeta.__version__,
     description="Git extensions to provide high-level repository operations for Vincent Driessen's branching model.",
     author=distmeta.__author__,
