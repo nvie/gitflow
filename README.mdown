@@ -26,6 +26,7 @@ feedback.
 Feel free to fork this repo and to commit your additions. For a list of all
 contributors, please see the [AUTHORS](AUTHORS) file.
 
+You will need `unittest2` to run the tests.
 
 License terms
 -------------
