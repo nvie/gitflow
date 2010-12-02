@@ -65,7 +65,7 @@ cmd_list() {
                 warn ""
                 warn "You can start a new hotfix branch:"
                 warn ""
-                warn "    git flow hotfix start <name> [<base>]"
+                warn "    git flow hotfix start <version> [<base>]"
                 warn ""
 		exit 0
 	fi
