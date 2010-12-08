@@ -193,6 +193,7 @@ cmd_finish() {
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
+	DEFINE_boolean backmerge false "back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)"
 
 	parse_args "$@"
 	require_version_arg
@@ -245,21 +246,34 @@ cmd_finish() {
 	fi
 
 	# try to merge into develop
-	# in case a previous attempt to finish this release branch has failed,
-	# but the merge into develop was successful, we skip it now
-	if ! git_is_branch_merged_into "$MASTER_BRANCH" "$DEVELOP_BRANCH"; then
-		git checkout "$DEVELOP_BRANCH" || \
-		  die "Could not check out $DEVELOP_BRANCH."
+	if flag backmerge; then
+		# in case a previous attempt to finish this release branch has failed,
+		# but the merge into develop was successful, we skip it now
+		if ! git_is_branch_merged_into "$MASTER_BRANCH" "$DEVELOP_BRANCH"; then
+			git checkout "$DEVELOP_BRANCH" || \
+			  die "Could not check out $DEVELOP_BRANCH."
 
-		# merge the master branch back into develop; this makes the master
-		# branch - and the new tag (if provided) - a parent of the development
-		# branch, which in turn lets you use 'git describe' on either branch
-		if noflag notag; then
-		  git merge --no-ff "$tagname" || \
-		    die "There were merge conflicts."
-		else
-		  git merge --no-ff "$MASTER_BRANCH" || \
-		    die "There were merge conflicts."
+			# merge the master branch back into develop; this makes the master
+			# branch - and the new tag (if provided) - a parent of the development
+			# branch, which in turn lets you use 'git describe' on either branch
+			if noflag notag; then
+			  git merge --no-ff "$tagname" || \
+			    die "There were merge conflicts."
+			else
+			  git merge --no-ff "$MASTER_BRANCH" || \
+			    die "There were merge conflicts."
+			fi
+		fi
+	else
+		# in case a previous attempt to finish this release branch has failed,
+		# but the merge into develop was successful, we skip it now
+		if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+			git checkout "$DEVELOP_BRANCH" || \
+			  die "Could not check out $DEVELOP_BRANCH."
+
+			# just merge the release branch into the development branch
+			git merge --no-ff "$BRANCH" || \
+			  die "There were merge conflicts."
 		fi
 	fi
 
@@ -288,11 +302,18 @@ cmd_finish() {
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
+	if noflag backmerge; then
+		echo "- Release branch has been merged into '$DEVELOP_BRANCH'"
+	fi
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
-		echo "- Tag '$tagname' has been back-merged into '$DEVELOP_BRANCH'"
+		if flag backmerge; then
+			echo "- Tag '$tagname' has been back-merged into '$DEVELOP_BRANCH'"
+		fi
 	else
-		echo "- Branch '$MASTER_BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
+		if flag backmerge; then
+			echo "- Branch '$MASTER_BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
+		fi
 	fi
 	if flag keep; then
 		echo "- Release branch '$BRANCH' is still available"
