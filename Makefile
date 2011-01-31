@@ -22,7 +22,7 @@ test-dist:
 	tox
 
 cover:
-	nosetests --with-coverage3 --cover-package=gitflow
+	nosetests --with-coverage3 --cover-package=gitflow --with-spec --spec-color
 
 dump-requirements:
 	pip freeze -l > .requirements
