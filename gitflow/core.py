@@ -32,131 +32,6 @@ class InvalidOperation(Exception):
     pass
 
 
-class Snapshot(object):
-    """
-    Initializes a new Snapshot instance, used to store/restore data required to
-    undo git-flow actions.
-
-    :param gitflow:
-        The :class:`GitFlow` instance that this snapshot belongs to.
-
-    :param description:
-        A message to describe the snap shot.
-
-    :param snapdate:
-        The date to use for this snapshot.  If not given, use the current date.
-
-    :param state:
-        A list of (:attr:`head`, :attr:`hexsha`, :attr:`is_active`) tuples
-        describing the state.  If not provided, it asks the :class:`GitFlow`
-        instance for the state.  Use this explicit parameter when restoring
-        a :class:`Snapshot` from disk, for example.
-
-    :param heads:
-        A list of heads to store in the :class:`Snapshot`.  If not specified
-        explicitly, all branches are snapped.  Only used when :attr:`state` is
-        :const:`None`.
-    """
-    __slots__ = ('gitflow', 'date', 'description', 'state')
-
-    def __init__(self, gitflow, description, snapdate=None, state=None,
-            heads=None):
-        self.gitflow = gitflow
-        self.description = description
-        if snapdate is None:
-            self.date = datetime.datetime.now()
-        else:
-            self.date = snapdate
-
-        if state is None:
-            if heads is None:
-                self.state = self.gitflow.status()
-            else:
-                # Only store the branches that are explicitly specified.
-                self.state = []
-                for head in heads:
-                    self.state.append(self.gitflow.branch_info(head))
-        else:
-            self.state = state
-
-    def __hash__(self, other):
-        return hash(self.gitflow) ^ hash(self.date) ^ \
-                hash(self.description) ^ hash(self.state)
-
-    def __eq__(self, other):
-        """
-        Compares this :class:`Snapshot` instance to the instance in
-        :attr:`other`.
-
-        :param other:
-            The :class:`Snapshot` instance to compare to.
-        """
-        return self.gitflow == other.gitflow and \
-                self.date == other.date and \
-                self.description == other.description and \
-                set(self.state) == set(other.state)
-
-
-    def write(self, config, index):
-        """
-        Write this :class:`Snapshot` instance to the :class:`ConfigParser`
-        instance given in :attr:`config`.
-
-        :param config:
-            The :class:`ConfigParser` instance to write to.
-
-        :param index:
-            The index position of this snapshot in the snapshot stack.  The
-            calling object (typically :class:`GitFlow`) is responsible for
-            providing the index number this instance should write itself under.
-        """
-        section = 'meta%d' % index
-        heads_section = 'heads%d' % index
-        config.add_section(section)
-        config.add_section(heads_section)
-        config.set(section, 'description', self.description)
-        config.set(section, 'date', repr(datetime_to_timestamp(self.date)))
-        active = None
-        for name, hexsha, is_active in self.state:
-            config.set(heads_section, name, hexsha)
-            if is_active:
-                active = name
-        if active:
-            config.set(section, 'active', active)
-
-    @classmethod
-    def read(self, gitflow, config, index):
-        """
-        Create a new :class:`Snapshot` instance by reading it from the
-        :class:`ConfigParser` (at index :attr:`index`).
-
-        :param gitflow:
-            The :class:`GitFlow` instance to register the :class:`Snapshot`
-            under.
-
-        :param config:
-            The :class:`ConfigParser` instance to read from.
-
-        :param index:
-            The index position of this snapshot in the snapshot stack.  The
-            calling object (typically :class:`GitFlow`) is responsible for
-            providing the index number this instance should write itself under.
-        """
-        meta = 'meta%d' % index
-        heads = 'heads%d' % index
-
-        description = config.get(meta, 'description')
-        snapdate = datetime.datetime.fromtimestamp(float(config.get(meta, 'date')))
-        active = config.get(meta, 'active')
-        state = []
-        for name, hexsha in config.items(heads):
-            tup = (name, hexsha, active == name)
-            state.append(tup)
-
-        snapshot = Snapshot(gitflow, description, snapdate, state)
-        return snapshot
-
-
 class GitFlow(object):
     """
     Creates a :class:`GitFlow` instance.
@@ -193,7 +68,6 @@ class GitFlow(object):
             pass
 
         self.managers = self._discover_branch_managers()
-        self._snapshots = None
 
     def _init_config(self, master=None, develop=None, prefixes={}, force_defaults=False):
         defaults = [
@@ -365,17 +239,6 @@ class GitFlow(object):
         mgr.finish(mgr.shorten(branch.name))
 
 
-    def snapshots(self):
-        """
-        Returns the snapshot stack.
-
-        The contents will be read from disk upon first access and will be cached
-        for all further access.
-        """
-        if self._snapshots is None:
-            self._snapshots = self._read_snapshots()
-        return self._snapshots
-
     @requires_repo
     def status(self):
         result = []
@@ -390,84 +253,5 @@ class GitFlow(object):
         active_branch = self.repo.active_branch
         b = self.repo.heads[name]
         return (name, b.commit.hexsha, b == active_branch)
-
-
-    def _read_snapshots(self):
-        git_dir = self.repo.git_dir
-        path = os.path.join(git_dir, 'snapshots')
-        if not os.path.exists(path):
-            # That's fine, there are not snapshots yet
-            return []
-
-        config = ConfigParser.ConfigParser()
-        config.read(path)
-        num = int(config.get('snapshots', 'num'))
-        snapshots = []
-        for index in range(num):
-            snap = Snapshot.read(self, config, index)
-            snapshots.append(snap)
-        return snapshots
-
-    def _store_snapshots(self):
-        git_dir = self.repo.git_dir
-        path = os.path.join(git_dir, 'snapshots')
-        config = ConfigParser.ConfigParser()
-        config.add_section('snapshots')
-        config.set('snapshots', 'num', repr(len(self.snapshots())))
-
-        for index, snapshot in enumerate(self.snapshots()):
-            snapshot.write(config, index)
-
-        f = open(path, 'wb')
-        try:
-            config.write(f)
-        finally:
-            f.close()
-
-    def snap(self, description, heads=None):
-        """
-        Make a snapshot of the current state of the repository, push it on the
-        snapshot stack, and write it to disk.
-
-        :param description:
-            The description to use for this snapshot.
-
-        :param heads:
-            A list of heads to store in the snapshot.  If not specified
-            explicitly, all branches are snapped.
-        """
-        snapshot = Snapshot(self, description, heads=heads)
-        self.snapshots().append(snapshot)
-        self._store_snapshots()
-        return snapshot
-
-
-    def restore(self, snap, backup=True):
-        """
-        Restores the state of the current repository to the state captured in
-        the snapshot.
-
-        :param snap:
-            The :class:`Snapshot` instance representing the state to restore the
-            current repository to.
-
-        :param backup:
-            If :const:`True`, the references to the current heads are kept
-            around in special `backup/` branches, so no objects will be
-            discarded during the next garbage collection.
-        """
-        for name, hexsha, is_active in snap.state:
-            if backup:
-                self.repo.create_head('backup/' + name, commit=name)
-
-            if name == self.repo.active_branch.name:
-                # reset --hard :)
-                self.repo.head.reset(hexsha, index=True, working_tree=False)
-            else:
-                self.repo.create_head(name, commit=hexsha, force=True)
-
-            # Change the active branch, if applicable
-            if is_active:
-                self.repo.branches[name].checkout()
 
 
