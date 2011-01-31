@@ -5,6 +5,19 @@ for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
+Getting started
+---------------
+For the best introduction to get started with `git flow`, please read Jeff
+Kreeftmeijer's blog post:
+
+[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
+
+Or have a look at one of these screen casts:
+
+* [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
+* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
+
+
 Installing git-flow
 -------------------
 
@@ -125,19 +138,6 @@ git-flow is published under the liberal terms of the BSD License, see the
 any modifications you make to the source code, you are very much encouraged and
 invited to contribute back your modifications to the community, preferably
 in a Github fork, of course.
-
-
-Typical usage:
---------------
-For the best introduction to get started to `git flow`, please read Jeff
-Kreeftmeijer's blog post:
-
-[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
-
-Or have a look at one of these screen casts:
-
-* [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
-* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
 
 ### Initialization
