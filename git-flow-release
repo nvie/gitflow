@@ -121,7 +121,7 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	VERSION=$(last_arg "$@")
+	VERSION=$1
 	BRANCH=$PREFIX$VERSION
 }
 

@@ -44,14 +44,6 @@
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
-# argument processing
-last_arg() {
-    if [ $# -ne 0 ]; then
-        shift $(expr $# - 1)
-        echo "$1"
-    fi
-}
-
 # set logic
 has() {
 	local item=$1; shift
