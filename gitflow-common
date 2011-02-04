@@ -44,10 +44,14 @@
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
+escape() {
+	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+}
+
 # set logic
 has() {
 	local item=$1; shift
-	echo " $@ " | grep -q " $item "
+	echo " $@ " | grep -q " $(escape $item) "
 }
 
 # basic math
@@ -211,7 +215,7 @@ gitflow_resolve_nameprefix() {
 		return 0
 	fi
 
-	matches=$(echo "$(git_local_branches)" | grep "^$prefix$name")
+	matches=$(echo "$(git_local_branches)" | grep "^$(escape "$prefix$name")")
 	num_matches=$(echo "$matches" | wc -l)
 	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
