@@ -1,3 +1,17 @@
+0.4.1:
+-----
+Release date: *Not released yet*
+
+* New option `-d` added to `git flow init`, to initialize with defaults without
+  asking for input.  Ideal for creating git-flow enabled repos in custom
+  scripts.
+
+* The parsing issues related to git-flow feature's flags are now dealt with on
+  all known platforms.  (Fixed #54, #62, #86, #97)
+
+* Escape queries for detecting branch/tag names.  (Fixed #91) 
+
+
 0.4:
 ---
 Release date: **2010/10/18**
