@@ -1,10 +1,11 @@
-from unittest2 import TestCase, skip
+from unittest2 import TestCase
 from git import GitCommandError
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager, FeatureBranchManager, \
         ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
         PrefixNotUniqueError, NoSuchBranchError
-from tests.helpers import sandboxed_git_repo, copy_from_fixture
+from tests.helpers import copy_from_fixture
+from tests.helpers.factory import create_git_repo
 
 
 def fake_commit(repo, message):
@@ -27,27 +28,27 @@ class DummyBranchManager(BranchManager):
 
 
 class TestAbstractBranchManager(TestCase):
-    @sandboxed_git_repo
     def test_default_prefix(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         fb = DummyBranchManager(gitflow)
         self.assertEquals('xyz/', fb.prefix)
 
-    @sandboxed_git_repo
     def test_explicit_prefix(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         fb = DummyBranchManager(gitflow, 'xyz-')
         self.assertEquals('xyz-', fb.prefix)
 
-    @sandboxed_git_repo
     def test_explicit_empty_prefix(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         fb = DummyBranchManager(gitflow, '')
         self.assertEquals('', fb.prefix)
 
-    @sandboxed_git_repo
     def test_shorten(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         fb = DummyBranchManager(gitflow)
         self.assertEquals('foo', fb.shorten('xyz/foo'))
         self.assertEquals('feature/foo', fb.shorten('feature/foo'))
@@ -61,9 +62,9 @@ class TestFeatureBranchManager(TestCase):
         expected = ['feature/even', 'feature/recursion']
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
 
-    @sandboxed_git_repo
     def test_list_empty_repo(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         mgr = FeatureBranchManager(gitflow)
         self.assertItemsEqual([], mgr.list())
 
@@ -91,9 +92,9 @@ class TestFeatureBranchManager(TestCase):
         self.assertRaises(NoSuchBranchError, mgr.by_name_prefix, 'nonexisting')
 
 
-    @sandboxed_git_repo
     def test_create_new_feature_branch(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         self.assertEqual(0, len(mgr.list()))
@@ -110,18 +111,18 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['feature/even'].commit)
 
-    @sandboxed_git_repo
     def test_feature_branch_origin(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         new_branch = mgr.create('foobar')
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['develop'].commit)
 
-    @sandboxed_git_repo
     def test_create_existing_feature_branch_yields_raises_error(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         mgr.create('foo')
@@ -278,9 +279,9 @@ class TestFeatureBranchManager(TestCase):
         # Assert develop branch advanced
         self.assertNotEqual(dc0, dc1)
 
-    @sandboxed_git_repo
     def test_merge_feature_without_commits(self):
-        gitflow = GitFlow(self.repo)
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
 
@@ -317,9 +318,9 @@ class TestFeatureBranchManager(TestCase):
 
 
 class TestReleaseBranchManager(TestCase):
-    @sandboxed_git_repo
     def test_empty_repo_has_no_releases(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         mgr = ReleaseBranchManager(gitflow)
         self.assertItemsEqual([], mgr.list())
 
@@ -337,9 +338,9 @@ class TestReleaseBranchManager(TestCase):
         expected = []
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
 
-    @sandboxed_git_repo
     def test_create_new_release_branch(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
         self.assertEqual(0, len(mgr.list()))
@@ -359,32 +360,32 @@ class TestReleaseBranchManager(TestCase):
         self.assertEqual(new_branch.commit.hexsha,
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')
 
-    @sandboxed_git_repo
     def test_release_branch_origin(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
         new_branch = mgr.create('1.1')
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['develop'].commit)
 
-    @sandboxed_git_repo
     def test_create_existing_release_branch_yields_raises_error(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
         mgr.create('1.0')
         self.assertRaises(GitCommandError, mgr.create, '1.0')
 
-    @sandboxed_git_repo
     def test_create_release_changes_active_branch(self):
-        gitflow = GitFlow(self.repo)
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
 
-        self.assertEquals('master', self.repo.active_branch.name)
+        self.assertEquals('master', repo.active_branch.name)
         mgr.create('1.0')
-        self.assertEquals('release/1.0', self.repo.active_branch.name)
+        self.assertEquals('release/1.0', repo.active_branch.name)
 
     @copy_from_fixture('dirty_sample_repo')
     def test_create_release_raises_error_if_local_changes_would_be_overwritten(self):
@@ -461,9 +462,9 @@ class TestReleaseBranchManager(TestCase):
 
 
 class TestHotfixBranchManager(TestCase):
-    @sandboxed_git_repo
     def test_create_new_hotfix_branch(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = HotfixBranchManager(gitflow)
         self.assertEqual(0, len(mgr.list()))
@@ -508,9 +509,9 @@ class TestHotfixBranchManager(TestCase):
 
 
 class TestSupportBranchManager(TestCase):
-    @sandboxed_git_repo
     def test_create_new_support_branch(self):
-        gitflow = GitFlow()
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = SupportBranchManager(gitflow)
         self.assertEqual(0, len(mgr.list()))
@@ -526,9 +527,9 @@ class TestSupportBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['master'].commit)
 
-    @sandboxed_git_repo
     def test_support_branches_cannot_be_finished(self):
-        gitflow = GitFlow(self.repo)
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
         gitflow.init()
         mgr = SupportBranchManager(gitflow)
         mgr.create('1.x')

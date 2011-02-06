@@ -1,15 +1,14 @@
 from unittest2 import TestCase, skip
 from gitflow.core import GitFlow
-from tests.helpers import sandboxed, sandboxed_git_repo, copy_from_fixture
+from tests.helpers.factory import create_git_repo
 
 
 class TestGitFlow(TestCase):
 
     @skip
-    @sandboxed_git_repo
     def test_create(self):
+        create_git_repo(self)
         gitflow = GitFlow()
-        repo = gitflow.repo
 
         self.assertEquals([], self.repo.branches)
 

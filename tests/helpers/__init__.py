@@ -29,18 +29,6 @@ def sandboxed(f):
         f(self, *args, **kwargs)
     return _inner
 
-def sandboxed_git_repo(f):
-    """
-    This decorator sets up a temporary, self-destructing empty Git repository
-    using "git init".  There hasn't been any git flow initialization yet.
-    """
-    @wraps(f)
-    @sandboxed
-    def _inner(self, *args, **kwargs):
-        self.repo = Repo.init()
-        f(self, *args, **kwargs)
-    return _inner
-
 def copy_from_fixture(fixture_name):
     """
     This decorator sets up a temporary, self-destructing sandbox and copies
