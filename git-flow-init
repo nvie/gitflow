@@ -69,6 +69,10 @@ cmd_default() {
 	local branch_count
 	local answer
 
+    if flag defaults; then
+        warn "Using default branch names."
+    fi
+
 	# add a master branch if no such branch exists yet
 	local master_branch
 	if gitflow_has_master_configured && ! flag force; then
@@ -103,10 +107,6 @@ cmd_default() {
 			done
 		fi
 		
-		if flag defaults; then
-			warn "Using default branch names."
-		fi
-
 		printf "Branch name for production releases: [$default_suggestion] "
 		if noflag defaults; then
 			read answer
