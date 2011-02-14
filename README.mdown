@@ -1,31 +1,80 @@
-git-flow
+git-flow ![Project status](http://stillmaintained.com/nvie/gitflow.png)
 ========
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
+Getting started
+---------------
+For the best introduction to get started with `git flow`, please read Jeff
+Kreeftmeijer's blog post:
+
+[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
+
+Or have a look at one of these screen casts:
+
+* [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
+* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
+
+
 Installing git-flow
 -------------------
-The easiest way to install git-flow is using Rick Osborne's excellent
-git-flow installer, which can be run using the following command:
 
-	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+### Mac OS
+If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
 
-For __OSX__ users, the `wget` command isn't available by default, but `curl` is, so you can run:
+    $ brew install git-flow
 
-	$ curl http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
 
-For __Windows__ users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
-first to install tools like sh and wget. Then simply follow the command:
+    $ port install git-flow
 
-	c:\Users\<user> wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+### Linux, etc.
+Another easy way to install git-flow is using Rick Osborne's excellent git-flow
+installer, which can be run using the following command:
 
-If you prefer a manual installation, please use the following instructions.
-After downloading the sources from Github, also fetch the submodules:
+	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
 
-	$ git submodule init
-	$ git submodule update
+### Windows
+#### Using Cygwin
+For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
+first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
+during installation). Then simply run this command from a Cygwin shell:
+
+	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+
+#### Using msysgit
+This is much like the manual installation below, but there are additional steps required to install some extra tools that
+are not distributed with [msysgit](http://code.google.com/p/msysgit/).
+
+Clone the git-flow sources from Github:
+
+	$ git clone --recursive git://github.com/nvie/gitflow.git
+
+Copy git-flow's relevant files to your msysgit installation directory:
+
+	$ mkdir /usr/local/bin
+	$ cp git-flow* gitflow* /usr/local/bin/
+	$ cp shFlags/src/shflags /usr/local/bin/gitflow-shFlags
+
+Next up we need to borrow a couple of binaries from [Cygwin](http://www.cygwin.com/). If you don't have Cygwin installed, please 
+install it including the `util-linux` package. Apart from `util-linux`'s dependencies, no other packages are required. When you
+finished installation, copy the following files using msysgit's _Git Bash_. We assume the Cygwin's default installation path in C:\cygwin.
+
+	$ cd /c/cygwin/
+	$ cp bin/getopt.exe /usr/local/bin/
+	$ cp bin/cyggcc_s-1.dll /usr/local/bin/
+	$ cp bin/cygiconv-2.dll /usr/local/bin/
+	$ cp bin/cygintl-8.dll /usr/local/bin/
+	$ cp bin/cygwin1.dll /usr/local/bin/
+
+After copying the files above, you can safely uninstall your Cygwin installation by deleting the C:\cygwin directory.
+
+### Manual installation
+If you prefer a manual installation, please use the following instructions:
+
+	$ git clone --recursive git://github.com/nvie/gitflow.git
 
 Then, you can install `git-flow`, using:
 
@@ -61,69 +110,8 @@ starting place for installing git.
 
 FAQ
 ---
-* **Can I still do manual branches and merges when I use git-flow?**  
-  Of course you can. `git-flow` does not forbid you to keep using vanilla Git
-  commands!
-
-  So if you want to merge `master` into `develop` for whatever reason you want
-  to, you can safely do so without breaking `git-flow` compatibility.  Do you
-  want to manually merge a feature branch X into another feature branch Y?  Not
-  a problem.  As long as you do it conciously and realize what this means for
-  finishing those branches later on.
-
-* **Why does git-describe not work for me?**  
-  When finishing release and hotfix branches, that branch's HEAD is first
-  merged into `master` and then into `develop`.  It is not the resulting new
-  merge commit from `master` that is merged back into `develop`.  This means
-  that a linear path from the new `develop` branch to the new `master` commit
-  is not created.  Even worse, a linear path is created from the new `develop`
-  branch to the *previous* `master` commit.  Although unintended, this is
-  simply an effect of using the current branching rules.
-
-  When using `git-describe` in these cases, you can get very confusing and
-  misleading results, since `git-describe` scans the current commits linear
-  history for the most recent tag it finds, which will always be the *previous*
-  tag.
-
-  I will change this behaviour in the next version of the branching model
-  explicitly and I will include this behavioural change in the first version of
-  the Python rewrite.
-
-  For more references to this problem, see:
-
-  - Issue [#49](http://github.com/nvie/gitflow/issues/49)
-  - These
-  	[two](http://groups.google.com/group/gitflow-users/browse\_thread/thread/9920a7df3d1c4908/0bb18a0bf7275ad6#0bb18a0bf7275ad6)
-  	[discussions](http://groups.google.com/group/gitflow-users/browse\_thread/thread/19efac724bb6418a)
-	on the [git-flow-users](http://groups.google.com/group/gitflow-users)
-	mailinglist.
-
-* **I'm getting errors when I use flags with git-flow!**  
-  `git-flow` uses the [shFlags](http://code.google.com/p/shflags/) library to
-  provide platform independent flag parsing (using wichever low-level flag
-  parsing libraries like `getopt` or `getopts` are available).  However,
-  `shFlags` does not work too well on a few platforms that haven't been tested
-  originally.  This results in errors like this:
-
-      flags:WARN getopt: option invalide -- 'f' -- 'init' flags:FATAL unable to parse provided options with getopt
-
-  The platforms that suffer these errors include:
-
-  - Gentoo
-  - Ubuntu
-  - Redhat Enterprise Linux
-
-  There are open issues related to this:
-  [#28](http://github.com/nvie/gitflow/issues/28) and
-  [#39](http://github.com/nvie/gitflow/issues/39). Unfortunately, there is no
-  simple fix for it and all hope is placed on the Python rewrite of `git-flow`,
-  see issue [#33](http://github.com/nvie/gitflow/issues/33).
-
-* **Can I use it with Windows?**  
-  There have been reports of Windows users using `git-flow`.
-  <del>Un</del>fortunately, I have no Windows environment to test it on, but
-  this [issue](http://github.com/nvie/gitflow/issues/issue/25) should be
-  helpful in setting it up.
+See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+Wiki.
 
 
 Please help out
@@ -147,14 +135,6 @@ git-flow is published under the liberal terms of the BSD License, see the
 any modifications you make to the source code, you are very much encouraged and
 invited to contribute back your modifications to the community, preferably
 in a Github fork, of course.
-
-
-Typical usage:
---------------
-For the best introduction to get started to `git flow`, please read Jeff
-Kreeftmeijer's blog post:
-
-[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
 
 
 ### Initialization

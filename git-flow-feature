@@ -170,22 +170,20 @@ name_or_current() {
 	fi
 }
 
-parse_cmdline() {
+parse_args() {
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
-}
-
-parse_args() {
-	parse_cmdline "$@"
 
 	# read arguments into global variables
-	NAME=$(last_arg "$@")
+	NAME=$1
 	BRANCH=$PREFIX$NAME
 }
 
 parse_remote_name() {
-	parse_cmdline "$@"
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
 	REMOTE=$1

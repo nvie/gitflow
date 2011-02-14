@@ -65,7 +65,7 @@ cmd_list() {
                 warn ""
                 warn "You can start a new hotfix branch:"
                 warn ""
-                warn "    git flow hotfix start <name> [<base>]"
+                warn "    git flow hotfix start <version> [<base>]"
                 warn ""
 		exit 0
 	fi
@@ -124,7 +124,7 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
-	VERSION=$(last_arg "$@")
+	VERSION=$1
 	BRANCH=$PREFIX$VERSION
 }
 

@@ -44,18 +44,14 @@
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
-# argument processing
-last_arg() {
-    if [ $# -ne 0 ]; then
-        shift $(expr $# - 1)
-        echo "$1"
-    fi
+escape() {
+	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
 }
 
 # set logic
 has() {
 	local item=$1; shift
-	echo " $@ " | grep -q " $item "
+	echo " $@ " | grep -q " $(escape $item) "
 }
 
 # basic math
@@ -148,7 +144,7 @@ git_compare_branches() {
 git_is_branch_merged_into() {
 	local subject=$1
 	local base=$2
-	local all_merges=$(git branch --no-color --contains $subject | sed 's/^[* ] //')
+	local all_merges="$(git branch --no-color --contains $subject | sed 's/^[* ] //')"
 	has $base $all_merges
 }
 
@@ -219,7 +215,7 @@ gitflow_resolve_nameprefix() {
 		return 0
 	fi
 
-	matches=$(echo "$(git_local_branches)" | grep "^$prefix$name")
+	matches=$(echo "$(git_local_branches)" | grep "^$(escape "$prefix$name")")
 	num_matches=$(echo "$matches" | wc -l)
 	if [ -z "$matches" ]; then
 		# no prefix match, so take it literally
