@@ -1,10 +1,10 @@
 0.4.1:
 -----
-Release date: *Not released yet*
+Release date: **2011/02/04**
 
 * New option `-d` added to `git flow init`, to initialize with defaults without
-  asking for input.  Ideal for creating git-flow enabled repos in custom
-  scripts.
+  asking for input interactively.  Ideal for creating git-flow enabled repos in
+  custom scripts.
 
 * The parsing issues related to git-flow feature's flags are now dealt with on
   all known platforms.  (Fixed #54, #62, #86, #97)
