@@ -17,3 +17,4 @@ Several good features for bmml format
 ### Reference
 * Vincent's blog: <http://nvie.com/posts/a-successful-git-branching-model/>
 * Larry's blog: <http://codeslife.com/2010/07/15/git-branch-flow-in-balsamiq-mockup-format>
+* @mockupstogo.net <http://mockupstogo.net/git-workflow>
