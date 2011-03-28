@@ -288,9 +288,11 @@ require_branch_absent() {
 }
 
 require_tag_absent() {
-	if has $1 $(git_all_tags); then
-		die "Tag '$1' already exists. Pick another name."
-	fi
+	for tag in $(git_all_tags); do
+		if [ "$1" = "$tag" ]; then
+			die "Tag '$1' already exists. Pick another name."
+		fi
+	done
 }
 
 require_branches_equal() {
