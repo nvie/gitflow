@@ -1,0 +1,14 @@
+Source: gitflow
+Section: unknown
+Priority: extra
+Maintainer: Kiall Mac Innes <kiall@managedit.ie>
+Build-Depends: debhelper (>= 7.0.50~), git
+Standards-Version: 3.9.1
+Homepage: http://nvie.com/posts/a-successful-git-branching-model/
+Vcs-Git: https://github.com/nvie/gitflow.git
+Vcs-Browser: https://github.com/nvie/gitflow
+
+Package: gitflow
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Git extensions to provide high-level repository operations for Vincent Driessen's branching model
