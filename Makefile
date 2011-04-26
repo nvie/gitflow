@@ -26,7 +26,13 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
 #
-prefix=/usr/local
+
+# Determine if we're inside a debian build .. 
+ifdef DEB_BUILD_ARCH
+   prefix=$(DESTDIR)/usr/
+else
+   prefix=/usr/local
+endif
 
 # files that need mode 755
 EXEC_FILES=git-flow
