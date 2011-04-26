@@ -42,7 +42,7 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-export GITFLOW_DIR=$(dirname "$0")
+export GITFLOW_DIR=$(dirname $(readlink "$0"))
 
 usage() {
 	echo "usage: git flow <subcommand>"
