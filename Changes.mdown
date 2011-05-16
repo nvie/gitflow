@@ -1,3 +1,9 @@
+0.4.2:
+-----
+Release date: **not yet**
+
+* Various minor bug fixes related to internal argument passing
+
 0.4.1:
 -----
 Release date: **2011/02/04**
