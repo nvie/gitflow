@@ -130,9 +130,11 @@ parse_args() {
 
 require_version_arg() {
 	if [ "$VERSION" = "" ]; then
-		warn "Missing argument <version>"
-		usage
-		exit 1
+    default_suggestion="$(git_next_revision_version)"
+		printf "Version number for this hotfix: [$default_suggestion] "
+		read answer
+		VERSION=${answer:-$default_suggestion}
+    BRANCH=$PREFIX$VERSION
 	fi
 }
 

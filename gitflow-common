@@ -105,6 +105,7 @@ git_tag_exists() {
 	has $1 $(git_all_tags)
 }
 
+
 #
 # git_compare_branches()
 #
@@ -311,4 +312,57 @@ require_branches_equal() {
 			die "Branches need merging first."
 		fi
 	fi
+}
+
+#
+# Functions for auto version incrementing
+#
+
+git_current_version() {
+  echo "$(git_all_tags)" | grep -e '.*[0-9]*\.[0-9]*\.[0-9].*' | sed '$!d' | sed -n 's/[^0-9]*\([0-9]*.[0-9]*.[0-9]\)/\1/p'
+}
+
+git_current_major_version() {
+  echo "$(git_current_version)" | sed -n 's/\([0-9]*\).[0-9]*.[0-9]*/\1/p'
+}
+
+git_current_minor_version() {
+  echo "$(git_current_version)" | sed -n 's/[0-9]*.\([0-9]*\).[0-9]*/\1/p'
+}
+
+git_current_revision_version() {
+  echo "$(git_current_version)" | sed -n 's/[0-9]*.[0-9]*.\([0-9]*\)/\1/p'
+}
+
+git_next_major_version() {
+  if [ $(git_current_version) == ""]; then
+    echo "1.0.0"
+  else
+    maj=$( echo "$(git_current_major_version)" | awk '{ print $1 + 1 }' )
+    min=0
+    rev=0
+    echo "$maj.$min.$rev"
+  fi
+}
+
+git_next_minor_version() {
+  if [ $(git_current_version) == ""]; then
+    echo "1.0.0"
+  else
+    maj=$(git_current_major_version)
+    min=$( echo "$(git_current_minor_version)" | awk '{ print $1 + 1 }' )
+    rev=0
+    echo "$maj.$min.$rev"
+  fi
+}
+
+git_next_revision_version() {
+  if [ $(git_current_version) == "" ]; then
+    echo "1.0.0"
+  else
+    maj=$(git_current_major_version)
+    min=$(git_current_minor_version)
+    rev=$( echo "$(git_current_revision_version)" | awk '{ print $1 + 1 }' )
+    echo "$maj.$min.$rev"
+  fi
 }
