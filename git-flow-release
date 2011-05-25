@@ -240,7 +240,11 @@ cmd_finish() {
 			local opts="-a"
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
-			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+			if [ "$FLAGS_message" != "" ]; then
+        opts="$opts -m '$FLAGS_message'"
+      else
+        opts="$opts -m '$VERSION_PREFIX$VERSION'"
+      fi
 			git tag $opts "$tagname" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi
