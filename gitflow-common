@@ -75,7 +75,7 @@ git_remote_branches() { git branch -r --no-color | sed 's/^[* ] //'; }
 git_all_branches() { ( git branch --no-color; git branch -r --no-color) | sed 's/^[* ] //'; }
 git_all_tags() { git tag; }
 
-git_all_tags_by_date() { git for-each-ref --sort='*authordate' --format='%(tag)' refs/tags; }
+git_all_tags_by_date() { git for-each-ref --sort='*authordate' --format='%(refname:short)' refs/tags; }
 
 git_current_branch() {
 	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
@@ -321,7 +321,7 @@ require_branches_equal() {
 #
 
 git_current_version() {
-  echo "$(git_all_tags_by_date)" | grep -e '.*[0-9]*\.[0-9]*\.[0-9].*' | sed '$!d' | sed -n 's/[^0-9]*\([0-9]*.[0-9]*.[0-9]\)/\1/p'
+  echo "$(git_all_tags_by_date)" | grep -e '.*[0-9]*\.[0-9]*\.[0-9].*' | sed '$!d' | sed -n 's/[^0-9]*\([0-9]*.[0-9]*.[0-9]\)[^0-9]*/\1/p'
 }
 
 git_current_major_version() {
@@ -337,7 +337,7 @@ git_current_revision_version() {
 }
 
 git_next_major_version() {
-  if [ $(git_current_version) == ""]; then
+  if [ -z $(git_current_version) ]; then
     echo "1.0.0"
   else
     maj=$( echo "$(git_current_major_version)" | awk '{ print $1 + 1 }' )
@@ -348,7 +348,7 @@ git_next_major_version() {
 }
 
 git_next_minor_version() {
-  if [ $(git_current_version) == ""]; then
+  if [ -z $(git_current_version) ]; then
     echo "1.0.0"
   else
     maj=$(git_current_major_version)
@@ -359,7 +359,7 @@ git_next_minor_version() {
 }
 
 git_next_revision_version() {
-  if [ $(git_current_version) == "" ]; then
+  if [ -z $(git_current_version) ]; then
     echo "1.0.0"
   else
     maj=$(git_current_major_version)
