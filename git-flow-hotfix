@@ -138,6 +138,17 @@ require_version_arg() {
 	fi
 }
 
+require_version_arg_for_finish() {
+	if [ "$VERSION" = "" ]; then
+    default_suggestion="$(gitflow_current_version_from_branch_name)"
+		printf "Version number for this release: [$default_suggestion] "
+		read answer
+		VERSION=${answer:-$default_suggestion}
+    BRANCH=$PREFIX$VERSION
+    require_branch $BRANCH
+	fi
+}
+
 require_base_is_on_master() {
 	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
 			| sed 's/[* ] //g' \
@@ -199,7 +210,7 @@ cmd_finish() {
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
 	parse_args "$@"
-	require_version_arg
+	require_version_arg_for_finish
 
 	# handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then

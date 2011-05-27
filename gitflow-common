@@ -320,6 +320,10 @@ require_branches_equal() {
 # Functions for auto version incrementing
 #
 
+gitflow_current_version_from_branch_name() {
+  echo "$(git_current_branch)" | sed 's/.*\/\(.*\)/\1/g'
+}
+
 git_current_version() {
   echo "$(git_all_tags_by_date)" | grep -e '.*[0-9]*\.[0-9]*\.[0-9].*' | sed '$!d' | sed -n 's/[^0-9]*\([0-9]*.[0-9]*.[0-9]\)[^0-9]*/\1/p'
 }
