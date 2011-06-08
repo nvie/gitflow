@@ -193,7 +193,7 @@ cmd_finish() {
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
-	DEFINE_boolean backmerge false "back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)"
+	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)"
 
 	parse_args "$@"
 	require_version_arg
@@ -246,7 +246,7 @@ cmd_finish() {
 	fi
 
 	# try to merge into develop
-	if flag backmerge; then
+	if noflag nobackmerge; then
 		# in case a previous attempt to finish this release branch has failed,
 		# but the merge into develop was successful, we skip it now
 		if ! git_is_branch_merged_into "$MASTER_BRANCH" "$DEVELOP_BRANCH"; then
@@ -302,18 +302,16 @@ cmd_finish() {
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
-	if noflag backmerge; then
-		echo "- Release branch has been merged into '$DEVELOP_BRANCH'"
-	fi
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
-		if flag backmerge; then
+		if noflag nobackmerge; then
 			echo "- Tag '$tagname' has been back-merged into '$DEVELOP_BRANCH'"
 		fi
+	fi
+	if flag nobackmerge; then
+		echo "- Release branch has been merged into '$DEVELOP_BRANCH'"
 	else
-		if flag backmerge; then
-			echo "- Branch '$MASTER_BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
-		fi
+        echo "- Branch '$MASTER_BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
 	fi
 	if flag keep; then
 		echo "- Release branch '$BRANCH' is still available"
