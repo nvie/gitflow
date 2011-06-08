@@ -31,7 +31,11 @@
 ifdef DEB_BUILD_ARCH
    prefix=$(DESTDIR)/usr/
 else
-   prefix=/usr/local
+   ifdef PREFIX
+      prefix=$(PREFIX)
+   else
+      prefix=/usr/local
+   endif
 endif
 
 # files that need mode 755
