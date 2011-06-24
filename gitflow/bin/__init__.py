@@ -38,6 +38,8 @@ class InitCommand(GitFlowCommand):
                 help='Initialize a repository for gitflow.')
         p.add_argument('-f', '--force', action='store_true',
                 help='force reinitialization of the gitflow preferences')
+        p.add_argument('-d', '--use-defaults', action='store_true',
+                help='force the use of the defaults gitflow preferences')
         p.set_defaults(func=self.run)
         return p
 
@@ -46,6 +48,21 @@ class InitCommand(GitFlowCommand):
         print('Init has been run!')
         print(args)
         print('-------------------')
+        gitflow = GitFlow()
+        if gitflow.is_initialized() and not args.force:
+            warn('Git repository is already initialized.')
+            warn('')
+            warn('You can initialize it again:')
+            warn('')
+            warn('    git flow init --force')
+            warn('')
+            raise SystemExit()
+
+        if args.use_defaults:
+            gitflow.init(force_defaults=args.use_defaults)
+        else:
+            # Prompt config values
+            raise NotImplementedError('Prompt branch names and prefix values')
 
 
 class FeatureCommand(GitFlowCommand):
