@@ -95,6 +95,10 @@ class GitFlow(object):
 
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
+        try:
+            self.repo.branches[self.master_name()]
+        except (GitCommandError, IndexError):
+            raise NotInitialized("Master branch doesn't exist.")
         develop_name = self.develop_name()
         # Create branch if it doesn't exist
         try:
