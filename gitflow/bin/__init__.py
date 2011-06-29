@@ -61,8 +61,45 @@ class InitCommand(GitFlowCommand):
         if args.use_defaults:
             gitflow.init(force_defaults=args.use_defaults)
         else:
-            # Prompt config values
-            raise NotImplementedError('Prompt branch names and prefix values')
+            # Prompt master
+            master_suggestion = 'master'
+            if len(gitflow.repo.branches) == 0:
+                print('No branches exist yet. Base branches must be created now.')
+            else:
+                print('Which branch should be used for bringing forth production releases?')
+                for b in gitflow.repo.branches:
+                    if b.name in ('production', 'main', 'master'):
+                        master_suggestion = b.name
+                        break
+            master = raw_input('Branch name for production releases: [%s] ' % master_suggestion)
+            master = master.strip()  # remove whitespaces
+            if not master:
+                master = master_suggestion
+            # Prompt develop
+            develop_suggestion = 'develop'
+            if len(gitflow.repo.branches) > 0:
+                print('Which branch should be used for integration of the "next release"?')
+                for b in gitflow.repo.branches:
+                    if b.name in ('develop', 'int', 'integration', 'master', 'next'):
+                        develop_suggestion = b.name
+                        break
+            develop = raw_input('Branch name for "next release" development: [%s] ' % develop_suggestion)
+            develop = develop.strip()  # remove whitespaces
+            if not develop:
+                develop = develop_suggestion
+            if master == develop:
+                warn('Production and integration branches should differ.')
+                raise SystemExit()
+            # Prompt branch values
+            prefix = {}
+            for identifier in gitflow.managers:
+                mgr = gitflow.managers[identifier]
+                data = (mgr.identifier, mgr.prefix)
+                response = raw_input("What's the prefix for the %s branch? [%s] " % data)
+                if not response.strip():
+                    response = mgr.prefix
+                prefix[identifier] = response
+            gitflow.init(master=master, develop=develop, prefixes=prefix)
 
 
 class FeatureCommand(GitFlowCommand):
