@@ -44,10 +44,6 @@ class InitCommand(GitFlowCommand):
         return p
 
     def run(self, args):
-        print('-------------------')
-        print('Init has been run!')
-        print(args)
-        print('-------------------')
         gitflow = GitFlow()
         if gitflow.is_initialized() and not args.force:
             warn('Git repository is already initialized.')
