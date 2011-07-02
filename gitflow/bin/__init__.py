@@ -14,6 +14,8 @@ git-flow
 
 """
 import argparse
+import readline  # this will trigger readline functionality for raw_input
+
 from gitflow.core import GitFlow
 from gitflow.util import itersubclasses
 
