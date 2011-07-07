@@ -295,6 +295,15 @@ cmd_default() {
 
 
 	# TODO: what to do with origin?
+
+        # We are on develop, so let's automagically track origin/develop && make
+        # sure it is updated
+        if git_branch_exists "origin/$develop_branch"; then
+                git branch --set-upstream "$develop_branch" "origin/$develop_branch"
+                warn "Now pulling updates from origin/$develop_branch to $develop_branch ..."
+                git pull
+        fi
+
 }
 
 cmd_help() {
