@@ -302,6 +302,11 @@ cmd_default() {
                 git branch --set-upstream "$develop_branch" "origin/$develop_branch"
                 warn "Now pulling updates from origin/$develop_branch to $develop_branch ..."
                 git pull
+	else
+		warn "It seems to me you are using git-flow-init for the first time on this git repository."
+		warn "Thus, you may likely find rather useful to run"
+		warn "\n\t\tgit branch --set-upstream ${develop_branch} origin/${develop_branch}\n"
+		warn "after your first push of branch: ${develop_branch}"
         fi
 
 }
