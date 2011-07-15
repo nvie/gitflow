@@ -307,6 +307,7 @@ cmd_default() {
 		warn "Thus, you may likely find rather useful to run"
 		warn "\n\t\tgit branch --set-upstream ${develop_branch} origin/${develop_branch}\n"
 		warn "after your first push of branch: ${develop_branch}"
+		warn "\t\t( git push origin ${develop_branch} )"
         fi
 
 }
