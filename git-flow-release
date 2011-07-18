@@ -264,6 +264,7 @@ cmd_finish() {
 			git checkout "$MASTER_BRANCH"
 		fi
 		git branch -d "$BRANCH"
+		git push "$ORIGIN" :"$BRANCH"
 	fi
 
 	if flag push; then

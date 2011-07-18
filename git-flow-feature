@@ -347,6 +347,7 @@ helper_finish_cleanup() {
 	
 	if noflag keep; then
 		git branch -d "$BRANCH"
+		git push "$ORIGIN" :"$BRANCH"
 	fi
 
 	echo
