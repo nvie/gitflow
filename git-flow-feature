@@ -350,6 +350,7 @@ helper_finish_cleanup() {
 		CHECK_REMOTE=$(git branch -r | grep "$ORIGIN"/"$BRANCH" | wc -l)
 		if [ $CHECK_REMOTE = 1 ]; then
 			git push "$ORIGIN" :"$BRANCH"
+		fi
 	fi
 
 	echo

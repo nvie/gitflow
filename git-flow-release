@@ -264,7 +264,10 @@ cmd_finish() {
 			git checkout "$MASTER_BRANCH"
 		fi
 		git branch -d "$BRANCH"
-		git push "$ORIGIN" :"$BRANCH"
+		CHECK_REMOTE=$(git branch -r | grep "$ORIGIN"/"$BRANCH" | wc -l)
+                if [ $CHECK_REMOTE = 1 ]; then
+	                git push "$ORIGIN" :"$BRANCH"
+                fi
 	fi
 
 	if flag push; then
