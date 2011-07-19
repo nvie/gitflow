@@ -347,7 +347,9 @@ helper_finish_cleanup() {
 	
 	if noflag keep; then
 		git branch -d "$BRANCH"
-		git push "$ORIGIN" :"$BRANCH"
+		check_remote=$(git branch -r | grep "$ORIGIN"/"$BRANCH" | wc -l)
+		if [ check_remote = 1 ]; then
+			git push "$ORIGIN" :"$BRANCH"
 	fi
 
 	echo
