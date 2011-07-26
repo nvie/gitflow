@@ -188,6 +188,25 @@ gitflow_load_settings() {
 }
 
 #
+# gitflow_render_merge_message
+#
+# Inputs:
+# $1 = source branch
+# $2 = destination branch
+#
+# Renders a pre-defined merge message.
+gitflow_render_merge_message() {
+	local src_branch=$1
+	local dst_branch=$2
+
+	local msg=$(eval "echo $(git config --get gitflow.merge.message)")
+
+	if [ "$msg" != "" ]; then
+		echo "$msg"
+	fi
+}
+
+#
 # gitflow_resolve_nameprefix
 #
 # Inputs:
