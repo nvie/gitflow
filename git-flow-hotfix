@@ -226,9 +226,19 @@ cmd_finish() {
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+
+		local msg=$(gitflow_render_merge_message "$BRANCH" "$MASTER_BRANCH")
+
+		if [ "$msg" != "" ]; then
+			git merge --no-ff -m "$msg" "$BRANCH"
+		else
+			git merge --no-ff "$BRANCH"
+		fi
+
+		if [ $? -ne 0 ]; then
+			die "There were merge conflicts."
+			# TODO: What do we do now?
+		fi
 	fi
 
 	if noflag notag; then
@@ -253,11 +263,21 @@ cmd_finish() {
 		git checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
+		local msg=$(gitflow_render_merge_message "$BRANCH" "$DEVELOP_BRANCH")
+
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+
+		if [ "$msg" != "" ]; then
+			git merge --no-ff -m "$msg" "$BRANCH"
+		else
+			git merge --no-ff "$BRANCH"
+		fi
+
+		if [ $? -ne 0 ]; then
+			die "There were merge conflicts."
+			# TODO: What do we do now?
+		fi
 	fi
 
 	# delete branch

@@ -311,7 +311,13 @@ cmd_finish() {
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
 	else
-		git merge --no-ff "$BRANCH"
+		local msg=$(gitflow_render_merge_message "$BRANCH" "$DEVELOP_BRANCH")
+
+		if [ "$msg" != "" ]; then
+			git merge --no-ff -m "$msg" "$BRANCH"
+		else
+			git merge --no-ff "$BRANCH"
+		fi
 	fi
 
 	if [ $? -ne 0 ]; then
