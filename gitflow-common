@@ -152,6 +152,25 @@ git_is_branch_merged_into() {
 # gitflow specific common functionality
 #
 
+# get path for gitflow config file
+gitflow_config_path() {
+	local repo_topdir=$(git rev-parse --show-toplevel)
+	local gitflow_config=".gitflow"
+	echo "$repo_topdir/$gitflow_config"
+}
+
+# get config values from .gitflow or git config
+gitflow_config_get() {
+	local key=$1
+	local config=$(gitflow_config_path)
+	local value
+	value="$(git config --file "$config" --get $key || \
+	    git config --get $key)"
+	local success=$?
+	[ $success -eq 0 ] && echo $value
+	return $success
+}
+
 # check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
