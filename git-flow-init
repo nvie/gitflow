@@ -122,7 +122,7 @@ cmd_default() {
 		fi
 
 		# store the name of the master branch
-		git config gitflow.branch.master "$master_branch"
+		gitflow_config_set gitflow.branch.master "$master_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
@@ -173,7 +173,7 @@ cmd_default() {
 		fi
 
 		# store the name of the develop branch
-		git config gitflow.branch.develop "$develop_branch"
+		gitflow_config_set gitflow.branch.develop "$develop_branch"
 	fi
 
 	# Creation of HEAD
@@ -235,7 +235,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.feature "$prefix"
+		gitflow_config_set gitflow.prefix.feature "$prefix"
 	fi
 
 	# Release branches
@@ -248,7 +248,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.release "$prefix"
+		gitflow_config_set gitflow.prefix.release "$prefix"
 	fi
 
 
@@ -262,7 +262,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.hotfix "$prefix"
+		gitflow_config_set gitflow.prefix.hotfix "$prefix"
 	fi
 
 
@@ -276,7 +276,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.support "$prefix"
+		gitflow_config_set gitflow.prefix.support "$prefix"
 	fi
 
 
@@ -290,7 +290,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.versiontag "$prefix"
+		gitflow_config_set gitflow.prefix.versiontag "$prefix"
 	fi
 
 
