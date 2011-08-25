@@ -36,6 +36,16 @@ installer, which can be run using the following command:
 
 	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
 
+#### Debian
+
+Users of Debian testing and unstable can use the apt-get tool to
+install gitflow from the Debian repository:
+
+    $ apt-get install git-flow
+
+For Debian stable, one can either use the git flow installer, or the
+Debian package from unstable (it works just fine on stable too).
+	
 ### Windows
 
 For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good

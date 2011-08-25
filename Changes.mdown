@@ -7,7 +7,7 @@ Release date: **not yet**
 
 * Various minor bug fixes related to internal argument passing
 
-* Add package installers for the Debian and Windows platforms.
+* Add package installers for the Windows platform.
 
 0.4.1:
 -----
