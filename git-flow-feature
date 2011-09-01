@@ -433,7 +433,7 @@ cmd_diff() {
 
 cmd_checkout() {
 	parse_args "$@"
-    CURRENTBRANCH = git_current_branch()
+    CURRENTBRANCH=$(git_current_branch)
     echo "$DATE PAUSE BRANCH $READABLEDATE $CURRENTBRANCH" >> .gitflowTiming
     echo "$DATE UNPAUSE FEATURE $READABLEDATE $BRANCH" >> .gitflowTiming
 
