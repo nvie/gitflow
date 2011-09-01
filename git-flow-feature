@@ -40,6 +40,8 @@ require_git_repo
 require_gitflow_initialized
 gitflow_load_settings
 PREFIX=$(git config --get gitflow.prefix.feature)
+DATE=$(date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s")
+READABLEDATE=$(date "+%Y-%m-%d %H:%M:%S")
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
@@ -225,6 +227,8 @@ cmd_start() {
 	echo ""
 	echo "     git flow feature finish $NAME"
 	echo
+    echo "$DATE START FEATURE $READABLEDATE $BRANCH" >> .gitflowTiming
+    
 }
 
 cmd_finish() {
@@ -330,6 +334,7 @@ cmd_finish() {
 		exit 1
 	fi
 
+    echo "$DATE FINISH FEATURE $READABLEDATE $BRANCH" >> .gitflowTiming
 	# when no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
 }
@@ -428,6 +433,9 @@ cmd_diff() {
 
 cmd_checkout() {
 	parse_args "$@"
+    CURRENTBRANCH = git_current_branch()
+    echo "$DATE PAUSE BRANCH $READABLEDATE $CURRENTBRANCH" >> .gitflowTiming
+    echo "$DATE UNPAUSE FEATURE $READABLEDATE $BRANCH" >> .gitflowTiming
 
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
