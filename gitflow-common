@@ -171,14 +171,6 @@ gitflow_config_get() {
 	return $success
 }
 
-# save config values to .gitflow
-gitflow_config_set() {
-	local key=$1
-	local value=$2
-	local config=$(gitflow_config_path)
-	git config --file "$config" $key "$value"
-}
-
 # check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(gitflow_config_get gitflow.branch.master)

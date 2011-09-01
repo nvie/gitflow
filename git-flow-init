@@ -37,7 +37,7 @@
 #
 
 usage() {
-	echo "usage: git flow init [-fd]"
+	echo "usage: git flow init [-fdp]"
 }
 
 parse_args() {
@@ -46,10 +46,23 @@ parse_args() {
 	eval set -- "${FLAGS_ARGV}"
 }
 
+# save config values to .gitflow if publish flag was specified
+gitflow_config_set() {
+	if flag publish; then
+	    local key=$1
+	    local value=$2
+	    local config=$(gitflow_config_path)
+	    git config --file "$config" $key "$value"
+	else
+	    git config "$config" $key "$value"
+	fi
+}
+
 # Default entry when no SUBACTION is given
 cmd_default() {
 	DEFINE_boolean force false 'force setting of gitflow branches, even if already configured' f
 	DEFINE_boolean defaults false 'use default branch naming conventions' d
+	DEFINE_boolean publish false 'publish settings to .gitflow' p
 	parse_args "$@"
 	
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
