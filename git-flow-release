@@ -314,8 +314,8 @@ cmd_publish() {
 	git fetch -q "$ORIGIN"
 
 	# configure remote tracking
-	gitflow_config_set "branch.$BRANCH.remote" "$ORIGIN"
-	gitflow_config_set "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+	git config "branch.$BRANCH.remote" "$ORIGIN"
+	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
 
 	echo
