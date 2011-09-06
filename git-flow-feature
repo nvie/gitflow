@@ -335,6 +335,21 @@ cmd_finish() {
 	fi
 
     echo "$DATE FINISH FEATURE $READABLEDATE $BRANCH" >> .gitflowTiming
+    awk '
+BEGIN{total=0;}
+/$BRANCH/ { 
+    if ($2=="START" || $2=="UNPAUSE") {
+        start=$1;
+    }
+
+    if ($2=="PAUSE" || $2=="FINISH") {
+        if (start) {
+            total+=$1-start; 
+        }
+        start = 0;
+    }
+}
+END{print total/60 " TOTAL FEATURE $READABLEDATE $BRANCH";}' .gitflowTiming 
 	# when no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
 }
