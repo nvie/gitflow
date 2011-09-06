@@ -12,4 +12,4 @@ BEGIN{total=0;}
         start = 0;
     }
 }
-END{print "total"; print total/60 " Minutes";}' .gitflowTiming 
+END{print "total" total/60 " Minutes";}' .gitflowTiming 
