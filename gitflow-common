@@ -40,6 +40,9 @@
 # Common functionality
 #
 
+# capitalize a word (used by git-flow-init)
+capitalize() { printf ${1:0:1} | tr [:lower:] [:upper:] ; printf ${1:1} ; }
+
 # shell output
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
