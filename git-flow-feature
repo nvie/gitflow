@@ -234,7 +234,7 @@ cmd_start() {
 		die "Could not create feature branch '$BRANCH'"
 	fi
 	# create remote branch
-  if [ $(flag remote) -a ! $(git push --set-upstream "$ORIGIN" "$BRANCH") ]; then
+  if flag remote && ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
     die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
   fi
 
@@ -305,7 +305,7 @@ cmd_finish() {
 
 	# update local repo with remote changes first, if asked
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
-    if [ $(flag fetch) -o $(flag remote) ]; then
+    if flag fetch || flag remote; then
 			git fetch -q "$ORIGIN" "$BRANCH"
 			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
@@ -321,7 +321,7 @@ cmd_finish() {
 	fi
 
 	# if the user wants to rebase, do that first
-  if [ $(flag rebase) -a ! $(git flow feature rebase "$NAME" "$DEVELOP_BRANCH") ]; then
+  if flag rebase && ! $(git flow feature rebase "$NAME" "$DEVELOP_BRANCH"); then
     warn "Finish was aborted due to conflicts during rebase."
     warn "Please finish the rebase manually now."
     warn "When finished, re-run:"
