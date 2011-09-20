@@ -235,8 +235,7 @@ cmd_start() {
 	fi
 	# create remote branch
   if [ $(flag remote) -a ! $(git push --set-upstream "$ORIGIN" "$BRANCH") ]; then
-      die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
-    fi
+    die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
   fi
 
 	echo
@@ -376,7 +375,9 @@ helper_finish_cleanup() {
 		if [ "$BRANCH" = "$(git_current_branch)" ]; then
 			git checkout "$DEVELOP_BRANCH"
 		fi
-    git push $ORIGIN $BRANCH
+    if flag remote; then
+      git push $ORIGIN $BRANCH
+    fi
 		git branch -d "$BRANCH"
 	fi
 
