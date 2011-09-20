@@ -128,6 +128,17 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
+parse_start_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	VERSION=$1
+	BRANCH=$PREFIX$VERSION
+	BASE=${2:-$MASTER_BRANCH}
+}
+
 require_version_arg() {
 	if [ "$VERSION" = "" ]; then
 		warn "Missing argument <version>"
@@ -155,8 +166,7 @@ require_no_existing_hotfix_branches() {
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
   DEFINE_boolean remote false "make and push remote branch to $ORIGIN" R
-	parse_args "$@"
-	BASE=${2:-$MASTER_BRANCH}
+	parse_start_args "$@"
 	require_version_arg
 	require_base_is_on_master
 	require_no_existing_hotfix_branches
@@ -182,10 +192,8 @@ cmd_start() {
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
 	# create remote branch
-  if flag remote; then
-    if ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
-      die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
-    fi
+  if [ $(flag remote) -a ! $(git push --set-upstream "$ORIGIN" "$BRANCH") ]; then
+    die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
   fi
 
 	echo
@@ -222,7 +230,7 @@ cmd_finish() {
 	# sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
-	if flag fetch -o flag remote; then
+  if [ $(flag fetch) -o $(flag remote) ]; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
@@ -234,8 +242,8 @@ cmd_finish() {
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
-  if flag remote -a ! has "$ORIGIN/$BRANCH" $(git_remote_branches); then
-    die "not exist the remote $BRANCH branch at $ORIGIN"
+  if [ $(flag remote) -a ! $(has "$ORIGIN/$BRANCH" $(git_remote_branches)) ]; then
+      die "not exist the remote $BRANCH branch at $ORIGIN"
   fi
 
 	# try to merge into master
@@ -280,10 +288,16 @@ cmd_finish() {
 
 	# delete branch
 	if noflag keep; then
+		if [ "$BRANCH" = "$(git_current_branch)" ]; then
+			git checkout "$MASTER_BRANCH"
+		fi
+    if flag remote; then
+      git push $ORIGIN $BRANCH
+    fi
 		git branch -d "$BRANCH"
 	fi
 
-	if flag push -o flag remote; then
+  if [ $(flag push) -o $(flag remote) ]; then
 		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
 		git push "$ORIGIN" "$MASTER_BRANCH" || \
