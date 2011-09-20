@@ -1,3 +1,18 @@
+0.5.0:
+-----
+Adding [--remote|-R] option with hotfix, feature and release subcommands by Motonori Iwata.
+
+0.4.2:
+-----
+Release date: **not yet**
+
+* `git flow feature finish` can now be called without a feature branch
+  name(prefix) argument and will finish the current branch, if on any.
+
+* Various minor bug fixes related to internal argument passing
+
+* Add package installers for the Debian and Windows platforms.
+
 0.4.1:
 -----
 Release date: **2011/02/04**

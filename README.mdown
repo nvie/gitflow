@@ -34,42 +34,33 @@ If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
 Another easy way to install git-flow is using Rick Osborne's excellent git-flow
 installer, which can be run using the following command:
 
-	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
+	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
 
 ### Windows
+
+For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
+starting place for installing git.
+
 #### Using Cygwin
 For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
 first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
 during installation). Then simply run this command from a Cygwin shell:
 
-	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
+	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
 
-#### Using msysgit
-This is much like the manual installation below, but there are additional steps required to install some extra tools that
-are not distributed with [msysgit](http://code.google.com/p/msysgit/).
+#### Using [msysgit](http://code.google.com/p/msysgit/)
+Download and install `getopt.exe` from the [util-linux package](http://gnuwin32.sourceforge.net/packages/util-linux-ng.htm) into `C:\Program Files\Git\bin`. (Only `getopt.exe`, the others util-linux files are not used). Also install `libintl3.dll` from the Dependencies package, into the same directory. 
 
-Clone the git-flow sources from Github:
+Clone the git-flow sources from GitHub:
 
 	$ git clone --recursive git://github.com/nvie/gitflow.git
+	$ cd gitflow
 
-Copy git-flow's relevant files to your msysgit installation directory:
+Run the `msysgit-install` script from a command-line prompt (you may have to
+run it with "Full Administrator" rights if you installed msysgit with its
+installer):
 
-	$ mkdir /usr/local/bin
-	$ cp git-flow* gitflow* /usr/local/bin/
-	$ cp shFlags/src/shflags /usr/local/bin/gitflow-shFlags
-
-Next up we need to borrow a couple of binaries from [Cygwin](http://www.cygwin.com/). If you don't have Cygwin installed, please 
-install it including the `util-linux` package. Apart from `util-linux`'s dependencies, no other packages are required. When you
-finished installation, copy the following files using msysgit's _Git Bash_. We assume the Cygwin's default installation path in C:\cygwin.
-
-	$ cd /c/cygwin/
-	$ cp bin/getopt.exe /usr/local/bin/
-	$ cp bin/cyggcc_s-1.dll /usr/local/bin/
-	$ cp bin/cygiconv-2.dll /usr/local/bin/
-	$ cp bin/cygintl-8.dll /usr/local/bin/
-	$ cp bin/cygwin1.dll /usr/local/bin/
-
-After copying the files above, you can safely uninstall your Cygwin installation by deleting the C:\cygwin directory.
+	C:\gitflow> contrib\msysgit-install.cmd
 
 ### Manual installation
 If you prefer a manual installation, please use the following instructions:
@@ -95,6 +86,60 @@ favorite package manager to install `getopt`.  For Cygwin, install the
 `util-linux` package to get `getopt`.  If you use `apt-get` as your install
 manager, the package name is `opt`.
 
+## Postscript
+Adding [--remote|-R] option with hotfix, feature and release subcommands.
+
+### for the hotfix subcommand
+
+    $ git flow hotfix start -R <hotfix name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $HOTFIX_BRANCH
+---------------------------
+    $ git flow hotfix finish -R <hotfix name>
+
+merge to develop and master branch, remove local hotfix branch, push develop, master and tags branch to $ORIGIN
+and remove remote hotfix at $ORIGIN:
+
+    $ git push $ORIGIN master
+    $ git push $ORIGIN develop
+    $ git push --tags $ORIGIN
+    $ git push $ORIGIN :$HOTFIX_BRANCH
+
+### for the feature subcommand
+
+    $ git flow feature start -R <feature name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $FEATURE_BRANCH
+---------------------------
+    $ git flow hotfix finish -R <hotfix name>
+
+merge to develop branch, remove local feature branch, push develop branch to $ORIGIN
+and remove remote feature at $ORIGIN:
+
+    $ git push $ORIGIN develop
+    $ git push $ORIGIN :$FEATURE_BRANCH
+
+### for the release subcommand
+
+    $ git flow release start -R <release> name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $RELEASE_BRANCH
+---------------------------
+    $ git flow release finish -R <hotfix name>
+
+merge to develop and master branch, remove local release branch, push develop, master and tags branch to $ORIGIN
+and remove remote release at $ORIGIN:
+
+    $ git push $ORIGIN master
+    $ git push $ORIGIN develop
+    $ git push --tags $ORIGIN
+    $ git push $ORIGIN :$RELEASE_BRANCH
 
 Integration with your shell
 ---------------------------
@@ -103,9 +148,6 @@ For those who use the [Bash](http://www.gnu.org/software/bash/) or
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
-
-For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
-starting place for installing git.
 
 
 FAQ
