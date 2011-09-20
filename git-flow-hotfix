@@ -192,7 +192,7 @@ cmd_start() {
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
 	# create remote branch
-  if flag remote && ! $(git push --set-upstream "$ORIGIN" "$BRANCH"); then
+  if flag remote && ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
     die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
   fi
 

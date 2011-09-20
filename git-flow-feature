@@ -321,7 +321,7 @@ cmd_finish() {
 	fi
 
 	# if the user wants to rebase, do that first
-  if flag rebase && ! $(git flow feature rebase "$NAME" "$DEVELOP_BRANCH"); then
+  if flag rebase && ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
     warn "Finish was aborted due to conflicts during rebase."
     warn "Please finish the rebase manually now."
     warn "When finished, re-run:"
