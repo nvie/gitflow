@@ -29,9 +29,9 @@
 
 # Determine if we're inside a debian build .. 
 ifdef DEB_BUILD_ARCH
-   prefix=$(DESTDIR)/usr/
+	prefix=$(DESTDIR)/usr/
 else
-   prefix=/usr/local
+	prefix=/usr/local
 endif
 
 # files that need mode 755
@@ -59,5 +59,7 @@ install:
 
 uninstall:
 	test -d $(prefix)/bin && \
-	cd $(prefix)/bin && \
-	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+		cd $(prefix)/bin && \
+		rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+
+# vim: set noexpandtab ff=unix sts=0 :

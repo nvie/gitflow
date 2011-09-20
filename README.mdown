@@ -2,7 +2,7 @@ git-flow ![Project status](http://stillmaintained.com/nvie/gitflow.png)
 ========
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
-blog post").
+		blog post").
 
 
 Getting started
@@ -24,17 +24,18 @@ Installing git-flow
 ### Mac OS
 If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
 
-    $ brew install git-flow
+$ brew install https://github.com/iwata/gitflow/raw/master/git-flow.rb
 
-If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
+#### --zsh-completion option
+For zsh user:
 
-    $ port install git-flow
+$ brew install --zsh-completion https://github.com/iwata/gitflow/raw/master/git-flow.rb
 
 ### Linux, etc.
 Another easy way to install git-flow is using Rick Osborne's excellent git-flow
 installer, which can be run using the following command:
 
-	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
+$ wget --no-check-certificate -q -O - https://github.com/iwata/gitflow/raw/master/contrib/gitflow-installer.sh | sudo bash
 
 ### Windows
 
@@ -44,143 +45,199 @@ starting place for installing git.
 #### Using Cygwin
 For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
 first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
-during installation). Then simply run this command from a Cygwin shell:
+		during installation). Then simply run this command from a Cygwin shell:
 
-	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
+$ wget -q -O - https://github.com/iwata/gitflow/raw/master/contrib/gitflow-installer.sh | bash
 
 #### Using [msysgit](http://code.google.com/p/msysgit/)
 Download and install `getopt.exe` from the [util-linux package](http://gnuwin32.sourceforge.net/packages/util-linux-ng.htm) into `C:\Program Files\Git\bin`. (Only `getopt.exe`, the others util-linux files are not used). Also install `libintl3.dll` from the Dependencies package, into the same directory. 
 
 Clone the git-flow sources from GitHub:
 
-	$ git clone --recursive git://github.com/nvie/gitflow.git
-	$ cd gitflow
+$ git clone --recursive git://github.com/iwata/gitflow.git
+$ cd gitflow
 
 Run the `msysgit-install` script from a command-line prompt (you may have to
-run it with "Full Administrator" rights if you installed msysgit with its
-installer):
+		run it with "Full Administrator" rights if you installed msysgit with its
+		installer):
 
 	C:\gitflow> contrib\msysgit-install.cmd
 
 ### Manual installation
-If you prefer a manual installation, please use the following instructions:
+	If you prefer a manual installation, please use the following instructions:
 
-	$ git clone --recursive git://github.com/nvie/gitflow.git
+	$ git clone --recursive git://github.com/iwata/gitflow.git
 
-Then, you can install `git-flow`, using:
+	Then, you can install `git-flow`, using:
 
 	$ sudo make install
 
-By default, git-flow will be installed in /usr/local. To change the prefix
-where git-flow will be installed, simply specify it explicitly, using:
+	By default, git-flow will be installed in /usr/local. To change the prefix
+	where git-flow will be installed, simply specify it explicitly, using:
 
 	$ sudo make prefix=/opt/local install
 
-Or simply point your `PATH` environment variable to your git-flow checkout
-directory.
+	Or simply point your `PATH` environment variable to your git-flow checkout
+	directory.
 
-*Installation note:*  
-git-flow depends on the availability of the command line utility `getopt`,
-which may not be available in your Unix/Linux environment.  Please use your
-favorite package manager to install `getopt`.  For Cygwin, install the
-`util-linux` package to get `getopt`.  If you use `apt-get` as your install
-manager, the package name is `opt`.
+	*Installation note:*  
+	git-flow depends on the availability of the command line utility `getopt`,
+	which may not be available in your Unix/Linux environment.  Please use your
+	favorite package manager to install `getopt`.  For Cygwin, install the
+	`util-linux` package to get `getopt`.  If you use `apt-get` as your install
+	manager, the package name is `opt`.
+
+## Postscript
+	Adding [--remote|-R] option with hotfix, feature and release subcommands.
+
+### for the hotfix subcommand
+
+	$ git flow hotfix start -R <hotfix name>
+
+	create local branch and push remote branch to $ORIGIN:
+
+	$ git push --set-upstream $ORIGIN $HOTFIX_BRANCH
+	---------------------------
+	$ git flow hotfix finish -R <hotfix name>
+
+	merge to develop and master branch, remove local hotfix branch, push develop, master and tags branch to $ORIGIN
+	and remove remote hotfix at $ORIGIN:
+
+	$ git push $ORIGIN master
+	$ git push $ORIGIN develop
+	$ git push --tags $ORIGIN
+	$ git push $ORIGIN :$HOTFIX_BRANCH
+
+### for the feature subcommand
+
+	$ git flow feature start -R <feature name>
+
+	create local branch and push remote branch to $ORIGIN:
+
+	$ git push --set-upstream $ORIGIN $FEATURE_BRANCH
+	---------------------------
+	$ git flow hotfix finish -R <hotfix name>
+
+	merge to develop branch, remove local feature branch, push develop branch to $ORIGIN
+	and remove remote feature at $ORIGIN:
+
+	$ git push $ORIGIN develop
+	$ git push $ORIGIN :$FEATURE_BRANCH
+
+### for the release subcommand
+
+	$ git flow release start -R <release> name>
+
+	create local branch and push remote branch to $ORIGIN:
+
+	$ git push --set-upstream $ORIGIN $RELEASE_BRANCH
+	---------------------------
+	$ git flow release finish -R <hotfix name>
+
+	merge to develop and master branch, remove local release branch, push develop, master and tags branch to $ORIGIN
+	and remove remote release at $ORIGIN:
+
+	$ git push $ORIGIN master
+	$ git push $ORIGIN develop
+	$ git push --tags $ORIGIN
+	$ git push $ORIGIN :$RELEASE_BRANCH
+
+	Integration with your shell
+	---------------------------
+	For those who use the [Bash](http://www.gnu.org/software/bash/) or
+	[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
+	[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
+	by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
+	git-flow subcommands and branch names.
 
 
-Integration with your shell
----------------------------
-For those who use the [Bash](http://www.gnu.org/software/bash/) or
-[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
-[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
-by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
-git-flow subcommands and branch names.
+	FAQ
+	---
+	See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+	Wiki.
 
 
-FAQ
----
-See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
-Wiki.
+	Please help out
+	---------------
+	This project is still under development. Feedback and suggestions are very
+	welcome and I encourage you to use the [Issues
+	list](http://github.com/nvie/gitflow/issues) on Github to provide that
+	feedback.
+
+	Feel free to fork this repo and to commit your additions. For a list of all
+	contributors, please see the [AUTHORS](AUTHORS) file.
+
+	Any questions, tips, or general discussion can be posted to our Google group:
+	[http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
 
 
-Please help out
----------------
-This project is still under development. Feedback and suggestions are very
-welcome and I encourage you to use the [Issues
-list](http://github.com/nvie/gitflow/issues) on Github to provide that
-feedback.
-
-Feel free to fork this repo and to commit your additions. For a list of all
-contributors, please see the [AUTHORS](AUTHORS) file.
-
-Any questions, tips, or general discussion can be posted to our Google group:
-[http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
-
-
-License terms
--------------
-git-flow is published under the liberal terms of the BSD License, see the
-[LICENSE](LICENSE) file. Although the BSD License does not require you to share
-any modifications you make to the source code, you are very much encouraged and
-invited to contribute back your modifications to the community, preferably
-in a Github fork, of course.
+	License terms
+	-------------
+	git-flow is published under the liberal terms of the BSD License, see the
+	[LICENSE](LICENSE) file. Although the BSD License does not require you to share
+	any modifications you make to the source code, you are very much encouraged and
+	invited to contribute back your modifications to the community, preferably
+	in a Github fork, of course.
 
 
 ### Initialization
 
-To initialize a new repo with the basic branch structure, use:
-  
-		git flow init
-  
-This will then interactively prompt you with some questions on which branches
-you would like to use as development and production branches, and how you
-would like your prefixes be named. You may simply press Return on any of
-those questions to accept the (sane) default suggestions.
+	To initialize a new repo with the basic branch structure, use:
+
+	git flow init
+
+	This will then interactively prompt you with some questions on which branches
+	you would like to use as development and production branches, and how you
+	would like your prefixes be named. You may simply press Return on any of
+	those questions to accept the (sane) default suggestions.
 
 
 ### Creating feature/release/hotfix/support branches
 
-* To list/start/finish feature branches, use:
-  
-  		git flow feature
-  		git flow feature start <name> [<base>]
-  		git flow feature finish <name>
-  
-  For feature branches, the `<base>` arg must be a commit on `develop`.
+	* To list/start/finish feature branches, use:
 
-* To list/start/finish release branches, use:
-  
-  		git flow release
-  		git flow release start <release> [<base>]
-  		git flow release finish <release>
-  
-  For release branches, the `<base>` arg must be a commit on `develop`.
-  
-* To list/start/finish hotfix branches, use:
-  
-  		git flow hotfix
-  		git flow hotfix start <release> [<base>]
-  		git flow hotfix finish <release>
-  
-  For hotfix branches, the `<base>` arg must be a commit on `master`.
+	git flow feature
+	git flow feature start <name> [<base>]
+	git flow feature finish <name>
 
-* To list/start support branches, use:
-  
-  		git flow support
-  		git flow support start <release> <base>
-  
-  For support branches, the `<base>` arg must be a commit on `master`.
+	For feature branches, the `<base>` arg must be a commit on `develop`.
+
+	* To list/start/finish release branches, use:
+
+	git flow release
+	git flow release start <release> [<base>]
+	git flow release finish <release>
+
+	For release branches, the `<base>` arg must be a commit on `develop`.
+
+	* To list/start/finish hotfix branches, use:
+
+	git flow hotfix
+	git flow hotfix start <release> [<base>]
+	git flow hotfix finish <release>
+
+	For hotfix branches, the `<base>` arg must be a commit on `master`.
+
+	* To list/start support branches, use:
+
+	git flow support
+	git flow support start <release> <base>
+
+	For support branches, the `<base>` arg must be a commit on `master`.
 
 
-Showing your appreciation
-=========================
-A few people already requested it, so now it's here: a Flattr button.
+	Showing your appreciation
+	=========================
+	A few people already requested it, so now it's here: a Flattr button.
 
-Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
-contributing to the community.  If you'd like to show your appreciation in
-another way, however, consider Flattr'ing me:
+	Of course, the best way to show your appreciation for the original
+	[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
+	contributing to the community.  If you'd like to show your appreciation in
+	another way, however, consider Flattr'ing me:
 
-[![Flattr this][2]][1]
+	[![Flattr this][2]][1]
 
-[1]: http://flattr.com/thing/53771/git-flow
-[2]: http://api.flattr.com/button/button-static-50x60.png
+	[1]: http://flattr.com/thing/53771/git-flow
+	[2]: http://api.flattr.com/button/button-static-50x60.png
+
+# vim: set noexpandtab ff=unix sts=0 :

@@ -64,11 +64,11 @@ cmd_list() {
 	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
-                warn ""
-                warn "You can start a new support branch:"
-                warn ""
-                warn "    git flow support start <name> <base>"
-                warn ""
+		warn ""
+		warn "You can start a new support branch:"
+		warn ""
+		warn "    git flow support start <name> <base>"
+		warn ""
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
@@ -149,10 +149,10 @@ require_base_arg() {
 
 require_base_is_on_master() {
 	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
-			| sed 's/[* ] //g' \
-	  		| grep -q "^$MASTER_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
-	fi
+		| sed 's/[* ] //g' \
+		| grep -q "^$MASTER_BRANCH\$"; then
+	die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+fi
 }
 
 cmd_start() {
@@ -180,3 +180,5 @@ cmd_start() {
 	echo "- You are now on branch '$BRANCH'"
 	echo
 }
+
+# vim: set noexpandtab ff=unix ft=sh sts=0 :

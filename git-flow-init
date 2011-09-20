@@ -51,7 +51,7 @@ cmd_default() {
 	DEFINE_boolean force false 'force setting of gitflow branches, even if already configured' f
 	DEFINE_boolean defaults false 'use default branch naming conventions' d
 	parse_args "$@"
-	
+
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
 		git init
 	else
@@ -69,9 +69,9 @@ cmd_default() {
 	local branch_count
 	local answer
 
-    if flag defaults; then
-        warn "Using default branch names."
-    fi
+	if flag defaults; then
+		warn "Using default branch names."
+	fi
 
 	# add a master branch if no such branch exists yet
 	local master_branch
@@ -99,81 +99,81 @@ cmd_default() {
 			should_check_existence=YES
 			default_suggestion=
 			for guess in $(git config --get gitflow.branch.master) \
-			             'production' 'main' 'master'; do
-				if git_local_branch_exists "$guess"; then
-					default_suggestion="$guess"
-					break
-				fi
-			done
-		fi
-		
-		printf "Branch name for production releases: [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		master_branch=${answer:-$default_suggestion}
-
-		# check existence in case of an already existing repo
-		if [ "$should_check_existence" = "YES" ]; then
-			git_local_branch_exists "$master_branch" || \
-				die "Local branch '$master_branch' does not exist."
-		fi
-
-		# store the name of the master branch
-		git config gitflow.branch.master "$master_branch"
+				'production' 'main' 'master'; do
+			if git_local_branch_exists "$guess"; then
+				default_suggestion="$guess"
+				break
+			fi
+		done
 	fi
 
-	# add a develop branch if no such branch exists yet
-	local develop_branch
-	if gitflow_has_develop_configured && ! flag force; then
-		develop_branch=$(git config --get gitflow.branch.develop)
+	printf "Branch name for production releases: [$default_suggestion] "
+	if noflag defaults; then
+		read answer
 	else
-		# Again, the same two cases as with the master selection are
-		# considered (fresh repo or repo that contains branches)
-		local default_suggestion
-		local should_check_existence
-		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
-		if [ "$branch_count" -eq 0 ]; then
-			should_check_existence=NO
-			default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
-		else
-			echo
-			echo "Which branch should be used for integration of the \"next release\"?"
-			git_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
+		printf "\n"
+	fi
+	master_branch=${answer:-$default_suggestion}
 
-			should_check_existence=YES
-			default_suggestion=
-			for guess in $(git config --get gitflow.branch.develop) \
-			             'develop' 'int' 'integration' 'master'; do
-				if git_local_branch_exists "$guess"; then
-					default_suggestion="$guess"
-					break
-				fi
-			done
+	# check existence in case of an already existing repo
+	if [ "$should_check_existence" = "YES" ]; then
+		git_local_branch_exists "$master_branch" || \
+			die "Local branch '$master_branch' does not exist."
+	fi
+
+	# store the name of the master branch
+	git config gitflow.branch.master "$master_branch"
+fi
+
+# add a develop branch if no such branch exists yet
+local develop_branch
+if gitflow_has_develop_configured && ! flag force; then
+	develop_branch=$(git config --get gitflow.branch.develop)
+else
+	# Again, the same two cases as with the master selection are
+	# considered (fresh repo or repo that contains branches)
+	local default_suggestion
+	local should_check_existence
+	branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
+	if [ "$branch_count" -eq 0 ]; then
+		should_check_existence=NO
+		default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
+	else
+		echo
+		echo "Which branch should be used for integration of the \"next release\"?"
+		git_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
+
+		should_check_existence=YES
+		default_suggestion=
+		for guess in $(git config --get gitflow.branch.develop) \
+			'develop' 'int' 'integration' 'master'; do
+		if git_local_branch_exists "$guess"; then
+			default_suggestion="$guess"
+			break
 		fi
+	done
+fi
 
-		printf "Branch name for \"next release\" development: [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		develop_branch=${answer:-$default_suggestion}
+printf "Branch name for \"next release\" development: [$default_suggestion] "
+if noflag defaults; then
+	read answer
+else
+	printf "\n"
+fi
+develop_branch=${answer:-$default_suggestion}
 
-		if [ "$master_branch" = "$develop_branch" ]; then
-			die "Production and integration branches should differ."
-		fi
+if [ "$master_branch" = "$develop_branch" ]; then
+	die "Production and integration branches should differ."
+fi
 
-		# check existence in case of an already existing repo
-		if [ "$should_check_existence" = "YES" ]; then
-			git_local_branch_exists "$develop_branch" || \
-				die "Local branch '$develop_branch' does not exist."
-		fi
+# check existence in case of an already existing repo
+if [ "$should_check_existence" = "YES" ]; then
+	git_local_branch_exists "$develop_branch" || \
+		die "Local branch '$develop_branch' does not exist."
+fi
 
-		# store the name of the develop branch
-		git config gitflow.branch.develop "$develop_branch"
+# store the name of the develop branch
+git config gitflow.branch.develop "$develop_branch"
 	fi
 
 	# Creation of HEAD
@@ -214,85 +214,131 @@ cmd_default() {
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
 	if flag force || \
-	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+		! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
+	! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
+	! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
+	! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
+	! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+	echo
+	echo "How to name your supporting branch prefixes?"
+fi
+
+local prefix
+
+# Feature branches
+if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+	default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
+	printf "Feature branches? [$default_suggestion] "
+	if noflag defaults; then
+		read answer
+	else
+		printf "\n"
+	fi
+	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+	git config gitflow.prefix.feature "$prefix"
+fi
+
+# Release branches
+if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
+	default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
+	printf "Release branches? [$default_suggestion] "
+	if noflag defaults; then
+		read answer
+	else
+		printf "\n"
+	fi
+	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+	git config gitflow.prefix.release "$prefix"
+fi
+
+
+# Hotfix branches
+if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
+	default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+	printf "Hotfix branches? [$default_suggestion] "
+	if noflag defaults; then
+		read answer
+	else
+		printf "\n"
+	fi
+	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+	git config gitflow.prefix.hotfix "$prefix"
+fi
+
+
+# Support branches
+if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
+	default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
+	printf "Support branches? [$default_suggestion] "
+	if noflag defaults; then
+		read answer
+	else
+		printf "\n"
+	fi
+	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+	git config gitflow.prefix.support "$prefix"
+fi
+
+
+# Version tag prefix
+if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
+	default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
+	printf "Version tag prefix? [$default_suggestion] "
+	if noflag defaults; then
+		read answer
+	else
+		printf "\n"
+	fi
+	[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+	git config gitflow.prefix.versiontag "$prefix"
+fi
+
+# add a remote repository name if no such remote repository exists yet
+local remote_repo
+if gitflow_has_remote_configured && ! flag force; then
+	remote_repo=$(git config --get gitflow.remote)
+else
+	# Again, the same two cases as with the master selection are
+	# considered (fresh repo or repo that contains branches)
+	local default_suggestion
+	local should_check_existence
+	remote_count=$(git remote | wc -l)
+	if [ "$remote_count" -ne 0 ]; then
+		should_check_existence=NO
+		default_suggestion="origin"
+	else
 		echo
-		echo "How to name your supporting branch prefixes?"
-	fi
+		echo "Which default remote repository should be used to push?"
+		git remote | sed 's/^.*$/   - &/g'
 
-	local prefix
-
-	# Feature branches
-	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
-		printf "Feature branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
+		should_check_existence=YES
+		default_suggestion=
+		for guess in $(git config --get gitflow.remote) \
+			'origin' 'github' 'work' 'private'; do
+		if git_remote_exists "$guess"; then
+			default_suggestion="$guess"
+			break
 		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.feature "$prefix"
+	done
+fi
+
+printf "Remote repository to push: [$default_suggestion] "
+if noflag defaults; then
+	read answer
+else
+	printf "\n"
+fi
+remote_repo=${answer:-$default_suggestion}
+
+# check existence in case of an already existing repo
+if [ "$should_check_existence" = "YES" ]; then
+	git_remote_exists "$remote_repo" || \
+		die "Remote repository '$remote_repo' does not exist."
+fi
+
+# store the name of the develop branch
+git config gitflow.remote "$remote_repo"
 	fi
-
-	# Release branches
-	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
-		printf "Release branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.release "$prefix"
-	fi
-
-
-	# Hotfix branches
-	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-		printf "Hotfix branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.hotfix "$prefix"
-	fi
-
-
-	# Support branches
-	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
-		printf "Support branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.support "$prefix"
-	fi
-
-
-	# Version tag prefix
-	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
-		printf "Version tag prefix? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.versiontag "$prefix"
-	fi
-
 
 	# TODO: what to do with origin?
 }
@@ -301,3 +347,5 @@ cmd_help() {
 	usage
 	exit 0
 }
+
+# vim: set noexpandtab ff=unix ft=sh sts=0 :

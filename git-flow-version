@@ -36,7 +36,7 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-GITFLOW_VERSION=0.4.2-pre
+GITFLOW_VERSION=0.5.10-pre
 
 usage() {
 	echo "usage: git flow version"
@@ -50,3 +50,5 @@ cmd_help() {
 	usage
 	exit 0
 }
+
+# vim: set noexpandtab ff=unix ft=sh sts=0 :

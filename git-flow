@@ -108,3 +108,5 @@ main() {
 }
 
 main "$@"
+
+# vim: set noexpandtab ff=unix ft=sh sts=0 :

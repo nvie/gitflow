@@ -44,8 +44,14 @@ PREFIX=$(git config --get gitflow.prefix.hotfix)
 
 usage() {
 	echo "usage: git flow hotfix [list] [-v]"
-	echo "       git flow hotfix start [-F] <version> [<base>]"
-	echo "       git flow hotfix finish [-Fsumpk] <version>"
+	echo "       git flow hotfix start [-F|--fetch] [-P|--pull] <version> [<base>]"
+	echo "       git flow hotfix start [-R|--remote] <version> [<base>]"
+	echo "       git flow hotfix finish [-F|--fetch] [-P|--pull]"
+	echo "                              [-s|--sign] [-u|--signingkey] [-m|--message]"
+	echo "                              [-p|--push] [-n|--notag] [-k|--keep] <version>"
+	echo "       git flow hotfix finish [-R|--remote]"
+	echo "                              [-s|--sign] [-u|--signingkey] [-m|--message]"
+	echo "                              [-p|--push] [-n|--notag] [-k|--keep] <version>"
 }
 
 cmd_default() {
@@ -62,11 +68,11 @@ cmd_list() {
 	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
 	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
-                warn ""
-                warn "You can start a new hotfix branch:"
-                warn ""
-                warn "    git flow hotfix start <version> [<base>]"
-                warn ""
+		warn ""
+		warn "You can start a new hotfix branch:"
+		warn ""
+		warn "    git flow hotfix start <version> [<base>]"
+		warn ""
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
@@ -128,6 +134,17 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
+parse_start_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	VERSION=$1
+	BRANCH=$PREFIX$VERSION
+	BASE=${2:-$MASTER_BRANCH}
+}
+
 require_version_arg() {
 	if [ "$VERSION" = "" ]; then
 		warn "Missing argument <version>"
@@ -138,10 +155,10 @@ require_version_arg() {
 
 require_base_is_on_master() {
 	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
-			| sed 's/[* ] //g' \
-	  		| grep -q "^$MASTER_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
-	fi
+		| sed 's/[* ] //g' \
+		| grep -q "^$MASTER_BRANCH\$"; then
+	die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+fi
 }
 
 require_no_existing_hotfix_branches() {
@@ -154,8 +171,9 @@ require_no_existing_hotfix_branches() {
 
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
-	parse_args "$@"
-	BASE=${2:-$MASTER_BRANCH}
+	DEFINE_boolean pull true "pull from $ORIGIN before performing local operation" P
+	DEFINE_boolean remote false "make and push remote branch to $ORIGIN" R
+	parse_start_args "$@"
 	require_version_arg
 	require_base_is_on_master
 	require_no_existing_hotfix_branches
@@ -166,17 +184,39 @@ cmd_start() {
 	require_tag_absent "$VERSION_PREFIX$VERSION"
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
+	elif flag pull; then
+		git_pull_quiet "$MASTER_BRANCH"
 	fi
+	if flag remote; then
+		git_pull_quiet "$MASTER_BRANCH"
+		if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+			die "$BRANCH has already existed at $ORIGIN"
+		fi
+	fi
+
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
 	fi
 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
+	# create remote branch
+	if flag remote && ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
+		die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
+	fi
 
 	echo
 	echo "Summary of actions:"
+	if flag fetch; then
+		echo "- Latest objects have been fetched from '$ORIGIN'"
+	elif flag pull || flag remote; then
+		echo "- Latest objects have been pulled from '$ORIGIN' to '$MASTER_BRANCH'"
+	fi
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	if flag remote; then
+		echo "- A new remote branch '$BRANCH' was created at '$ORIGIN', too"
+		echo "- The local branch '$BRANCH' was configured to track the remote branch"
+	fi
 	echo "- You are now on branch '$BRANCH'"
 	echo
 	echo "Follow-up actions:"
@@ -190,6 +230,8 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean pull true "pull from $ORIGIN before performing local operation" P
+	DEFINE_boolean remote false "push the master/develop to remote and remove a remote hotfix branch at $ORIGIN" R
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
@@ -209,9 +251,12 @@ cmd_finish() {
 	require_clean_working_tree
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
-		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+			die "Could not fetch $MASTER_BRANCH from $ORIGIN."
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
-		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+			die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+	elif flag pull || flag remote; then
+		git_pull_quiet "$MASTER_BRANCH"
+		git_pull_quiet "$DEVELOP_BRANCH"
 	fi
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
@@ -219,16 +264,19 @@ cmd_finish() {
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
+	if flag remote && ! has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+		die "not exist the remote $BRANCH branch at $ORIGIN"
+	fi
 
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
-		  die "Could not check out $MASTER_BRANCH."
+			die "Could not check out $MASTER_BRANCH."
 		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+			die "There were merge conflicts."
+		# TODO: What do we do now?
 	fi
 
 	if noflag notag; then
@@ -242,7 +290,7 @@ cmd_finish() {
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			git tag $opts "$VERSION_PREFIX$VERSION" || \
-			die "Tagging failed. Please run finish again to retry."
+				die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
 
@@ -251,21 +299,27 @@ cmd_finish() {
 	# but the merge into develop was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
 		git checkout "$DEVELOP_BRANCH" || \
-		  die "Could not check out $DEVELOP_BRANCH."
+			die "Could not check out $DEVELOP_BRANCH."
 
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
 		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+			die "There were merge conflicts."
+		# TODO: What do we do now?
 	fi
 
 	# delete branch
 	if noflag keep; then
+		if [ "$BRANCH" = "$(git_current_branch)" ]; then
+			git checkout "$MASTER_BRANCH"
+		fi
+		if flag remote; then
+			git push "$ORIGIN" ":$BRANCH"
+		fi
 		git branch -d "$BRANCH"
 	fi
 
-	if flag push; then
+	if flag push || flag remote; then
 		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
 		git push "$ORIGIN" "$MASTER_BRANCH" || \
@@ -278,7 +332,12 @@ cmd_finish() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- Latest objects have been fetched from '$ORIGIN'"
+	if flag fetch; then
+		echo "- Latest objects have been fetched from '$ORIGIN'"
+	elif flag pull || flag remote; then
+		echo "- Latest objects have been pulled from '$ORIGIN' to '$MASTER_BRANCH'"
+		echo "- Latest objects have been pulled from '$ORIGIN' to '$DEVELOP_BRANCH'"
+	fi
 	echo "- Hotfix branch has been merged into '$MASTER_BRANCH'"
 	if noflag notag; then
 		echo "- The hotfix was tagged '$VERSION_PREFIX$VERSION'"
@@ -288,9 +347,14 @@ cmd_finish() {
 		echo "- Hotfix branch '$BRANCH' is still available"
 	else
 		echo "- Hotfix branch '$BRANCH' has been deleted"
+		if flag remote; then
+			echo "- Hotfix branch '$BRANCH' in '$ORIGIN' has been deleted."
+		fi
 	fi
-	if flag push; then
+	if flag push || flag remote; then
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
 	fi
 	echo
 }
+
+# vim: set noexpandtab ff=unix ft=sh sts=0 :
