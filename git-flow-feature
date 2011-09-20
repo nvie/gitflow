@@ -43,8 +43,8 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] [<name|nameprefix>]"
+	echo "       git flow feature start [-F|-R] <name> [<base>]"
+	echo "       git flow feature finish [-rFk|-R] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -193,6 +193,7 @@ parse_remote_name() {
 
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+  DEFINE_boolean remote false "make and push remote branch to $ORIGIN" R
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
@@ -205,6 +206,13 @@ cmd_start() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
+	if flag remote; then
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+    if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+      die "$BRANCH has already existed at $ORIGIN"
+    fi
+	fi
+
 	# if the origin branch counterpart exists, assert that the local branch
 	# isn't behind it (to avoid unnecessary rebasing)
 	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
@@ -215,6 +223,12 @@ cmd_start() {
 	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
+	# create remote branch
+  if flag remote; then
+    if ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
+      die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
+    fi
+  fi
 
 	echo
 	echo "Summary of actions:"
@@ -229,6 +243,7 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+  DEFINE_boolean remote false "push the develop branch to remote and remove a remote feature branch at $ORIGIN" R
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	parse_args "$@"
@@ -282,10 +297,12 @@ cmd_finish() {
 
 	# update local repo with remote changes first, if asked
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
-		if flag fetch; then
+		if flag fetch -o flag remote; then
 			git fetch -q "$ORIGIN" "$BRANCH"
 			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
+  elif flag remote; then
+    die "not exist the remote $BRANCH branch at $ORIGIN"
 	fi
 
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
@@ -343,7 +360,10 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	
+	if flag remote; then
+		git push "$ORIGIN" ":$BRANCH"
+    git push "$ORIGIN" "$DEVELOP_BRANCH"
+	fi
 	
 	if noflag keep; then
 		git branch -d "$BRANCH"
