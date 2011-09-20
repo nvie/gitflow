@@ -367,20 +367,20 @@ helper_finish_cleanup() {
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
 	if flag remote; then
-		git push "$ORIGIN" ":$BRANCH"
     git push "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
-	
+
 	if noflag keep; then
 		if [ "$BRANCH" = "$(git_current_branch)" ]; then
 			git checkout "$DEVELOP_BRANCH"
 		fi
     if flag remote; then
-      git push $ORIGIN $BRANCH
+      git push "$ORIGIN" ":$BRANCH"
     fi
 		git branch -d "$BRANCH"
 	fi
 
+	
 	echo
 	echo "Summary of actions:"
 	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
