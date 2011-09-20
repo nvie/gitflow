@@ -292,7 +292,7 @@ cmd_finish() {
 			git checkout "$MASTER_BRANCH"
 		fi
     if flag remote; then
-      git push $ORIGIN $BRANCH
+      git push "$ORIGIN" ":$BRANCH"
     fi
 		git branch -d "$BRANCH"
 	fi
@@ -307,10 +307,6 @@ cmd_finish() {
 				die "Could not push tags to $ORIGIN."
 		fi
 	fi
-  # remove remote Hotfix branch
-  if flag remote; then
-    git push "$ORIGIN" ":$BRANCH"
-  fi
 
 	echo
 	echo "Summary of actions:"
