@@ -152,39 +152,47 @@ git_is_branch_merged_into() {
 # gitflow specific common functionality
 #
 
+# assembles the configuration prefix
+# when called as git-flow, use gitflow, if called as git-flow-$something, use gitflow-$something.
+gitflow_config() {
+	local self=${GIT_FLOW_SELF:-$(basename $0)}
+	self="gitflow${self#git-flow}"
+	echo ${self}
+}
+
 # check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
-	local master=$(git config --get gitflow.branch.master)
+	local master=$(git config --get $(gitflow_config).branch.master)
 	[ "$master" != "" ] && git_local_branch_exists "$master"
 }
 
 gitflow_has_develop_configured() {
-	local develop=$(git config --get gitflow.branch.develop)
+	local develop=$(git config --get $(gitflow_config).branch.develop)
 	[ "$develop" != "" ] && git_local_branch_exists "$develop"
 }
 
 gitflow_has_prefixes_configured() {
-	git config --get gitflow.prefix.feature >/dev/null 2>&1     && \
-	git config --get gitflow.prefix.release >/dev/null 2>&1     && \
-	git config --get gitflow.prefix.hotfix >/dev/null 2>&1      && \
-	git config --get gitflow.prefix.support >/dev/null 2>&1     && \
-	git config --get gitflow.prefix.versiontag >/dev/null 2>&1
+	git config --get $(gitflow_config).prefix.feature >/dev/null 2>&1     && \
+	git config --get $(gitflow_config).prefix.release >/dev/null 2>&1     && \
+	git config --get $(gitflow_config).prefix.hotfix >/dev/null 2>&1      && \
+	git config --get $(gitflow_config).prefix.support >/dev/null 2>&1     && \
+	git config --get $(gitflow_config).prefix.versiontag >/dev/null 2>&1
 }
 
 gitflow_is_initialized() {
 	gitflow_has_master_configured                    && \
 	gitflow_has_develop_configured                   && \
-	[ "$(git config --get gitflow.branch.master)" !=    \
-	  "$(git config --get gitflow.branch.develop)" ] && \
+	[ "$(git config --get $(gitflow_config).branch.master)" !=    \
+	  "$(git config --get $(gitflow_config).branch.develop)" ] && \
 	gitflow_has_prefixes_configured
 }
 
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
-	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
-	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
-	export ORIGIN=$(git config --get gitflow.origin || echo origin)
+	export MASTER_BRANCH=$(git config --get $(gitflow_config).branch.master)
+	export DEVELOP_BRANCH=$(git config --get $(gitflow_config).branch.develop)
+	export ORIGIN=$(git config --get $(gitflow_config).origin || echo origin)
 }
 
 #
