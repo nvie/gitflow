@@ -45,7 +45,7 @@ warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
 escape() {
-	echo "$1" | sed 's/\([\.\+\$\*\-]\)/\\\1/g'
+  echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
 }
 
 # set logic
