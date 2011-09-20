@@ -86,6 +86,60 @@ favorite package manager to install `getopt`.  For Cygwin, install the
 `util-linux` package to get `getopt`.  If you use `apt-get` as your install
 manager, the package name is `opt`.
 
+## Postscript
+Adding [--remote|-R] option with hotfix, feature and release subcommands.
+
+### for the hotfix subcommand
+
+    $ git flow hotfix start -R <hotfix name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $HOTFIX_BRANCH
+---------------------------
+    $ git flow hotfix finish -R <hotfix name>
+
+merge to develop and master branch, remove local hotfix branch, push develop, master and tags branch to $ORIGIN
+and remove remote hotfix at $ORIGIN:
+
+    $ git push $ORIGIN master
+    $ git push $ORIGIN develop
+    $ git push --tags $ORIGIN
+    $ git push $ORIGIN :$HOTFIX_BRANCH
+
+### for the feature subcommand
+
+    $ git flow feature start -R <feature name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $FEATURE_BRANCH
+---------------------------
+    $ git flow hotfix finish -R <hotfix name>
+
+merge to develop branch, remove local feature branch, push develop branch to $ORIGIN
+and remove remote feature at $ORIGIN:
+
+    $ git push $ORIGIN develop
+    $ git push $ORIGIN :$FEATURE_BRANCH
+
+### for the release subcommand
+
+    $ git flow release start -R <release> name>
+
+create local branch and push remote branch to $ORIGIN:
+
+    $ git push --set-upstream $ORIGIN $RELEASE_BRANCH
+---------------------------
+    $ git flow release finish -R <hotfix name>
+
+merge to develop and master branch, remove local release branch, push develop, master and tags branch to $ORIGIN
+and remove remote release at $ORIGIN:
+
+    $ git push $ORIGIN master
+    $ git push $ORIGIN develop
+    $ git push --tags $ORIGIN
+    $ git push $ORIGIN :$RELEASE_BRANCH
 
 Integration with your shell
 ---------------------------
