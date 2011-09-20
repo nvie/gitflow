@@ -190,7 +190,7 @@ cmd_start() {
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
 	# create remote branch
-  if [ $(flag remote) -a ! $(git push --set-upstream "$ORIGIN" "$BRANCH") ]; then
+  if flag remote && ! $(git push --set-upstream "$ORIGIN" "$BRANCH"); then
     die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
   fi
 
@@ -229,7 +229,7 @@ cmd_finish() {
 	# sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
-  if [ $(flag fetch) -o $(flag remote) ]; then
+  if flag fetch || flag remote; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
@@ -241,7 +241,7 @@ cmd_finish() {
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
-  if [ $(flag remote) -a ! $(has "$ORIGIN/$BRANCH" $(git_remote_branches)) ]; then
+  if flag remote && ! has "$ORIGIN/$BRANCH" $(git_remote_branches); then
     die "not exist the remote $BRANCH branch at $ORIGIN"
   fi
 
@@ -296,7 +296,7 @@ cmd_finish() {
 		git branch -d "$BRANCH"
 	fi
 
-  if [ $(flag push) -o $(flag remote) ]; then
+  if flag push || flag remote; then
 		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
 		git push "$ORIGIN" "$MASTER_BRANCH" || \
