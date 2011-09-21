@@ -18,8 +18,8 @@ class GitFlowCompletion < Formula
 end
 
 class GitFlow < Formula
-  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.8'
-  version '0.5.8'
+  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.9'
+  version '0.5.9'
   head 'https://github.com/iwata/gitflow.git', :branch => 'develop'
 
   homepage 'https://github.com/iwata/gitflow'
