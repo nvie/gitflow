@@ -197,6 +197,10 @@ cmd_start() {
 	echo
 	echo "Summary of actions:"
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+  if flag remote; then
+    echo "- A new remote branch '$BRANCH' was created at '$ORIGIN', too"
+    echo "- The local branch '$BRANCH' was configured to track the remote branch"
+  fi
 	echo "- You are now on branch '$BRANCH'"
 	echo
 	echo "Follow-up actions:"
@@ -322,7 +326,7 @@ cmd_finish() {
 	else
 		echo "- Release branch '$BRANCH' has been deleted"
 	fi
-	if flag push; then
+	if flag push || flag remote; then
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
 		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	fi
