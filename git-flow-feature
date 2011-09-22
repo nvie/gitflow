@@ -43,14 +43,14 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] [<name|nameprefix>]"
-	echo "       git flow feature publish <name>"
-	echo "       git flow feature track <name>"
+	echo "       git flow feature start [-dF] <name> [<base>]"
+	echo "       git flow feature finish [-drFk] [<name|nameprefix>]"
+	echo "       git flow feature publish [-d] <name>"
+	echo "       git flow feature track [-d] <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
-	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
-	echo "       git flow feature checkout [<name|nameprefix>]"
-	echo "       git flow feature pull <remote> [<name>]"
+	echo "       git flow feature rebase [-di] [<name|nameprefix>]"
+	echo "       git flow feature checkout [-d] [<name|nameprefix>]"
+	echo "       git flow feature pull [-d] <remote> [<name>]"
 }
 
 cmd_default() {
@@ -193,6 +193,7 @@ parse_remote_name() {
 
 cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
@@ -202,7 +203,11 @@ cmd_start() {
 
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+		if flag dryrun; then
+			echo "DRY-RUN: git fetch -q $ORIGIN $DEVELOP_BRANCH"
+		else
+			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+		fi
 	fi
 
 	# if the origin branch counterpart exists, assert that the local branch
@@ -212,8 +217,12 @@ cmd_start() {
 	fi
 
 	# create branch
-	if ! git checkout -b "$BRANCH" "$BASE"; then
-		die "Could not create feature branch '$BRANCH'"
+	if flag dryrun; then
+		echo "DRY-RUN: git checkout -b $BRANCH $BASE"
+	else
+		if ! git checkout -b "$BRANCH" "$BASE"; then
+			die "Could not create feature branch '$BRANCH'"
+		fi
 	fi
 
 	echo
@@ -231,6 +240,7 @@ cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -297,7 +307,9 @@ cmd_finish() {
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
-		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
+		if flag dryrun; then
+			echo "DRY-RUN: git flow feature rebase $NAME $DEVELOP_BRANCH"
+		elif ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
 			warn "Finish was aborted due to conflicts during rebase."
 			warn "Please finish the rebase manually now."
 			warn "When finished, re-run:"
@@ -307,11 +319,23 @@ cmd_finish() {
 	fi
 
 	# merge into BASE
-	git checkout "$DEVELOP_BRANCH"
-	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
-		git merge --ff "$BRANCH"
+	if flag dryrun; then
+		echo "DRY-RUN: git checkout $DEVELOP_BRANCH"
 	else
-		git merge --no-ff "$BRANCH"
+		git checkout "$DEVELOP_BRANCH"
+	fi
+	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+		if flag dryrun; then
+			echo "DRY-RUN: git merge --ff $BRANCH"
+		else
+			git merge --ff "$BRANCH"
+		fi
+	else
+		if flag dryrun; then
+			echo "DRY-RUN: git merge --no-ff $BRANCH"
+		else
+			git merge --no-ff "$BRANCH"
+		fi
 	fi
 
 	if [ $? -ne 0 ]; then
@@ -341,12 +365,20 @@ helper_finish_cleanup() {
 
 	# delete branch
 	if flag fetch; then
-		git push "$ORIGIN" ":refs/heads/$BRANCH"
+		if flag dryrun; then
+			echo "DRY-RUN: git push $ORIGIN :refs/heads/$BRANCH"
+		else
+			git push "$ORIGIN" ":refs/heads/$BRANCH"
+		fi
 	fi
 	
 	
 	if noflag keep; then
-		git branch -d "$BRANCH"
+		if flag dryrun; then
+			echo "DRY-RUN: git branch -d $BRANCH"
+		else
+			git branch -d "$BRANCH"
+		fi
 	fi
 
 	echo
@@ -363,23 +395,39 @@ helper_finish_cleanup() {
 }
 
 cmd_publish() {
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 	expand_nameprefix_arg
 
 	# sanity checks
 	require_clean_working_tree
 	require_branch "$BRANCH"
-	git fetch -q "$ORIGIN"
+	if flag dryrun; then
+		echo "DRY-RUN: git fetch -q $ORIGIN"
+	else
+		git fetch -q "$ORIGIN"
+	fi
 	require_branch_absent "$ORIGIN/$BRANCH"
 
 	# create remote branch
-	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
-	git fetch -q "$ORIGIN"
+	if flag dryrun; then
+		echo "DRY-RUN: git push $ORIGIN $BRANCH:refs/heads/$BRANCH"
+		echo "DRY-RUN: git fetch -q $ORIGIN"
+	else
+		git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+		git fetch -q "$ORIGIN"
+	fi
 
 	# configure remote tracking
-	git config "branch.$BRANCH.remote" "$ORIGIN"
-	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-	git checkout "$BRANCH"
+	if flag dryrun; then
+		echo "DRY-RUN: git config branch.$BRANCH.remote $ORIGIN"
+		echo "DRY-RUN: git config branch.$BRANCH.merge refs/heads/$BRANCH"
+		echo "DRY-RUN: git checkout $BRANCH"
+	else
+		git config "branch.$BRANCH.remote" "$ORIGIN"
+		git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+		git checkout "$BRANCH"
+	fi
 
 	echo
 	echo "Summary of actions:"
@@ -390,17 +438,26 @@ cmd_publish() {
 }
 
 cmd_track() {
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 	require_name_arg
 
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
-	git fetch -q "$ORIGIN"
+	if flag dryrun; then
+		echo "DRY-RUN: git fetch -q $ORIGIN"
+	else
+		git fetch -q "$ORIGIN"
+	fi
 	require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
-	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+	if flag dryrun; then
+		echo "DRY-RUN: git checkout -b $BRANCH $ORIGIN/$BRANCH"
+	else
+		git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+	fi
 
 	echo
 	echo "Summary of actions:"
@@ -427,11 +484,16 @@ cmd_diff() {
 }
 
 cmd_checkout() {
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
-		git checkout "$BRANCH"
+		if flag dryrun; then
+			echo "DRY-RUN: git checkout $BRANCH"
+		else
+			git checkout "$BRANCH"
+		fi
 	else
 		die "Name a feature branch explicitly."
 	fi
@@ -444,18 +506,27 @@ cmd_co() {
 
 cmd_rebase() {
 	DEFINE_boolean interactive false 'do an interactive rebase' i
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 	warn "Will try to rebase '$NAME'..."
 	require_clean_working_tree
 	require_branch "$BRANCH"
 
-	git checkout -q "$BRANCH"
+	if flag dryrun; then
+		echo "DRY-RUN: git checkout -q $BRANCH"
+	else
+		git checkout -q "$BRANCH"
+	fi
 	local OPTS=
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
-	git rebase $OPTS "$DEVELOP_BRANCH"
+	if flag dryrun; then
+		echo "DRY-RUN: git rebase $OPTS $DEVELOP_BRANCH"
+	else
+		git rebase $OPTS "$DEVELOP_BRANCH"
+	fi
 }
 
 avoid_accidental_cross_branch_action() {
@@ -470,6 +541,7 @@ avoid_accidental_cross_branch_action() {
 
 cmd_pull() {
 	#DEFINE_string prefix false 'alternative remote feature branch name prefix' p
+	DEFINE_boolean dryrun false 'perform a dry-run; display commands but do not execute' d
 	parse_remote_name "$@"
 
 	if [ -z "$REMOTE" ]; then
@@ -495,13 +567,23 @@ cmd_pull() {
 
 		# we already have a local branch called like this, so simply pull the
 		# remote changes in
-		git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
-		echo "Pulled $REMOTE's changes into $BRANCH."
+		if flag dryrun; then
+			echo "DRY-RUN: git pull -q $REMOTE $BRANCH"
+		else
+			git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+			echo "Pulled $REMOTE's changes into $BRANCH."
+		fi
 	else
 		# setup the local branch clone for the first time
-		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
-		git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
-		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
-		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+		if flag dryrun; then
+			echo "DRY-RUN: git fetch -q $REMOTE $BRANCH"
+			echo "DRY-RUN: git branch --no-track $BRANCH FETCH_HEAD"
+			echo "DRY-RUN: git checkout -q $BRANCH"
+		else
+			git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+			git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+			git checkout -q "$BRANCH" || die "Checking out new local branch failed."
+			echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+		fi
 	fi
 }
