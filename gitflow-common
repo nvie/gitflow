@@ -109,6 +109,13 @@ git_remote_exists() {
 	has $1 $(git remote)
 }
 
+git_pull_quiet() {
+  local branch=$1
+  git checkout $branch
+  git pull -q || \
+    die "Could not pull '$branch' from $ORIGIN";
+}
+
 #
 # git_compare_branches()
 #
