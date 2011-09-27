@@ -44,8 +44,8 @@ PREFIX=$(git config --get gitflow.prefix.release)
 
 usage() {
 	echo "usage: git flow release [list] [-v]"
-	echo "       git flow release start [-F|-R] <version> [<base>]"
-	echo "       git flow release finish [-Fsumpk|-R] <version>"
+	echo "       git flow release start [-F|-P|-R] <version> [<base>]"
+	echo "       git flow release finish [-Fsumpk|-P|-R] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
@@ -162,6 +162,7 @@ require_no_existing_release_branches() {
 
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean pull true "pull from $ORIGIN before performing local operation" P
   DEFINE_boolean remote false "make and push remote branch to $ORIGIN" R
 	parse_start_args "$@"
 	require_version_arg
@@ -174,10 +175,12 @@ cmd_start() {
 	require_tag_absent "$VERSION_PREFIX$VERSION"
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+  elif flag pull; then
+    git_pull_quiet $DEVELOP_BRANCH
 	fi
 
 	if flag remote; then
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+    git_pull_quiet $DEVELOP_BRANCH
     if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
       die "$BRANCH has already existed at $ORIGIN"
     fi
@@ -196,6 +199,11 @@ cmd_start() {
 
 	echo
 	echo "Summary of actions:"
+  if flag fetch; then
+    echo "- Latest objects have been fetched from '$ORIGIN'"
+  elif flag pull || flag remote; then
+    echo "- Latest objects have been pulled from '$ORIGIN' to '$DEVELOP_BRANCH'"
+  fi
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
   if flag remote; then
     echo "- A new remote branch '$BRANCH' was created at '$ORIGIN', too"
@@ -233,11 +241,14 @@ cmd_finish() {
 	# sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
-  if flag fetch || flag remote; then
+  if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+  elif flag pull || flag remote; then
+    git_pull_quiet $MASTER_BRANCH
+    git_pull_quiet $DEVELOP_BRANCH
 	fi
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
@@ -315,7 +326,12 @@ cmd_finish() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- Latest objects have been fetched from '$ORIGIN'"
+  if flag fetch; then
+    echo "- Latest objects have been fetched from '$ORIGIN'"
+  elif flag pull || flag remote; then
+    echo "- Latest objects have been pulled from '$ORIGIN' to '$MASTER_BRANCH'"
+    echo "- Latest objects have been pulled from '$ORIGIN' to '$DEVELOP_BRANCH'"
+  fi
 	echo "- Release branch has been merged into '$MASTER_BRANCH'"
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
