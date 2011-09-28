@@ -2,9 +2,9 @@
 require 'formula'
 
 class GitFlowCompletion < Formula
-  url 'https://github.com/bobthecow/git-flow-completion.git', :tag => '0.4.1.0'
-  version '0.4.1.0'
-  head 'https://github.com/bobthecow/git-flow-completion.git', :branch => 'develop'
+  url 'https://github.com/iwata/git-flow-completion.git', :tag => '0.5.0.1'
+  version '0.5.0.1'
+  head 'https://github.com/iwata/git-flow-completion.git', :branch => 'develop'
 
   def initialize
     # We need to hard-code the formula name since Homebrew can't

@@ -44,8 +44,8 @@ PREFIX=$(git config --get gitflow.prefix.hotfix)
 
 usage() {
 	echo "usage: git flow hotfix [list] [-v]"
-	echo "       git flow hotfix start [-F|-P|-R] <version> [<base>]"
-	echo "       git flow hotfix finish [-Fsumpk|-P|-R] <version>"
+	echo "       git flow hotfix start [-F|-R] <version> [<base>]"
+	echo "       git flow hotfix finish [-Fsumpk|-Rsumk] <version>"
 }
 
 cmd_default() {
