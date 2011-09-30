@@ -2,8 +2,8 @@
 require 'formula'
 
 class GitFlowCompletion < Formula
-  url 'https://github.com/iwata/git-flow-completion.git', :tag => '0.5.0.2'
-  version '0.5.0.2'
+  url 'https://github.com/iwata/git-flow-completion.git', :tag => '0.5.1.0'
+  version '0.5.1.0'
   head 'https://github.com/iwata/git-flow-completion.git', :branch => 'develop'
 
   def initialize
@@ -18,8 +18,8 @@ class GitFlowCompletion < Formula
 end
 
 class GitFlow < Formula
-  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.12.1'
-  version '0.5.12.1'
+  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.12.2'
+  version '0.5.12.2'
   head 'https://github.com/iwata/gitflow.git', :branch => 'develop'
 
   homepage 'https://github.com/iwata/gitflow'
