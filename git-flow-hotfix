@@ -179,10 +179,10 @@ cmd_start() {
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
   elif flag pull; then
-    git_pull_quiet $MASTER_BRANCH
+    git_pull_quiet "$MASTER_BRANCH"
 	fi
 	if flag remote; then
-    git_pull_quiet $MASTER_BRANCH
+    git_pull_quiet "$MASTER_BRANCH"
     if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
       die "$BRANCH has already existed at $ORIGIN"
     fi
@@ -249,8 +249,8 @@ cmd_finish() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
   elif flag pull || flag remote; then
-    git_pull_quiet $MASTER_BRANCH
-    git_pull_quiet $DEVELOP_BRANCH
+    git_pull_quiet "$MASTER_BRANCH"
+    git_pull_quiet "$DEVELOP_BRANCH"
 	fi
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
