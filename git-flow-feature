@@ -220,7 +220,7 @@ cmd_start() {
 	fi
 
 	if flag remote; then
-    git_pull_quiet $DEVELOP_BRANCH
+    git_pull_quiet "$DEVELOP_BRANCH"
     if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
       die "$BRANCH has already existed at $ORIGIN"
     fi
@@ -320,8 +320,8 @@ cmd_finish() {
 			git fetch -q "$ORIGIN" "$BRANCH"
 			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
     elif flag pull || flag remote; then
-      git_pull_quiet $BRANCH
-      git_pull_quiet $DEVELOP_BRANCH
+      git_pull_quiet "$BRANCH"
+      git_pull_quiet "$DEVELOP_BRANCH"
     fi
   elif flag remote; then
     die "not exist the remote $BRANCH branch at $ORIGIN"
