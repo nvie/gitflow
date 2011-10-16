@@ -42,7 +42,13 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-export GITFLOW_DIR=$(dirname "$0")
+if [ -n "$MSYSTEM" ]; then
+	export GITFLOW_DIR=$(dirname "$(echo $0 | \
+		sed -e 's,\(.\):,/\1,g' -e 's,;,:,g' -e 's,\\,/,g')")
+else
+	export GITFLOW_DIR=$(dirname "$0")
+fi
+
 
 usage() {
 	echo "usage: git flow <subcommand>"
