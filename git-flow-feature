@@ -448,6 +448,9 @@ cmd_rebase() {
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 	
+	require_clean_working_tree
+	require_branch "$BRANCH"
+	
 	if flag pull; then
 		warn "Fetching latest from $ORIGIN"
 		git fetch -q "$ORIGIN"
@@ -469,8 +472,6 @@ cmd_rebase() {
 
 	
 	warn "Will try to rebase '$NAME'..."
-	require_clean_working_tree
-	require_branch "$BRANCH"
 
 	git checkout -q "$BRANCH"
 	local OPTS=
