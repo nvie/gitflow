@@ -2,8 +2,8 @@
 require 'formula'
 
 class GitFlowCompletion < Formula
-  url 'https://github.com/iwata/git-flow-completion.git', :tag => '0.5.1.0'
-  version '0.5.1.0'
+  url 'https://github.com/iwata/git-flow-completion.git', :tag => '0.5.3.0'
+  version '0.5.3.0'
   head 'https://github.com/iwata/git-flow-completion.git', :branch => 'develop'
 
   def initialize
@@ -14,15 +14,25 @@ class GitFlowCompletion < Formula
     super "git-flow-completion"
   end
 
-  homepage 'https://github.com/bobthecow/git-flow-completion'
+  homepage 'https://github.com/iwata/git-flow-completion'
 end
 
 class GitFlow < Formula
-  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.12.4'
-  version '0.5.12.4'
+  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.13.0'
+  version '0.5.13.0'
   head 'https://github.com/iwata/gitflow.git', :branch => 'develop'
 
   homepage 'https://github.com/iwata/gitflow'
+
+  def options
+    [
+        ['--zsh-completion', "copy zsh completion function file to #{share}/zsh/functions"]
+    ]
+  end
+
+  if ARGV.include? '--zsh-completion'
+    depends_on 'zsh'
+  end
 
   def install
     system "make", "prefix=#{prefix}", "install"
@@ -35,10 +45,12 @@ class GitFlow < Formula
 
     cellar_etc = prefix + 'etc'
     bash_completion_d = cellar_etc + "bash_completion.d"
+    zsh_functions_d = cellar_etc + "zsh/functions"
 
     completion = GitFlowCompletion.new
     completion.brew do
       bash_completion_d.install "git-flow-completion.bash"
+      zsh_functions_d.instal "_git-flow" if ARGV.include? '--zsh-completion'
     end
   end
 end
