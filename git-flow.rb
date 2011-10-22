@@ -18,8 +18,8 @@ class GitFlowCompletion < Formula
 end
 
 class GitFlow < Formula
-  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.13.0'
-  version '0.5.13.0'
+  url 'https://github.com/iwata/gitflow.git', :tag => '0.5.13.1'
+  version '0.5.13.1'
   head 'https://github.com/iwata/gitflow.git', :branch => 'develop'
 
   homepage 'https://github.com/iwata/gitflow'
@@ -45,7 +45,7 @@ class GitFlow < Formula
 
     cellar_etc = prefix + 'etc'
     bash_completion_d = cellar_etc + "bash_completion.d"
-    zsh_functions_d = cellar_etc + "zsh/functions"
+    zsh_functions_d = share + 'zsh/functions'
 
     completion = GitFlowCompletion.new
     completion.brew do
