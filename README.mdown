@@ -24,13 +24,18 @@ Installing git-flow
 ### Mac OS
 If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
 
-    $ brew install https://github.com/iwata/gitflow/raw/develop/git-flow.rb
+    $ brew install https://github.com/iwata/gitflow/raw/master/git-flow.rb
+
+#### --zsh-completion option
+For zsh user:
+
+    $ brew install --zsh-completion https://github.com/iwata/gitflow/raw/master/git-flow.rb
 
 ### Linux, etc.
 Another easy way to install git-flow is using Rick Osborne's excellent git-flow
 installer, which can be run using the following command:
 
-	$ wget --no-check-certificate -q -O - https://github.com/iwata/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
+	$ wget --no-check-certificate -q -O - https://github.com/iwata/gitflow/raw/master/contrib/gitflow-installer.sh | sudo bash
 
 ### Windows
 
@@ -42,7 +47,7 @@ For Windows users who wish to use the automated install, it is suggested that yo
 first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
 during installation). Then simply run this command from a Cygwin shell:
 
-	$ wget -q -O - https://github.com/iwata/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
+	$ wget -q -O - https://github.com/iwata/gitflow/raw/master/contrib/gitflow-installer.sh | bash
 
 #### Using [msysgit](http://code.google.com/p/msysgit/)
 Download and install `getopt.exe` from the [util-linux package](http://gnuwin32.sourceforge.net/packages/util-linux-ng.htm) into `C:\Program Files\Git\bin`. (Only `getopt.exe`, the others util-linux files are not used). Also install `libintl3.dll` from the Dependencies package, into the same directory. 
