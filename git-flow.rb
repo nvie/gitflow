@@ -50,7 +50,7 @@ class GitFlow < Formula
     completion = GitFlowCompletion.new
     completion.brew do
       bash_completion_d.install "git-flow-completion.bash"
-      zsh_functions_d.instal "_git-flow" if ARGV.include? '--zsh-completion'
+      zsh_functions_d.install "_git-flow" if ARGV.include? '--zsh-completion'
     end
   end
 end
