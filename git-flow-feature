@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] [<name|nameprefix>]"
+	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -231,6 +231,7 @@ cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean hard_delete false "try extra hard to delete the branch after performing finish" D
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -346,7 +347,11 @@ helper_finish_cleanup() {
 	
 	
 	if noflag keep; then
-		git branch -d "$BRANCH"
+		if flag hard_delete; then
+			git branch -D "$BRANCH"
+		else
+			git branch -d "$BRANCH"
+		fi
 	fi
 
 	echo
