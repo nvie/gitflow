@@ -43,8 +43,12 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-F|-R] <name> [<base>]"
-	echo "       git flow feature finish [-rFk|-rRk] [<name|nameprefix>]"
+	echo "       git flow feature start [-F|--fetch] [-P|--pull] <version> [<base>]"
+	echo "       git flow feature start [-R|--remote] <version> [<base>]"
+	echo "       git flow feature finish [-F|--fetch] [-P|--pull]"
+  echo "                               [-r|--rebase] [-k|--keep] [<name|nameprefix>]"
+	echo "       git flow feature finish [-R|--remote]"
+  echo "                               [-r|--rebase] [-k|--keep] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
