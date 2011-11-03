@@ -30,7 +30,7 @@ class GitFlow < Formula
 
   def options
     [
-        ['--bash-completion', "copy bash completion function file to #{prefix}/etc/bash_completion.d"]
+        ['--bash-completion', "copy bash completion function file to #{prefix}/etc/bash_completion.d"],
         ['--zsh-completion', "copy zsh completion function file to #{share}/zsh/functions: please add #{share}/zsh/functions to $fpath in .zshrc"]
     ]
   end
