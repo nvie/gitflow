@@ -45,7 +45,7 @@ warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
 escape() {
-	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+  echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
 }
 
 # set logic
@@ -103,6 +103,17 @@ git_branch_exists() {
 
 git_tag_exists() {
 	has $1 $(git_all_tags)
+}
+
+git_remote_exists() {
+	has $1 $(git remote)
+}
+
+git_pull_quiet() {
+  local branch=$1
+  git checkout $branch
+  git pull -q || \
+    die "Could not pull '$branch' from $ORIGIN";
 }
 
 #
@@ -171,6 +182,11 @@ gitflow_has_prefixes_configured() {
 	git config --get gitflow.prefix.versiontag >/dev/null 2>&1
 }
 
+gitflow_has_remote_configured() {
+	local remote=$(git config --get gitflow.remote)
+	[ "$remote" != "" ] && git_remote_exists "$remote"
+}
+
 gitflow_is_initialized() {
 	gitflow_has_master_configured                    && \
 	gitflow_has_develop_configured                   && \
@@ -184,7 +200,7 @@ gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
-	export ORIGIN=$(git config --get gitflow.origin || echo origin)
+	export ORIGIN=$(git config --get gitflow.remote || echo origin)
 }
 
 #

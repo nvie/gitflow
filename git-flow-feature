@@ -43,8 +43,12 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
-	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] [<name|nameprefix>]"
+	echo "       git flow feature start [-F|--fetch] [-P|--pull] <version> [<base>]"
+	echo "       git flow feature start [-R|--remote] <version> [<base>]"
+	echo "       git flow feature finish [-F|--fetch] [-P|--pull]"
+  echo "                               [-r|--rebase] [-k|--keep] [<name|nameprefix>]"
+	echo "       git flow feature finish [-R|--remote]"
+  echo "                               [-r|--rebase] [-k|--keep] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -180,6 +184,17 @@ parse_args() {
 	BRANCH=$PREFIX$NAME
 }
 
+parse_start_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	NAME=$1
+	BRANCH=$PREFIX$NAME
+	BASE=${2:-$DEVELOP_BRANCH}
+}
+
 parse_remote_name() {
 	# parse options
 	FLAGS "$@" || exit $?
@@ -192,9 +207,10 @@ parse_remote_name() {
 }
 
 cmd_start() {
-	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
-	parse_args "$@"
-	BASE=${2:-$DEVELOP_BRANCH}
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing local operation" F
+	DEFINE_boolean pull true "pull from $ORIGIN before performing local operation" P
+  DEFINE_boolean remote false "make and push remote branch to $ORIGIN" R
+	parse_start_args "$@"
 	require_name_arg
 
 	# sanity checks
@@ -203,6 +219,15 @@ cmd_start() {
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+  elif flag pull; then
+    git_pull $DEVELOP_BRANCH
+	fi
+
+	if flag remote; then
+    git_pull_quiet "$DEVELOP_BRANCH"
+    if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+      die "$BRANCH has already existed at $ORIGIN"
+    fi
 	fi
 
 	# if the origin branch counterpart exists, assert that the local branch
@@ -215,10 +240,21 @@ cmd_start() {
 	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
+	# create remote branch
+  if flag remote && ! git push --set-upstream "$ORIGIN" "$BRANCH"; then
+    die "Could not create remote branch '$BRANCH' at '$ORIGIN'"
+  fi
 
 	echo
 	echo "Summary of actions:"
+  if flag pull || flag remote; then
+    echo "- Latest objects have been pulled from '$ORIGIN' to '$DEVELOP_BRANCH'"
+  fi
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+  if flag remote; then
+    echo "- A new remote branch '$BRANCH' was created at '$ORIGIN', too"
+    echo "- The local branch '$BRANCH' was configured to track the remote branch"
+  fi
 	echo "- You are now on branch '$BRANCH'"
 	echo ""
 	echo "Now, start committing on your feature. When done, use:"
@@ -229,6 +265,8 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean pull true "pull from $ORIGIN before performing finish" P
+  DEFINE_boolean remote false "push the develop branch to remote and remove a remote feature branch at $ORIGIN" R
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	parse_args "$@"
@@ -282,10 +320,15 @@ cmd_finish() {
 
 	# update local repo with remote changes first, if asked
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
-		if flag fetch; then
+    if flag fetch; then
 			git fetch -q "$ORIGIN" "$BRANCH"
 			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
-		fi
+    elif flag pull || flag remote; then
+      git_pull_quiet "$BRANCH"
+      git_pull_quiet "$DEVELOP_BRANCH"
+    fi
+  elif flag remote; then
+    die "not exist the remote $BRANCH branch at $ORIGIN"
 	fi
 
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
@@ -296,14 +339,12 @@ cmd_finish() {
 	fi
 
 	# if the user wants to rebase, do that first
-	if flag rebase; then
-		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
-			warn "Finish was aborted due to conflicts during rebase."
-			warn "Please finish the rebase manually now."
-			warn "When finished, re-run:"
-			warn "    git flow feature finish '$NAME' '$DEVELOP_BRANCH'"
-			exit 1
-		fi
+  if flag rebase && ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
+    warn "Finish was aborted due to conflicts during rebase."
+    warn "Please finish the rebase manually now."
+    warn "When finished, re-run:"
+    warn "    git flow feature finish '$NAME' '$DEVELOP_BRANCH'"
+    exit 1
 	fi
 
 	# merge into BASE
@@ -343,21 +384,41 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	
-	
+	if flag remote; then
+    git push "$ORIGIN" "$DEVELOP_BRANCH"
+	fi
+
 	if noflag keep; then
+		if [ "$BRANCH" = "$(git_current_branch)" ]; then
+			git checkout "$DEVELOP_BRANCH"
+		fi
+    if flag remote; then
+      git push "$ORIGIN" ":$BRANCH"
+    fi
 		git branch -d "$BRANCH"
 	fi
 
+	
 	echo
 	echo "Summary of actions:"
+  if flag fetch; then
+    echo "- Latest objects have been fetched from '$ORIGIN'"
+  elif flag pull || flag remote; then
+    echo "- Latest objects have been pulled from '$ORIGIN' to '$DEVELOP_BRANCH'"
+  fi
 	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+  if flag remote; then
+    echo "- '$DEVELOP_BRANCH' have been pushed to '$ORIGIN'"
+  fi
 	if flag keep; then
 		echo "- Feature branch '$BRANCH' is still available"
 	else
-		echo "- Feature branch '$BRANCH' has been removed"
-	fi
+    echo "- Feature branch '$BRANCH' has been removed"
+    if flag remote; then
+      echo "- Feature branch '$BRANCH' in '$ORIGIN' has been deleted."
+    fi
+  fi
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo
 }
