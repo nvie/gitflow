@@ -44,8 +44,14 @@ PREFIX=$(git config --get gitflow.prefix.release)
 
 usage() {
 	echo "usage: git flow release [list] [-v]"
-	echo "       git flow release start [-F|-R] <version> [<base>]"
-	echo "       git flow release finish [-Fsumpk|-Rsumk] <version>"
+	echo "       git flow release start [-F|--fetch] [-P|--pull] <version> [<base>]"
+	echo "       git flow release start [-R|--remote] <version> [<base>]"
+	echo "       git flow release finish [-F|--fetch] [-P|--pull]"
+  echo "                               [-s|--sign] [-u|--signingkey] [-m|--message]"
+  echo "                               [-p|--push] [-n|--notag] [-k|--keep] <version>"
+	echo "       git flow release finish [-R|--remote]"
+  echo "                               [-s|--sign] [-u|--signingkey] [-m|--message]"
+  echo "                               [-p|--push] [-n|--notag] [-k|--keep] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
