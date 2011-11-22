@@ -36,6 +36,10 @@ installer, which can be run using the following command:
 
 	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
 
+### Solaris
+
+Make a manual installation but instead of using `make install` use `make solaris`.
+
 ### Windows
 
 For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
