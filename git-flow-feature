@@ -231,7 +231,7 @@ cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
-	DEFINE_boolean hard_delete false "try extra hard to delete the branch after performing finish" D
+	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -347,7 +347,7 @@ helper_finish_cleanup() {
 	
 	
 	if noflag keep; then
-		if flag hard_delete; then
+		if flag force_delete; then
 			git branch -D "$BRANCH"
 		else
 			git branch -d "$BRANCH"
