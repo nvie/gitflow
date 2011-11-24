@@ -14,6 +14,7 @@ Kreeftmeijer's blog post:
 
 Or have a look at one of these screen casts:
 
+* [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
 * [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
 * [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
