@@ -46,15 +46,42 @@ parse_args() {
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
+
+    REPO=$1
+    DIRECTORY=`echo "$REPO" | sed "s/.*[/:]//g" | sed "s/\.git//g"`
 }
 
 # Default entry when no SUBACTION is given
 cmd_default() {
-    cmd_clone
+    cmd_clone "$@"
 }
 
 cmd_clone() {
-    echo "Cloning"
+    parse_args "$@"
+
+    mkdir "$DIRECTORY" || die "git flow clone aborted. Could not create directory $DIRECTORY"
+    cd "$DIRECTORY"
+    git init
+    require_git_repo
+    git flow init
+    require_gitflow_initialized
+    gitflow_load_settings
+
+    git remote add origin "$REPO"
+    git fetch
+
+    git branch -D "$MASTER_BRANCH" > /dev/null 2>&1
+    git checkout -b "$MASTER_BRANCH" "origin/$MASTER_BRANCH"
+
+    git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
+    git checkout -b "$DEVELOP_BRANCH" "origin/$MASTER_BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- Repository $REPO was cloned"
+	echo "- $MASTER_BRANCH branch was set to track $MASTER_BRANCH at $REPO"
+	echo "- $DEVELOP_BRANCH branch was set to track $DEVELOP_BRANCH at $REPO"
+	echo
 }
 
 cmd_help() {
