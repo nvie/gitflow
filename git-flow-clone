@@ -66,10 +66,16 @@ cmd_clone() {
 
     mkdir "$DIRECTORY" || die "git flow clone aborted. Could not create directory $DIRECTORY"
     cd "$DIRECTORY"
-    git init
+    git init > /dev/null 2>&1
     require_git_repo
     git remote add origin "$REPO"
     git fetch
+
+    if [ "$?" -ne "0" ]; then
+        cd ..
+        rm -r "$DIRECTORY"
+        exit 1
+    fi
 
     git flow init
     require_gitflow_initialized
