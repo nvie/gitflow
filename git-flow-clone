@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
@@ -37,75 +36,28 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-# enable debug mode
-if [ "$DEBUG" = "yes" ]; then
-	set -x
-fi
-
-export GITFLOW_DIR=$(dirname "$0")
+NO_SUBACTION=true
 
 usage() {
-	echo "usage: git flow <subcommand>"
-	echo
-	echo "Available subcommands are:"
-	echo "   init      Initialize a new git repo with support for the branching model."
-    echo "   clone     Clone an existing git repo that uses git flow"
-	echo "   feature   Manage your feature branches."
-	echo "   release   Manage your release branches."
-	echo "   hotfix    Manage your hotfix branches."
-	echo "   support   Manage your support branches."
-	echo "   version   Shows version information."
-	echo
-	echo "Try 'git flow <subcommand> help' for details."
+	echo "usage: git flow clone <repository>"
 }
 
-main() {
-	if [ $# -lt 1 ]; then
-		usage
-		exit 1
-	fi
-
-	# load common functionality
-	. "$GITFLOW_DIR/gitflow-common"
-
-	# This environmental variable fixes non-POSIX getopt style argument
-	# parsing, effectively breaking git-flow subcommand parsing on several
-	# Linux platforms.
-	export POSIXLY_CORRECT=1
-
-	# use the shFlags project to parse the command line arguments
-	. "$GITFLOW_DIR/gitflow-shFlags"
-	FLAGS_PARENT="git flow"
+parse_args() {
+	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
-
-	# sanity checks
-	SUBCOMMAND="$1"; shift
-
-	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
-		usage
-		exit 1
-	fi
-
-	# run command
-	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
-	FLAGS_PARENT="git flow $SUBCOMMAND"
-
-	# test if the first argument is a flag (i.e. starts with '-')
-	# in that case, we interpret this arg as a flag for the default
-	# command
-	SUBACTION="default"
-	if [ "$1" != "" ] && [ ! "$NO_SUBACTION" ] && { ! echo "$1" | grep -q "^-"; } then
-		SUBACTION="$1"; shift
-	fi
-	if ! type "cmd_$SUBACTION" >/dev/null 2>&1; then
-		warn "Unknown subcommand: '$SUBACTION'"
-		usage
-		exit 1
-	fi
-
-	# run the specified action
-	cmd_$SUBACTION "$@"
 }
 
-main "$@"
+# Default entry when no SUBACTION is given
+cmd_default() {
+    cmd_clone
+}
+
+cmd_clone() {
+    echo "Cloning"
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
