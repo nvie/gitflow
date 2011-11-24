@@ -79,8 +79,8 @@ cmd_clone() {
 	echo
 	echo "Summary of actions:"
 	echo "- Repository $REPO was cloned"
-	echo "- $MASTER_BRANCH branch was set to track $MASTER_BRANCH at $REPO"
-	echo "- $DEVELOP_BRANCH branch was set to track $DEVELOP_BRANCH at $REPO"
+	echo "- The local branch $MASTER_BRANCH was configured to track the remote branch"
+	echo "- The local branch $DEVELOP_BRANCH was configured to track the remote branch"
 	echo
 }
 

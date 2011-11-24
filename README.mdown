@@ -137,6 +137,10 @@ you would like to use as development and production branches, and how you
 would like your prefixes be named. You may simply press Return on any of
 those questions to accept the (sane) default suggestions.
 
+Alternatively, you can clone an existing repo that utilizes git flow:
+
+		git flow clone <repository>
+
 
 ### Creating feature/release/hotfix/support branches
 
