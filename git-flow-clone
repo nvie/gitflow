@@ -47,46 +47,48 @@ parse_args() {
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
-    REPO=$1
-    DIRECTORY=`echo "$REPO" | sed "s/.*[/:]//g" | sed "s/\.git//g"`
+	REPO=$1
+	DIRECTORY=`echo "$REPO" | sed "s/.*[/:]//g" | sed "s/\.git//g"`
 }
 
 # Default entry when no SUBACTION is given
 cmd_default() {
-    cmd_clone "$@"
+	cmd_clone "$@"
 }
 
 cmd_clone() {
-    parse_args "$@"
+	parse_args "$@"
 
-    if [ "$REPO" == "" ]; then
-        usage
-        exit 1
-    fi
+	if [ "$REPO" == "" ]; then
+		usage
+		exit 1
+	fi
 
-    mkdir "$DIRECTORY" || die "git flow clone aborted. Could not create directory $DIRECTORY"
-    cd "$DIRECTORY"
-    git init > /dev/null 2>&1
-    require_git_repo
-    git remote add origin "$REPO"
-    git fetch
+	mkdir "$DIRECTORY" || die "git flow clone aborted. Could not create directory $DIRECTORY"
+	cd "$DIRECTORY"
 
-    if [ "$?" -ne "0" ]; then
-        cd ..
-        rm -r "$DIRECTORY"
-        exit 1
-    fi
+	git init > /dev/null 2>&1
+	require_git_repo
 
-    git flow init
-    require_gitflow_initialized
-    gitflow_load_settings
+	git remote add origin "$REPO"
+	git fetch
+
+	if [ "$?" -ne "0" ]; then
+		cd ..
+		rm -r "$DIRECTORY"
+		exit 1
+	fi
+
+	git flow init
+	require_gitflow_initialized
+	gitflow_load_settings
 
 
-    git branch -D "$MASTER_BRANCH" > /dev/null 2>&1
-    git checkout -b "$MASTER_BRANCH" "origin/$MASTER_BRANCH"
+	git branch -D "$MASTER_BRANCH" > /dev/null 2>&1
+	git checkout -b "$MASTER_BRANCH" "origin/$MASTER_BRANCH"
 
-    git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
-    git checkout -b "$DEVELOP_BRANCH" "origin/$MASTER_BRANCH"
+	git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
+	git checkout -b "$DEVELOP_BRANCH" "origin/$MASTER_BRANCH"
 
 	echo
 	echo "Summary of actions:"
