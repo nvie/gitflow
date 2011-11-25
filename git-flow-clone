@@ -88,7 +88,7 @@ cmd_clone() {
 	git checkout -b "$MASTER_BRANCH" "origin/$MASTER_BRANCH"
 
 	git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
-	git checkout -b "$DEVELOP_BRANCH" "origin/$MASTER_BRANCH"
+	git checkout -b "$DEVELOP_BRANCH" "origin/$DEVELOP_BRANCH"
 
 	echo
 	echo "Summary of actions:"
