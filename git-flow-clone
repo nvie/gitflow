@@ -97,8 +97,3 @@ cmd_clone() {
 	echo "- The local branch $DEVELOP_BRANCH was configured to track the remote branch"
 	echo
 }
-
-cmd_help() {
-	usage
-	exit 0
-}

@@ -49,7 +49,7 @@ usage() {
 	echo
 	echo "Available subcommands are:"
 	echo "   init      Initialize a new git repo with support for the branching model."
-	echo "   clone     Clone an existing git repo that uses git flow"
+	echo "   clone     Clone an existing git repo that uses git flow."
 	echo "   feature   Manage your feature branches."
 	echo "   release   Manage your release branches."
 	echo "   hotfix    Manage your hotfix branches."
