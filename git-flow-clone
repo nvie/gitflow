@@ -39,7 +39,7 @@
 NO_SUBACTION=true
 
 usage() {
-	echo "usage: git flow clone <repository>"
+	echo "usage: git flow clone <repository> [-d]"
 }
 
 parse_args() {
@@ -56,8 +56,11 @@ cmd_default() {
 	cmd_clone "$@"
 }
 
+# Clone an existing repository that already uses git flow
 cmd_clone() {
+	DEFINE_boolean defaults false 'use default branch naming conventions' d
 	parse_args "$@"
+	ORIGIN="origin"
 
 	if [ "$REPO" == "" ]; then
 		usage
@@ -70,30 +73,65 @@ cmd_clone() {
 	git init > /dev/null 2>&1
 	require_git_repo
 
-	git remote add origin "$REPO"
+	git remote add "$ORIGIN" "$REPO"
 	git fetch
 
+	# Fetch failed, so it's probably not a git repository
 	if [ "$?" -ne "0" ]; then
 		cd ..
 		rm -r "$DIRECTORY"
 		exit 1
 	fi
 
-	git flow init
+	if flag defaults; then
+		git flow init -d
+	else
+		git flow init
+	fi
+
 	require_gitflow_initialized
 	gitflow_load_settings
 
+	tracking_master=false
+	tracking_develop=false
 
-	git branch -D "$MASTER_BRANCH" > /dev/null 2>&1
-	git checkout -b "$MASTER_BRANCH" "origin/$MASTER_BRANCH"
+	# Track the remote master branch if it exists
+	if git_remote_branch_exists "$ORIGIN/$MASTER_BRANCH"; then
+		git branch -D "$MASTER_BRANCH" > /dev/null 2>&1
+		git checkout -b "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+		tracking_master=true
+	fi
 
-	git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
-	git checkout -b "$DEVELOP_BRANCH" "origin/$DEVELOP_BRANCH"
+	# Track the remote develop branch if it exists
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
+		git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
+		git checkout -b "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+		tracking_develop=true
+	
+	# Create the develop branch if the remote develop branch doesn't exist
+	elif "$tracking_master"; then
+		git branch -D "$DEVELOP_BRANCH" > /dev/null 2>&1
+		git checkout -b "$DEVELOP_BRANCH" "$MASTER_BRANCH"
+	fi
+
+	# Switch to the develop branch
+	git checkout "$DEVELOP_BRANCH"
 
 	echo
 	echo "Summary of actions:"
 	echo "- Repository $REPO was cloned"
-	echo "- The local branch $MASTER_BRANCH was configured to track the remote branch"
-	echo "- The local branch $DEVELOP_BRANCH was configured to track the remote branch"
+	if "$tracking_master"; then
+		echo "- The local branch $MASTER_BRANCH was configured to track the remote branch"
+	else
+		echo "- The local branch $MASTER_BRANCH was created"
+	fi
+	if "$tracking_develop"; then
+		echo "- The local branch $DEVELOP_BRANCH was configured to track the remote branch"
+	elif "$tracking_master"; then
+		echo "- The local branch $DEVELOP_BRANCH was created based on the $MASTER_BRANCH branch"
+	else
+		echo "- The local branch $DEVELOP_BRANCH was created"
+	fi
+	echo "- You are on the $DEVELOP_BRANCH branch"
 	echo
 }
