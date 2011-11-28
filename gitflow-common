@@ -97,6 +97,10 @@ git_local_branch_exists() {
 	has $1 $(git_local_branches)
 }
 
+git_remote_branch_exists() {
+	has $1 $(git_remote_branches)
+}
+
 git_branch_exists() {
 	has $1 $(git_all_branches)
 }
