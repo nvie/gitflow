@@ -200,7 +200,11 @@ cmd_default() {
 	# default production branch and develop was "created".  We should create
 	# the develop branch now in that case (we base it on master, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
-		git branch --no-track "$develop_branch" "$master_branch"
+		if git_remote_branch_exists "origin/$develop_branch"; then
+			git branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
+		else
+			git branch --no-track "$develop_branch" "$master_branch"
+		fi
 		created_gitflow_branch=1
 	fi
 
