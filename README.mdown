@@ -119,7 +119,7 @@ Any questions, tips, or general discussion can be posted to our Google group:
 Contributing
 ------------
 * Fork the repository.
-* `git clone git@github.com:<username>/gitflow.git`
+* `git clone --recursive git@github.com:<username>/gitflow.git`
 * `git branch master origin/master`
 * `git flow init -d`
 * `git flow feature start <your feature>`
