@@ -116,6 +116,16 @@ contributors, please see the [AUTHORS](AUTHORS) file.
 Any questions, tips, or general discussion can be posted to our Google group:
 [http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
 
+Contributing
+------------
+* Fork the repository.
+* `git clone git@github.com:<username>/gitflow.git`
+* `git branch master origin/master`
+* `git flow init -d`
+* `git flow feature start <your feature>`
+* Do work and commit your changes. (**hint**: ``export PATH=`pwd`:$PATH`` from within the gitflow directory helps)
+* `git flow feature publish <your feature>`
+* Open a pull request to your feature branch.
 
 License terms
 -------------
