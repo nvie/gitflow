@@ -42,7 +42,12 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-export GITFLOW_DIR=$(dirname "$0")
+if [[ $OS == Windows* ]]; then
+	export GITFLOW_DIR=$(dirname "${0//\\/\/}")
+else
+	export GITFLOW_DIR=$(dirname "$0")
+fi
+
 
 usage() {
 	echo "usage: git flow <subcommand>"
