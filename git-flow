@@ -42,8 +42,8 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-if [ "$(echo $OS | grep -ic windows)" == 1 ]; then
-	export GITFLOW_DIR=$(dirname "$(echo $0 | sed -e 's,\\,/,g')")
+if [[ $OS == Windows* ]]; then
+	export GITFLOW_DIR=$(dirname "${0//\\/\/}")
 else
 	export GITFLOW_DIR=$(dirname "$0")
 fi
