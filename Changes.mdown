@@ -10,6 +10,8 @@ Release date: **not yet**
 
 * Various minor bug fixes related to internal argument passing
 
+* Better support for Windows users.
+
 * Add package installers for the Debian and Windows platforms.
 
 0.4.1:

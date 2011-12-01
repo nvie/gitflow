@@ -42,7 +42,9 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-export GITFLOW_DIR=$(dirname "$0")
+# The sed expression here replaces all backslashes by forward slashes.
+# This helps our Windows users, while not bothering our Unix users.
+export GITFLOW_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
 
 usage() {
 	echo "usage: git flow <subcommand>"
