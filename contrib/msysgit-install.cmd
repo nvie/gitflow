@@ -22,11 +22,11 @@ echo getopt.exe... Found
 
 if not exist "%GIT_HOME%\bin\git-flow" goto :Install
 echo GitFlow is already installed.>&2
-choice /C YN /M "Do you want to replace it"
-if errorlevel 255 goto :Abort
-if errorlevel 2 goto :Abort
-if not errorlevel 1 goto :Abort
+set /p mychoice="Do you want to replace it [y/n]"
+if "%mychoice%"=="y" goto :DeleteOldFiles
+goto :Abort
 
+:DeleteOldFiles
 echo Deleting old files...
 for /F %%i in ("%GIT_HOME%\git-flow*" "%GIT_HOME%\gitflow-*") do if exist "%%~fi" del /F /Q "%%~fi"
 
