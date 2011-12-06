@@ -57,6 +57,12 @@ install:
 	install -m 0755 $(EXEC_FILES) $(prefix)/bin
 	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
 
+solaris:
+	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
+	ginstall -d -m 0755 $(prefix)/bin
+	ginstall -m 0755 $(EXEC_FILES) $(prefix)/bin
+	ginstall -m 0644 $(SCRIPT_FILES) $(prefix)/bin
+
 uninstall:
 	test -d $(prefix)/bin && \
 	cd $(prefix)/bin && \

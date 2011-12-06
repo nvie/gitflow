@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
