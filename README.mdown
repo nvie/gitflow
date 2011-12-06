@@ -49,6 +49,13 @@ during installation). Then simply run this command from a Cygwin shell:
 
 	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
 
+If you get the error "flags: FATAL unable to determine getopt version" error after 
+
+	$ git flow init
+
+you need to install the util-linux package using the Cygwin setup.
+
+
 #### Using [msysgit](http://code.google.com/p/msysgit/)
 Download and install `getopt.exe` from the [util-linux package](http://gnuwin32.sourceforge.net/packages/util-linux-ng.htm) into `C:\Program Files\Git\bin`. (Only `getopt.exe`, the others util-linux files are not used). Also install `libintl3.dll` from the Dependencies package, into the same directory. 
 
