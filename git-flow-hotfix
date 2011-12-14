@@ -221,6 +221,7 @@ cmd_finish() {
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
+    DEFINE_string commit "" "use the given commit message" c
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
@@ -254,7 +255,9 @@ cmd_finish() {
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
+        local opts=""
+        [ "$FLAGS_commit" != "" ] && opts="$opts -m '$FLAGS_commit'"
+		git merge --no-ff $opts "$BRANCH" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi

@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
+	echo "       git flow feature finish [-rFkD] [-m <message>] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -232,6 +232,7 @@ cmd_finish() {
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
+	DEFINE_string message "" "use the given commit message" m
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -312,7 +313,9 @@ cmd_finish() {
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
 	else
-		git merge --no-ff "$BRANCH"
+        local opts=""
+        [ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+		git merge --no-ff $opts "$BRANCH"
 	fi
 
 	if [ $? -ne 0 ]; then
