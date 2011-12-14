@@ -313,8 +313,8 @@ cmd_finish() {
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
 	else
-        local opts=""
-        [ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+		local opts=""
+		[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 		git merge --no-ff $opts "$BRANCH"
 	fi
 
