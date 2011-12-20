@@ -45,7 +45,7 @@ PREFIX=$(git config --get gitflow.prefix.release)
 usage() {
 	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start [-F] <version> [<base>]"
-	echo "       git flow release finish [-Fsumpk] <version>"
+	echo "       git flow release finish [-Fsumpkb] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
@@ -193,7 +193,7 @@ cmd_finish() {
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
-	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)"
+	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH to be a parent of $DEVELOP_BRANCH (using tag if applicable)" b
 
 	parse_args "$@"
 	require_version_arg
