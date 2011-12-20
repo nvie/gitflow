@@ -106,7 +106,7 @@ The ``-d`` flag will accept all defaults.
 * To push/pull a feature branch to the remote repository, use:
 
   		git flow feature publish <name>
-		git flow feature pull <remote> <name>
+		  git flow feature pull <remote> <name>
 
 * To list/start/finish release branches, use:
   
