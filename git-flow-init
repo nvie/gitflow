@@ -48,13 +48,13 @@ parse_args() {
 
 # save config values to .gitflow if publish flag was specified
 gitflow_config_set() {
+	local key=$1
+	local value=$2
 	if flag publish; then
-	    local key=$1
-	    local value=$2
-	    local config=$(gitflow_config_path)
-	    git config --file "$config" $key "$value"
+		local config=$(gitflow_config_path)
+		git config --file "$config" $key "$value"
 	else
-	    git config "$config" $key "$value"
+	    git config $key "$value"
 	fi
 }
 
