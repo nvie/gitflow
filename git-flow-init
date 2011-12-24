@@ -222,7 +222,7 @@ cmd_default() {
 		git checkout -q "$develop_branch"
 	fi
 
-	# finally, ask the user for naming conventions (branch and tag prefixes)
+	# Ask the user for naming conventions (branch and tag prefixes )
 	if flag force || \
 	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
@@ -303,6 +303,47 @@ cmd_default() {
 		git config gitflow.prefix.versiontag "$prefix"
 	fi
 
+	# Ask the user for gitflow configuration directory (main and hooks )
+	if flag force || \
+	   ! git config --get gitflow.dir.main >/dev/null 2>&1 ||
+	   ! git config --get gitflow.dir.hooks >/dev/null 2>&1; then
+		echo
+		echo "Where is the gitflow directory located?"
+	fi
+
+	local dir
+	# Main directory
+	if ! git config --get gitflow.dir.main >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.dir.main || echo .gitflow/)
+		printf "gitflow configuration directory? [$default_suggestion] "
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && dir= || dir=${answer:-$default_suggestion}
+		if [ ! -d "$dir" ] ; then
+			mkdir "$dir" >/dev/null 2>&1 || die "Can not create directory ${dir}"
+		fi
+		git config gitflow.dir.main "$dir"
+	fi
+
+	local subdir
+	# Hooks directory
+	if ! git config --get gitflow.dir.hooks >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.dir.hooks || echo hooks/)
+		printf "gitflow hooks directory? [$default_suggestion] "
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && subdir= || subdir=${answer:-$default_suggestion}
+		if [ ! -d "$dir""$subdir" ] ; then
+			mkdir -p "$dir""$subdir"  >/dev/null 2>&1 || die "Can not create directory ${dir}${subdir}"
+		fi
+		git config gitflow.dir.hooks "$subdir"
+	fi
 
 	# TODO: what to do with origin?
 }

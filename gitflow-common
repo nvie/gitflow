@@ -175,12 +175,18 @@ gitflow_has_prefixes_configured() {
 	git config --get gitflow.prefix.versiontag >/dev/null 2>&1
 }
 
+gitflow_has_dirs_configured() {
+	git config --get gitflow.dir.main >/dev/null 2>&1      && \
+	git config --get gitflow.dir.hooks >/dev/null 2>&1
+}
+
 gitflow_is_initialized() {
 	gitflow_has_master_configured                    && \
 	gitflow_has_develop_configured                   && \
 	[ "$(git config --get gitflow.branch.master)" !=    \
 	  "$(git config --get gitflow.branch.develop)" ] && \
-	gitflow_has_prefixes_configured
+	gitflow_has_prefixes_configured                  && \
+	gitflow_has_dirs_configured
 }
 
 # loading settings that can be overridden using git config
@@ -189,6 +195,7 @@ gitflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
+	export GITFLOW_DIR_HOOKS=$(git config --get gitflow.dir.main)$(git config --get gitflow.dir.hooks)
 }
 
 #
