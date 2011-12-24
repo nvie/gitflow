@@ -105,8 +105,15 @@ main() {
 		exit 1
 	fi
 
+	# Run hook action
+	do_hook pre
+	
 	# run the specified action
 	cmd_$SUBACTION "$@"
+	
+	# Run hook action
+	do_hook post
+	
 }
 
 main "$@"
