@@ -9,17 +9,17 @@
 #    http://github.com/nvie/gitflow
 #
 # Copyright 2010 Vincent Driessen. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 #    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-# 
+#
 #    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -30,7 +30,7 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
@@ -53,7 +53,7 @@ has() {
 	local item=$1; shift
 	echo " $@ " | grep -q " $(escape $item) "
 }
-	
+
 # basic math
 min() { [ "$1" -le "$2" ] && echo "$1" || echo "$2"; }
 max() { [ "$1" -ge "$2" ] && echo "$1" || echo "$2"; }
@@ -343,19 +343,19 @@ require_branches_equal() {
 do_hook() {
 	local prefix="$1"
 	local return_code=0
-	
+
 	if [ -z $prefix ]; then
 		die "Hook implementation error - No prefix given"
 	fi
 	if [ $prefix != "pre" ] && [ $prefix != "post" ]; then
 		die "Hook implementation error - Bad Prefix"
 	fi
-	
+
 	if [ -x ${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION} ]; then
 		${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION}
-		return_code=$?	
+		return_code=$?
 	fi
-	
+
 	if [ $return_code -gt 0 ]; then
 		die "Hook command ${prefix}_${SUBCOMMAND}_${SUBACTION} failed. Exit code $return_code"
 	fi
