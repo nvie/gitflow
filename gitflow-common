@@ -324,6 +324,22 @@ require_branches_equal() {
 	fi
 }
 
+#
+# do_hook
+# Inputs:
+# $1 = prefix of the hook
+#	Currently the following prefixes are supported
+#	pre - Executed before the command is executed
+#	post - Executed after the command is successfully executed.
+#
+# The hook called should be executable.
+# The hooks should return an exit code 0 on success. Any other return code will result in aborting the git flow process.
+#
+# Naming convention of a hook:
+# <prefix>_<SUB COMMAND>_<SUB ACTION>
+# Example for a hook called before the command git flow feature start test is executed:
+# 	pre_feature_start
+#
 do_hook() {
 	local prefix="$1"
 	local return_code=0
