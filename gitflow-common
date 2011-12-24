@@ -53,7 +53,7 @@ has() {
 	local item=$1; shift
 	echo " $@ " | grep -q " $(escape $item) "
 }
-
+	
 # basic math
 min() { [ "$1" -le "$2" ] && echo "$1" || echo "$2"; }
 max() { [ "$1" -ge "$2" ] && echo "$1" || echo "$2"; }
@@ -321,5 +321,26 @@ require_branches_equal() {
 		else
 			die "Branches need merging first."
 		fi
+	fi
+}
+
+do_hook() {
+	local prefix="$1"
+	local return_code=0
+	
+	if [ -z $prefix ]; then
+		die "Hook implementation error - No prefix given"
+	fi
+	if [ $prefix != "pre" ] && [ $prefix != "post" ]; then
+		die "Hook implementation error - Bad Prefix"
+	fi
+	
+	if [ -x ${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION} ]; then
+		${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION}
+		return_code=$?	
+	fi
+	
+	if [ $return_code -gt 0 ]; then
+		die "Hook command ${prefix}_${SUBCOMMAND}_${SUBACTION} failed. Exit code $return_code"
 	fi
 }
