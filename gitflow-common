@@ -196,11 +196,11 @@ gitflow_has_prefixes_configured_old_way() {
 }
 
 gitflow_is_initialized() {
-if ! gitflow_has_config; then
-			if gitflow_has_prefixes_configured_old_way; then
-				die "Fatal: gitflow upgrade needed. Please run \"git flow init\" first."
-			fi
-			return 1;
+	if ! gitflow_has_config; then
+		if gitflow_has_prefixes_configured_old_way; then
+			die "Fatal: gitflow upgrade needed. Please run \"git flow init\" first."
+		fi
+		return 1;
 	fi
 	gitflow_has_master_configured                    && \
 	gitflow_has_develop_configured                   && \
