@@ -66,6 +66,9 @@ cmd_default() {
 		exit 0
 	fi
 
+	# Check if directory exists, if not we create it.
+	require_gitflow_conf_directory
+	
 	local branch_count
 	local answer
 
@@ -305,6 +308,50 @@ cmd_default() {
 
 
 	# TODO: what to do with origin?
+}
+
+cmd_upgrade() {
+	if gitflow_has_config; then
+		warn "Not upgrading as there already is the config file."
+		exit 0
+	fi
+	
+	if ! gitflow_has_prefixes_configured_old_way; then
+			die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\". There's no need to upgrade"
+	fi
+	
+	# Check if directory exists, if not we create it.
+	require_gitflow_conf_directory
+
+	local old_setting
+	
+	old_setting=$(git config --get gitflow.branch.master)
+	git config --file $GITFLOW_CONF gitflow.branch.master "$old_setting"
+	git config --unset gitflow.branch.master
+	
+	old_setting=$(git config --get gitflow.branch.develop)
+	git config --file $GITFLOW_CONF gitflow.branch.develop "$old_setting"
+	git config --unset gitflow.branch.develop
+	
+	old_setting=$(git config --get gitflow.prefix.feature)
+	git config --file $GITFLOW_CONF gitflow.prefix.feature "$old_setting"
+	git config --unset gitflow.prefix.feature
+	
+	old_setting=$(git config --get gitflow.prefix.release)
+	git config --file $GITFLOW_CONF gitflow.prefix.release "$old_setting"
+	git config --unset gitflow.prefix.release
+	
+	old_setting=$(git config --get gitflow.prefix.hotfix)
+	git config --file $GITFLOW_CONF gitflow.prefix.hotfix "$old_setting"
+	git config --unset gitflow.prefix.hotfix
+	
+	old_setting=$(git config --get gitflow.prefix.support)
+	git config --file $GITFLOW_CONF gitflow.prefix.support "$old_setting"
+	git config --unset gitflow.prefix.support
+	
+	old_setting=$(git config --get gitflow.prefix.versiontag)
+	git config --file $GITFLOW_CONF gitflow.prefix.versiontag "$old_setting"
+	git config --unset gitflow.prefix.versiontag
 }
 
 cmd_help() {

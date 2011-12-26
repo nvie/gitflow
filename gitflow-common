@@ -158,8 +158,8 @@ git_is_branch_merged_into() {
 
 # Setup common variables
 gitflow_setup_common_variables() {
-	local dot_gitflow_dir=".gitflow"
-	export GITFLOW_CONF="$dot_gitflow_dir/conf"
+	export DOT_GITFLOW_DIR=$(git rev-parse --show-toplevel)"/.gitflow"
+	export GITFLOW_CONF="$DOT_GITFLOW_DIR/conf"
 }
 
 # Check if the repo has the new configuration layout
@@ -198,7 +198,7 @@ gitflow_has_prefixes_configured_old_way() {
 gitflow_is_initialized() {
 	if ! gitflow_has_config; then
 		if gitflow_has_prefixes_configured_old_way; then
-			die "Fatal: gitflow upgrade needed. Please run \"git flow init\" first."
+			die "Fatal: gitflow upgrade needed. Please run \"git flow init upgrade\" first."
 		fi
 		return 1;
 	fi
@@ -343,4 +343,10 @@ require_branches_equal() {
 			die "Branches need merging first."
 		fi
 	fi
+}
+
+require_gitflow_conf_directory() {
+	 if [ ! -d  $DOT_GITFLOW_DIR ]; then
+		 mkdir $DOT_GITFLOW_DIR
+	 fi
 }
