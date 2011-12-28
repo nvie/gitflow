@@ -68,8 +68,6 @@ main() {
 
 	# load common functionality
 	. "$GITFLOW_DIR/gitflow-common"
-	# Setup common variables
-	gitflow_setup_common_variables
 
 	# This environmental variable fixes non-POSIX getopt style argument
 	# parsing, effectively breaking git-flow subcommand parsing on several

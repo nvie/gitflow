@@ -59,6 +59,9 @@ cmd_default() {
 		git_repo_is_headless || require_clean_working_tree
 	fi
 
+	# Setup common variables
+	gitflow_setup_common_variables
+
 	# running git flow init on an already initialized repo is fine
 	if gitflow_is_initialized && ! flag force; then
 		warn "Already initialized for gitflow."
