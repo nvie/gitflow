@@ -131,7 +131,7 @@ cmd_default() {
 		fi
 
 		# store the name of the master branch
-		git config --file $GITFLOW_CONF --file $GITFLOW_CONF gitflow.branch.master "$master_branch"
+		git config --file $GITFLOW_CONF gitflow.branch.master "$master_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
