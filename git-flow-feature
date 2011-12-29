@@ -37,9 +37,12 @@
 #
 
 require_git_repo
+# Setup common variables
+gitflow_setup_common_variables
+
 require_gitflow_initialized
 gitflow_load_settings
-PREFIX=$(git config --get gitflow.prefix.feature)
+PREFIX=$(git config --file $GITFLOW_CONF --get gitflow.prefix.feature)
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"

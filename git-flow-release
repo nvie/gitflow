@@ -37,10 +37,13 @@
 #
 
 require_git_repo
+# Setup common variables
+gitflow_setup_common_variables
+
 require_gitflow_initialized
 gitflow_load_settings
-VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-PREFIX=$(git config --get gitflow.prefix.release)
+VERSION_PREFIX=$(eval "echo `git config --file $GITFLOW_CONF --get gitflow.prefix.versiontag`")
+PREFIX=$(git config --file $GITFLOW_CONF --get gitflow.prefix.release)
 
 usage() {
 	echo "usage: git flow release [list] [-v]"

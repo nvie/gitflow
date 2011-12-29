@@ -59,6 +59,9 @@ cmd_default() {
 		git_repo_is_headless || require_clean_working_tree
 	fi
 
+	# Setup common variables
+	gitflow_setup_common_variables
+
 	# running git flow init on an already initialized repo is fine
 	if gitflow_is_initialized && ! flag force; then
 		warn "Already initialized for gitflow."
@@ -66,6 +69,9 @@ cmd_default() {
 		exit 0
 	fi
 
+	# Check if directory exists, if not we create it.
+	require_gitflow_conf_directory
+	
 	local branch_count
 	local answer
 
@@ -76,7 +82,7 @@ cmd_default() {
 	# add a master branch if no such branch exists yet
 	local master_branch
 	if gitflow_has_master_configured && ! flag force; then
-		master_branch=$(git config --get gitflow.branch.master)
+		master_branch=$(git config --file $GITFLOW_CONF --get gitflow.branch.master)
 	else
 		# Two cases are distinguished:
 		# 1. A fresh git repo (without any branches)
@@ -90,7 +96,7 @@ cmd_default() {
 		if [ "$branch_count" -eq 0 ]; then
 			echo "No branches exist yet. Base branches must be created now."
 			should_check_existence=NO
-			default_suggestion=$(git config --get gitflow.branch.master || echo master)
+			default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.branch.master || echo master)
 		else
 			echo
 			echo "Which branch should be used for bringing forth production releases?"
@@ -98,7 +104,7 @@ cmd_default() {
 
 			should_check_existence=YES
 			default_suggestion=
-			for guess in $(git config --get gitflow.branch.master) \
+			for guess in $(git config --file $GITFLOW_CONF --get gitflow.branch.master) \
 			             'production' 'main' 'master'; do
 				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
@@ -128,7 +134,7 @@ cmd_default() {
 		fi
 
 		# store the name of the master branch
-		git config gitflow.branch.master "$master_branch"
+		git config --file $GITFLOW_CONF gitflow.branch.master "$master_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
@@ -143,7 +149,7 @@ cmd_default() {
 		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
 		if [ "$branch_count" -eq 0 ]; then
 			should_check_existence=NO
-			default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
+			default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.branch.develop || echo develop)
 		else
 			echo
 			echo "Which branch should be used for integration of the \"next release\"?"
@@ -151,7 +157,7 @@ cmd_default() {
 
 			should_check_existence=YES
 			default_suggestion=
-			for guess in $(git config --get gitflow.branch.develop) \
+			for guess in $(git config --file $GITFLOW_CONF --get gitflow.branch.develop) \
 			             'develop' 'int' 'integration' 'master'; do
 				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
@@ -179,7 +185,7 @@ cmd_default() {
 		fi
 
 		# store the name of the develop branch
-		git config gitflow.branch.develop "$develop_branch"
+		git config --file $GITFLOW_CONF gitflow.branch.develop "$develop_branch"
 	fi
 
 	# Creation of HEAD
@@ -224,11 +230,11 @@ cmd_default() {
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
 	if flag force || \
-	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+	   ! git config --file $GITFLOW_CONF --get gitflow.prefix.feature >/dev/null 2>&1 || 
+	   ! git config --file $GITFLOW_CONF --get gitflow.prefix.release >/dev/null 2>&1 || 
+	   ! git config --file $GITFLOW_CONF --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
+	   ! git config --file $GITFLOW_CONF --get gitflow.prefix.support >/dev/null 2>&1 || 
+	   ! git config --file $GITFLOW_CONF --get gitflow.prefix.versiontag >/dev/null 2>&1; then
 		echo
 		echo "How to name your supporting branch prefixes?"
 	fi
@@ -236,8 +242,8 @@ cmd_default() {
 	local prefix
 
 	# Feature branches
-	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
+	if ! git config --file $GITFLOW_CONF --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.prefix.feature || echo feature/)
 		printf "Feature branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -245,12 +251,12 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.feature "$prefix"
+		git config --file $GITFLOW_CONF gitflow.prefix.feature "$prefix"
 	fi
 
 	# Release branches
 	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
+		default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.prefix.release || echo release/)
 		printf "Release branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -258,13 +264,13 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.release "$prefix"
+		git config --file $GITFLOW_CONF gitflow.prefix.release "$prefix"
 	fi
 
 
 	# Hotfix branches
-	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+	if ! git config --file $GITFLOW_CONF --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.prefix.hotfix || echo hotfix/)
 		printf "Hotfix branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -272,13 +278,13 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.hotfix "$prefix"
+		git config --file $GITFLOW_CONF gitflow.prefix.hotfix "$prefix"
 	fi
 
 
 	# Support branches
-	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
+	if ! git config --file $GITFLOW_CONF --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.prefix.support || echo support/)
 		printf "Support branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -286,13 +292,13 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.support "$prefix"
+		git config --file $GITFLOW_CONF gitflow.prefix.support "$prefix"
 	fi
 
 
 	# Version tag prefix
-	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
+	if ! git config --file $GITFLOW_CONF --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --file $GITFLOW_CONF --get gitflow.prefix.versiontag || echo "")
 		printf "Version tag prefix? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -300,11 +306,55 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.versiontag "$prefix"
+		git config --file $GITFLOW_CONF gitflow.prefix.versiontag "$prefix"
 	fi
 
 
 	# TODO: what to do with origin?
+}
+
+cmd_upgrade() {
+	require_git_repo
+	# Setup common variables
+	gitflow_setup_common_variables
+	
+	if gitflow_has_config; then
+		warn "Not upgrading as there already is the config file."
+		exit 0
+	fi
+	
+	if ! gitflow_has_prefixes_configured_old_way; then
+			die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\". There's no need to upgrade"
+	fi
+	
+	# Check if directory exists, if not we create it.
+	require_gitflow_conf_directory
+
+	local old_setting
+	
+	old_setting=$(git config --get gitflow.branch.master)
+	git config --file $GITFLOW_CONF gitflow.branch.master "$old_setting"
+	
+	old_setting=$(git config --get gitflow.branch.develop)
+	git config --file $GITFLOW_CONF gitflow.branch.develop "$old_setting"
+	
+	old_setting=$(git config --get gitflow.prefix.feature)
+	git config --file $GITFLOW_CONF gitflow.prefix.feature "$old_setting"
+	
+	old_setting=$(git config --get gitflow.prefix.release)
+	git config --file $GITFLOW_CONF gitflow.prefix.release "$old_setting"
+	
+	old_setting=$(git config --get gitflow.prefix.hotfix)
+	git config --file $GITFLOW_CONF gitflow.prefix.hotfix "$old_setting"
+	
+	old_setting=$(git config --get gitflow.prefix.support)
+	git config --file $GITFLOW_CONF gitflow.prefix.support "$old_setting"
+	
+	old_setting=$(git config --get gitflow.prefix.versiontag)
+	git config --file $GITFLOW_CONF gitflow.prefix.versiontag "$old_setting"
+	
+	git config --remove-section gitflow.prefix
+	git config --remove-section gitflow.branch
 }
 
 cmd_help() {
