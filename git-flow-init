@@ -314,6 +314,10 @@ cmd_default() {
 }
 
 cmd_upgrade() {
+	require_git_repo
+	# Setup common variables
+	gitflow_setup_common_variables
+	
 	if gitflow_has_config; then
 		warn "Not upgrading as there already is the config file."
 		exit 0
@@ -330,31 +334,27 @@ cmd_upgrade() {
 	
 	old_setting=$(git config --get gitflow.branch.master)
 	git config --file $GITFLOW_CONF gitflow.branch.master "$old_setting"
-	git config --unset gitflow.branch.master
 	
 	old_setting=$(git config --get gitflow.branch.develop)
 	git config --file $GITFLOW_CONF gitflow.branch.develop "$old_setting"
-	git config --unset gitflow.branch.develop
 	
 	old_setting=$(git config --get gitflow.prefix.feature)
 	git config --file $GITFLOW_CONF gitflow.prefix.feature "$old_setting"
-	git config --unset gitflow.prefix.feature
 	
 	old_setting=$(git config --get gitflow.prefix.release)
 	git config --file $GITFLOW_CONF gitflow.prefix.release "$old_setting"
-	git config --unset gitflow.prefix.release
 	
 	old_setting=$(git config --get gitflow.prefix.hotfix)
 	git config --file $GITFLOW_CONF gitflow.prefix.hotfix "$old_setting"
-	git config --unset gitflow.prefix.hotfix
 	
 	old_setting=$(git config --get gitflow.prefix.support)
 	git config --file $GITFLOW_CONF gitflow.prefix.support "$old_setting"
-	git config --unset gitflow.prefix.support
 	
 	old_setting=$(git config --get gitflow.prefix.versiontag)
 	git config --file $GITFLOW_CONF gitflow.prefix.versiontag "$old_setting"
-	git config --unset gitflow.prefix.versiontag
+	
+	git config --remove-section gitflow.prefix
+	git config --remove-section gitflow.branch
 }
 
 cmd_help() {
