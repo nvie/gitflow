@@ -494,6 +494,8 @@ cmd_pull() {
 
 	require_clean_working_tree
 
+	run_pre_hook "$NAME" "$REMOTE" "$BRANCH"
+
 	if git_branch_exists "$BRANCH"; then
 		# Again, avoid accidental merges
 		avoid_accidental_cross_branch_action || die
@@ -509,4 +511,6 @@ cmd_pull() {
 		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
 		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
 	fi
+
+	run_post_hook "$NAME" "$REMOTE" "$BRANCH"
 }
