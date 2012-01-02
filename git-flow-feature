@@ -211,10 +211,14 @@ cmd_start() {
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
+
 	# create branch
 	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -296,6 +300,8 @@ cmd_finish() {
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+    run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	# if the user wants to rebase, do that first
 	if flag rebase; then
 		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
@@ -330,6 +336,8 @@ cmd_finish() {
 		echo
 		exit 1
 	fi
+
+    run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	# when no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
@@ -377,6 +385,8 @@ cmd_publish() {
 	git fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	# create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
 	git fetch -q "$ORIGIN"
@@ -385,6 +395,8 @@ cmd_publish() {
 	git config "branch.$BRANCH.remote" "$ORIGIN"
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -401,11 +413,16 @@ cmd_track() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
+
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	git fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
 	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
