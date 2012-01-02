@@ -175,18 +175,12 @@ gitflow_has_prefixes_configured() {
 	git config --get gitflow.prefix.versiontag >/dev/null 2>&1
 }
 
-gitflow_has_dirs_configured() {
-	git config --get gitflow.dir.main >/dev/null 2>&1      && \
-	git config --get gitflow.dir.hooks >/dev/null 2>&1
-}
-
 gitflow_is_initialized() {
 	gitflow_has_master_configured                    && \
 	gitflow_has_develop_configured                   && \
 	[ "$(git config --get gitflow.branch.master)" !=    \
 	  "$(git config --get gitflow.branch.develop)" ] && \
-	gitflow_has_prefixes_configured                  && \
-	gitflow_has_dirs_configured
+	gitflow_has_prefixes_configured
 }
 
 # loading settings that can be overridden using git config
@@ -195,7 +189,7 @@ gitflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
-	export GITFLOW_CONF_DIR_HOOKS=$(git config --get gitflow.dir.main)$(git config --get gitflow.dir.hooks)
+	export GITFLOW_DIR_HOOKS="$DOT_GIT_DIR"/hooks
 }
 
 #
@@ -336,9 +330,9 @@ require_branches_equal() {
 # The hooks should return an exit code 0 on success. Any other return code will result in aborting the git flow process.
 #
 # Naming convention of a hook:
-# <prefix>_<SUB COMMAND>_<SUB ACTION>
+# <prefix>-flow-<SUB COMMAND>-<SUB ACTION>
 # Example for a hook called before the command git flow feature start test is executed:
-# 	pre_feature_start
+# 	pre-flow-feature-start
 #
 do_hook() {
 	local prefix="$1"
@@ -351,12 +345,14 @@ do_hook() {
 		die "Hook implementation error - Bad Prefix"
 	fi
 
-	if [ -x ${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION} ]; then
-		${GITFLOW_CONF_DIR_HOOKS}${prefix}_${SUBCOMMAND}_${SUBACTION}
+	if [ -x ${GITFLOW_DIR_HOOKS}${prefix}-flow-${SUBCOMMAND}-${SUBACTION} ]; then
+		${GITFLOW_DIR_HOOKS}${prefix}-flow-${SUBCOMMAND}-${SUBACTION}
+
 		return_code=$?
+
+		if [ $return_code -gt 0 ]; then
+			die "Hook command ${prefix}-flow-${SUBCOMMAND}-${SUBACTION} failed. Exit code $return_code"
+		fi
 	fi
 
-	if [ $return_code -gt 0 ]; then
-		die "Hook command ${prefix}_${SUBCOMMAND}_${SUBACTION} failed. Exit code $return_code"
-	fi
 }
