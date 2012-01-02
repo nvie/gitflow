@@ -9,17 +9,17 @@
 #    http://github.com/nvie/gitflow
 #
 # Copyright 2010 Vincent Driessen. All rights reserved.
-#
+# 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-#
+# 
 #    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-#
+# 
 #    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#
+# 
 # THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -30,7 +30,7 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+# 
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
@@ -211,10 +211,14 @@ cmd_start() {
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
+
 	# create branch
 	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -244,7 +248,7 @@ cmd_finish() {
 		# TODO: detect that we're working on the correct branch here!
 		# The user need not necessarily have given the same $NAME twice here
 		# (although he/she should).
-		#
+		# 
 
 		# TODO: git_is_clean_working_tree() should provide an alternative
 		# exit code for "unmerged changes in working tree", which we should
@@ -270,7 +274,7 @@ cmd_finish() {
 			echo "Merge conflicts not resolved yet, use:"
 			echo "    git mergetool"
 			echo "    git commit"
-			echo
+			echo 
 			echo "You can then complete the finish by running it again:"
 			echo "    git flow feature finish $NAME"
 			echo
@@ -295,6 +299,8 @@ cmd_finish() {
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
+
+    run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
@@ -324,12 +330,14 @@ cmd_finish() {
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
 		echo "    git mergetool"
 		echo "    git commit"
-		echo
+		echo 
 		echo "You can then complete the finish by running it again:"
 		echo "    git flow feature finish $NAME"
 		echo
 		exit 1
 	fi
+
+    run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	# when no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
@@ -344,8 +352,8 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-
-
+	
+	
 	if noflag keep; then
 		if flag force_delete; then
 			git branch -D "$BRANCH"
@@ -377,6 +385,8 @@ cmd_publish() {
 	git fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	# create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
 	git fetch -q "$ORIGIN"
@@ -385,6 +395,8 @@ cmd_publish() {
 	git config "branch.$BRANCH.remote" "$ORIGIN"
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -401,11 +413,16 @@ cmd_track() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
+
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	git fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
 	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -494,6 +511,8 @@ cmd_pull() {
 
 	require_clean_working_tree
 
+	run_pre_hook "$NAME" "$REMOTE" "$BRANCH"
+
 	if git_branch_exists "$BRANCH"; then
 		# Again, avoid accidental merges
 		avoid_accidental_cross_branch_action || die
@@ -509,4 +528,6 @@ cmd_pull() {
 		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
 		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
 	fi
+
+	run_post_hook "$NAME" "$REMOTE" "$BRANCH"
 }
