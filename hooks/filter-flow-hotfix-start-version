@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Runs during git flow hotfix start
+#
+# Positional arguments:
+# $1    Version
+#
+VERSION=$1
+
+# Implement your script here.
+
+# Return the VERSION
+echo ${VERSION}
+exit 0
