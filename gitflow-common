@@ -186,6 +186,7 @@ gitflow_is_initialized() {
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
+	export HOOKS_DIR="$DOT_GIT_DIR"/hooks
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
@@ -314,5 +315,26 @@ require_branches_equal() {
 		else
 			die "Branches need merging first."
 		fi
+	fi
+}
+
+#
+# run_filter_hook
+#
+# Looks for a Git hook script called as defined by the first variable
+#
+#     filter-flow-command
+#
+# If such a hook script exists and is executable, it is called with the given
+# positional arguments.
+#
+run_filter_hook() {
+	local command=$1
+	shift
+	local scriptfile="${HOOKS_DIR}/filter-flow-${command}"
+	if [ -x $scriptfile ]; then
+		echo `$scriptfile "$@"`
+	else
+		echo "$@"
 	fi
 }
