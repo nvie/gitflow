@@ -1,8 +1,8 @@
-git-flow ![Project status](http://stillmaintained.com/nvie/gitflow.png)
+git-flow ![Project status](http://stillmaintained.com/petervanderdoes/gitflow.png)
 ========
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
-blog post").
+blog post"). This fork adds functionality not (yet) added to the original branch.
 
 
 Getting started
@@ -21,7 +21,7 @@ Or have a look at one of these screen casts:
 
 Installing git-flow
 -------------------
-See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
+See the Wiki for up-to-date [Installation Instructions](https://github.com/petervanderdoes/gitflow/wiki/Installation).
 
 
 Integration with your shell
@@ -35,7 +35,7 @@ git-flow subcommands and branch names.
 
 FAQ
 ---
-See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+See the [FAQ](http://github.com/petervanderdoes/gitflow/wiki/FAQ) section of the project
 Wiki.
 
 
@@ -43,7 +43,7 @@ Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
 welcome and I encourage you to use the [Issues
-list](http://github.com/nvie/gitflow/issues) on Github to provide that
+list](http://github.com/petervanderdoes/gitflow/issues) on Github to provide that
 feedback.
 
 Feel free to fork this repo and to commit your additions. For a list of all
@@ -127,14 +127,12 @@ those questions to accept the (sane) default suggestions.
 
 Showing your appreciation
 =========================
-A few people already requested it, so now it's here: a Flattr button.
 
-Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
+Of course, the best way to show your appreciation for the git-flow tool itself remains
 contributing to the community.  If you'd like to show your appreciation in
-another way, however, consider Flattr'ing me:
+another way, however, consider donating through PayPal:
 
-[![Flattr this][2]][1]
+[![PayPal][2]][1]
 
-[1]: http://flattr.com/thing/53771/git-flow
-[2]: http://api.flattr.com/button/button-static-50x60.png
+[1]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=S85FXJ9EBHAF2&lc=US&item_name=gitflow&item_number=gitflow&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller&no_shipping=1&rm=1&return=https%3a%2f%2fgithub%2ecom%2fpetervanderdoes%2fgitflow&cancel_return=https%3a%2f%2fgithub%2ecom%2fpetervanderdoes%2fgitflow&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
+[2]: https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif

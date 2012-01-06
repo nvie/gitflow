@@ -1,3 +1,10 @@
+0.4.2-avh1
+----------
+Release date: **not yet**
+
+* Start of the git flow AVH release.
+* Adds support for the version filter in the commands `git flow release start` and `git flow hotfix start`
+
 0.4.2:
 -----
 Release date: **not yet**
