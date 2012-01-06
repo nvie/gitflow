@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Runs at the end of git flow feature track
+#
+# Positional arguments:
+# $1    The friendly name of the branch
+# $2    The origin remote
+# $3    The full branch name (including the feature prefix)
+#
+NAME=$1
+ORIGIN=$2
+BRANCH=$3
+
+# Implement your script here.
+
+exit 0
