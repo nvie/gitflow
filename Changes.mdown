@@ -1,14 +1,17 @@
-[petervanderdoes]:https://github.com/petervanderdoes "Peter van der Does on github"
-[bloveridge]:https://github.com/bloveridge "Ben Loveridge on github"
+[petervanderdoes]:	https://github.com/petervanderdoes	"Peter van der Does on github"
+[bloveridge]:		https://github.com/bloveridge		"Ben Loveridge on github"
 0.4.2-avh1
 ----------
 Release date: **not yet**
 
 [Peter van der Does][petervanderdoes]
+
 * Start of the git flow AVH release.
+
 * Adds support for the version filter in the commands `git flow release start` and `git flow hotfix start`
 
 [Ben Loveridge][bloveridge]
+
 * Fix usage of shFlags on FreeBSD
 
 0.4.2:
