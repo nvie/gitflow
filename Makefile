@@ -5,11 +5,11 @@
 # modification, are permitted provided that the following conditions are met:
 # 
 #    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
+#	this list of conditions and the following disclaimer.
 # 
 #    2. Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in the
-#       documentation and/or other materials provided with the distribution.
+#	notice, this list of conditions and the following disclaimer in the
+#	documentation and/or other materials provided with the distribution.
 # 
 # THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -47,17 +47,50 @@ SCRIPT_FILES+=git-flow-version
 SCRIPT_FILES+=gitflow-common
 SCRIPT_FILES+=gitflow-shFlags
 
-all:
-	@echo "usage: make install"
-	@echo "       make uninstall"
+PWD=$(shell pwd)
 
-install:
+all:
+	@echo "Run: make help"
+
+# Rule: help - display Makefile rules
+help:
+	@sed -n "/^# Rule:/s/.*Rule: *//p;" Makefile | sort
+
+
+check:
 	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
+
+# Rule: install - standard install to $(prefix)/bin
+install: check
 	install -d -m 0755 $(prefix)/bin
 	install -m 0755 $(EXEC_FILES) $(prefix)/bin
 	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
 
+# Rule: install-symlink - symlink install from current dir to $(prefix)/bin
+install-symlink: check
+	install -d -m 0755 $(prefix)/bin
+
+	@echo "# Making symlinks..."
+
+	@cd $(prefix)/bin ; \
+	for file in $(EXEC_FILES); \
+	do \
+		chmod 755 $(PWD)/$$file ; \
+		ln -vsf $(PWD)/$$file $$file ; \
+	done && \
+	for file in $(SCRIPT_FILES); \
+	do \
+		chmod 644 $(PWD)/$$file ; \
+		ln -vsf $(PWD)/$$file $$file ; \
+	done
+
+
+# Rule: uninstall - remove installed files from $(prefix)/bin
 uninstall:
 	test -d $(prefix)/bin && \
 	cd $(prefix)/bin && \
 	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+
+.PHONY: check install install-symlink uninstall
+
+# End of file
