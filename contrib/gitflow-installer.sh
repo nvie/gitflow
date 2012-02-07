@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # git-flow make-less installer for *nix systems, by Rick Osborne
 # Based on the git-flow core Makefile:
@@ -50,7 +50,7 @@ case "$1" in
 		;;
 	*)
 		echo "Installing git-flow to $INSTALL_PREFIX"
-		if [[ -d "$REPO_NAME" && -d "$REPO_NAME/.git" ]] ; then
+		if [ -d "$REPO_NAME" -a -d "$REPO_NAME/.git" ] ; then
 			echo "Using existing repo: $REPO_NAME"
 		else
 			echo "Cloning repo from GitHub to $REPO_NAME"

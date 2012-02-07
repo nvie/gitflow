@@ -39,7 +39,7 @@
 require_git_repo
 require_gitflow_initialized
 gitflow_load_settings
-VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
 PREFIX=$(git config --get gitflow.prefix.support)
 
 warn "note: The support subcommand is still very EXPERIMENTAL!"
@@ -71,7 +71,7 @@ cmd_list() {
                 warn ""
 		exit 0
 	fi
-	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
@@ -148,7 +148,7 @@ require_base_arg() {
 }
 
 require_base_is_on_master() {
-	if ! git branch --contains "$BASE" 2>/dev/null \
+	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
 			| sed 's/[* ] //g' \
 	  		| grep -q "^$MASTER_BRANCH\$"; then
 		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."

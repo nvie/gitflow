@@ -42,7 +42,9 @@ if [ "$DEBUG" = "yes" ]; then
 	set -x
 fi
 
-export GITFLOW_DIR=$(dirname "$0")
+# The sed expression here replaces all backslashes by forward slashes.
+# This helps our Windows users, while not bothering our Unix users.
+export GITFLOW_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
 
 usage() {
 	echo "usage: git flow <subcommand>"
@@ -67,6 +69,11 @@ main() {
 	# load common functionality
 	. "$GITFLOW_DIR/gitflow-common"
 
+	# This environmental variable fixes non-POSIX getopt style argument
+	# parsing, effectively breaking git-flow subcommand parsing on several
+	# Linux platforms.
+	export POSIXLY_CORRECT=1
+
 	# use the shFlags project to parse the command line arguments
 	. "$GITFLOW_DIR/gitflow-shFlags"
 	FLAGS_PARENT="git flow"
@@ -89,7 +96,7 @@ main() {
 	# in that case, we interpret this arg as a flag for the default
 	# command
 	SUBACTION="default"
-	if [ "$1" != "" ] && ! echo "$1" | grep -q "^-"; then
+	if [ "$1" != "" ] && { ! echo "$1" | grep -q "^-"; } then
 		SUBACTION="$1"; shift
 	fi
 	if ! type "cmd_$SUBACTION" >/dev/null 2>&1; then

@@ -1,0 +1,5 @@
+gitflow (0.4.1) unstable; urgency=low
+
+  * Initial Debian Packaging
+
+ -- Kiall Mac Innes <kiall@managedit.ie>  Mon, 25 Apr 2011 23:51:42 +0100

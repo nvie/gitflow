@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rF] <name|nameprefix>"
+	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -74,7 +74,7 @@ cmd_list() {
 		warn ""
 		exit 0
 	fi
-	current_branch=$(git branch | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
 
 	# determine column width first
@@ -170,14 +170,10 @@ name_or_current() {
 	fi
 }
 
-parse_cmdline() {
+parse_args() {
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
-}
-
-parse_args() {
-	parse_cmdline "$@"
 
 	# read arguments into global variables
 	NAME=$1
@@ -185,7 +181,9 @@ parse_args() {
 }
 
 parse_remote_name() {
-	parse_cmdline "$@"
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
 	REMOTE=$1
@@ -231,9 +229,11 @@ cmd_start() {
 
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
-	DEFINE_boolean rebase false 'rebase instead of merge' r
+	DEFINE_boolean rebase false "rebase instead of merge" r
+	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	parse_args "$@"
-	expand_nameprefix_arg
+	expand_nameprefix_arg_or_current
 
 	# sanity checks
 	require_branch "$BRANCH"
@@ -282,16 +282,17 @@ cmd_finish() {
 	require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		if flag fetch; then
 			git fetch -q "$ORIGIN" "$BRANCH"
+			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
 	fi
 
-	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" "$(git_remote_branches)"; then
+	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
@@ -343,13 +344,25 @@ helper_finish_cleanup() {
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	git branch -D "$BRANCH"
+	
+	
+	if noflag keep; then
+		if flag force_delete; then
+			git branch -D "$BRANCH"
+		else
+			git branch -d "$BRANCH"
+		fi
+	fi
 
 	echo
 	echo "Summary of actions:"
 	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
-	echo "- Feature branch '$BRANCH' has been removed"
+	if flag keep; then
+		echo "- Feature branch '$BRANCH' is still available"
+	else
+		echo "- Feature branch '$BRANCH' has been removed"
+	fi
 	echo "- You are now on branch '$DEVELOP_BRANCH'"
 	echo
 }

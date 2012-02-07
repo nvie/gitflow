@@ -1,49 +1,42 @@
-git-flow
+git-flow ![Project status](http://stillmaintained.com/nvie/gitflow.png)
 ========
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
+Getting started
+---------------
+For the best introduction to get started with `git flow`, please read Jeff
+Kreeftmeijer's blog post:
+
+[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
+
+Or have a look at one of these screen casts:
+
+* [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
+* [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
+* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
+
+
 Installing git-flow
 -------------------
-The easiest way to install git-flow is using Rick Osborne's excellent
-git-flow installer, which can be run using the following command:
-
-	$ wget -q -O - http://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
-
-If you prefer a manual installation, please use the following instructions.
-After downloading the sources from Github, also fetch the submodules:
-
-	$ git submodule init
-	$ git submodule update
-
-Then, you can install `git-flow`, using:
-
-	$ sudo make install
-
-By default, git-flow will be installed in /usr/local. To change the prefix
-where git-flow will be installed, simply specify it explicitly, using:
-
-	$ sudo make prefix=/opt/local install
-
-Or simply point your `PATH` environment variable to your git-flow checkout
-directory.
+See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
 
 
 Integration with your shell
 ---------------------------
-For those who use the [Bash](http://www.gnu.org/software/bash/) shell, please
-check out the excellent work on the
+For those who use the [Bash](http://www.gnu.org/software/bash/) or
+[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
-If you are a [zsh](http://www.zsh.org) user with some plugin-writing
-experience, please help us develop a
-[completion plugin](http://github.com/bobthecow/git-flow-completion/issues#issue/1)
-for zsh, too.  Please contact me on [Github](http://github.com/inbox/new/nvie)
-or [Twitter](http://twitter.com/nvie) to discuss details.
+
+FAQ
+---
+See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+Wiki.
 
 
 Please help out
@@ -57,8 +50,25 @@ Feel free to fork this repo and to commit your additions. For a list of all
 contributors, please see the [AUTHORS](AUTHORS) file.
 
 Any questions, tips, or general discussion can be posted to our Google group:
-http://groups.google.com/group/gitflow-users
+[http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
 
+Contributing
+------------
+Fork the repository.  Then, run:
+
+    git clone --recursive git@github.com:<username>/gitflow.git
+    cd gitflow
+    git branch master origin/master
+    git flow init -d
+    git flow feature start <your feature>
+
+Then, do work and commit your changes.  **Hint**: ``export PATH=`pwd`:$PATH``
+from within the gitflow directory makes sure you're using the version of
+gitflow you're currently developing.
+
+    git flow feature publish <your feature>
+
+When done, open a pull request to your feature branch.
 
 License terms
 -------------
@@ -68,9 +78,6 @@ any modifications you make to the source code, you are very much encouraged and
 invited to contribute back your modifications to the community, preferably
 in a Github fork, of course.
 
-
-Typical usage:
---------------
 
 ### Initialization
 
@@ -117,3 +124,17 @@ those questions to accept the (sane) default suggestions.
   
   For support branches, the `<base>` arg must be a commit on `master`.
 
+
+Showing your appreciation
+=========================
+A few people already requested it, so now it's here: a Flattr button.
+
+Of course, the best way to show your appreciation for the original
+[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
+contributing to the community.  If you'd like to show your appreciation in
+another way, however, consider Flattr'ing me:
+
+[![Flattr this][2]][1]
+
+[1]: http://flattr.com/thing/53771/git-flow
+[2]: http://api.flattr.com/button/button-static-50x60.png
