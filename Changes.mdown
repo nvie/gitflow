@@ -2,10 +2,15 @@
 -----
 Release date: **not yet**
 
+* `git flow init` now detects situations where origin already has gitflow
+  branches set up, and behaves accordingly (thanks Emre Berge Ergenekon)
+
 * `git flow feature finish` can now be called without a feature branch
   name(prefix) argument and will finish the current branch, if on any.
 
 * Various minor bug fixes related to internal argument passing
+
+* Better support for Windows users.
 
 * Add package installers for the Debian and Windows platforms.
 

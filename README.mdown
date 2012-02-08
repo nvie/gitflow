@@ -14,77 +14,14 @@ Kreeftmeijer's blog post:
 
 Or have a look at one of these screen casts:
 
+* [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
 * [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
 * [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
 
 Installing git-flow
 -------------------
-
-### Mac OS
-If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
-
-    $ brew install git-flow
-
-If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
-
-    $ port install git-flow
-
-### Linux, etc.
-Another easy way to install git-flow is using Rick Osborne's excellent git-flow
-installer, which can be run using the following command:
-
-	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo bash
-
-### Windows
-
-For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
-starting place for installing git.
-
-#### Using Cygwin
-For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
-first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
-during installation). Then simply run this command from a Cygwin shell:
-
-	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
-
-#### Using [msysgit](http://code.google.com/p/msysgit/)
-Download and install `getopt.exe` from the [util-linux package](http://gnuwin32.sourceforge.net/packages/util-linux-ng.htm) into `C:\Program Files\Git\bin`. (Only `getopt.exe`, the others util-linux files are not used). Also install `libintl3.dll` from the Dependencies package, into the same directory. 
-
-Clone the git-flow sources from GitHub:
-
-	$ git clone --recursive git://github.com/nvie/gitflow.git
-	$ cd gitflow
-
-Run the `msysgit-install` script from a command-line prompt (you may have to
-run it with "Full Administrator" rights if you installed msysgit with its
-installer):
-
-	C:\gitflow> contrib\msysgit-install.cmd
-
-### Manual installation
-If you prefer a manual installation, please use the following instructions:
-
-	$ git clone --recursive git://github.com/nvie/gitflow.git
-
-Then, you can install `git-flow`, using:
-
-	$ sudo make install
-
-By default, git-flow will be installed in /usr/local. To change the prefix
-where git-flow will be installed, simply specify it explicitly, using:
-
-	$ sudo make prefix=/opt/local install
-
-Or simply point your `PATH` environment variable to your git-flow checkout
-directory.
-
-*Installation note:*  
-git-flow depends on the availability of the command line utility `getopt`,
-which may not be available in your Unix/Linux environment.  Please use your
-favorite package manager to install `getopt`.  For Cygwin, install the
-`util-linux` package to get `getopt`.  If you use `apt-get` as your install
-manager, the package name is `opt`.
+See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
 
 
 Integration with your shell
@@ -115,6 +52,23 @@ contributors, please see the [AUTHORS](AUTHORS) file.
 Any questions, tips, or general discussion can be posted to our Google group:
 [http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
 
+Contributing
+------------
+Fork the repository.  Then, run:
+
+    git clone --recursive git@github.com:<username>/gitflow.git
+    cd gitflow
+    git branch master origin/master
+    git flow init -d
+    git flow feature start <your feature>
+
+Then, do work and commit your changes.  **Hint**: ``export PATH=`pwd`:$PATH``
+from within the gitflow directory makes sure you're using the version of
+gitflow you're currently developing.
+
+    git flow feature publish <your feature>
+
+When done, open a pull request to your feature branch.
 
 License terms
 -------------
