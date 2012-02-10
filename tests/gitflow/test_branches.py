@@ -481,7 +481,7 @@ class TestHotfixBranchManager(TestCase):
                 gitflow.repo.branches['master'].commit)
 
     @copy_from_fixture('sample_repo')
-    def test_finish_release(self):
+    def test_finish_hotfix(self):
         gitflow = GitFlow(self.repo)
         mgr = HotfixBranchManager(gitflow)
         mgr.create('1.2.3')
