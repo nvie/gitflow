@@ -2,7 +2,7 @@ import time
 import datetime
 import os
 from functools import wraps
-from git import Git, Repo, InvalidGitRepositoryError, GitCommandError
+from git import Git, Repo, InvalidGitRepositoryError
 import ConfigParser
 from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses

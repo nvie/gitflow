@@ -1,5 +1,3 @@
-from git import GitCommandError
-
 
 class NoSuchBranchError(Exception):
     pass
