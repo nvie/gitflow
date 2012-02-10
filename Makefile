@@ -7,7 +7,9 @@ clean-docs:
 	cd docs && make clean
 
 clean-files:
-	find . -name '*.pyc' -exec rm {} \;
+	find . -name '*.py[co]' -exec rm {} \;
+	rm -rf *.egg *.egg-info
+	rm nosetests.xml *.egg-lnk pip-log.txt
 
 clean: clean-files clean-docs
 
