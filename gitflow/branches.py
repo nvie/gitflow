@@ -4,6 +4,9 @@ from git import GitCommandError
 class NoSuchBranchError(Exception):
     pass
 
+class BranchExistsError(Exception):
+    pass
+
 class PrefixNotUniqueError(Exception):
     pass
 
@@ -109,6 +112,8 @@ class BranchManager(object):
         full_name = self.prefix + name
         if base is None:
             base = self.default_base()
+        if full_name in repo.branches:
+            raise BranchExistsError(full_name)
         branch = repo.create_head(full_name, base)
         branch.checkout()
         return branch
