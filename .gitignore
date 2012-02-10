@@ -9,4 +9,5 @@
 /.coverage
 /.achievements
 /.tox
+/nosetests.xml
 /docs/_build
