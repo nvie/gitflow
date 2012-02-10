@@ -15,6 +15,8 @@ Or, if you'd like to use `pip` instead:
 
 	$ pip install gitflow
 
+git-flow requires at least Python 2.5.
+
 
 Please help out
 ---------------
