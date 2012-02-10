@@ -6,3 +6,4 @@ Authors are (ordered by first commit date):
 - Jason L. Shiffer
 - Randy Merrill
 - Sebastian Thiel
+- Hartmut Goebel
