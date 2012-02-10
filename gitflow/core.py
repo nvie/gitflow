@@ -98,7 +98,7 @@ class GitFlow(object):
         develop_name = self.develop_name()
         try:
             self.repo.create_head(develop_name, self.master_name())
-        except GitCommandError:
+        except OSError:
             # on error, the branch existed already
             pass
         
