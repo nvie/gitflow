@@ -1,8 +1,7 @@
 # Python junk
-*.pyc
-*.pyo
-*.egg
-*.egg-info
+*.py[co]
+/*.egg
+/*.egg-info
 /build
 /dist
 /pip-log.txt
