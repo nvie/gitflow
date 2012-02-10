@@ -11,7 +11,13 @@ clean-files:
 	rm -rf *.egg *.egg-info
 	rm nosetests.xml *.egg-lnk pip-log.txt
 
-clean: clean-files clean-docs
+clean: clean-docs clean-files
+
+clean-all: clean-tox clean
+	rm -rf build dist .coverage
+
+clean-tox:
+	rm -rf .tox
 
 xunit-test:
 	nosetests --with-xunit
