@@ -46,6 +46,9 @@ class InitCommand(GitFlowCommand):
                               help='Initialize a repository for gitflow.')
         p.add_argument('-f', '--force', action='store_true',
                        help='force reinitialization of the gitflow preferences')
+        p.add_argument('-d', '--defaults', action='store_true',
+                       dest='use_defaults',
+                       help='use default branch naming conventions and prefixes')
         p.set_defaults(func=self.run)
         return p
 
