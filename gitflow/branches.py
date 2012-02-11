@@ -26,10 +26,10 @@ class BranchManager(object):
 
     def __init__(self, gitflow, prefix=None):
         from gitflow.core import GitFlow
-        assert isinstance(gitflow, GitFlow), 'Argument \'gitflow\' must be a GitFlow instance.'
+        assert isinstance(gitflow, GitFlow), "Argument 'gitflow' must be a GitFlow instance."
         self.gitflow = gitflow
         if not prefix is None:
-            assert isinstance(prefix, basestring), 'Argument \'prefix\' must be a string.'
+            assert isinstance(prefix, basestring), "Argument 'prefix' must be a string."
             self.prefix = prefix
 
     def default_base(self):
@@ -39,7 +39,7 @@ class BranchManager(object):
             in case no explicit base is specified.
 
         This method can be overriden in a subclass of :class:`BranchManager`.
-        If not overriden, the default is to use the "develop" branch.
+        If not overriden, the default is to use the 'develop' branch.
         """
         return self.gitflow.develop_name()
 
@@ -135,9 +135,9 @@ class BranchManager(object):
             a default merge message is used.  You can use the following string
             placeholders, which :meth:`merge` will expand::
 
-                %(name)s = The full name of the branch (e.g. "feature/foo")
-                %(short_name)s = The friendly name of the branch (e.g. "foo")
-                %(identifier)s = The type (e.g. "feature", "hotfix", etc.)
+                %(name)s = The full name of the branch (e.g. 'feature/foo')
+                %(short_name)s = The friendly name of the branch (e.g. 'foo')
+                %(identifier)s = The type (e.g. 'feature', 'hotfix', etc.)
 
         You typically don't need to override this method in a subclass.
         """
@@ -148,10 +148,10 @@ class BranchManager(object):
         kwargs = dict()
         if not self._is_single_commit_branch(into, full_name):
             kwargs['no_ff'] = True
-        if not message is None:
-            message = message % \
-                        dict(name=full_name, identifier=self.identifier,
-                                short_name=name)
+        if message is not None:
+            message = (message
+                       % dict(name=full_name, identifier=self.identifier,
+                              short_name=name))
             kwargs['message'] = message
         repo.git.merge(full_name, **kwargs)
 
