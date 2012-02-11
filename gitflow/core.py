@@ -52,7 +52,6 @@ class GitFlow(object):
             managers[cls.identifier] = cls(self)
         return managers
 
-
     def __init__(self, working_dir='.'):
         # Allow Repos to be passed in instead of strings
         self.repo = None
@@ -68,52 +67,66 @@ class GitFlow(object):
             pass
 
         self.managers = self._discover_branch_managers()
+        self.defaults = {
+            'gitflow.branch.master': 'master',
+            'gitflow.branch.develop': 'develop',
+            'gitflow.prefix.versiontag': '',
+            'gitflow.origin': 'origin',
+            }
+        for i in self.managers:
+            self.defaults['gitflow.prefix.%s' % i] = self.managers[i].prefix
 
-    def _init_config(self, master=None, develop=None, prefixes={}, force_defaults=False):
-        defaults = [
-            ('gitflow.branch.master', 'master', master),
-            ('gitflow.branch.develop', 'develop', develop),
-        ]
-        defaults += [('gitflow.prefix.%s' % i, self.managers[i].prefix,
-                        prefixes.get(i, None))
-                     for i in self.managers]
-        for setting, default, value in defaults:
-            if not value is None:
-                self.set(setting, value)
+
+    def _init_config(self, master=None, develop=None, prefixes={},
+                     force_defaults=False):
+        for setting, default in self.defaults.items():
+            if force_defaults:
+                value = default
+            elif setting == 'gitflow.branch.master':
+                value = master
+            elif setting == 'gitflow.branch.develop':
+                value = develop
             else:
-                if force_defaults or not self.is_set(setting):
-                    self.set(setting, default)
+                value = prefixes.get(setting, None)
+            if value is None or not self.is_set(setting):
+                value = default
+            self.set(setting, value)
+
 
     def _init_initial_commit(self):
-        master = self.master_name()
         try:
-            self.repo.branches[master]
-        except:
-            # Only if 'master' branch does not exist
+            self.master()
+        except IndexError:
+            # Create 'master' branch if it does not exist
+            print('Creating branch %r' % self.master_name())
             c = self.repo.index.commit('Initial commit', head=False)
-            self.repo.create_head(master, c)
+            self.repo.create_head(self.master_name(), c)
 
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
-        develop_name = self.develop_name()
         try:
-            self.repo.create_head(develop_name, self.master_name())
-        except OSError:
-            # on error, the branch existed already
-            pass
-        
+            self.develop()
+        except IndexError:
+            # Create 'develop' branch if it does not exist
+            print('Creating branch %r' % self.develop_name())
+            branch = self.repo.create_head(self.develop_name(), self.master())
+            # switch to develop branch if its newly created
+            print('Switching to branch %s' % branch)
+            branch.checkout()
 
-    def init(self, master=None, develop=None, prefixes={}, force_defaults=False):
+    def _enforce_git_repo(self):
+        """
+        Ensure a (maybe empty) repository exists we can work on.
+
+        This is to be used by the `init` sub-command.
+        """
         if self.repo is None:
-            try:
-                self.repo = Repo(self.working_dir)
-            except InvalidGitRepositoryError:
-                # Git repo is not yet initialized
-                self.git.init()
+            self.git.init(self.working_dir)
+            self.repo = Repo(self.working_dir)
 
-                # Try it again with an inited git repo
-                self.repo = Repo(self.working_dir)
-
+    def init(self, master=None, develop=None, prefixes={},
+             force_defaults=False):
+        self._enforce_git_repo()
         self._init_config(master, develop, prefixes, force_defaults)
         self._init_initial_commit()
         self._init_develop_branch()

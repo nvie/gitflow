@@ -53,10 +53,8 @@ class InitCommand(GitFlowCommand):
         return p
 
     def run(self, args):
-        print('-------------------')
-        print('Init has been run!')
-        print(args)
-        print('-------------------')
+        from . import _init
+        _init.run_default(args)
 
 
 class FeatureCommand(GitFlowCommand):
