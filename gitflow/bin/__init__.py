@@ -43,9 +43,9 @@ class GitFlowCommand(object):
 class InitCommand(GitFlowCommand):
     def register_parser(self, parent):
         p = parent.add_parser('init',
-                help='Initialize a repository for gitflow.')
+                              help='Initialize a repository for gitflow.')
         p.add_argument('-f', '--force', action='store_true',
-                help='force reinitialization of the gitflow preferences')
+                       help='force reinitialization of the gitflow preferences')
         p.set_defaults(func=self.run)
         return p
 
