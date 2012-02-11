@@ -131,27 +131,20 @@ class GitFlow(object):
     def _parse_setting(self, setting):
         groups = setting.split('.', 2)
         if len(groups) == 2:
-            subsection = None
             section, option = groups
         elif len(groups) == 3:
             section, subsection, option = groups
-        else:
-            raise ValueError('Invalid setting name: %s' % setting)
-
-        if subsection:
             section = '%s "%s"' % (section, subsection)
         else:
-            section = section
-
+            raise ValueError('Invalid setting name: %s' % setting)
         return (section, option)
 
     @requires_repo
     def get(self, setting, null=False):
         section, option = self._parse_setting(setting)
         try:
-            setting = self.repo.config_reader().get_value(section, option)
-            return setting
-        except Exception:
+            return self.repo.config_reader().get_value(section, option)
+        except:
             if null:
                 return None
             raise
