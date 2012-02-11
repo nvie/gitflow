@@ -2,7 +2,7 @@ import time
 import datetime
 import os
 from functools import wraps
-from git import Git, Repo, InvalidGitRepositoryError
+from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
 import ConfigParser
 from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
@@ -199,7 +199,11 @@ class GitFlow(object):
         return self.repo.is_dirty()
 
     @requires_repo
-    def branch_names(self):
+    def branch_names(self, remote=False):
+        if remote:
+            return [r.name
+                    for r in self.repo.refs
+                    if isinstance(r, RemoteReference)]
         return map(lambda h: h.name, self.repo.branches)
 
 
