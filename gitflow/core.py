@@ -119,12 +119,14 @@ class GitFlow(object):
         self._init_develop_branch()
 
     def is_initialized(self):
-        return self.is_set('gitflow.branch.master') \
-           and self.is_set('gitflow.branch.develop') \
-           and self.is_set('gitflow.prefix.feature') \
-           and self.is_set('gitflow.prefix.release') \
-           and self.is_set('gitflow.prefix.hotfix') \
-           and self.is_set('gitflow.prefix.support')
+        return (self.repo and
+                self.is_set('gitflow.branch.master') and
+                self.is_set('gitflow.branch.develop') and
+                self.is_set('gitflow.prefix.feature') and
+                self.is_set('gitflow.prefix.release') and
+                self.is_set('gitflow.prefix.hotfix') and
+                self.is_set('gitflow.prefix.support') and
+                self.is_set('gitflow.prefix.versiontag'))
 
     def _parse_setting(self, setting):
         groups = setting.split('.', 2)
