@@ -209,7 +209,10 @@ def main():
     for cls in itersubclasses(GitFlowCommand):
         cls().register_parser(placeholder)
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except KeyboardInterrupt:
+        die('', 'Aborted by user request.')
 
 
 if __name__ == '__main__':
