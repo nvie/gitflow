@@ -131,9 +131,22 @@ parse_args() {
 
 require_version_arg() {
 	if [ "$VERSION" = "" ]; then
-		warn "Missing argument <version>"
-		usage
-		exit 1
+    default_suggestion="$(git_next_revision_version)"
+		printf "Version number for this hotfix: [$default_suggestion] "
+		read answer
+		VERSION=${answer:-$default_suggestion}
+    BRANCH=$PREFIX$VERSION
+	fi
+}
+
+require_version_arg_for_finish() {
+	if [ "$VERSION" = "" ]; then
+    default_suggestion="$(gitflow_current_version_from_branch_name)"
+		printf "Version number for this release: [$default_suggestion] "
+		read answer
+		VERSION=${answer:-$default_suggestion}
+    BRANCH=$PREFIX$VERSION
+    require_branch $BRANCH
 	fi
 }
 
@@ -225,7 +238,7 @@ cmd_finish() {
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
 	parse_args "$@"
-	require_version_arg
+	require_version_arg_for_finish
 
 	# handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then
@@ -268,7 +281,11 @@ cmd_finish() {
 			local opts="-a"
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
-			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+			if [ "$FLAGS_message" != "" ]; then
+        opts="$opts -m '$FLAGS_message'"
+      else
+        opts="$opts -m '$VERSION_PREFIX$VERSION'"
+      fi
 			git tag $opts "$VERSION_PREFIX$VERSION" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi

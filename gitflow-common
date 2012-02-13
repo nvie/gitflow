@@ -75,6 +75,8 @@ git_remote_branches() { git branch -r --no-color | sed 's/^[* ] //'; }
 git_all_branches() { ( git branch --no-color; git branch -r --no-color) | sed 's/^[* ] //'; }
 git_all_tags() { git tag; }
 
+git_all_tags_by_date() { git for-each-ref --sort='*authordate' --format='%(refname:short)' refs/tags; }
+
 git_current_branch() {
 	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
 }
@@ -108,6 +110,7 @@ git_branch_exists() {
 git_tag_exists() {
 	has $1 $(git_all_tags)
 }
+
 
 #
 # git_compare_branches()
@@ -315,4 +318,61 @@ require_branches_equal() {
 			die "Branches need merging first."
 		fi
 	fi
+}
+
+#
+# Functions for auto version incrementing
+#
+
+gitflow_current_version_from_branch_name() {
+  echo "$(git_current_branch)" | sed 's/.*\/\(.*\)/\1/g'
+}
+
+git_current_version() {
+  echo "$(git_all_tags_by_date)" | grep -e '.*[0-9]*\.[0-9]*\.[0-9].*' | sed '$!d' | sed -n 's/[^0-9]*\([0-9]*.[0-9]*.[0-9]\)[^0-9]*/\1/p'
+}
+
+git_current_major_version() {
+  echo "$(git_current_version)" | sed -n 's/\([0-9]*\).[0-9]*.[0-9]*/\1/p'
+}
+
+git_current_minor_version() {
+  echo "$(git_current_version)" | sed -n 's/[0-9]*.\([0-9]*\).[0-9]*/\1/p'
+}
+
+git_current_revision_version() {
+  echo "$(git_current_version)" | sed -n 's/[0-9]*.[0-9]*.\([0-9]*\)/\1/p'
+}
+
+git_next_major_version() {
+  if [ -z $(git_current_version) ]; then
+    echo "1.0.0"
+  else
+    maj=$( echo "$(git_current_major_version)" | awk '{ print $1 + 1 }' )
+    min=0
+    rev=0
+    echo "$maj.$min.$rev"
+  fi
+}
+
+git_next_minor_version() {
+  if [ -z $(git_current_version) ]; then
+    echo "1.0.0"
+  else
+    maj=$(git_current_major_version)
+    min=$( echo "$(git_current_minor_version)" | awk '{ print $1 + 1 }' )
+    rev=0
+    echo "$maj.$min.$rev"
+  fi
+}
+
+git_next_revision_version() {
+  if [ -z $(git_current_version) ]; then
+    echo "1.0.0"
+  else
+    maj=$(git_current_major_version)
+    min=$(git_current_minor_version)
+    rev=$( echo "$(git_current_revision_version)" | awk '{ print $1 + 1 }' )
+    echo "$maj.$min.$rev"
+  fi
 }
