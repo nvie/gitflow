@@ -17,7 +17,7 @@ Release date: **not yet**
 
 * Better support for Windows and BSD users.
 
-* Add package installers for the Debian and Windows platforms.
+* Add package installer for the Windows platform.
 
 0.4.1:
 -----
