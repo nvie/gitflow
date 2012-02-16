@@ -196,6 +196,8 @@ cmd_start() {
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
+	# validate naming convention
+	require_name_convention "$NAME"
 
 	# sanity checks
 	require_branch_absent "$BRANCH"

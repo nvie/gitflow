@@ -316,3 +316,40 @@ require_branches_equal() {
 		fi
 	fi
 }
+
+isJustNumber() {
+	r=$(echo "$1" | tr '[^0-9]' ' ' | wc -w)
+	if [ $r -eq 0 ] ; then
+		return 0
+	fi
+	return 1
+}
+
+explain_name_convention() {
+	reason="$1"
+	warn "*CEC*******************************************"
+	warn " $reason "
+	warn " "
+	warn " Standard is: <ticket #>-<description>"
+	warn "    Example: 918-AddLasers"
+	warn "*******************************************CEC*"
+}
+
+require_name_convention() {
+	name="$1"
+
+	split=$(echo $name | sed 's/-/ /g')
+	set -- $split
+	branchTicket=${1##*/}
+	branchDesc=$2
+
+	if [ -z "$branchTicket" -o -z "$branchDesc" ] ; then
+		explain_name_convention "You must include both the ticket number and a description"
+		exit 1
+	fi
+
+	if ! isJustNumber "$branchTicket" ; then
+		explain_name_convention "Ticket field must only contain integers"
+		exit 1
+	fi
+}
