@@ -93,13 +93,17 @@ class FeatureCommand(GitFlowCommand):
                 help='Finish branch by rebasing first.')
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
-        p.add_argument('nameprefix')
+        p.add_argument('-k', '--keep', action='store_true',
+                help='Keep branch after performing finish.')
+        p.add_argument('-D', '--force-delete', action='store_true',
+                help='Force delete feature branch after finish.')
+        p.add_argument('nameprefix', nargs='?')
 
         # publish
         p = sub.add_parser('publish',
                 help='Publish this feature branch to origin.')
         p.set_defaults(func=self.run_publish)
-        p.add_argument('name')
+        p.add_argument('nameprefix')
 
         # track
         p = sub.add_parser('track',
@@ -204,13 +208,147 @@ class ReleaseCommand(GitFlowCommand):
         p = parent.add_parser('release', help='Manage your release branches.')
         p.add_argument('-v', '--verbose', action='store_true',
            help='be verbose (more output)')
-        p.set_defaults(func=self.run)
-        return p
+        sub = p.add_subparsers(title='Actions')
 
-    def run(self, args):
-        print 'release ran'
-        print(args)
+        # list
+        p = sub.add_parser('list', help='List all release branches.')
+        p.set_defaults(func=self.run_list)
+        p.add_argument('-v', '--verbose', action='store_true',
+                help='Be verbose (more output).')
 
+        # start
+        p = sub.add_parser('start', help='Start a new release branch.')
+        p.set_defaults(func=self.run_start)
+        p.add_argument('-F', '--fetch', action='store_true',
+                       #:todo: get "origin" from config
+                help='Fetch from origin before performing local operation.')
+        p.add_argument('version')
+        p.add_argument('base', nargs='?')
+
+        # finish
+        p = sub.add_parser('finish', help='Finish a release branch.')
+        p.set_defaults(func=self.run_finish)
+        p.add_argument('-r', '--rebase', action='store_true',
+                help='Finish branch by rebasing first.')
+        p.add_argument('-F', '--fetch', action='store_true',
+                help='Fetch from origin before performing local operation.')
+        p.add_argument('-s', '--sign', action='store_true',
+                help="sign the release tag cryptographically")
+        p.add_argument('-u', '--signingkey',
+                help="use the given GPG-key for the digital signature "
+                     "(implies -s)")
+        p.add_argument('-m', '--message',
+                       help="use the given tag message")
+        p.add_argument('-p', '--push', action='store_true',
+                       #:todo: get "origin" from config
+                       help="push to origin after performing finish")
+        p.add_argument('-k', '--keep', action='store_true',
+                help='Keep branch after performing finish.')
+        p.add_argument('-n', '--notag', action='store_true',
+                       help="don't tag this release")
+        p.add_argument('version')
+
+        # publish
+        p = sub.add_parser('publish',
+                help='Publish this release branch to origin.')
+        p.set_defaults(func=self.run_publish)
+        p.add_argument('version')
+
+        # track
+        p = sub.add_parser('track',
+                help='Track a release branch from origin.')
+        p.set_defaults(func=self.run_track)
+        p.add_argument('version')
+
+
+    def run_list(self, args): pass
+    def run_start(self, args): pass
+    def run_finish(self, args): pass
+    def run_publish(self, args): pass
+    def run_track(self, args): pass
+
+
+class HotfixCommand(GitFlowCommand):
+    def register_parser(self, parent):
+        p = parent.add_parser('hotfix', help='Manage your hotfix branches.')
+        p.add_argument('-v', '--verbose', action='store_true',
+           help='be verbose (more output)')
+        sub = p.add_subparsers(title='Actions')
+
+        # list
+        p = sub.add_parser('list', help='List all hotfix branches.')
+        p.set_defaults(func=self.run_list)
+        p.add_argument('-v', '--verbose', action='store_true',
+                help='Be verbose (more output).')
+
+        # start
+        p = sub.add_parser('start', help='Start a new hotfix branch.')
+        p.set_defaults(func=self.run_start)
+        p.add_argument('-F', '--fetch', action='store_true',
+                       #:todo: get "origin" from config
+                help='Fetch from origin before performing local operation.')
+        p.add_argument('version')
+        p.add_argument('base', nargs='?')
+
+        # finish
+        p = sub.add_parser('finish', help='Finish a hotfix branch.')
+        p.set_defaults(func=self.run_finish)
+        p.add_argument('-r', '--rebase', action='store_true',
+                help='Finish branch by rebasing first.')
+        p.add_argument('-F', '--fetch', action='store_true',
+                help='Fetch from origin before performing local operation.')
+        p.add_argument('-s', '--sign', action='store_true',
+                help="sign the hotfix tag cryptographically")
+        p.add_argument('-u', '--signingkey',
+                help="use the given GPG-key for the digital signature "
+                     "(implies -s)")
+        p.add_argument('-m', '--message',
+                       help="use the given tag message")
+        p.add_argument('-p', '--push', action='store_true',
+                       #:todo: get "origin" from config
+                       help="push to origin after performing finish")
+        p.add_argument('-k', '--keep', action='store_true',
+                help='Keep branch after performing finish.')
+        p.add_argument('-n', '--notag', action='store_true',
+                       help="don't tag this hotfix")
+        p.add_argument('version')
+
+        # publish
+        p = sub.add_parser('publish',
+                help='Publish this hotfix branch to origin.')
+        p.set_defaults(func=self.run_publish)
+        p.add_argument('version')
+
+    def run_list(self, args): pass
+    def run_start(self, args): pass
+    def run_finish(self, args): pass
+    def run_publish(self, args): pass
+
+
+class SupportCommand(GitFlowCommand):
+    def register_parser(self, parent):
+        p = parent.add_parser('support', help='Manage your support branches.')
+        p.add_argument('-v', '--verbose', action='store_true',
+           help='be verbose (more output)')
+        sub = p.add_subparsers(title='Actions')
+
+        # list
+        p = sub.add_parser('list', help='List all feature branches.')
+        p.set_defaults(func=self.run_list)
+        p.add_argument('-v', '--verbose', action='store_true',
+                help='Be verbose (more output).')
+
+        # start
+        p = sub.add_parser('start', help='Start a new feature branch.')
+        p.set_defaults(func=self.run_start)
+        p.add_argument('-F', '--fetch', action='store_true',
+                help='Fetch from origin before performing local operation.')
+        p.add_argument('name')
+        p.add_argument('base', nargs='?')
+
+
+    def run_list(self, args): pass
+    def run_start(self, args): pass
 
 def main():
     parser = argparse.ArgumentParser(prog='git flow')
