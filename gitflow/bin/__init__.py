@@ -40,6 +40,16 @@ class GitFlowCommand(object):
         raise NotImplementedError("Implement this method in a subclass.")
 
 
+class VersionCommand(GitFlowCommand):
+    def register_parser(self, parent):
+        p = parent.add_parser('version', help='Show the version of gitflow.')
+        p.set_defaults(func=self.run)
+
+    def run(self, args):
+        from gitflow import __version__
+        print(__version__)
+
+
 class InitCommand(GitFlowCommand):
     def register_parser(self, parent):
         p = parent.add_parser('init',
@@ -200,16 +210,6 @@ class ReleaseCommand(GitFlowCommand):
     def run(self, args):
         print 'release ran'
         print(args)
-
-
-class VersionCommand(GitFlowCommand):
-    def register_parser(self, parent):
-        p = parent.add_parser('version', help='Show the version of gitflow.')
-        p.set_defaults(func=self.run)
-
-    def run(self, args):
-        from gitflow import __version__
-        print(__version__)
 
 
 def main():
