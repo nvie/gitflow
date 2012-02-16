@@ -117,8 +117,14 @@ cmd_default() {
 
 		# check existence in case of an already existing repo
 		if [ "$should_check_existence" = "YES" ]; then
-			git_local_branch_exists "$master_branch" || \
+			# if no local branch exists and a remote branch of the same
+			# name exists, checkout that branch and use it for master
+			if ! git_local_branch_exists "$master_branch" && \
+				git_remote_branch_exists "origin/$master_branch"; then
+				git branch "$master_branch" "origin/$master_branch" >/dev/null 2>&1
+			elif ! git_local_branch_exists "$master_branch"; then
 				die "Local branch '$master_branch' does not exist."
+			fi
 		fi
 
 		# store the name of the master branch
@@ -200,7 +206,11 @@ cmd_default() {
 	# default production branch and develop was "created".  We should create
 	# the develop branch now in that case (we base it on master, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
-		git branch --no-track "$develop_branch" "$master_branch"
+		if git_remote_branch_exists "origin/$develop_branch"; then
+			git branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
+		else
+			git branch --no-track "$develop_branch" "$master_branch"
+		fi
 		created_gitflow_branch=1
 	fi
 

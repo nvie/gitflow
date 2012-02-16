@@ -45,7 +45,7 @@ warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
 escape() {
-	echo "$1" | sed 's/\([\.\+\$\*]\)/\\\1/g'
+	echo "$1" | sed 's/\([\.\$\*]\)/\\\1/g'
 }
 
 # set logic
@@ -95,6 +95,10 @@ git_repo_is_headless() {
 
 git_local_branch_exists() {
 	has $1 $(git_local_branches)
+}
+
+git_remote_branch_exists() {
+	has $1 $(git_remote_branches)
 }
 
 git_branch_exists() {
@@ -181,7 +185,7 @@ gitflow_is_initialized() {
 
 # loading settings that can be overridden using git config
 gitflow_load_settings() {
-	export DOT_GIT_DIR=$(git rev-parse --git-dir >/dev/null 2>&1)
+	export DOT_GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
@@ -288,9 +292,11 @@ require_branch_absent() {
 }
 
 require_tag_absent() {
-	if has $1 $(git_all_tags); then
-		die "Tag '$1' already exists. Pick another name."
-	fi
+	for tag in $(git_all_tags); do
+		if [ "$1" = "$tag" ]; then
+			die "Tag '$1' already exists. Pick another name."
+		fi
+	done
 }
 
 require_branches_equal() {
@@ -308,5 +314,42 @@ require_branches_equal() {
 		else
 			die "Branches need merging first."
 		fi
+	fi
+}
+
+isJustNumber() {
+	r=$(echo "$1" | tr '[^0-9]' ' ' | wc -w)
+	if [ $r -eq 0 ] ; then
+		return 0
+	fi
+	return 1
+}
+
+explain_name_convention() {
+	reason="$1"
+	warn "*CEC*******************************************"
+	warn " $reason "
+	warn " "
+	warn " Standard is: <ticket #>-<description>"
+	warn "    Example: 918-AddLasers"
+	warn "*******************************************CEC*"
+}
+
+require_name_convention() {
+	name="$1"
+
+	split=$(echo $name | sed 's/-/ /g')
+	set -- $split
+	branchTicket=${1##*/}
+	branchDesc=$2
+
+	if [ -z "$branchTicket" -o -z "$branchDesc" ] ; then
+		explain_name_convention "You must include both the ticket number and a description"
+		exit 1
+	fi
+
+	if ! isJustNumber "$branchTicket" ; then
+		explain_name_convention "Ticket field must only contain integers"
+		exit 1
 	fi
 }
