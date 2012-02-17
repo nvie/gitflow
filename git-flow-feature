@@ -462,7 +462,7 @@ cmd_rebase() {
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
-	git rebase $OPTS "$DEVELOP_BRANCH"
+	git rebase $OPTS "$MASTER_BRANCH"
 }
 
 avoid_accidental_cross_branch_action() {
