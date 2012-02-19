@@ -1,6 +1,7 @@
 import time
 import datetime
 import os
+import sys
 from functools import wraps
 from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
 import ConfigParser
@@ -20,6 +21,14 @@ def requires_repo(f):
             raise NotInitialized(msg)
         return f(self, *args, **kwargs)
     return _inner
+
+def warn(*texts):
+    for txt in texts:
+        print >> sys.stderr, txt
+
+def die(*texts):
+    warn(*texts)
+    raise SystemExit(1)
 
 
 class NotInitialized(Exception):

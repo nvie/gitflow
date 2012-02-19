@@ -13,18 +13,11 @@ git-flow
        Print usage, help and information on the available commands.
 
 """
-import sys
+
 import argparse
-from gitflow.core import GitFlow
+from gitflow.core import GitFlow, die
 from gitflow.util import itersubclasses
 
-def warn(*texts):
-    for txt in texts:
-        print >> sys.stderr, txt
-
-def die(*texts):
-    warn(*texts)
-    raise SystemExit(1)
 
 class GitFlowCommand(object):
     """
