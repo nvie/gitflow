@@ -44,6 +44,9 @@ class BranchExists(Exception):
 class InvalidOperation(Exception):
     pass
 
+class _NONE:
+    pass
+
 
 class GitFlow(object):
     """
@@ -166,13 +169,13 @@ class GitFlow(object):
         return (section, option)
 
     @requires_repo
-    def get(self, setting, null=False):
+    def get(self, setting, default=_NONE):
         section, option = self._parse_setting(setting)
         try:
             return self.repo.config_reader().get_value(section, option)
-        except:
-            if null:
-                return None
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            if default is not _NONE:
+                return default
             raise
 
     @requires_repo
@@ -181,7 +184,7 @@ class GitFlow(object):
         self.repo.config_writer().set_value(section, option, value)
 
     def is_set(self, setting):
-        return not self.get(setting, null=True) is None
+        return self.get(setting, None) is not None
 
 
     @requires_repo
