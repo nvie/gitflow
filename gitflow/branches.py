@@ -248,10 +248,65 @@ class FeatureBranchManager(BranchManager):
     identifier = 'feature'
     prefix = 'feature/'
 
+    def create(self, name, base=None, fetch=False):
+        """
+        Creates a branch of type `feature` and checks it out.
+
+        :param name:
+            The (short) name of the branch to create. This will be
+            prefixed by `feature/` or whatever is configured in
+            `gitflow.prefix.feature`.
+
+        :param base:
+            The base commit or ref to base the branch off from.  If no
+            base is provided, it defaults to the branch configured in
+            `gitflow.branch.develop`.  See also :meth:`default_base`.
+
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            creating the new branch.
+
+        :returns:
+            The newly created :class:`git.refs.Head` reference.
+        """
+        return super(FeatureBranchManager, self).create(
+            name, base, fetch=fetch, must_be_on_default_base=False)
+
 
 class ReleaseBranchManager(BranchManager):
     identifier = 'release'
     prefix = 'release/'
+
+    def create(self, version, base=None, fetch=False):
+        """
+        Creates a branch of type `release` and checks it out.
+
+        :param version:
+            The version to be released and for which to create the
+            release-branch for. This will be prefixed by `release/`
+            or whatever is configured in `gitflow.prefix.release`.
+
+        :param base:
+            The base commit or ref to base the branch off from.  If no
+            base is provided, it defaults to the branch configured in
+            `gitflow.branch.develop`.  See also :meth:`default_base`.
+
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            creating the new branch.
+
+        :returns:
+            The newly created :class:`git.refs.Head` reference.
+        """
+        # there must be no active `release` branch
+        if len(self.list()) > 0:
+            raise BranchTypeExistsError(self.identifier)
+        # there must be no tag for this version yet
+        tagname = self.gitflow.get('gitflow.prefix.versiontag') + version
+        if tagname in self.gitflow.repo.tags:
+            raise TagExistsError(tagname)
+        return super(ReleaseBranchManager, self).create(
+            version, base, fetch=fetch, must_be_on_default_base=True)
 
     def finish(self, name):
         self.merge(name, self.gitflow.master_name(),
@@ -268,6 +323,37 @@ class HotfixBranchManager(BranchManager):
     def default_base(self):
         return self.gitflow.master_name()
 
+    def create(self, version, base=None, fetch=False):
+        """
+        Creates a branch of type `hotfix` and checks it out.
+
+        :param version:
+            The version the hotfix will get and for which to create
+            the release-branch for. This will be prefixed by `hotfix/`
+            or whatever is configured in `gitflow.prefix.hotfix`.
+
+        :param base:
+            The base commit or ref to base the branch off from.  If no
+            base is provided, it defaults to the branch configured in
+            `gitflow.branch.master`.  See also :meth:`default_base`.
+
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            creating the new branch.
+
+        :returns:
+            The newly created :class:`git.refs.Head` reference.
+        """
+        # there must be no active `hotfix` branch
+        if len(self.list()) > 0:
+            raise BranchTypeExistsError(self.identifier)
+        # there must be no tag for this version yet
+        tagname = self.gitflow.get('gitflow.prefix.versiontag') + version
+        if tagname in self.gitflow.repo.tags:
+            raise TagExists(tagname)
+        return super(HotfixBranchManager, self).create(
+            version, base, fetch=fetch, must_be_on_default_base=True)
+
     def finish(self, name):
         self.merge(name, self.gitflow.master_name(),
                 'Finished %(identifier)s %(short_name)s.')
@@ -283,7 +369,30 @@ class SupportBranchManager(BranchManager):
     def default_base(self):
         return self.gitflow.master_name()
 
+    def create(self, name, base=None, fetch=False):
+        """
+        Creates a branch of type `support` and checks it out.
+
+        :param name:
+            The (short) name of the branch to create. This will be
+            prefixed by `support/` or whatever is configured in
+            `gitflow.prefix.support`.
+
+        :param base:
+            The base commit or ref to base the branch off from.  If no
+            base is provided, it defaults to the branch configured in
+            `gitflow.branch.develop`.  See also :meth:`default_base`.
+
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            creating the new branch.
+
+        :returns:
+            The newly created :class:`git.refs.Head` reference.
+        """
+        return super(SupportBranchManager, self).create(
+            name, base, fetch=fetch, must_be_on_default_base=True)
+
     def finish(self, name):
         raise NotImplementedError("Finishing support branches does not make "
                 "any sense.")
-
