@@ -6,7 +6,7 @@ from functools import wraps
 import git
 from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
 import ConfigParser
-from gitflow.branches import BranchManager
+from gitflow.branches import BranchManager, BranchTypeExistsError
 from gitflow.util import itersubclasses
 
 

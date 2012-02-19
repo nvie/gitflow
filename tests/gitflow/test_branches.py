@@ -3,7 +3,8 @@ from git import GitCommandError
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager, FeatureBranchManager, \
         ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
-        PrefixNotUniqueError, NoSuchBranchError, BranchExistsError
+        PrefixNotUniqueError, NoSuchBranchError, BranchExistsError, \
+        BranchTypeExistsError
 from tests.helpers import copy_from_fixture
 from tests.helpers.factory import create_git_repo
 
@@ -375,7 +376,7 @@ class TestReleaseBranchManager(TestCase):
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
         mgr.create('1.0')
-        self.assertRaises(BranchExistsError, mgr.create, '1.0')
+        self.assertRaises(BranchTypeExistsError, mgr.create, '1.0')
 
     def test_create_release_changes_active_branch(self):
         repo = create_git_repo(self)
