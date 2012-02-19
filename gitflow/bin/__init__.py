@@ -287,7 +287,7 @@ class ReleaseCommand(GitFlowCommand):
 
     def run_list(self, args): pass
     def run_finish(self, args): pass
-    def run_start(self):
+    def run_start(self, args):
         gitflow = GitFlow()
         gitflow.start_transaction('create release branch %s (from %s)' % \
                 (args.version, args.base))
