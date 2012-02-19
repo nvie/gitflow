@@ -41,7 +41,6 @@ def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
     #    rather allow to use existing branches for git-flow.
     name = 'gitflow.branch.' + name
     default_name = gitflow.get_default(name)
-    print '--', default_name
     local_branches = [b
                       for b in gitflow.branch_names()
                       if b not in filter]
