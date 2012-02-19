@@ -23,13 +23,7 @@ class GitFlow(CoreGitFlow):
         return self._has_configured(self.develop)
 
     def get_default(self, setting):
-        try:
-            value = self.get(setting, True)
-            if value is None:
-                value = self.defaults[setting]
-        except NotInitialized:
-            value = self.defaults[setting]
-        return value
+        return self.get(setting, self.defaults[setting])
         
 
 def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
@@ -102,7 +96,7 @@ def _ask_config(args, name, question):
 
 def _ask_prefix(args, name, question):
     name = 'gitflow.prefix.' + name
-    if not gitflow.get(name, True) or args.force:
+    if not gitflow.get(name, None) or args.force:
         _ask_config(args, name, question)
 
 
