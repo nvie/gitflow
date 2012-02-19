@@ -8,6 +8,15 @@ class BranchExistsError(Exception):
 class PrefixNotUniqueError(Exception):
     pass
 
+class BaseNotOnDefaultBranch(Exception):
+    def __str__(self):
+        return ("Given base '%s' is not a valid commit on '%s'."
+                % (self.args[1], self.args[0]))
+
+class WorkdirIsDirtyError(Exception): pass
+class BranchTypeExistsError(Exception): pass
+class TagExistsError(Exception): pass
+
 
 class BranchManager(object):
     """
@@ -89,7 +98,8 @@ class BranchManager(object):
             if branch.name.startswith(self.prefix):
                 yield branch
 
-    def create(self, name, base=None):
+    def create(self, name, base=None, fetch=False,
+               must_be_on_default_base=False):
         """
         Creates a branch of the type that this manager manages and checks it
         out.
@@ -102,16 +112,45 @@ class BranchManager(object):
             not provided explicitly, the default base for this type of branch is
             used.  See also :meth:`default_base`.
 
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            creating the new branch.
+
+        :param must_be_on_default_base:
+            If set, the `base` must be a valid commit on the branch
+            manager `default_base`.
+
         :returns:
             The newly created :class:`git.refs.Head` reference.
         """
-        repo = self.gitflow.repo
+        gitflow = self.gitflow
+        repo = gitflow.repo
 
         full_name = self.prefix + name
-        if base is None:
-            base = self.default_base()
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
+        if base is None:
+            base = self.default_base()
+        elif must_be_on_default_base:
+            # :todo: implement this more efficiently
+            if not self.default_base() in [
+                b.lstrip('* ')
+                for b in gitflow.git.branch('--contains', base).splitlines()]:
+                raise BaseNotOnDefaultBranch(self.identifier, self.default_base())
+
+        if gitflow.is_dirty():
+            # :fixme: only if without conflict
+            raise WorkdirIsDirtyError()
+
+        # update the local repo with remote changes, if asked
+        if repo and fetch:
+            repo.fetch(gitflow.origin_name(base))
+
+        # If the origin branch counterpart exists, assert that the
+        # local branch isn't behind it (to avoid unnecessary rebasing).
+        if gitflow.origin_name(base) in gitflow.branch_names(remote=True):
+            gitflow.require_branches_equal(base, gitflow.origin_name(base))
+
         branch = repo.create_head(full_name, base)
         branch.checkout()
         return branch
