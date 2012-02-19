@@ -240,6 +240,11 @@ class GitFlow(object):
         return map(lambda h: h.name, self.repo.branches)
 
 
+    @requires_repo
+    def start_transaction(self, message=None):
+        if message:
+            info(message)
+
     def create(self, identifier, name, base=None, fetch=False):
         """
         Creates a branch of the given type, with the given short name.
