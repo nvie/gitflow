@@ -198,7 +198,9 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_checkout)
         p.add_argument('nameprefix')
 
-    def run_checkout(self, args): pass
+    def run_checkout(self, args):
+        gitflow = GitFlow()
+        gitflow.checkout('feature', args.nameprefix)
 
     #- pull
     def register_pull(self, parent):

@@ -331,6 +331,12 @@ class GitFlow(object):
         mgr.finish(mgr.shorten(branch.name))
 
 
+    def checkout(self, identifier, nameprefix):
+        mgr = self.managers[identifier]
+        branch = mgr.by_name_prefix(nameprefix)
+        branch.checkout()
+
+
     @requires_repo
     def status(self):
         result = []
