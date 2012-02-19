@@ -3,6 +3,7 @@ import datetime
 import os
 import sys
 from functools import wraps
+import git
 from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
 import ConfigParser
 from gitflow.branches import BranchManager
@@ -299,3 +300,51 @@ class GitFlow(object):
         return (name, b.commit.hexsha, b == active_branch)
 
 
+    @requires_repo
+    def compare_branches(self, branch1, branch2):
+        """
+        Tests whether branches and their 'origin' counterparts have
+        diverged and need merging first. It returns error codes to
+        provide more detail, like so:
+
+        0    Branch heads point to the same commit
+        1    First given branch needs fast-forwarding
+        2    Second given branch needs fast-forwarding
+        3    Branch needs a real merge
+        4    There is no merge base, i.e. the branches have no common ancestors
+        """
+        try:
+            commit1 = self.repo.rev_parse(branch1)
+            commit2 = self.repo.rev_parse(branch2)
+        except git.BadObject, e:
+            raise NoSuchBranch(e.args[0])
+        if commit1 == commit2:
+            return 0
+        try:
+            base = repo.git.merge_base(commit1, commit2)
+        except GitCommandError:
+            return 4
+        if base == commit1:
+            return 1
+        elif base == commit2:
+            return 2
+        else:
+            return 3
+
+
+    @requires_repo
+    def require_branches_equal(self, branch1, branch2):
+        reop = self.repo
+        status = self.compare_branches(branch1, branch2)
+        if status == 0:
+            # branches are equal
+            return
+        else:
+            warn("Branches '%s' and '%s' have diverged." % (branch1, branch2))
+            if status == 1:
+                die("And branch '%s' may be fast-forwarded." % branch1)
+            elif status == 2:
+                # Warn here, since there is no harm in being ahead
+                warn("And local branch '%s' is ahead of '%s'." % (branch1, branch2))
+            else:
+                die("Branches need merging first.")
