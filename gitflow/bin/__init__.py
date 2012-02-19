@@ -118,7 +118,8 @@ class FeatureCommand(GitFlowCommand):
         gitflow.start_transaction('create feature branch %s (from %s)' % \
                 (args.name, args.base))
         try:
-            branch = gitflow.create('feature', args.name, args.base)
+            branch = gitflow.create('feature', args.name, args.base,
+                                    fetch=args.fetch)
         except Exception, e:
             die("Could not create feature branch %r" % args.name,
                 str(e))
@@ -250,7 +251,8 @@ class ReleaseCommand(GitFlowCommand):
         gitflow.start_transaction('create release branch %s (from %s)' % \
                 (args.version, args.base))
         try:
-            branch = gitflow.create('release', args.version, args.base)
+            branch = gitflow.create('release', args.version, args.base,
+                                    fetch=args.fetch)
         except BranchTypeExistsError, e:
             die("There is an existing release branch (%s). "
                 "Finish that one first." % e.args[0])
@@ -348,7 +350,8 @@ class HotfixCommand(GitFlowCommand):
         gitflow.start_transaction('create hotfix branch %s (from %s)' % \
                 (args.version, args.base))
         try:
-            branch = gitflow.create('hotfix', args.version, args.base)
+            branch = gitflow.create('hotfix', args.version, args.base,
+                                    fetch=args.fetch)
         except BranchTypeExistsError, e:
             die("There is an existing hotfix branch (%s). "
                 "Finish that one first." % e.args[0])
@@ -439,7 +442,8 @@ class SupportCommand(GitFlowCommand):
         gitflow.start_transaction('create support branch %s (from %s)' %
                 (args.name, args.base))
         try:
-            branch = gitflow.create('support', args.name, args.base)
+            branch = gitflow.create('support', args.name, args.base,
+                                    fetch=args.fetch)
         except BranchTypeExistsError, e:
             die("There is an existing suport branch (%s). "
                 "Finish that one first." % e.args[0])
