@@ -414,7 +414,7 @@ class SupportCommand(GitFlowCommand):
 
     #- list
     def register_list(self, parent):
-        p = parent.add_parser('list', help='List all feature branches.')
+        p = parent.add_parser('list', help='List all support branches.')
         p.set_defaults(func=self.run_list)
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
@@ -427,7 +427,7 @@ class SupportCommand(GitFlowCommand):
 
     #- start
     def register_start(self, parent):
-        p = parent.add_parser('start', help='Start a new feature branch.')
+        p = parent.add_parser('start', help='Start a new support branch.')
         p.set_defaults(func=self.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
