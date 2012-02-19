@@ -237,7 +237,7 @@ class GitFlow(object):
         return map(lambda h: h.name, self.repo.branches)
 
 
-    def create(self, identifier, name, base=None):
+    def create(self, identifier, name, base=None, fetch=False):
         """
         Creates a branch of the given type, with the given short name.
 
@@ -256,7 +256,7 @@ class GitFlow(object):
         :returns:
             The newly created :class:`git.refs.Head` branch.
         """
-        return self.managers[identifier].create(name, base)
+        return self.managers[identifier].create(name, base, fetch=fetch)
 
     def finish(self, identifier, nameprefix):
         """

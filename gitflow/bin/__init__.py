@@ -178,9 +178,25 @@ class FeatureCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
+        # :todo: use_current_feature_branch_name(), wenn args.name == ""
+        # :fixme: sh-vcersion doe ot require a clean working dr. why?
         gitflow.start_transaction('create feature branch %s (from %s)' % \
                 (args.name, args.base))
-        gitflow.create('feature', args.name, args.base)
+        try:
+            branch = gitflow.create('feature', args.name, args.base)
+        except Exception, e:
+            die("Could not create feature branch %r" % args.name,
+                str(e))
+        print
+        print "Summary of actions:"
+        print "- A new branch", branch, "was created, based on", args.base
+        print "- You are now on branch", branch
+        print ""
+        print "Now, start committing on your feature. When done, use:"
+        print ""
+        print "     git flow feature finish", args.name
+        print
+
 
     def run_finish(self, args):
         gitflow = GitFlow()
@@ -255,8 +271,27 @@ class ReleaseCommand(GitFlowCommand):
 
 
     def run_list(self, args): pass
-    def run_start(self, args): pass
     def run_finish(self, args): pass
+    def run_start(self):
+        gitflow = GitFlow()
+        gitflow.start_transaction('create release branch %s (from %s)' % \
+                (args.version, args.base))
+        try:
+            branch = gitflow.create('release ', args.version, args.base)
+        except BranchTypeAlreadyExists, e:
+            die("There is an existing release branch (%s). "
+                "Finish that one first." % e.args[0])
+        except Exception, e:
+            die("Could not create release branch %r" % args.version,
+                str(e))
+        print "Follow-up actions:"
+        print "- Bump the version number now!"
+        print "- Start committing last-minute fixes in preparing your release"
+        print "- When done, run:"
+        print
+        print "     git flow release finish", args.version
+
+
     def run_publish(self, args): pass
     def run_track(self, args): pass
 
@@ -313,7 +348,30 @@ class HotfixCommand(GitFlowCommand):
         p.add_argument('version')
 
     def run_list(self, args): pass
-    def run_start(self, args): pass
+    def run_start(self, args):
+        gitflow = GitFlow()
+        gitflow.start_transaction('create hotfix branch %s (from %s)' % \
+                (args.version, args.base))
+        try:
+            branch = gitflow.create('hotfix ', args.version, args.base)
+        except BranchTypeAlreadyExists, e:
+            die("There is an existing hotfix branch (%s). "
+                "Finish that one first." % e.args[0])
+        except Exception, e:
+            die("Could not create hotfix branch %r" % args.version,
+                str(e))
+        print
+        print "Summary of actions:"
+        print "- A new branch", branch, "was created, based on", args.base
+        print "- You are now on branch", branch
+        print ""
+        print "Follow-up actions:"
+        print "- Bump the version number now!"
+        print "- Start committing your hot fixes"
+        print "- When done, run:"
+        print
+        print "     git flow hotfix finish ", args.version
+
     def run_finish(self, args): pass
     def run_publish(self, args): pass
 
@@ -341,7 +399,24 @@ class SupportCommand(GitFlowCommand):
 
 
     def run_list(self, args): pass
-    def run_start(self, args): pass
+    def run_start(self, args):
+        gitflow = GitFlow()
+        gitflow.start_transaction('create support branch %s (from %s)' %
+                (args.name, args.base))
+        try:
+            branch = gitflow.create('support ', args.name, args.base)
+        except BranchTypeAlreadyExists, e:
+            die("There is an existing suport branch (%s). "
+                "Finish that one first." % e.args[0])
+        except Exception, e:
+            die("Could not create support branch %r" % args.name,
+                str(e))
+        print
+        print "Summary of actions:"
+        print "- A new branch", branch, "was created, based on", args.base
+        print "- You are now on branch", branch
+        print ""
+
 
 def main():
     parser = argparse.ArgumentParser(prog='git flow')
