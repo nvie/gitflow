@@ -89,6 +89,7 @@ class FeatureCommand(GitFlowCommand):
         self.register_checkout(sub)
         self.register_pull(sub)
 
+    #- list
     def register_list(self, parent):
         p = parent.add_parser('list', help='List all feature branches.')
         p.set_defaults(func=self.run_list)
@@ -101,6 +102,7 @@ class FeatureCommand(GitFlowCommand):
         gitflow.list('feature', 'name', use_tagname=False,
                      verbose=args.verbose)
 
+    #- start
     def register_start(self, parent):
         p = parent.add_parser('start', help='Start a new feature branch.')
         p.set_defaults(func=self.run_start)
@@ -130,6 +132,7 @@ class FeatureCommand(GitFlowCommand):
         print "     git flow feature finish", args.name
         print
 
+    #- finish
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a feature branch.')
         p.set_defaults(func=self.run_finish)
@@ -149,6 +152,7 @@ class FeatureCommand(GitFlowCommand):
                 % args.nameprefix)
         gitflow.finish('feature', args.nameprefix)
 
+    #- publish
     def register_publish(self, parent):
         p = parent.add_parser('publish',
                 help='Publish this feature branch to origin.')
@@ -157,6 +161,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_publish(self, args): pass
 
+    #- track
     def register_track(self, parent):
         p = parent.add_parser('track',
                 help='Track a feature branch from origin.')
@@ -165,6 +170,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_track(self, args): pass
 
+    #- diff
     def register_diff(self, parent):
         p = parent.add_parser('diff',
                 help='Show a diff of changes since this feature branched off.')
@@ -173,6 +179,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_diff(self, args): pass
 
+    #- rebase
     def register_rebase(self, parent):
         p = parent.add_parser('rebase',
                 help='Rebase a feature branch on top of develop.')
@@ -183,6 +190,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_rebase(self, args): pass
 
+    #- checkout
     def register_checkout(self, parent):
         p = parent.add_parser('checkout',
                 help='Check out the given feature branch.')
@@ -191,6 +199,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_checkout(self, args): pass
 
+    #- pull
     def register_pull(self, parent):
         p = parent.add_parser('pull',
                 help='Pull a feature branch from a remote peer.')
@@ -213,6 +222,7 @@ class ReleaseCommand(GitFlowCommand):
         self.register_publish(sub)
         self.register_track(sub)
 
+    #- list
     def register_list(self, parent):
         p = parent.add_parser('list', help='List all release branches.')
         p.set_defaults(func=self.run_list)
@@ -225,6 +235,7 @@ class ReleaseCommand(GitFlowCommand):
         gitflow.list('release', 'version', use_tagname=True,
                      verbose=args.verbose)
 
+    #- start
     def register_start(self, parent):
         p = parent.add_parser('start', help='Start a new release branch.')
         p.set_defaults(func=self.run_start)
@@ -253,6 +264,7 @@ class ReleaseCommand(GitFlowCommand):
         print
         print "     git flow release finish", args.version
 
+    #- finish
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a release branch.')
         p.set_defaults(func=self.run_finish)
@@ -278,6 +290,7 @@ class ReleaseCommand(GitFlowCommand):
 
     def run_finish(self, args): pass
 
+    #- publish
     def register_publish(self, parent):
         p = parent.add_parser('publish',
                 help='Publish this release branch to origin.')
@@ -286,6 +299,7 @@ class ReleaseCommand(GitFlowCommand):
 
     def run_publish(self, args): pass
 
+    #- track
     def register_track(self, parent):
         p = parent.add_parser('track',
                 help='Track a release branch from origin.')
@@ -306,6 +320,7 @@ class HotfixCommand(GitFlowCommand):
         self.register_finish(sub)
         self.register_publish(sub)
 
+    #- list
     def register_list(self, parent):
         p = parent.add_parser('list', help='List all hotfix branches.')
         p.set_defaults(func=self.run_list)
@@ -318,6 +333,7 @@ class HotfixCommand(GitFlowCommand):
         gitflow.list('hotfix', 'version', use_tagname=True,
                      verbose=args.verbose)
 
+    #- start
     def register_start(self, parent):
         p = parent.add_parser('start', help='Start a new hotfix branch.')
         p.set_defaults(func=self.run_start)
@@ -351,6 +367,7 @@ class HotfixCommand(GitFlowCommand):
         print
         print "     git flow hotfix finish ", args.version
 
+    #- finish
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a hotfix branch.')
         p.set_defaults(func=self.run_finish)
@@ -376,6 +393,7 @@ class HotfixCommand(GitFlowCommand):
 
     def run_finish(self, args): pass
 
+    #- publish
     def register_publish(self, parent):
         p = parent.add_parser('publish',
                 help='Publish this hotfix branch to origin.')
@@ -394,6 +412,7 @@ class SupportCommand(GitFlowCommand):
         self.register_list(sub)
         self.register_start(sub)
 
+    #- list
     def register_list(self, parent):
         p = parent.add_parser('list', help='List all feature branches.')
         p.set_defaults(func=self.run_list)
@@ -406,6 +425,7 @@ class SupportCommand(GitFlowCommand):
         gitflow.list('support', 'version', use_tagname=True,
                      verbose=args.verbose)
 
+    #- start
     def register_start(self, parent):
         p = parent.add_parser('start', help='Start a new feature branch.')
         p.set_defaults(func=self.run_start)
