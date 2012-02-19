@@ -246,6 +246,53 @@ class GitFlow(object):
         if message:
             info(message)
 
+    def list(self, identifier, arg0_name, use_tagname, verbose=False):
+        repo = self.repo
+        manager = self.managers[identifier]
+        branches = manager.list()
+        if not branches:
+            die('',
+                'No %s branches exist.' % identifier,
+                'You can start a new %s branch with the command:' % identifier,
+                '',
+                '    git flow %s start <%s> [<base>]' % (identifier, arg0_name),
+                '')
+
+        # determine the longest branch name
+        width = max(len(b.name) for b in branches) - len(manager.prefix) + 1
+
+        basebranch_sha = repo.branches[manager.default_base()].commit.hexsha
+
+        for branch in branches:
+            if repo.active_branch == branch:
+                prefix = '* '
+            else:
+                prefix = '  '
+
+            name = manager.shorten(branch.name)
+            extra_info = ''
+
+            if verbose:
+                name = name.ljust(width)
+                branch_sha = branch.commit.hexsha
+                base_sha = repo.git.merge_base(basebranch_sha, branch_sha)
+                if branch_sha == basebranch_sha:
+                    extra_info = '(no commits yet)'
+                elif use_tagname:
+                    tagname = self.git.name_rev('--tags','--name-only',
+                                                '--no-undefined', base_sha)
+                    if not tagname:
+                        r.git.rev_parse('--short', base_sha)
+                elif base_sha == branch_sha:
+                    extra_info = '(is behind develop, may ff)'
+                elif base_sha == basebranch_sha:
+                    extra_info = '(based on latest develop)'
+                else:
+                    extra_info = '(may be rebased)'
+
+            info(prefix + name + extra_info)
+
+
     def create(self, identifier, name, base=None, fetch=False):
         """
         Creates a branch of the given type, with the given short name.

@@ -146,50 +146,12 @@ class FeatureCommand(GitFlowCommand):
         p.add_argument('remote')
         p.add_argument('name', nargs='?')
 
+
     def run_list(self, args):
         gitflow = GitFlow()
         gitflow.start_transaction()
-        manager = gitflow.managers['feature']
-        branches = manager.list()
-        if not branches:
-            warn('No feature branches exist.')
-            warn('')
-            warn('You can start a new feature branch:')
-            warn('')
-            warn('    git flow feature start <name> [<base>]')
-            warn('')
-            raise SystemExit()
-
-        # determine the longest branch name
-        lenfunc = lambda b: len(b.name)
-        width = max(map(lenfunc, branches)) - len(manager.prefix) + 3
-
-        develop_sha = gitflow.develop().commit.hexsha
-
-        for branch in branches:
-            is_active = gitflow.repo.active_branch == branch
-            if is_active:
-                prefix = '* '
-            else:
-                prefix = '  '
-
-            name = manager.shorten(branch.name)
-            extra_info = ''
-
-            if args.verbose:
-                name = name.ljust(width)
-                branch_sha = branch.commit.hexsha
-                base_sha = gitflow.repo.git.merge_base(develop_sha, branch_sha)
-                if branch_sha == develop_sha:
-                    extra_info = '(no commits yet)'
-                elif base_sha == branch_sha:
-                    extra_info = '(is behind develop, may ff)'
-                elif base_sha == develop_sha:
-                    extra_info = '(based on latest develop)'
-                else:
-                    extra_info = '(may be rebased)'
-
-            print(prefix + name + extra_info)
+        gitflow.list('feature', 'name', use_tagname=False,
+                     verbose=args.verbose)
 
     def run_start(self, args):
         gitflow = GitFlow()
@@ -285,7 +247,12 @@ class ReleaseCommand(GitFlowCommand):
         p.add_argument('version')
 
 
-    def run_list(self, args): pass
+    def run_list(self, args):
+        gitflow = GitFlow()
+        gitflow.start_transaction()
+        gitflow.list('release', 'version', use_tagname=True,
+                     verbose=args.verbose)
+
     def run_finish(self, args): pass
     def run_start(self, args):
         gitflow = GitFlow()
@@ -362,7 +329,12 @@ class HotfixCommand(GitFlowCommand):
         p.set_defaults(func=self.run_publish)
         p.add_argument('version')
 
-    def run_list(self, args): pass
+    def run_list(self, args):
+        gitflow = GitFlow()
+        gitflow.start_transaction()
+        gitflow.list('hotfix', 'version', use_tagname=True,
+                     verbose=args.verbose)
+
     def run_start(self, args):
         gitflow = GitFlow()
         gitflow.start_transaction('create hotfix branch %s (from %s)' % \
@@ -413,7 +385,12 @@ class SupportCommand(GitFlowCommand):
         p.add_argument('base', nargs='?')
 
 
-    def run_list(self, args): pass
+    def run_list(self, args):
+        gitflow = GitFlow()
+        gitflow.start_transaction()
+        gitflow.list('support', 'version', use_tagname=True,
+                     verbose=args.verbose)
+
     def run_start(self, args):
         gitflow = GitFlow()
         gitflow.start_transaction('create support branch %s (from %s)' %
