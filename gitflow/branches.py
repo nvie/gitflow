@@ -229,23 +229,6 @@ class BranchManager(object):
         full_name = self.prefix + name
         repo.delete_head(full_name, force=force)
 
-    def finish(self, name):
-        """
-        Finishes the branch of the type that this manager manages named
-        :attr:`name`.  Finishing means that:
-
-        * The branch is merged into all branches that require it to be merged
-          in to.  The model prescribes the branching/merging rules for each
-          branch type, so this depends on the implementing subclass.
-        * The branch is deleted if all merges are successful.
-
-        :param name:
-            The (short) name of the branch to finish.
-        """
-        self.merge(name, self.gitflow.develop_name(),
-                'Finished %(identifier)s %(short_name)s.')
-        self.delete(name)
-
 
 class FeatureBranchManager(BranchManager):
     identifier = 'feature'
@@ -274,6 +257,24 @@ class FeatureBranchManager(BranchManager):
         """
         return super(FeatureBranchManager, self).create(
             name, base, fetch=fetch, must_be_on_default_base=False)
+
+
+    def finish(self, name):
+        """
+        Finishes the branch of the type that this manager manages named
+        :attr:`name`.  Finishing means that:
+
+        * The branch is merged into all branches that require it to be merged
+          in to.  The model prescribes the branching/merging rules for each
+          branch type, so this depends on the implementing subclass.
+        * The branch is deleted if all merges are successful.
+
+        :param name:
+            The (short) name of the branch to finish.
+        """
+        self.merge(name, self.gitflow.develop_name(),
+                'Finished %(identifier)s %(short_name)s.')
+        self.delete(name)
 
 
 class ReleaseBranchManager(BranchManager):
