@@ -15,7 +15,7 @@ git-flow
 """
 
 import argparse
-from gitflow.core import GitFlow, die, info
+from gitflow.core import GitFlow, die, info, BranchTypeExistsError
 from gitflow.util import itersubclasses
 
 
@@ -292,8 +292,8 @@ class ReleaseCommand(GitFlowCommand):
         gitflow.start_transaction('create release branch %s (from %s)' % \
                 (args.version, args.base))
         try:
-            branch = gitflow.create('release ', args.version, args.base)
-        except BranchTypeAlreadyExists, e:
+            branch = gitflow.create('release', args.version, args.base)
+        except BranchTypeExistsError, e:
             die("There is an existing release branch (%s). "
                 "Finish that one first." % e.args[0])
         except Exception, e:
@@ -368,8 +368,8 @@ class HotfixCommand(GitFlowCommand):
         gitflow.start_transaction('create hotfix branch %s (from %s)' % \
                 (args.version, args.base))
         try:
-            branch = gitflow.create('hotfix ', args.version, args.base)
-        except BranchTypeAlreadyExists, e:
+            branch = gitflow.create('hotfix', args.version, args.base)
+        except BranchTypeExistsError, e:
             die("There is an existing hotfix branch (%s). "
                 "Finish that one first." % e.args[0])
         except Exception, e:
@@ -419,8 +419,8 @@ class SupportCommand(GitFlowCommand):
         gitflow.start_transaction('create support branch %s (from %s)' %
                 (args.name, args.base))
         try:
-            branch = gitflow.create('support ', args.name, args.base)
-        except BranchTypeAlreadyExists, e:
+            branch = gitflow.create('support', args.name, args.base)
+        except BranchTypeExistsError, e:
             die("There is an existing suport branch (%s). "
                 "Finish that one first." % e.args[0])
         except Exception, e:
