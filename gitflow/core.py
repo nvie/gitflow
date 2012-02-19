@@ -193,6 +193,17 @@ class GitFlow(object):
     def develop_name(self):
         return self._safe_get('gitflow.branch.develop')
 
+    def origin_name(self, name=None):
+        origin = self.get('gitflow.origin', self.defaults['gitflow.origin'])
+        if name is not None:
+            return origin + '/' + name
+        else:
+            return origin
+
+    @requires_repo
+    def origin(self):
+        return self.repo.branches[self.origin_name()]
+
     @requires_repo
     def develop(self):
         return self.repo.branches[self.develop_name()]
