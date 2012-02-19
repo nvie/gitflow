@@ -169,7 +169,14 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_track)
         p.add_argument('name')
 
-    def run_track(self, args): pass
+    def run_track(self, args):
+        gitflow = GitFlow()
+        branch = gitflow.track('feature', args.name)
+        print
+        print "Summary of actions:"
+        print "- A new remote tracking branch '%s' was created" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
     #- diff
     def register_diff(self, parent):
