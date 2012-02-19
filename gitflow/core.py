@@ -293,7 +293,7 @@ class GitFlow(object):
             info(prefix + name + extra_info)
 
 
-    def create(self, identifier, name, base=None, fetch=False):
+    def create(self, identifier, name, base, fetch):
         """
         Creates a branch of the given type, with the given short name.
 
