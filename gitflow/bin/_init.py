@@ -71,7 +71,7 @@ def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
         # if no local branch exists and a remote branch of the same
         # name exists, checkout that branch and use it for the local branch
         if not branch_name in local_branches:
-            remote_name = gitflow.get_default('gitflow.origin') + '/' + branch_name
+            remote_name = gitflow.origin_name(branch_name)
             if remote_name in gitflow.branch_names(remote=True):
                 gitflow.repo.branch(branch_name, remote_name)
             else:
