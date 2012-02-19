@@ -15,7 +15,7 @@ git-flow
 """
 
 import argparse
-from gitflow.core import GitFlow, die
+from gitflow.core import GitFlow, die, info
 from gitflow.util import itersubclasses
 
 
@@ -41,6 +41,21 @@ class VersionCommand(GitFlowCommand):
     def run(self, args):
         from gitflow import __version__
         print(__version__)
+
+
+class StatusCommand(GitFlowCommand):
+    def register_parser(self, parent):
+        p = parent.add_parser('status', help='Show some status.')
+        p.set_defaults(func=self.run)
+
+    def run(self, args):
+        gitflow = GitFlow()
+        for name, hexsha, is_active_branch in gitflow.status():
+            if is_active_branch:
+                prefix = '*'
+            else:
+                prefix = ' '
+            info('%s %s: %s' % (prefix, name, hexsha[:7]))
 
 
 class InitCommand(GitFlowCommand):
