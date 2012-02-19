@@ -96,9 +96,10 @@ class GitFlow(object):
             elif setting == 'gitflow.branch.develop':
                 value = develop
             else:
-                value = prefixes.get(setting, None)
-            if value is None or not self.is_set(setting):
-                value = default
+                prefix = setting[len('gitflow.prefix.'):]
+                value = prefixes.get(prefix, None)
+            if value is None:
+                value = self.get(setting, default)
             self.set(setting, value)
 
 
