@@ -3,8 +3,8 @@
 git-flow init
 """
 
-from gitflow.core import GitFlow as CoreGitFlow, NotInitialized
-from gitflow.bin import warn, die
+from gitflow.core import GitFlow as CoreGitFlow, NotInitialized, \
+     warn, die
 
 class GitFlow(CoreGitFlow):
 
