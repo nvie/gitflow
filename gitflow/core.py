@@ -22,6 +22,10 @@ def requires_repo(f):
         return f(self, *args, **kwargs)
     return _inner
 
+def info(*texts):
+    for txt in texts:
+        print txt
+
 def warn(*texts):
     for txt in texts:
         print >> sys.stderr, txt
@@ -102,13 +106,12 @@ class GitFlow(object):
                 value = self.get(setting, default)
             self.set(setting, value)
 
-
     def _init_initial_commit(self):
         try:
             self.master()
         except IndexError:
             # Create 'master' branch if it does not exist
-            print('Creating branch %r' % self.master_name())
+            info('Creating branch %r' % self.master_name())
             c = self.repo.index.commit('Initial commit', head=False)
             self.repo.create_head(self.master_name(), c)
 
@@ -118,10 +121,10 @@ class GitFlow(object):
             self.develop()
         except IndexError:
             # Create 'develop' branch if it does not exist
-            print('Creating branch %r' % self.develop_name())
+            info('Creating branch %r' % self.develop_name())
             branch = self.repo.create_head(self.develop_name(), self.master())
             # switch to develop branch if its newly created
-            print('Switching to branch %s' % branch)
+            info('Switching to branch %s' % branch)
             branch.checkout()
 
     def _enforce_git_repo(self):
