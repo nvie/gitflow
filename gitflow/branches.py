@@ -52,13 +52,25 @@ class BranchManager(object):
         """
         return self.gitflow.develop_name()
 
-    def list(self):
+    def full_name(self, name):
+        return self.prefix + name
+
+    def shorten(self, full_name):
         """
+        Returns the friendly (short) name of this branch, without the prefix,
+        given the fully qualified branch name.
+
+        :param full_name:
+            The full name of the branch as it is known to Git, including the
+            prefix.
+
         :returns:
-            A list of all branches of the type that this manager manages.  See
-            also :meth:`iter`.
+            The friendly name of the branch.
         """
-        return list(self.iter())
+        if full_name.startswith(self.prefix):
+            return full_name[len(self.prefix):]
+        else:
+            return full_name
 
     def by_name_prefix(self, nameprefix):
         """
@@ -97,6 +109,14 @@ class BranchManager(object):
         for branch in self.gitflow.repo.branches:
             if branch.name.startswith(self.prefix):
                 yield branch
+
+    def list(self):
+        """
+        :returns:
+            A list of all branches of the type that this manager manages.  See
+            also :meth:`iter`.
+        """
+        return list(self.iter())
 
     def create(self, name, base=None, fetch=False,
                must_be_on_default_base=False):
@@ -225,23 +245,6 @@ class BranchManager(object):
         self.merge(name, self.gitflow.develop_name(),
                 'Finished %(identifier)s %(short_name)s.')
         self.delete(name)
-
-    def shorten(self, full_name):
-        """
-        Returns the friendly (short) name of this branch, without the prefix,
-        given the fully qualified branch name.
-
-        :param full_name:
-            The full name of the branch as it is known to Git, including the
-            prefix.
-
-        :returns:
-            The friendly name of the branch.
-        """
-        if full_name.startswith(self.prefix):
-            return full_name[len(self.prefix):]
-        else:
-            return full_name
 
 
 class FeatureBranchManager(BranchManager):
