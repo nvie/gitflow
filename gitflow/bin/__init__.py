@@ -193,7 +193,7 @@ class FeatureCommand(GitFlowCommand):
     #- checkout
     def register_checkout(self, parent):
         p = parent.add_parser('checkout',
-                help='Check out the given feature branch.')
+                help='Check out (switch to) the given feature branch.')
         p.set_defaults(func=self.run_checkout)
         p.add_argument('nameprefix')
 
