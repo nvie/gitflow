@@ -260,11 +260,11 @@ class GitFlow(object):
         manager = self.managers[identifier]
         if not prefix:
             if repo.active_branch.name.startswith(manager.prefix):
-                return repo.active_branch
+                return manager.shorten(repo.active_branch.name)
             else:
                 raise NoSuchBranchError('The current branch is no %s branch.'
                     'Please specify one explicitly.' % identifier)
-        return manager.by_name_prefix(prefix)
+        return manager.shorten(manager.by_name_prefix(prefix).name)
 
 
     def list(self, identifier, arg0_name, use_tagname, verbose=False):
