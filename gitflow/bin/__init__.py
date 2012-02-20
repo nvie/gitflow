@@ -137,10 +137,10 @@ class FeatureCommand(GitFlowCommand):
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a feature branch.')
         p.set_defaults(func=self.run_finish)
-        p.add_argument('-r', '--rebase', action='store_true',
-                help='Finish branch by rebasing first.')
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
+        p.add_argument('-r', '--rebase', action='store_true',
+                help='Finish branch by rebasing first.')
         p.add_argument('-k', '--keep', action='store_true',
                 help='Keep branch after performing finish.')
         p.add_argument('-D', '--force-delete', action='store_true',
@@ -279,10 +279,10 @@ class ReleaseCommand(GitFlowCommand):
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a release branch.')
         p.set_defaults(func=self.run_finish)
-        p.add_argument('-r', '--rebase', action='store_true',
-                help='Finish branch by rebasing first.')
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
+        p.add_argument('-r', '--rebase', action='store_true',
+                help='Finish branch by rebasing first.')
         p.add_argument('-s', '--sign', action='store_true',
                 help="sign the release tag cryptographically")
         p.add_argument('-u', '--signingkey',
@@ -383,10 +383,10 @@ class HotfixCommand(GitFlowCommand):
     def register_finish(self, parent):
         p = parent.add_parser('finish', help='Finish a hotfix branch.')
         p.set_defaults(func=self.run_finish)
-        p.add_argument('-r', '--rebase', action='store_true',
-                help='Finish branch by rebasing first.')
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
+        p.add_argument('-r', '--rebase', action='store_true',
+                help='Finish branch by rebasing first.')
         p.add_argument('-s', '--sign', action='store_true',
                 help="sign the hotfix tag cryptographically")
         p.add_argument('-u', '--signingkey',
