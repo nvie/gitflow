@@ -250,11 +250,15 @@ class GitFlow(object):
 
     def name_or_current(self, identifier, prefix):
         """
-        If the prefix is empty, see if the current branch is of
-        the type that this manager manages.  If so, returns the
-        current branch, otherwise raises :exc:`NoSuchBranchError`.
+        If the prefix is empty, see if the current branch is of type
+        :param`identifier`. If so, returns the current branches short
+        name, otherwise raises :exc:`NoSuchBranchError`.
 
-        Otherwise let the manager expand the prefix.
+        If exactly one branch of type :param`identifier` starts with
+        the given name prefix, returns that branches short name.
+        Raises :exc:`NoSuchBranchError` in case no branch exists with
+        the given prefix, or :exc:`PrefixNotUniqueError` in case
+        multiple matches are found.
         """
         repo = self.repo
         manager = self.managers[identifier]
