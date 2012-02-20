@@ -374,6 +374,7 @@ class GitFlow(object):
         remote_name = self.origin_name(full_name)
         self.origin().fetch(full_name)
         branch = repo.create_head(full_name, remote_name)
+        branch.set_tracking_branch(remote_name)
         return branch.checkout()
 
     @requires_repo
