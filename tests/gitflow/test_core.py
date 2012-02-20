@@ -232,10 +232,10 @@ class TestGitFlow(TestCase):
         create_git_repo(self)
         gitflow = GitFlow()
         gitflow.init()
-        gitflow.create('feature', 'foo')
+        gitflow.create('feature', 'foo', None, fetch=False)
         self.assertIn('feature/foo',
                 [h.name for h in gitflow.repo.branches])
-        gitflow.create('release', '1.0')
+        gitflow.create('release', '1.0', None, fetch=False)
         self.assertIn('release/1.0',
                 [h.name for h in gitflow.repo.branches])
 
@@ -243,11 +243,11 @@ class TestGitFlow(TestCase):
         create_git_repo(self)
         gitflow = GitFlow()
         gitflow.init()
-        gitflow.create('feature', 'foo', 'master')
+        gitflow.create('feature', 'foo', 'master', fetch=False)
         self.assertIn('feature/foo',
                 [h.name for h in gitflow.repo.branches])
         gitflow.repo.index.commit('Foo')
-        gitflow.create('release', '1.0', 'feature/foo')
+        gitflow.create('release', '1.0', 'feature/foo', fetch=False)
         self.assertIn('release/1.0',
                 [h.name for h in gitflow.repo.branches])
 
