@@ -29,6 +29,18 @@ class DummyBranchManager(BranchManager):
 
 
 class TestAbstractBranchManager(TestCase):
+    def __prep_explicit_prefix(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        fb = DummyBranchManager(gitflow, 'xyz-')
+        return repo, fb
+
+    def __prep_explicit_empty_prefix(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        fb = DummyBranchManager(gitflow, '')
+        return repo, fb
+
     def test_default_prefix(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
@@ -36,15 +48,11 @@ class TestAbstractBranchManager(TestCase):
         self.assertEquals('xyz/', fb.prefix)
 
     def test_explicit_prefix(self):
-        repo = create_git_repo(self)
-        gitflow = GitFlow(repo)
-        fb = DummyBranchManager(gitflow, 'xyz-')
+        repo, fb = self.__prep_explicit_prefix()
         self.assertEquals('xyz-', fb.prefix)
 
     def test_explicit_empty_prefix(self):
-        repo = create_git_repo(self)
-        gitflow = GitFlow(repo)
-        fb = DummyBranchManager(gitflow, '')
+        repo, fb = self.__prep_explicit_empty_prefix()
         self.assertEquals('', fb.prefix)
 
     def test_shorten(self):
@@ -53,6 +61,38 @@ class TestAbstractBranchManager(TestCase):
         fb = DummyBranchManager(gitflow)
         self.assertEquals('foo', fb.shorten('xyz/foo'))
         self.assertEquals('feature/foo', fb.shorten('feature/foo'))
+
+    def test_full_name(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        fb = DummyBranchManager(gitflow)
+        self.assertEquals('xyz/foo', fb.full_name('foo'))
+        self.assertEquals('xyz/feature/foo', fb.full_name('feature/foo'))
+
+    def test_explicit_prefix_shorten(self):
+        repo, fb = self.__prep_explicit_prefix()
+        self.assertEquals('foo', fb.shorten('xyz-foo'))
+        self.assertEquals('xyz/foo', fb.shorten('xyz/foo'))
+        self.assertEquals('feature/foo', fb.shorten('feature/foo'))
+
+    def test_explicit_empty_prefix_shorten(self):
+        repo, fb = self.__prep_explicit_empty_prefix()
+        self.assertEquals('xyz-foo', fb.shorten('xyz-foo'))
+        self.assertEquals('xyz/foo', fb.shorten('xyz/foo'))
+        self.assertEquals('feature/foo', fb.shorten('feature/foo'))
+
+    def test_explicit_prefix_full_name(self):
+        repo, fb = self.__prep_explicit_prefix()
+        self.assertEquals('xyz-foo', fb.full_name('foo'))
+        self.assertEquals('xyz-xyz/foo', fb.full_name('xyz/foo'))
+        self.assertEquals('xyz-feature/foo', fb.full_name('feature/foo'))
+
+    def test_explicit_empty_prefix_full_name(self):
+        repo, fb = self.__prep_explicit_empty_prefix()
+        self.assertEquals('foo', fb.full_name('foo'))
+        self.assertEquals('xyz-foo', fb.full_name('xyz-foo'))
+        self.assertEquals('xyz/foo', fb.full_name('xyz/foo'))
+        self.assertEquals('feature/foo', fb.full_name('feature/foo'))
 
 
 class TestFeatureBranchManager(TestCase):
