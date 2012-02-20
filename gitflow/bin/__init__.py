@@ -219,7 +219,10 @@ class FeatureCommand(GitFlowCommand):
 
     def run_checkout(self, args):
         gitflow = GitFlow()
-        gitflow.checkout('feature', args.nameprefix)
+        # NB: Does not default to the current branch as `nameprefix` is required
+        name = gitflow.name_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('checking out feature branch %s' % name)
+        gitflow.checkout('feature', name)
 
     #- pull
     def register_pull(self, parent):
