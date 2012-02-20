@@ -215,7 +215,11 @@ class FeatureCommand(GitFlowCommand):
                 help='Start an interactive rebase.')
         p.add_argument('nameprefix', nargs='?')
 
-    def run_rebase(self, args): pass
+    def run_rebase(self, args):
+        gitflow = GitFlow()
+        name = gitflow.name_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('rebasing feature branch %s' % name)
+        gitflow.rebase('feature', name, args.interactive)
 
     #- checkout
     def register_checkout(self, parent):

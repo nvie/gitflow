@@ -411,6 +411,21 @@ class GitFlow(object):
 
 
     @requires_repo
+    def rebase(self, identifier, name, interactive):
+        warn("Will try to rebase %s branch '%s' ..." % (identifier, name))
+        repo = self.repo
+        mgr = self.managers[identifier]
+        full_name = mgr.full_name(name)
+        # :todo: require_clean_working_tree
+        self.checkout(identifier, name)
+        args = []
+        if interactive:
+            args.append('-i')
+        args.append(mgr.default_base())
+        self.git.rebase(*args)
+
+
+    @requires_repo
     def status(self):
         result = []
         for b in self.repo.branches:
