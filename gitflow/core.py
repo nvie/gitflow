@@ -248,6 +248,8 @@ class GitFlow(object):
         if message:
             info(message)
 
+
+    @requires_repo
     def name_or_current(self, identifier, prefix):
         """
         If the prefix is empty, see if the current branch is of type
@@ -271,6 +273,7 @@ class GitFlow(object):
         return manager.shorten(manager.by_name_prefix(prefix).name)
 
 
+    @requires_repo
     def list(self, identifier, arg0_name, use_tagname, verbose=False):
         repo = self.repo
         manager = self.managers[identifier]
@@ -318,6 +321,7 @@ class GitFlow(object):
             info(prefix + name + extra_info)
 
 
+    @requires_repo
     def create(self, identifier, name, base, fetch):
         """
         Creates a branch of the given type, with the given short name.
