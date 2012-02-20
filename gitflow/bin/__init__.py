@@ -183,6 +183,8 @@ class FeatureCommand(GitFlowCommand):
     def run_track(self, args):
         gitflow = GitFlow()
         # NB: `args.name` is required since the branch must not yet exist
+        gitflow.start_transaction('tracking remote feature branch %s'
+                                  % args.name)
         branch = gitflow.track('feature', args.name)
         print
         print "Summary of actions:"
