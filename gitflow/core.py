@@ -6,7 +6,8 @@ from functools import wraps
 import git
 from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
 import ConfigParser
-from gitflow.branches import BranchManager, BranchTypeExistsError
+from gitflow.branches import BranchManager, BranchTypeExistsError, \
+     NoSuchBranchError
 from gitflow.util import itersubclasses
 
 
@@ -246,6 +247,25 @@ class GitFlow(object):
     def start_transaction(self, message=None):
         if message:
             info(message)
+
+    def name_or_current(self, identifier, prefix):
+        """
+        If the prefix is empty, see if the current branch is of
+        the type that this manager manages.  If so, returns the
+        current branch, otherwise raises :exc:`NoSuchBranchError`.
+
+        Otherwise let the manager expand the prefix.
+        """
+        repo = self.repo
+        manager = self.managers[identifier]
+        if not prefix:
+            if repo.active_branch.name.startswith(manager.prefix):
+                return repo.active_branch
+            else:
+                raise NoSuchBranchError('The current branch is no %s branch.'
+                    'Please specify one explicitly.' % identifier)
+        return manager.by_name_prefix(prefix)
+
 
     def list(self, identifier, arg0_name, use_tagname, verbose=False):
         repo = self.repo
