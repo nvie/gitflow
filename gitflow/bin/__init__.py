@@ -199,7 +199,12 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_diff)
         p.add_argument('nameprefix', nargs='?')
 
-    def run_diff(self, args): pass
+    def run_diff(self, args):
+        gitflow = GitFlow()
+        name = gitflow.name_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('diff for feature branch %s' % name)
+        gitflow.diff('feature', name)
+
 
     #- rebase
     def register_rebase(self, parent):

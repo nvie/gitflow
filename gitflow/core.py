@@ -402,6 +402,15 @@ class GitFlow(object):
 
 
     @requires_repo
+    def diff(self, identifier, name):
+        repo = self.repo
+        mgr = self.managers[identifier]
+        full_name = mgr.full_name(name)
+        base = self.git.merge_base(mgr.default_base(), full_name)
+        print self.git.diff('%s..%s' % (base, full_name))
+
+
+    @requires_repo
     def status(self):
         result = []
         for b in self.repo.branches:
