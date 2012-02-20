@@ -341,7 +341,17 @@ class ReleaseCommand(GitFlowCommand):
         p.set_defaults(func=self.run_track)
         p.add_argument('version')
 
-    def run_track(self, args): pass
+    def run_track(self, args):
+        gitflow = GitFlow()
+        # NB: `args.version` is required since the branch must not yet exist
+        gitflow.start_transaction('tracking remote release branch %s'
+                                  % args.version)
+        branch = gitflow.track('release', args.version)
+        print
+        print "Summary of actions:"
+        print "- A new remote tracking branch '%s' was created" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
 
 class HotfixCommand(GitFlowCommand):
