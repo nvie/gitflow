@@ -242,8 +242,16 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_pull)
         p.add_argument('remote')
         p.add_argument('name', nargs='?')
+        # :todo: implement --prefix
+        #p.add-argument('-p', '--prefix',
+        #               help='alternative remote feature branch name prefix')
 
-    def run_pull(self, args): pass
+    def run_pull(self, args):
+        gitflow = GitFlow()
+        name = gitflow.name_or_current('feature', args.name)
+        gitflow.start_transaction('pulling remote feature branch %s '
+                                  'into local banch %s' % (args.remote, name))
+        gitflow.pull('feature', args.remote, name)
 
 
 class ReleaseCommand(GitFlowCommand):

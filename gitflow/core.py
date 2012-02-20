@@ -425,6 +425,43 @@ class GitFlow(object):
         args.append(mgr.default_base())
         self.git.rebase(*args)
 
+    @requires_repo
+    def pull(self, identifier, remote, local_name):
+
+        def avoid_accidental_cross_branch_action(branch_name):
+            current_branch = repo.active_branch
+            if branch_name != current_branch.name:
+                warn("Trying to pull from '%s' while currently on branch '%s'."
+                     % (branch_name , current_branch))
+                raise SystemExit("To avoid unintended merges, git-flow aborted.")
+
+        repo = self.repo
+        mgr = self.managers[identifier]
+        full_name = mgr.full_name(name)
+        # To avoid accidentally merging different feature branches
+        # into each other, die if the current feature branch differs
+        # from the requested $NAME argument.
+        if repo.active_branch.name.startswith(self.get_prefix(identifier)):
+            # We are on a local `identifier` branch already, so `full_name`
+            # must be equal to the current branch.
+            avoid_accidental_cross_branch_action(full_name)
+        # :todo: require_clean_working_tree
+        if full_name in self.repo.branches:
+            # Again, avoid accidental merges
+            avoid_accidental_cross_branch_action(full_name)
+            # We already have a local branch called like this, so
+            # simply pull the remote changes in
+            repo.remotes[remote].pull(full_name)
+            info("Pulled %s's changes into %s." % (remote_name, fullname))
+        else:
+            # Setup the local branch clone for the first time
+            repo.remotes[remote].fetch(full_name) # stores in FETCH_HEAD
+            # set up a non-tracking branch
+            branch = repo.create_head(full_name, 'FETCH_HEAD')
+            branch.checkout()
+            info("Created local branch $s based on %s's $s."
+                 % (full_name, remote_name, full_name))
+
 
     @requires_repo
     def status(self):
