@@ -113,8 +113,9 @@ class FeatureCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
-        # :todo: use_current_feature_branch_name(), wenn args.name == ""
-        # :fixme: sh-vcersion doe ot require a clean working dr. why?
+        # :fixme: Why does the sh-version not require a clean working dir?
+        # NB: `args.name` is required since the branch must not yet exist
+        # :fixme: get default value for `base`
         gitflow.start_transaction('create feature branch %s (from %s)' % \
                 (args.name, args.base))
         try:
@@ -171,6 +172,7 @@ class FeatureCommand(GitFlowCommand):
 
     def run_track(self, args):
         gitflow = GitFlow()
+        # NB: `args.name` is required since the branch must not yet exist
         branch = gitflow.track('feature', args.name)
         print
         print "Summary of actions:"
@@ -257,6 +259,8 @@ class ReleaseCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
+        # NB: `args.version` is required since the branch must not yet exist
+        # :fixme: get default value for `base`
         gitflow.start_transaction('create release branch %s (from %s)' % \
                 (args.version, args.base))
         try:
@@ -356,6 +360,8 @@ class HotfixCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
+        # NB: `args.version` is required since the branch must not yet exist
+        # :fixme: get default value for `base`
         gitflow.start_transaction('create hotfix branch %s (from %s)' % \
                 (args.version, args.base))
         try:
@@ -448,6 +454,8 @@ class SupportCommand(GitFlowCommand):
 
     def run_start(self, args):
         gitflow = GitFlow()
+        # NB: `args.name` is required since the branch must not yet exist
+        # :fixme: get default value for `base`
         gitflow.start_transaction('create support branch %s (from %s)' %
                 (args.name, args.base))
         try:

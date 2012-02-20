@@ -356,9 +356,9 @@ class GitFlow(object):
         mgr.finish(mgr.shorten(branch.name))
 
 
-    def checkout(self, identifier, nameprefix):
+    def checkout(self, identifier, name):
         mgr = self.managers[identifier]
-        branch = mgr.by_name_prefix(nameprefix)
+        branch = mgr.by_name_prefix(name)
         branch.checkout()
 
 
@@ -366,12 +366,13 @@ class GitFlow(object):
     def track(self, identifier, name):
         repo = self.repo
         mgr = self.managers[identifier]
-        # require_clean_working_tree
+        # sanity checks
+        # :todo: require_clean_working_tree
         full_name = mgr.full_name(name)
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
         remote_name = self.origin_name(full_name)
-        repo.remotes[self.origin_name()].fetch(full_name)
+        self.origin().fetch(full_name)
         branch = repo.create_head(full_name, remote_name)
         return branch.checkout()
 
