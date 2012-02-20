@@ -238,7 +238,8 @@ class GitFlow(object):
             return [r.name
                     for r in self.repo.refs
                     if isinstance(r, RemoteReference)]
-        return map(lambda h: h.name, self.repo.branches)
+        else:
+            return [r.name for r in self.repo.branches]
 
 
     @requires_repo

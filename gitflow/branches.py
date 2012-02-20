@@ -87,8 +87,9 @@ class BranchManager(object):
             The :class:`git.refs.Head` instance of the branch that can be
             uniquely identified by the given name prefix.
         """
-        matches = filter(lambda b: self.shorten(b.name).startswith(nameprefix),
-                self.iter())
+        matches = [b
+                   for b in self.iter()
+                   if self.shorten(b.name).startswith(nameprefix)]
         num_matches = len(matches)
         if num_matches == 1:
             return matches[0]
