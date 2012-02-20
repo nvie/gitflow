@@ -159,9 +159,19 @@ class FeatureCommand(GitFlowCommand):
         p = parent.add_parser('publish',
                 help='Publish this feature branch to origin.')
         p.set_defaults(func=self.run_publish)
-        p.add_argument('nameprefix')
+        p.add_argument('nameprefix', nargs='?')
 
-    def run_publish(self, args): pass
+    def run_publish(self, args):
+        gitflow = GitFlow()
+        name = gitflow.name_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('publishing feature branch %s' % name)
+        branch = gitflow.publish('feature', name)
+        print
+        print "Summary of actions:"
+        print "- A new remote branch '%s' was created" % branch
+        print "- The local branch '%s' was configured to track the remote branch" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
     #- track
     def register_track(self, parent):
@@ -310,9 +320,19 @@ class ReleaseCommand(GitFlowCommand):
         p = parent.add_parser('publish',
                 help='Publish this release branch to origin.')
         p.set_defaults(func=self.run_publish)
-        p.add_argument('version')
+        p.add_argument('version', nargs='?')
 
-    def run_publish(self, args): pass
+    def run_publish(self, args):
+        gitflow = GitFlow()
+        version = gitflow.name_or_current('release', args.version)
+        gitflow.start_transaction('publishing release branch %s' % version)
+        branch = gitflow.publish('release', args.version)
+        print
+        print "Summary of actions:"
+        print "- A new remote branch '%s' was created" % branch
+        print "- The local branch '%s' was configured to track the remote branch" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
     #- track
     def register_track(self, parent):
@@ -416,9 +436,19 @@ class HotfixCommand(GitFlowCommand):
         p = parent.add_parser('publish',
                 help='Publish this hotfix branch to origin.')
         p.set_defaults(func=self.run_publish)
-        p.add_argument('version')
+        p.add_argument('version', nargs='?')
 
-    def run_publish(self, args): pass
+    def run_publish(self, args):
+        gitflow = GitFlow()
+        version = gitflow.name_or_current('hotfix', args.version)
+        gitflow.start_transaction('publishing hotfix branch %s' % version)
+        branch = gitflow.publish('hotfix', version)
+        print
+        print "Summary of actions:"
+        print "- A new remote branch '%s' was created" % branch
+        print "- The local branch '%s' was configured to track the remote branch" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
 
 class SupportCommand(GitFlowCommand):

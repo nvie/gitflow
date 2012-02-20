@@ -376,6 +376,30 @@ class GitFlow(object):
         branch = repo.create_head(full_name, remote_name)
         return branch.checkout()
 
+    @requires_repo
+    def publish(self, identifier, name):
+        repo = self.repo
+        mgr = self.managers[identifier]
+
+        # sanity checks
+        # :todo: require_clean_working_tree
+        full_name = mgr.full_name(name)
+        remote_name = self.origin_name(full_name)
+        if not full_name in repo.branches:
+            raise NoSuchBranchError(full_name)
+        if remote_name in repo.branches:
+            raise BranchExistsError(remote_name)
+
+        origin = self.origin()
+        # create remote branch
+        origin.push('%s:refs/heads/%s' % (branch, branch))
+        origin.fetch()
+
+        # configure remote tracking
+        self.set ("branch.%s.remote" % branch, origin)
+        self.set ("branch.%s.merge" % branch, "refs/heads/%s" % branch)
+        return branch.checkout()
+
 
     @requires_repo
     def status(self):
