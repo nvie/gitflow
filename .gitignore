@@ -1,3 +1,9 @@
+# Temporary editor and backup files
+*~
+.\#*
+\#*#
+*.swp
+
 # Python junk
 *.py[co]
 /*.egg
