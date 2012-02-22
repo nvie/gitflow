@@ -524,7 +524,7 @@ class SupportCommand(GitFlowCommand):
             branch = gitflow.create('support', args.name, args.base,
                                     fetch=args.fetch)
         except BranchTypeExistsError, e:
-            die("There is an existing suport branch (%s). "
+            die("There is an existing support branch (%s). "
                 "Finish that one first." % e.args[0])
         except Exception, e:
             die("Could not create support branch %r" % args.name,
