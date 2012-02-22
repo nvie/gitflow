@@ -3,7 +3,7 @@ import os
 from ConfigParser import NoOptionError, NoSectionError
 from gitflow.core import GitFlow, NotInitialized
 from gitflow.branches import BranchManager
-from tests.helpers import copy_from_fixture
+from tests.helpers import copy_from_fixture, remote_clone_from_fixture
 from tests.helpers.factory import create_sandbox, create_git_repo
 
 class TestGitFlow(TestCase):
@@ -165,6 +165,14 @@ class TestGitFlow(TestCase):
         all_commits_after_init = self.all_commits(self.repo)
         self.assertEquals(all_commits_before_init, all_commits_after_init)
 
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_creates_no_extra_commits(self):
+        all_commits_before_init = self.all_commits(self.repo)
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        all_commits_after_init = self.all_commits(self.repo)
+        self.assertEquals(all_commits_before_init, all_commits_after_init)
+
     @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_branches(self):
         heads_before_init = [h.name for h in self.repo.heads]
@@ -188,6 +196,58 @@ class TestGitFlow(TestCase):
         gitflow.init()
         self.assertItemsEqual(['master', 'develop'],
                 gitflow.branch_names())
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_creates_master_and_develop(self):
+        heads_before_init = [h.name for h in self.repo.heads]
+        self.assertNotIn('master', heads_before_init)
+        self.assertNotIn('develop', heads_before_init)
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        heads_after_init = [h.name for h in self.repo.heads]
+        self.assertIn('master', heads_after_init)
+        self.assertIn('develop', heads_after_init)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_creates_no_custom_master_and_develop(self):
+        heads_before_init = [h.name for h in self.repo.heads]
+        self.assertNotIn('foo', heads_before_init)
+        self.assertNotIn('bar', heads_before_init)
+        gitflow = GitFlow(self.repo)
+        self.assertRaises(NotImplementedError,
+                          gitflow.init, master='foo', develop='bar')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_creates_branches_from_counterpart(self):
+        remote =  GitFlow(self.remote)
+        rmc0 = remote.master().commit
+        rdc0 = remote.develop().commit
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+
+        # local and remote heads must be the same
+        self.assertEqual(rmc0, mc0)
+        self.assertEqual(rdc0, dc0)
+        self.assertTrue(gitflow.master().tracking_branch())
+        self.assertTrue(gitflow.develop().tracking_branch())
+        self.assertEqual(gitflow.master().tracking_branch().name, 'origin/master')
+        self.assertEqual(gitflow.develop().tracking_branch().name, 'origin/develop')
+
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_creates_no_extra_banches(self):
+        heads_before_init = [h.name for h in self.repo.heads]
+        heads_before_init.sort()
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        heads_after_init = [h.name for h in self.repo.heads]
+        heads_after_init.remove('master')
+        heads_after_init.remove('develop')
+        self.assertItemsEqual(heads_before_init, heads_after_init)
+
 
     @copy_from_fixture('partly_inited')
     def test_gitflow_force_reinit_partly_inited(self):
