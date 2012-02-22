@@ -273,6 +273,29 @@ class GitFlow(object):
         return manager.shorten(manager.by_name_prefix(prefix).name)
 
 
+    def is_merged_into(self, commit, target_branch):
+        """
+        Checks whether `commit` is succesfully merged into branch
+        `target_branch`.
+
+        :param commit:
+            The commit or branch that ought to be merged. This may be
+            a full branch-name, a commit-hexsha or any of branch-,
+            head-, reference- or commit-object.
+
+        :param target_branch:
+            The branch which should contain the commit. This may be a
+            full branch-name, or any of branch-, head- or
+            reference-object.
+        """
+        if isinstance(target_branch, git.SymbolicReference):
+            target_branch = target_branch.name
+        # :todo: implement this more efficiently
+        return target_branch in [
+            b.lstrip('* ')
+            for b in gitflow.git.branch('--contains', commit).splitlines()]
+
+
     @requires_repo
     def list(self, identifier, arg0_name, use_tagname, verbose=False):
         repo = self.repo

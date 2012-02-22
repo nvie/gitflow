@@ -154,10 +154,7 @@ class BranchManager(object):
         if base is None:
             base = self.default_base()
         elif must_be_on_default_base:
-            # :todo: implement this more efficiently
-            if not self.default_base() in [
-                b.lstrip('* ')
-                for b in gitflow.git.branch('--contains', base).splitlines()]:
+            if not gitflow.is_merged_into(base, self.default_base()):
                 raise BaseNotOnDefaultBranch(self.identifier, self.default_base())
 
         if gitflow.is_dirty():
