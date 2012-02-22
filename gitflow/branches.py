@@ -176,6 +176,8 @@ class BranchManager(object):
 
         branch = repo.create_head(full_name, base)
         branch.checkout()
+        if origin:
+            branch.set_tracking_branch(origin)
         return branch
 
     def _is_single_commit_branch(self, from_, to):
