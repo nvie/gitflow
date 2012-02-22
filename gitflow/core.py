@@ -112,25 +112,44 @@ class GitFlow(object):
             self.set(setting, value)
 
     def _init_initial_commit(self):
-        try:
-            self.master()
-        except IndexError:
-            # Create 'master' branch if it does not exist
-            info('Creating branch %r' % self.master_name())
+        master = self.master_name()
+        if master in self.repo.branches:
+            # local `master` branch exists
+            return
+        elif self.origin_name(master) in self.repo.refs:
+            # the origin branch counterpart exists
+            origin = self.repo.refs[self.origin_name(master)]
+            branch = self.repo.create_head(master, origin)
+            branch.set_tracking_branch(origin)
+        elif self.repo.heads:
+            raise NotImplementedError('Local and remote branches exist, '
+                                     'but neither %s nor %s'
+                                     % (master, self.origin_name(master) ))
+        else:
+            # Create 'master' branch
+            info('Creating branch %r' % master)
             c = self.repo.index.commit('Initial commit', head=False)
-            self.repo.create_head(self.master_name(), c)
+            self.repo.create_head(master, c)
 
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
-        try:
-            self.develop()
-        except IndexError:
-            # Create 'develop' branch if it does not exist
-            info('Creating branch %r' % self.develop_name())
-            branch = self.repo.create_head(self.develop_name(), self.master())
+        develop = self.develop_name()
+        if develop in self.repo.branches:
+            # local `develop` branch exists
+            return
+        if self.origin_name(develop) in self.repo.refs:
+            # the origin branch counterpart exists
+            origin = self.repo.refs[self.origin_name(develop)]
+            branch = self.repo.create_head(develop, origin)
+            branch.set_tracking_branch(origin)
+        else:
+            # Create 'develop' branch
+            info('Creating branch %r' % develop)
+            branch = self.repo.create_head(develop, self.master())
             # switch to develop branch if its newly created
             info('Switching to branch %s' % branch)
             branch.checkout()
+
 
     def _enforce_git_repo(self):
         """
