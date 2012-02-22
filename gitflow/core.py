@@ -233,6 +233,22 @@ class GitFlow(object):
         """
         return self.repo.is_dirty()
 
+
+    @requires_repo
+    def has_unmerged_changes(self):
+        """
+        Returns whether or not the current working directory contains
+        unmerged changes.
+        """
+        #:todo: implement this correctly
+        try:
+            git.SymbolicReference.from_path(self.repo, 'MERGE_BASE')
+            return False
+        except ValueError:
+            # no such reference, so there is no merge conflict
+            return True
+
+
     @requires_repo
     def branch_names(self, remote=False):
         if remote:
@@ -293,11 +309,11 @@ class GitFlow(object):
         # :todo: implement this more efficiently
         return target_branch in [
             b.lstrip('* ')
-            for b in gitflow.git.branch('--contains', commit).splitlines()]
+            for b in self.git.branch('--contains', commit).splitlines()]
 
 
     @requires_repo
-    def list(self, identifier, arg0_name, use_tagname, verbose=False):
+    def list(self, identifier, arg0_name, use_tagname, verbose):
         repo = self.repo
         manager = self.managers[identifier]
         branches = manager.list()
@@ -366,7 +382,10 @@ class GitFlow(object):
         """
         return self.managers[identifier].create(name, base, fetch=fetch)
 
-    def finish(self, identifier, nameprefix):
+
+    @requires_repo
+    def finish(self, identifier, name, fetch, rebase, keep, force_delete
+               ):
         """
         Finishes a branch of the given type, with the given short name.
 
@@ -379,10 +398,29 @@ class GitFlow(object):
             The friendly (short) name to finish.
         """
         mgr = self.managers[identifier]
-        branch = mgr.by_name_prefix(nameprefix)
-        mgr.finish(mgr.shorten(branch.name))
+        branch = mgr.by_name_prefix(name)
+        if self.has_unmerged_changes():
+            die("",
+                "Merge conflicts not resolved yet, use:",
+                "    git mergetool",
+                "    git commit",
+                "",
+                "You can then complete the finish by running it again:",
+                "    git flow %s finish %s" % (identifier, name),
+                "")
+        return mgr.finish(mgr.shorten(branch.name), fetch=fetch, rebase=rebase,
+                          keep=keep, force_delete=force_delete)
 
 
+    def must_be_uptodate(self, branch, fetch):
+        remote_branch = self.origin_name(branch)
+        if remote_branch in self.branch_names(remote=True):
+            if fetch:
+                repo.fetch(remote_branch)
+            self.require_branches_equal(base, remote_branch)
+        
+
+    @requires_repo
     def checkout(self, identifier, name):
         mgr = self.managers[identifier]
         branch = mgr.by_name_prefix(name)
