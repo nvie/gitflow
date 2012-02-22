@@ -60,6 +60,12 @@ class TestGitFlow(TestCase):
         self.assertItemsEqual(['master', 'production'],
                 gitflow.branch_names())
 
+    @copy_from_fixture('custom_repo')
+    def test_custom_repo_init_keeps_active_branch_if_develop_already_existed(self):
+        active_branch = self.repo.active_branch
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertNotEqual(gitflow.repo.active_branch.name, active_branch)
 
     # Sanity checking
     def test_new_repo_is_not_dirty(self):
@@ -157,6 +163,20 @@ class TestGitFlow(TestCase):
         self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
         self.assertEquals('support/', gitflow.get_prefix('support'))
 
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_init_keeps_active_branch_if_develop_already_existed(self):
+        active_branch = self.repo.active_branch
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertNotEqual(gitflow.repo.active_branch.name, active_branch)
+
+    def test_gitflow_init_checkout_develop_if_newly_created(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertEqual(gitflow.repo.active_branch.name, 'develop')
+
     @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_commits(self):
         all_commits_before_init = self.all_commits(self.repo)
@@ -248,6 +268,12 @@ class TestGitFlow(TestCase):
         heads_after_init.remove('develop')
         self.assertItemsEqual(heads_before_init, heads_after_init)
 
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_init_cloned_checkout_develop_if_newly_created(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertEqual(gitflow.repo.active_branch.name, 'develop')
 
     @copy_from_fixture('partly_inited')
     def test_gitflow_force_reinit_partly_inited(self):
