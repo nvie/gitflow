@@ -151,9 +151,14 @@ class BranchManager(object):
         full_name = self.prefix + name
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
+
+        origin = None
+        if gitflow.origin_name(full_name) in repo.refs:
+            # If the origin branch counterpart exists use it
+            origin = repo.refs[gitflow.origin_name(full_name)]
         if base is None:
-            base = self.default_base()
-        elif must_be_on_default_base:
+            base = origin and origin.name or self.default_base()
+        if must_be_on_default_base:
             if not gitflow.is_merged_into(base, self.default_base()):
                 raise BaseNotOnDefaultBranch(self.identifier, self.default_base())
 
@@ -161,13 +166,13 @@ class BranchManager(object):
             raise WorkdirIsDirtyError()
 
         # update the local repo with remote changes, if asked
-        if repo and fetch:
-            repo.fetch(gitflow.origin_name(base))
+        if origin and fetch:
+            repo.fetch(origin)
 
         # If the origin branch counterpart exists, assert that the
         # local branch isn't behind it (to avoid unnecessary rebasing).
-        if gitflow.origin_name(base) in gitflow.branch_names(remote=True):
-            gitflow.require_branches_equal(base, gitflow.origin_name(base))
+        if origin:
+            gitflow.require_branches_equal(base, origin.name)
 
         branch = repo.create_head(full_name, base)
         branch.checkout()
