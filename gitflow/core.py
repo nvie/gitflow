@@ -211,7 +211,7 @@ class GitFlow(object):
 
     @requires_repo
     def origin(self):
-        return self.repo.branches[self.origin_name()]
+        return self.repo.remotes[self.origin_name()]
 
     @requires_repo
     def develop(self):
