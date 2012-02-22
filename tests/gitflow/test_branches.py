@@ -5,7 +5,7 @@ from gitflow.branches import BranchManager, FeatureBranchManager, \
         ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
         PrefixNotUniqueError, NoSuchBranchError, BranchExistsError, \
         BranchTypeExistsError
-from tests.helpers import copy_from_fixture
+from tests.helpers import copy_from_fixture, remote_clone_from_fixture
 from tests.helpers.factory import create_git_repo
 
 
@@ -349,6 +349,89 @@ class TestFeatureBranchManager(TestCase):
 
         # Merge commit message
         self.assertEquals('Finished feature even.\n', dc1.message)
+
+    @copy_from_fixture('sample_repo')
+    def test_finish_feature_keep(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+        mgr.finish('even', keep=True)
+        mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+
+        # Feature finishes don't advance master, but develop
+        self.assertEqual(mc0, mc1)
+        self.assertNotEqual(dc0, dc1)
+
+        # Finishing removes the feature branch
+        self.assertIn('feature/even',
+                [b.name for b in self.repo.branches])
+
+        # Merge commit message
+        self.assertEquals('Finished feature even.\n', dc1.message)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_finish_feature_on_unpulled_branch_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        self.assertRaises(NoSuchBranchError, mgr.finish, 'even', push=True)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_create_feature_from_remote_branch(self):
+        remote_branch = self.remote.refs['feature/even']
+        rfc0 = remote_branch.commit
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        branch = self.repo.active_branch
+        self.assertEqual(branch.name, 'feature/even')
+        self.assertEqual(branch.commit, rfc0)
+        # must be a tracking branch
+        self.assertTrue(branch.tracking_branch())
+        self.assertEqual(branch.tracking_branch().name, 'origin/feature/even')
+
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_finish_feature_push(self):
+        remote =  GitFlow(self.remote)
+        remote.init()
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+
+        rmc0 = remote.master().commit
+        rdc0 = remote.develop().commit
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        mgr.finish('even', push=True)
+
+        rmc1 = remote.master().commit
+        rdc1 = remote.develop().commit
+        mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+
+        # Feature finishes don't advance remote master, but remote develop
+        self.assertEqual(rmc0, rmc1)
+        self.assertNotEqual(rdc0, rdc1)
+        self.assertEqual(mc0, mc1)
+        self.assertNotEqual(dc0, dc1)
+
+        # local and remote heads must be the same again
+        self.assertEqual(rmc1, mc1)
+        self.assertEqual(rdc1, dc1)
+
+        # Finishing removes the remote feature branch
+        self.assertNotIn('feature/even',
+                [b.name for b in self.remote.branches])
+
+        # Merge commit message
+        self.assertEquals('Finished feature even.\n', rdc1.message)
 
 
 class TestReleaseBranchManager(TestCase):
