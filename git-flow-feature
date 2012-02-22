@@ -44,6 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
+	echo "       git flow feature review [-F] [<name|nameprefix>]"
 	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
@@ -229,7 +230,72 @@ cmd_start() {
 	echo
 }
 
+avoid_multiple_reviews() {
+	local num_commits
+	num_commits=$(git log $ORIGIN/$MASTER_BRANCH..HEAD --oneline | wc -l)
+
+	if [ $num_commits -gt 1 ] ; then
+		echo
+		echo "Aborting the review construction!"
+		echo
+		echo "    You have $num_commits commits between your feature branch and master."
+		echo "    This means you are going to produce $num_commits code reviews on"
+		echo "    Gerrit; if that is what you want to do, re-run with the --force option."
+		echo
+		exit 1
+	fi
+}
+
+cmd_review() {
+	DEFINE_boolean force false "force review submission even if multiple will be opened" F
+	parse_args "$@"
+	expand_nameprefix_arg_or_current
+
+	# sanity checks
+	require_branch "$BRANCH"
+
+	# sanity checks
+	require_clean_working_tree
+
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
+	fi
+	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
+
+	# sanity checks
+	if ! flag force; then
+		avoid_multiple_reviews
+	fi
+
+	echo
+
+	# Submit review
+	git push $ORIGIN "HEAD:refs/for/$DEVELOP_BRANCH/$BRANCH"
+
+	if [ $? -ne 0 ] ; then
+		echo
+		echo "Summary of actions:"
+		echo "- Failed to submit code review!"
+		echo "  See above for details; likely there are no changes"
+		echo
+	else
+		echo
+		echo "Summary of actions:"
+		echo "- A new code review on $DEVELOP_BRANCH for topic '$BRANCH' was created"
+		echo
+	fi
+
+}
+
 cmd_finish() {
+	echo
+	echo " Use 'git flow feature review' to submit reviews; you must manually"
+	echo " delete local branches when you are done as this method has been"
+	echo " disabled."
+	echo
+	exit
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
@@ -377,7 +443,7 @@ cmd_publish() {
 	require_clean_working_tree
 	require_branch "$BRANCH"
 	git fetch -q "$ORIGIN"
-	require_branch_absent "$ORIGIN/$BRANCH"
+	#require_branch_absent "$ORIGIN/$BRANCH"
 
 	# create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
@@ -390,7 +456,7 @@ cmd_publish() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- A new remote branch '$BRANCH' was created"
+	echo "- A new remote branch '$BRANCH' was created or updated"
 	echo "- The local branch '$BRANCH' was configured to track the remote branch"
 	echo "- You are now on branch '$BRANCH'"
 	echo
