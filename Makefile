@@ -23,7 +23,7 @@ xunit-test:
 	nosetests --with-xunit
 
 test:
-	nosetests
+	nosetests --with-spec --spec-color
 
 test-dist:
 	PIP_DOWNLOAD_CACHE=~/Projects/pkgrepo/pkgs
