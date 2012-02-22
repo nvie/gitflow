@@ -205,9 +205,12 @@ class BranchManager(object):
 
         You typically don't need to override this method in a subclass.
         """
+        full_name = self.prefix + name
+        if self.gitflow.is_merged_into(full_name, into):
+            # already merged, nothing more to do
+            return
         repo = self.gitflow.repo
         repo.branches[into].checkout()
-        full_name = self.prefix + name
 
         kwargs = dict()
         if not self._is_single_commit_branch(into, full_name):
