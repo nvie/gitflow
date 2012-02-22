@@ -267,22 +267,43 @@ class FeatureBranchManager(BranchManager):
             name, base, fetch=fetch, must_be_on_default_base=False)
 
 
-    def finish(self, name):
+    def finish(self, name, fetch=False, rebase=False, keep=False,
+               force_delete=False, push=False):
         """
-        Finishes the branch of the type that this manager manages named
-        :attr:`name`.  Finishing means that:
+        Finishes the branch of type `feature` named :attr:`name`.
+        Finishing means that:
 
-        * The branch is merged into all branches that require it to be merged
-          in to.  The model prescribes the branching/merging rules for each
-          branch type, so this depends on the implementing subclass.
-        * The branch is deleted if all merges are successful.
+        * The `feature`-branch is merged into the `develop`-branch.
+        * The `feature`-branch is deleted if all merges are successful.
 
         :param name:
             The (short) name of the branch to finish.
+        :param fetch:
+            If set, update the local repo with remote changes prior to
+            merging.
+        :param rebase:
+            Rebase `featuer`-branch prior to merging.
+        :param keep:
+            Keep `feature`-branch after performing finish.
+        :param force_delete:
+            Force deleting the `feature`-branch even if merging failed.
+        :param push:
+            Push changes to the remote repository.
         """
+        gitflow = self.gitflow
+        full_name = self.full_name(name)
+        gitflow.must_be_uptodate(full_name, fetch=fetch)
+        gitflow.must_be_uptodate(gitflow.develop_name(), fetch=fetch)
+        if rebase:
+            gitflow.rebase(self.identifier, name, interactive=False)
         self.merge(name, self.gitflow.develop_name(),
-                'Finished %(identifier)s %(short_name)s.')
-        self.delete(name)
+                   'Finished %(identifier)s %(short_name)s.')
+        if not keep:
+            self.delete(name, force=force_delete)
+        if push:
+            gitflow.origin().push(self.gitflow.develop_name())
+            if not keep:
+                gitflow.origin().push(':'+full_name)
 
 
 class ReleaseBranchManager(BranchManager):
