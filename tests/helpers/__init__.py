@@ -70,3 +70,31 @@ def clone_from_fixture(fixture_name):
         return _inner
     return _outer
 
+
+def remote_clone_from_fixture(fixture_name):
+    """
+    This decorator sets up a temporary, self-destructing sandbox, cloned from
+    a sandboxed copy of the fixture.  In contrast to a filesystem copy, a clone
+    always has fresh configuration and a clean working directory.
+
+    The repo is accesible via the self.repo attribute inside the
+    tests, the remote (clond) repo via `self.remote`.
+    """
+    def _outer(f):
+        @wraps(f)
+        @sandboxed
+        def _inner(self, *args, **kwargs):
+            root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+            src = os.path.join(root, 'fixtures', fixture_name)
+            dest = os.path.join(self.sandbox, 'remote')
+            shutil.copytree(src, dest)
+            os.chdir(dest)
+            shutil.move('dot_git', '.git')
+            self.remote = Repo(dest)
+            clone = os.path.join(self.sandbox, 'clone')
+            self.repo = self.remote.clone(clone)
+            os.chdir(clone)
+            f(self, *args, **kwargs)
+        return _inner
+    return _outer
+
