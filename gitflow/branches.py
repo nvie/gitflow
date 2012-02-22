@@ -157,8 +157,7 @@ class BranchManager(object):
             if not gitflow.is_merged_into(base, self.default_base()):
                 raise BaseNotOnDefaultBranch(self.identifier, self.default_base())
 
-        if gitflow.is_dirty():
-            # :fixme: only if without conflict
+        if gitflow.is_dirty() and not gitflow.has_unmerged_changes():
             raise WorkdirIsDirtyError()
 
         # update the local repo with remote changes, if asked
