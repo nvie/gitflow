@@ -9,8 +9,11 @@ from tests.helpers import copy_from_fixture
 from tests.helpers.factory import create_git_repo
 
 
-def fake_commit(repo, message):
-    f = open('newfile.py', 'a')
+def fake_commit(repo, message, append=True):
+    if append:
+        f = open('newfile.py', 'a')
+    else:
+        f = open('newfile.py', 'w')
     try:
         f.write('This is a dummy change.\n')
     finally:
@@ -236,12 +239,7 @@ class TestFeatureBranchManager(TestCase):
 
         self.assertEquals(2, len(mgr.list()))
         mgr.create('foo')
-        f = open('newfile.py', 'w')
-        f.write('This is a dummy file.\n')
-        f.close()
-        self.repo.index.add(['newfile.py'])
-        self.repo.index.commit('A commit on the feature branch.')
-
+        fake_commit(self.repo, 'A commit on the feature branch.', append=False)
         gitflow.develop().checkout()
         self.assertEquals(3, len(mgr.list()))
         self.assertRaisesRegexp(GitCommandError,
@@ -255,12 +253,7 @@ class TestFeatureBranchManager(TestCase):
 
         self.assertEquals(2, len(mgr.list()))
         mgr.create('foo')
-        f = open('newfile.py', 'w')
-        f.write('This is a dummy file.\n')
-        f.close()
-        self.repo.index.add(['newfile.py'])
-        self.repo.index.commit('A commit on the feature branch.')
-
+        fake_commit(self.repo, 'A commit on the feature branch.', append=False)
         gitflow.develop().checkout()
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo', force=True)
