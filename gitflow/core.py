@@ -135,7 +135,7 @@ class GitFlow(object):
         # NOTE: This function assumes master already exists
         develop = self.develop_name()
         if develop in self.repo.branches:
-            # local `develop` branch exists
+            # local `develop` branch exists, but do not switch there
             return
         if self.origin_name(develop) in self.repo.refs:
             # the origin branch counterpart exists
@@ -146,9 +146,9 @@ class GitFlow(object):
             # Create 'develop' branch
             info('Creating branch %r' % develop)
             branch = self.repo.create_head(develop, self.master())
-            # switch to develop branch if its newly created
-            info('Switching to branch %s' % branch)
-            branch.checkout()
+        # switch to develop branch if its newly created
+        info('Switching to branch %s' % branch)
+        branch.checkout()
 
 
     def _enforce_git_repo(self):
