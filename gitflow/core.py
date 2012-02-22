@@ -436,7 +436,7 @@ class GitFlow(object):
         if remote_branch in self.branch_names(remote=True):
             if fetch:
                 repo.fetch(remote_branch)
-            self.require_branches_equal(base, remote_branch)
+            self.require_branches_equal(branch, remote_branch)
         
 
     @requires_repo
@@ -580,7 +580,7 @@ class GitFlow(object):
             commit1 = self.repo.rev_parse(branch1)
             commit2 = self.repo.rev_parse(branch2)
         except git.BadObject, e:
-            raise NoSuchBranch(e.args[0])
+            raise NoSuchBranchError(e.args[0])
         if commit1 == commit2:
             return 0
         try:
