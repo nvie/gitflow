@@ -100,10 +100,24 @@ class TestAbstractBranchManager(TestCase):
 
 class TestFeatureBranchManager(TestCase):
     @copy_from_fixture('sample_repo')
+    def test_shorten(self):
+        gitflow = GitFlow(self.repo)
+        fb = FeatureBranchManager(gitflow)
+        self.assertEquals('foo', fb.shorten('feat/foo'))
+        self.assertEquals('feature/foo', fb.shorten('feature/foo'))
+
+    @copy_from_fixture('sample_repo')
+    def test_full_name(self):
+        gitflow = GitFlow(self.repo)
+        fb = FeatureBranchManager(gitflow)
+        self.assertEquals('feat/foo', fb.full_name('foo'))
+        self.assertEquals('feat/feature/foo', fb.full_name('feature/foo'))
+
+    @copy_from_fixture('sample_repo')
     def test_list(self):
         gitflow = GitFlow()
         mgr = FeatureBranchManager(gitflow)
-        expected = ['feature/even', 'feature/recursion']
+        expected = ['feat/even', 'feat/recursion']
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
 
     def test_list_empty_repo(self):
