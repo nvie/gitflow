@@ -3,3 +3,4 @@
 2e2fc06b0b33a9ebcc83d7c3e184f6e6fda8e94a 2c716b745ef3c3152a893c01539d1d8ab7725d45 Vincent Driessen <vincent@datafox.nl> 1287801841 +0200	commit: Describe intentions.
 2c716b745ef3c3152a893c01539d1d8ab7725d45 c8b6deac7ef94f078a426d52c0b1fb3e1221133c Vincent Driessen <vincent@datafox.nl> 1287801894 +0200	rebase -i (finish): refs/heads/develop onto 296586b
 c8b6deac7ef94f078a426d52c0b1fb3e1221133c 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1287802014 +0200	commit: Add naive initial implementation of the odd function.
+2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Hartmut Goebel <h.goebel@goebel-consult.de> 1329992358 +0100	Branch: renamed refs/heads/develop to refs/heads/devel

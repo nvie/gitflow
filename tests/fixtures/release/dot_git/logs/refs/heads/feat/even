@@ -1,3 +1,4 @@
 0000000000000000000000000000000000000000 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 Vincent Driessen <vincent@datafox.nl> 1287802041 +0200	branch: Created from develop
 2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3 2ca717f82f6d94c457b0d9ff1fbc5f101480bae1 Vincent Driessen <vincent@datafox.nl> 1287802086 +0200	commit: Add even function.
 2ca717f82f6d94c457b0d9ff1fbc5f101480bae1 e56be18dada9e81ca7969760ddea357b0c4c9412 Vincent Driessen <vincent@datafox.nl> 1287802101 +0200	commit: Rename file, to match both functions.
+e56be18dada9e81ca7969760ddea357b0c4c9412 e56be18dada9e81ca7969760ddea357b0c4c9412 Hartmut Goebel <h.goebel@goebel-consult.de> 1329992358 +0100	Branch: renamed refs/heads/feature/even to refs/heads/feat/even
