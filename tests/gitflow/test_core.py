@@ -306,7 +306,7 @@ class TestGitFlow(TestCase):
         # Declare a custom branch type inline
         class FooBarManager(BranchManager):
             identifier = 'foobar'
-            prefix = 'xyz/'
+            DEFAULT_PREFIX = 'xyz/'
 
         gitflow = GitFlow()
         self.assertIn('foobar', gitflow.managers)
