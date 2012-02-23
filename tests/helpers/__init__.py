@@ -80,11 +80,14 @@ def copy_gitflow_config(src, dest):
                 writer.set_value(section, item, value)
     del writer
 
-def remote_clone_from_fixture(fixture_name):
+def remote_clone_from_fixture(fixture_name, copy_config=True):
     """
     This decorator sets up a temporary, self-destructing sandbox,
     cloned from a sandboxed copy of the fixture.  In contrast to a
     filesystem copy, the clone always has a clean working directory.
+
+    :param copy_config:
+         Copy the `gitflow` parts of the original repo into the clone.
 
     The repo is accesible via the self.repo attribute inside the
     tests, the remote (clond) repo via `self.remote`.
@@ -102,7 +105,8 @@ def remote_clone_from_fixture(fixture_name):
             self.remote = Repo(dest)
             clone = os.path.join(self.sandbox, 'clone')
             self.repo = self.remote.clone(clone)
-            copy_gitflow_config(self.remote, self.repo)
+            if copy_config:
+                copy_gitflow_config(self.remote, self.repo)
             os.chdir(clone)
             f(self, *args, **kwargs)
         return _inner
