@@ -270,8 +270,7 @@ class TestGitFlow(TestCase):
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_init_cloned_checkout_develop_if_newly_created(self):
-        repo = create_git_repo(self)
-        gitflow = GitFlow(repo)
+        gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertEqual(gitflow.repo.active_branch.name, 'develop')
 
