@@ -138,8 +138,8 @@ class TestFeatureBranchManager(TestCase):
     def test_by_nameprefix(self):
         gitflow = GitFlow()
         mgr = FeatureBranchManager(gitflow)
-        self.assertEquals('feature/even', mgr.by_name_prefix('e').name)
-        self.assertEquals('feature/recursion', mgr.by_name_prefix('re').name)
+        self.assertEquals('feat/even', mgr.by_name_prefix('e').name)
+        self.assertEquals('feat/recursion', mgr.by_name_prefix('re').name)
 
     @copy_from_fixture('sample_repo')
     def test_by_nameprefix_not_unique_enough(self):
@@ -165,9 +165,9 @@ class TestFeatureBranchManager(TestCase):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
 
-        new_branch = mgr.create('foo', 'feature/even')
+        new_branch = mgr.create('foo', 'feat/even')
         self.assertEqual(new_branch.commit,
-                gitflow.repo.branches['feature/even'].commit)
+                gitflow.repo.branches['feat/even'].commit)
 
     def test_feature_branch_origin(self):
         repo = create_git_repo(self)
@@ -191,9 +191,9 @@ class TestFeatureBranchManager(TestCase):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
 
-        self.assertEquals('feature/recursion', self.repo.active_branch.name)
+        self.assertEquals('feat/recursion', self.repo.active_branch.name)
         mgr.create('foo')
-        self.assertEquals('feature/foo', self.repo.active_branch.name)
+        self.assertEquals('feat/foo', self.repo.active_branch.name)
 
     @copy_from_fixture('dirty_sample_repo')
     def test_create_feature_raises_error_if_local_changes_would_be_overwritten(self):
@@ -227,7 +227,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
         self.assertEquals(2, len(mgr.list()))
-        self.assertNotIn('feature/foo', [b.name for b in self.repo.branches])
+        self.assertNotIn('feat/foo', [b.name for b in self.repo.branches])
 
 
     @copy_from_fixture('sample_repo')
@@ -239,12 +239,12 @@ class TestFeatureBranchManager(TestCase):
         mgr.create('foo')
         fake_commit(self.repo, 'Dummy commit #1')
         fake_commit(self.repo, 'Dummy commit #2')
-        mgr.merge('foo', 'develop')
+        mgr.merge('foo', 'devel')
 
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo')
         self.assertEquals(2, len(mgr.list()))
-        self.assertNotIn('feature/foo', [b.name for b in mgr.list()])
+        self.assertNotIn('feat/foo', [b.name for b in mgr.list()])
 
     @copy_from_fixture('sample_repo')
     def test_delete_feature_with_commits_raises_error(self):
@@ -272,7 +272,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEquals(3, len(mgr.list()))
         mgr.delete('foo', force=True)
         self.assertEquals(2, len(mgr.list()))
-        self.assertNotIn('feature/foo', [b.name for b in self.repo.branches])
+        self.assertNotIn('feat/foo', [b.name for b in self.repo.branches])
 
     @copy_from_fixture('sample_repo')
     def test_delete_current_feature_raises_error(self):
@@ -297,13 +297,13 @@ class TestFeatureBranchManager(TestCase):
         mgr = FeatureBranchManager(gitflow)
 
         dc0 = gitflow.develop().commit
-        mgr.merge('even', 'develop')
+        mgr.merge('even', 'devel')
         dc1 = gitflow.develop().commit
 
         # Assert merge commit has been made
         self.assertEqual(2, len(dc1.parents))
         self.assertEqual(
-                "Merge branch 'feature/even' into develop\n",
+                "Merge branch 'feat/even' into devel\n",
                 dc1.message)
 
         # Assert develop branch advanced
@@ -316,7 +316,7 @@ class TestFeatureBranchManager(TestCase):
         mgr = FeatureBranchManager(gitflow)
 
         dc0 = gitflow.develop().commit
-        mgr.merge('recursion', 'develop')
+        mgr.merge('recursion', 'devel')
         dc1 = gitflow.develop().commit
 
         # Assert no merge commit has been made
@@ -358,7 +358,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertNotEqual(dc0, dc1)
 
         # Finishing removes the feature branch
-        self.assertNotIn('feature/even',
+        self.assertNotIn('feat/even',
                 [b.name for b in self.repo.branches])
 
         # Merge commit message
@@ -380,7 +380,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertNotEqual(dc0, dc1)
 
         # Finishing removes the feature branch
-        self.assertIn('feature/even',
+        self.assertIn('feat/even',
                 [b.name for b in self.repo.branches])
 
         # Merge commit message
@@ -395,18 +395,18 @@ class TestFeatureBranchManager(TestCase):
 
     @remote_clone_from_fixture('sample_repo')
     def test_create_feature_from_remote_branch(self):
-        remote_branch = self.remote.refs['feature/even']
+        remote_branch = self.remote.refs['feat/even']
         rfc0 = remote_branch.commit
         gitflow = GitFlow(self.repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         mgr.create('even')
         branch = self.repo.active_branch
-        self.assertEqual(branch.name, 'feature/even')
+        self.assertEqual(branch.name, 'feat/even')
         self.assertEqual(branch.commit, rfc0)
         # must be a tracking branch
         self.assertTrue(branch.tracking_branch())
-        self.assertEqual(branch.tracking_branch().name, 'origin/feature/even')
+        self.assertEqual(branch.tracking_branch().name, 'origin/feat/even')
 
 
     @remote_clone_from_fixture('sample_repo')
@@ -441,7 +441,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(rdc1, dc1)
 
         # Finishing removes the remote feature branch
-        self.assertNotIn('feature/even',
+        self.assertNotIn('feat/even',
                 [b.name for b in self.remote.branches])
 
         # Merge commit message
@@ -459,7 +459,7 @@ class TestReleaseBranchManager(TestCase):
     def test_list(self):
         gitflow = GitFlow()
         mgr = ReleaseBranchManager(gitflow)
-        expected = ['release/1.0']
+        expected = ['rel/1.0']
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
 
     @copy_from_fixture('release')
@@ -487,7 +487,7 @@ class TestReleaseBranchManager(TestCase):
         mgr = ReleaseBranchManager(gitflow)
 
         new_branch = mgr.create('1.0',
-                'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')  # develop~1
+                'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')  # devel~1
         self.assertEqual(new_branch.commit.hexsha,
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')
 
@@ -514,7 +514,7 @@ class TestReleaseBranchManager(TestCase):
         gitflow.init()
         mgr = ReleaseBranchManager(gitflow)
 
-        self.assertEquals('master', repo.active_branch.name)
+        self.assertEquals('develop', repo.active_branch.name)
         mgr.create('1.0')
         self.assertEquals('release/1.0', repo.active_branch.name)
 
@@ -550,7 +550,7 @@ class TestReleaseBranchManager(TestCase):
         self.assertEquals(1, len(mgr.list()))
         mgr.delete('1.0')
         self.assertEquals(0, len(mgr.list()))
-        self.assertNotIn('release/1.0', [b.name for b in mgr.list()])
+        self.assertNotIn('rel/1.0', [b.name for b in mgr.list()])
 
     @copy_from_fixture('sample_repo')
     def test_cannot_delete_current_release(self):
@@ -585,7 +585,7 @@ class TestReleaseBranchManager(TestCase):
         self.assertNotEqual(dc0, dc1)
 
         # Finishing removes the release branch
-        self.assertNotIn('release/1.0',
+        self.assertNotIn('rel/1.0',
                 [b.name for b in self.repo.branches])
 
         # Merge commit message
@@ -609,7 +609,7 @@ class TestHotfixBranchManager(TestCase):
         mgr = HotfixBranchManager(gitflow)
         new_branch = mgr.create('3.14-beta5')
         self.assertEqual(new_branch.commit,
-                gitflow.repo.branches['master'].commit)
+                gitflow.repo.branches['stable'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_finish_hotfix(self):
@@ -632,7 +632,7 @@ class TestHotfixBranchManager(TestCase):
         self.assertNotEqual(dc0, dc1)
 
         # Finishing removes the hotfix branch
-        self.assertNotIn('hotfix/1.2.3',
+        self.assertNotIn('hf/1.2.3',
                 [b.name for b in self.repo.branches])
 
         # Merge commit message
@@ -656,7 +656,7 @@ class TestSupportBranchManager(TestCase):
         mgr = SupportBranchManager(gitflow)
         new_branch = mgr.create('legacy')
         self.assertEqual(new_branch.commit,
-                gitflow.repo.branches['master'].commit)
+                gitflow.repo.branches['stable'].commit)
 
     def test_support_branches_cannot_be_finished(self):
         repo = create_git_repo(self)
