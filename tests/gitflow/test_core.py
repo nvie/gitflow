@@ -166,10 +166,10 @@ class TestGitFlow(TestCase):
 
     @copy_from_fixture('sample_repo')
     def test_gitflow_init_keeps_active_branch_if_develop_already_existed(self):
-        active_branch = self.repo.active_branch
+        active_branch = self.repo.active_branch.name
         gitflow = GitFlow(self.repo)
         gitflow.init()
-        self.assertNotEqual(gitflow.repo.active_branch.name, active_branch)
+        self.assertEqual(gitflow.repo.active_branch.name, active_branch)
 
     def test_gitflow_init_checkout_develop_if_newly_created(self):
         repo = create_git_repo(self)
