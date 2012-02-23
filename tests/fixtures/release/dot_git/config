@@ -5,11 +5,11 @@
 	logallrefupdates = true
 	ignorecase = true
 [gitflow "branch"]
-	master = master
-	develop = develop
+	master = stable
+	develop = devel
 [gitflow "prefix"]
-	feature = feature/
-	release = release/
-	hotfix = hotfix/
-	support = support/
-	versiontag = 
+	feature = feat/
+	release = rel/
+	hotfix = hf/
+	support = supp/
+	versiontag = v
