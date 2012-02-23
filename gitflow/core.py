@@ -91,8 +91,8 @@ class GitFlow(object):
             'gitflow.prefix.versiontag': '',
             'gitflow.origin': 'origin',
             }
-        for i in self.managers:
-            self.defaults['gitflow.prefix.%s' % i] = self.managers[i].prefix
+        for identifier, manager in self.managers.items():
+            self.defaults['gitflow.prefix.%s' % identifier] = manager.prefix
 
 
     def _init_config(self, master=None, develop=None, prefixes={},
