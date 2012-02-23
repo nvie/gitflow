@@ -94,10 +94,10 @@ class TestGitFlow(TestCase):
     def test_gitflow_status_on_sample_repo(self):
         gitflow = GitFlow(self.repo)
         self.assertItemsEqual([
-                ('master', '296586bb164c946cad10d37e82570f60e6348df9', False),
-                ('develop', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False),
-                ('feature/recursion', '54d59c872469c7bf34d540d2fb3128a97502b73f', True),
-                ('feature/even', 'e56be18dada9e81ca7969760ddea357b0c4c9412', False),
+                ('stable', '296586bb164c946cad10d37e82570f60e6348df9', False),
+                ('devel', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False),
+                ('feat/recursion', '54d59c872469c7bf34d540d2fb3128a97502b73f', True),
+                ('feat/even', 'e56be18dada9e81ca7969760ddea357b0c4c9412', False),
             ], gitflow.status())
 
 
@@ -220,13 +220,13 @@ class TestGitFlow(TestCase):
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_init_cloned_creates_master_and_develop(self):
         heads_before_init = [h.name for h in self.repo.heads]
-        self.assertNotIn('master', heads_before_init)
-        self.assertNotIn('develop', heads_before_init)
+        self.assertNotIn('stable', heads_before_init)
+        self.assertNotIn('devel', heads_before_init)
         gitflow = GitFlow(self.repo)
         gitflow.init()
         heads_after_init = [h.name for h in self.repo.heads]
-        self.assertIn('master', heads_after_init)
-        self.assertIn('develop', heads_after_init)
+        self.assertIn('stable', heads_after_init)
+        self.assertIn('devel', heads_after_init)
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_init_cloned_creates_no_custom_master_and_develop(self):
@@ -253,8 +253,8 @@ class TestGitFlow(TestCase):
         self.assertEqual(rdc0, dc0)
         self.assertTrue(gitflow.master().tracking_branch())
         self.assertTrue(gitflow.develop().tracking_branch())
-        self.assertEqual(gitflow.master().tracking_branch().name, 'origin/master')
-        self.assertEqual(gitflow.develop().tracking_branch().name, 'origin/develop')
+        self.assertEqual(gitflow.master().tracking_branch().name, 'origin/stable')
+        self.assertEqual(gitflow.develop().tracking_branch().name, 'origin/devel')
 
 
     @remote_clone_from_fixture('sample_repo')
@@ -264,15 +264,15 @@ class TestGitFlow(TestCase):
         gitflow = GitFlow(self.repo)
         gitflow.init()
         heads_after_init = [h.name for h in self.repo.heads]
-        heads_after_init.remove('master')
-        heads_after_init.remove('develop')
+        heads_after_init.remove('stable')
+        heads_after_init.remove('devel')
         self.assertItemsEqual(heads_before_init, heads_after_init)
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_init_cloned_checkout_develop_if_newly_created(self):
         gitflow = GitFlow(self.repo)
         gitflow.init()
-        self.assertEqual(gitflow.repo.active_branch.name, 'develop')
+        self.assertEqual(gitflow.repo.active_branch.name, 'devel')
 
     @copy_from_fixture('partly_inited')
     def test_gitflow_force_reinit_partly_inited(self):
