@@ -92,7 +92,7 @@ class GitFlow(object):
             'gitflow.origin': 'origin',
             }
         for identifier, manager in self.managers.items():
-            self.defaults['gitflow.prefix.%s' % identifier] = manager.prefix
+            self.defaults['gitflow.prefix.%s' % identifier] = manager.DEFAULT_PREFIX
 
 
     def _init_config(self, master=None, develop=None, prefixes={},
