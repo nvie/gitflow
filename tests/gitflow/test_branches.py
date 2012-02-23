@@ -28,7 +28,7 @@ class DummyBranchManager(BranchManager):
     a concrete class, since Branch is an "abstract" class.
     """
     identifier = 'abc'
-    prefix = 'xyz/'
+    DEFAULT_PREFIX = 'xyz/'
 
 
 class TestAbstractBranchManager(TestCase):

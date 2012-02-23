@@ -30,8 +30,19 @@ class BranchManager(object):
 
     :param prefix:
         The prefix to use for the type of branches that this branch
-        manager manages.
+        manager manages. If this is not `None`, it supersedes the
+        configuration of the `gitflow` object's repository.
     """
+
+    def _get_prefix(self):
+        if self._prefix is not None:
+            return self._prefix
+        try:
+            return self.gitflow.get_prefix(self.identifier)
+        except:
+            return self.DEFAULT_PREFIX
+    def _set_prefix(self, value): self._prefix = value
+    prefix = property(_get_prefix, _set_prefix)
 
     def __init__(self, gitflow, prefix=None):
         from gitflow.core import GitFlow
@@ -40,6 +51,8 @@ class BranchManager(object):
         if not prefix is None:
             assert isinstance(prefix, basestring), "Argument 'prefix' must be a string."
             self.prefix = prefix
+        else:
+            self.prefix = None
 
     def default_base(self):
         """
@@ -240,7 +253,7 @@ class BranchManager(object):
 
 class FeatureBranchManager(BranchManager):
     identifier = 'feature'
-    prefix = 'feature/'
+    DEFAULT_PREFIX = 'feature/'
 
     def create(self, name, base=None, fetch=False):
         """
@@ -308,7 +321,7 @@ class FeatureBranchManager(BranchManager):
 
 class ReleaseBranchManager(BranchManager):
     identifier = 'release'
-    prefix = 'release/'
+    DEFAULT_PREFIX = 'release/'
 
     def create(self, version, base=None, fetch=False):
         """
@@ -351,7 +364,7 @@ class ReleaseBranchManager(BranchManager):
 
 class HotfixBranchManager(BranchManager):
     identifier = 'hotfix'
-    prefix = 'hotfix/'
+    DEFAULT_PREFIX = 'hotfix/'
 
     def default_base(self):
         return self.gitflow.master_name()
@@ -397,7 +410,7 @@ class HotfixBranchManager(BranchManager):
 
 class SupportBranchManager(BranchManager):
     identifier = 'support'
-    prefix = 'support/'
+    DEFAULT_PREFIX = 'support/'
 
     def default_base(self):
         return self.gitflow.master_name()
