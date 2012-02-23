@@ -6,13 +6,17 @@ indent() {
 gather_info() {
     pwd >&2
     mv dot_git .git | indent
-    echo "\n- Config:"
+    echo
+    echo "- Config:"
     git config --list -f .git/config | indent
-    echo "\n- Status:"
+    echo
+    echo "- Status:"
     git status | indent
-    echo "\n- Branches:"
+    echo
+    echo "- Branches:"
     git branch | indent
-    echo "\n- Commit graph:"
+    echo
+    echo "- Commit graph:"
     git log --graph --oneline --all --decorate | indent
     echo
     mv .git dot_git
@@ -25,7 +29,8 @@ collect() {
         if [ ! -d $x ]; then
             continue
         fi
-        echo "$x\n------------------"
+        echo "$x"
+	echo "------------------"
         (cd $x; gather_info $x)
         echo
     done
