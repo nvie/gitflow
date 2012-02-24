@@ -36,7 +36,7 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-GITFLOW_VERSION=0.4.3-cec-2
+GITFLOW_VERSION=0.4.3-cec-3
 
 usage() {
 	echo "usage: git flow version"
