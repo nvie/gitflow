@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature review [-F] [<name|nameprefix>]"
+	echo "       git flow feature review [-FN] [<name|nameprefix>]"
 	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
@@ -52,6 +52,8 @@ usage() {
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
+	echo
+	echo "       git flow feature <command> --help"
 }
 
 cmd_default() {
@@ -246,8 +248,38 @@ avoid_multiple_reviews() {
 	fi
 }
 
+# Squashes multiple commits into the branch provided as a paramater,
+# and then returns with the current checked out branch being the
+# result of the squash.
+squash_multiple_commits() {
+	local squash_branch="$*"
+	local commit_message_file=$(tempfile -p "git-flow")
+
+	# Determine the contents of the commit message
+	local allMessages="$(git log --reverse --pretty=format:"%s%n%ad%n%b" "$ORIGIN/$MASTER_BRANCH..$BRANCH")"
+	local firstId="$(echo "$allMessages" | grep "Change-Id:" | head -n 1 | sed -e 's/\s*//')"
+	local changedMessages="$(echo "$allMessages" | sed -e 's/Change-Id: .*//')"
+
+	# Construct new commit message
+	echo "$changedMessages" > "$commit_message_file"
+	echo >> "$commit_message_file"
+	echo "$firstId" >> "$commit_message_file"
+
+	# Perform squash
+	git branch --no-track "$squash_branch" "$ORIGIN/$MASTER_BRANCH"
+	git checkout "$squash_branch"
+	git merge --squash "$BRANCH"
+
+	# Perform the commit
+	git commit --edit -F "$commit_message_file"
+
+	# Clean up
+	echo rm -f "$commit_message_file"
+}
+
 cmd_review() {
 	DEFINE_boolean force false "force review submission even if multiple will be opened" F
+	DEFINE_boolean nosquash false "do not squash multiple commits into one review" N
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -265,27 +297,44 @@ cmd_review() {
 	fi
 
 	# sanity checks
-	if ! flag force; then
-		avoid_multiple_reviews
+	if flag nosquash ; then
+		if ! flag force; then
+			avoid_multiple_reviews
+		fi
+	fi
+
+	# Squash commits
+	if ! flag nosquash ; then
+		squash_multiple_commits "review/$BRANCH"
 	fi
 
 	echo
 
 	# Submit review
-	git push $ORIGIN "HEAD:refs/for/$DEVELOP_BRANCH/$BRANCH"
+	git push "$ORIGIN" "HEAD:refs/for/$DEVELOP_BRANCH/$BRANCH"
+	local pushResult=$?
 
-	if [ $? -ne 0 ] ; then
-		echo
-		echo "Summary of actions:"
+	local changeId="$(git log --pretty="format:%b" -n1 | grep "Change-Id:" | head -n1 | sed -e 's/.*Change-Id: //')"
+
+	# If we squashed, clean up
+	if ! flag nosquash ; then
+		git checkout "$BRANCH"
+		git branch -D "review/$BRANCH"
+	fi
+
+	echo
+	echo "Summary of actions:"
+	if [ $pushResult -ne 0 ] ; then
 		echo "- Failed to submit code review!"
 		echo "  See above for details; likely there are no changes"
 		echo
+		echo "- Review should already be online at "
+		echo "  https://source.cummings.local/#/q/$changeId,n,z"
 	else
-		echo
-		echo "Summary of actions:"
 		echo "- A new code review on $DEVELOP_BRANCH for topic '$BRANCH' was created"
-		echo
+		echo "  https://source.cummings.local/#/q/$changeId,n,z"
 	fi
+	echo
 
 }
 
