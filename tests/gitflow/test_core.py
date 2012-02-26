@@ -13,7 +13,7 @@ def all_commits(repo):
     return s
 
 
-class TestGitFlow(TestCase):
+class TestGitFlowBasics(TestCase):
 
     # Configuration
     @copy_from_fixture('custom_repo')
@@ -100,7 +100,9 @@ class TestGitFlow(TestCase):
             ], gitflow.status())
 
 
+class TestGitFlowInit(TestCase):
     # git flow init
+
     def test_gitflow_init_inits_underlying_git_repo(self):
         sandbox = create_sandbox(self)
         gitflow = GitFlow(sandbox)
@@ -288,6 +290,8 @@ class TestGitFlow(TestCase):
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
+
+class TestGitFlowBranchManagement(TestCase):
 
     # Branch type detection
     def test_detect_branch_types(self):
