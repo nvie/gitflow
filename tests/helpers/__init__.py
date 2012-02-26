@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from functools import wraps
 from unittest2 import TestCase
+import git
 from git import Repo
 
 
@@ -115,7 +116,30 @@ def remote_clone_from_fixture(fixture_name, copy_config=True):
     return _outer
 
 
+def git_working_dir(func):
+    """
+    Decorator which changes the current working dir to the one of the
+    git repository in order to assure relative paths are handled
+    correctly.
+    """
+    # Adopted from GitPython's git.index.util.git_working_dir
+    # Copyright (C) 2008, 2009 Michael Trier (mtrier@gmail.com) and
+    #    contributors
+    # Released under the BSD License:
+    # http://www.opensource.org/licenses/bsd-license.php
+    @wraps(func)
+    def set_git_working_dir(repo, *args, **kwargs):
+        cur_wd = os.getcwd()
+        os.chdir(repo.working_tree_dir)
+        try:
+            return func(repo, *args, **kwargs)
+        finally:
+            os.chdir(cur_wd)
 
+    return set_git_working_dir
+
+
+@git_working_dir
 def fake_commit(repo, message, append=True):
     if append:
         f = open('newfile.py', 'a')
