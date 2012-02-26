@@ -510,7 +510,7 @@ class GitFlow(object):
         self.git.rebase(*args)
 
     @requires_repo
-    def pull(self, identifier, remote, local_name):
+    def pull(self, identifier, remote, name):
 
         def avoid_accidental_cross_branch_action(branch_name):
             current_branch = repo.active_branch
@@ -536,15 +536,14 @@ class GitFlow(object):
             # We already have a local branch called like this, so
             # simply pull the remote changes in
             repo.remotes[remote].pull(full_name)
-            info("Pulled %s's changes into %s." % (remote_name, fullname))
+            # :fixme: why is the branch not checked out here?
+            info("Pulled %s's changes into %s." % (remote, full_name))
         else:
-            # Setup the local branch clone for the first time
-            repo.remotes[remote].fetch(full_name) # stores in FETCH_HEAD
-            # set up a non-tracking branch
-            branch = repo.create_head(full_name, 'FETCH_HEAD')
-            branch.checkout()
-            info("Created local branch $s based on %s's $s."
-                 % (full_name, remote_name, full_name))
+            # Setup the non-tracking local branch clone for the first time
+            repo.remotes[remote].fetch(full_name+':'+full_name)
+            repo.heads[full_name].checkout()
+            info("Created local branch %s based on %s's %s."
+                 % (full_name, remote, full_name))
 
 
     @requires_repo
