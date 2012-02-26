@@ -100,6 +100,31 @@ class TestGitFlowBasics(TestCase):
             ], gitflow.status())
 
 
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_status_on_cloned_sample_repo(self):
+        gitflow = GitFlow(self.repo)
+        # NB: only the active branch is created locally when cloning
+        self.assertEqual(self.remote.active_branch.name, 'feat/recursion')
+        self.assertItemsEqual([
+                ('feat/recursion', '54d59c872469c7bf34d540d2fb3128a97502b73f', True),
+            ], gitflow.status())
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_cloned_sample_repo_is_not_remote(self):
+        self.assertNotEqual(self.remote.git_dir, self.repo.git_dir)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_cloned_sample_repo_equals_remote(self):
+        all_remote_commits = all_commits(self.remote)
+        all_cloned_commits = all_commits(self.repo)
+        self.assertEqual(all_remote_commits, all_remote_commits)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_cloned_sample_repo_remote_name(self):
+        self.assertEqual(len(list(self.repo.remotes)), 1)
+        self.assertEqual(self.repo.remotes[0].name, 'my-remote')
+
+
 class TestGitFlowInit(TestCase):
     # git flow init
 
