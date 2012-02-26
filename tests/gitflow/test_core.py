@@ -1,9 +1,11 @@
 from unittest2 import TestCase
 import os
 from ConfigParser import NoOptionError, NoSectionError
+from git import GitCommandError
 from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError
 from gitflow.branches import BranchManager
-from tests.helpers import copy_from_fixture, remote_clone_from_fixture
+from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
+     fake_commit
 from tests.helpers.factory import create_sandbox, create_git_repo
 
 def all_commits(repo):
@@ -343,6 +345,93 @@ class TestGitFlowBranches(TestCase):
         self.repo.branches['feat/recursion'].checkout()
         self.assertEqual(gitflow.name_or_current('feature', 'e'), 'even')
 
+class TestGitFlowCommandPull(TestCase):
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_creates_non_tracking_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        gitflow.pull('feature', 'my-remote', 'even')
+        self.assertEqual(self.repo.active_branch.name, 'feat/even')
+        self.assertEqual(self.repo.active_branch.tracking_branch(), None)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_while_on_other_branchtype_is_allowed(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # activate some hotfix branch
+        new_branch = self.repo.create_head('hf-dummy', 'stable')
+        new_branch.checkout()
+        gitflow.pull('feature', 'my-remote', 'even')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_while_on_same_branchtype_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # activate some feature branch
+        new_branch = self.repo.create_head('feat/something', 'stable')
+        new_branch.checkout()
+        # try to pull another feature branch
+        self.assertRaisesRegexp(
+            SystemExit, "To avoid unintended merges, git-flow aborted.",
+            gitflow.pull, 'feature', 'my-remote', 'my-name-is-irrelevant')
+
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_existing_branch_creates_non_tracking_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # create local branch based on first commit
+        new_branch = self.repo.create_head('feat/even', 'stable')
+        new_branch.checkout()
+        gitflow.pull('feature', 'my-remote', 'even')
+        self.assertEqual(self.repo.active_branch.name, 'feat/even')
+        self.assertEqual(self.repo.active_branch.tracking_branch(), None)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_existing_branch_while_on_other_branchtype_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # create local branch based on first commit
+        new_branch = self.repo.create_head('feat/even', 'stable')
+        self.assertRaisesRegexp(
+            SystemExit, "To avoid unintended merges, git-flow aborted.",
+            gitflow.pull, 'feature', 'my-remote', 'even')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_existing_branch_while_on_same_branchtype_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # create local branch based on first commit
+        new_branch = self.repo.create_head('feat/even', 'stable')
+        # activate some feature branch
+        new_branch = self.repo.create_head('feat/something', 'stable')
+        new_branch.checkout()
+        self.assertRaisesRegexp(
+            SystemExit, "To avoid unintended merges, git-flow aborted.",
+            gitflow.pull, 'feature', 'my-remote', 'even')
+
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_non_existing_feature_raises_error(self):
+        all_remote_commits_before_change = all_commits(self.remote)
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertRaisesRegexp(
+            GitCommandError, "Couldn't find remote ref ",
+            gitflow.pull, 'feature', 'my-remote', 'i-am-not-here')
+
+    # :todo: pull changed and test if new commit is really pulled
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_pull_really_pulls(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.remote.heads['feat/even'].checkout()
+        change = fake_commit(self.remote, "Another commit")
+        self.assertNotIn(change, all_commits(self.repo))
+        gitflow.pull('feature', 'my-remote', 'even')
+        self.assertIn(change, all_commits(self.repo))
+
 
 class TestGitFlowBranchManagement(TestCase):
 
@@ -380,7 +469,7 @@ class TestGitFlowBranchManagement(TestCase):
         self.assertIn('release/1.0',
                 [h.name for h in gitflow.repo.branches])
 
-    def test_create_branches_from_alt_base(self):
+    def _test_create_branches_from_alt_base(self):
         create_git_repo(self)
         gitflow = GitFlow()
         gitflow.init()
