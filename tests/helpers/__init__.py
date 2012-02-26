@@ -104,9 +104,11 @@ def remote_clone_from_fixture(fixture_name, copy_config=True):
             shutil.move('dot_git', '.git')
             self.remote = Repo(dest)
             clone = os.path.join(self.sandbox, 'clone')
-            self.repo = self.remote.clone(clone)
+            self.repo = self.remote.clone(clone, origin='my-remote')
             if copy_config:
                 copy_gitflow_config(self.remote, self.repo)
+            self.repo.config_writer(config_level='repository').set_value(
+                'gitflow', 'origin', 'my-remote')
             os.chdir(clone)
             f(self, *args, **kwargs)
         return _inner

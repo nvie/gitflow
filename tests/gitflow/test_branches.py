@@ -394,7 +394,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(branch.commit, rfc0)
         # must be a tracking branch
         self.assertTrue(branch.tracking_branch())
-        self.assertEqual(branch.tracking_branch().name, 'origin/feat/even')
+        self.assertEqual(branch.tracking_branch().name, 'my-remote/feat/even')
 
 
     @remote_clone_from_fixture('sample_repo')

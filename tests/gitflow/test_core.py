@@ -254,8 +254,8 @@ class TestGitFlowInit(TestCase):
         self.assertEqual(rdc0, dc0)
         self.assertTrue(gitflow.master().tracking_branch())
         self.assertTrue(gitflow.develop().tracking_branch())
-        self.assertEqual(gitflow.master().tracking_branch().name, 'origin/stable')
-        self.assertEqual(gitflow.develop().tracking_branch().name, 'origin/devel')
+        self.assertEqual(gitflow.master().tracking_branch().name, 'my-remote/stable')
+        self.assertEqual(gitflow.develop().tracking_branch().name, 'my-remote/devel')
 
 
     @remote_clone_from_fixture('sample_repo')
