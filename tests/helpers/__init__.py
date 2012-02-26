@@ -124,4 +124,4 @@ def fake_commit(repo, message, append=True):
     finally:
         f.close()
     repo.index.add(['newfile.py'])
-    repo.index.commit(message)
+    return repo.index.commit(message)
