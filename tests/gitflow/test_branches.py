@@ -5,21 +5,9 @@ from gitflow.branches import BranchManager, FeatureBranchManager, \
         ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
         PrefixNotUniqueError, NoSuchBranchError, BranchExistsError, \
         BranchTypeExistsError
-from tests.helpers import copy_from_fixture, remote_clone_from_fixture
+from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
+     fake_commit
 from tests.helpers.factory import create_git_repo
-
-
-def fake_commit(repo, message, append=True):
-    if append:
-        f = open('newfile.py', 'a')
-    else:
-        f = open('newfile.py', 'w')
-    try:
-        f.write('This is a dummy change.\n')
-    finally:
-        f.close()
-    repo.index.add(['newfile.py'])
-    repo.index.commit(message)
 
 
 class DummyBranchManager(BranchManager):

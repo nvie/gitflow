@@ -112,3 +112,16 @@ def remote_clone_from_fixture(fixture_name, copy_config=True):
         return _inner
     return _outer
 
+
+
+def fake_commit(repo, message, append=True):
+    if append:
+        f = open('newfile.py', 'a')
+    else:
+        f = open('newfile.py', 'w')
+    try:
+        f.write('This is a dummy change.\n')
+    finally:
+        f.close()
+    repo.index.add(['newfile.py'])
+    repo.index.commit(message)
