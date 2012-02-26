@@ -1,7 +1,7 @@
 from unittest2 import TestCase
 import os
 from ConfigParser import NoOptionError, NoSectionError
-from gitflow.core import GitFlow, NotInitialized
+from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError
 from gitflow.branches import BranchManager
 from tests.helpers import copy_from_fixture, remote_clone_from_fixture
 from tests.helpers.factory import create_sandbox, create_git_repo
@@ -289,6 +289,34 @@ class TestGitFlowInit(TestCase):
         # Explicitly forced back to defaults
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
+
+
+class TestGitFlowBranches(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_name_or_current_defaults_to_current(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # gitflow.init checks out `devel` branch :-(
+        self.repo.branches['feat/recursion'].checkout()
+        self.assertEqual(gitflow.name_or_current('feature', ''), 'recursion')
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_name_or_current_on_other_branch_type_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # gitflow.init checks out `devel` branch :-(
+        self.repo.branches['feat/recursion'].checkout()
+        self.assertRaises(NoSuchBranchError,
+                          gitflow.name_or_current, 'release', '')
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_name_or_current_expands_prefix(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        # gitflow.init check sout `devel` branch :-(
+        self.repo.branches['feat/recursion'].checkout()
+        self.assertEqual(gitflow.name_or_current('feature', 'e'), 'even')
 
 
 class TestGitFlowBranchManagement(TestCase):
