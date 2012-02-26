@@ -6,15 +6,14 @@ from gitflow.branches import BranchManager
 from tests.helpers import copy_from_fixture, remote_clone_from_fixture
 from tests.helpers.factory import create_sandbox, create_git_repo
 
+def all_commits(repo):
+    s = set([])
+    for h in repo.heads:
+        s |= set(repo.iter_commits(h))
+    return s
+
+
 class TestGitFlow(TestCase):
-
-    # Helper methods
-    def all_commits(self, repo):
-        s = set([])
-        for h in repo.heads:
-            s |= set(repo.iter_commits(h))
-        return s
-
 
     # Configuration
     @copy_from_fixture('custom_repo')
@@ -179,18 +178,18 @@ class TestGitFlow(TestCase):
 
     @copy_from_fixture('sample_repo')
     def test_gitflow_init_creates_no_extra_commits(self):
-        all_commits_before_init = self.all_commits(self.repo)
+        all_commits_before_init = all_commits(self.repo)
         gitflow = GitFlow(self.repo)
         gitflow.init()
-        all_commits_after_init = self.all_commits(self.repo)
+        all_commits_after_init = all_commits(self.repo)
         self.assertEquals(all_commits_before_init, all_commits_after_init)
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_init_cloned_creates_no_extra_commits(self):
-        all_commits_before_init = self.all_commits(self.repo)
+        all_commits_before_init = all_commits(self.repo)
         gitflow = GitFlow(self.repo)
         gitflow.init()
-        all_commits_after_init = self.all_commits(self.repo)
+        all_commits_after_init = all_commits(self.repo)
         self.assertEquals(all_commits_before_init, all_commits_after_init)
 
     @copy_from_fixture('sample_repo')
@@ -203,10 +202,10 @@ class TestGitFlow(TestCase):
 
     def test_gitflow_init_creates_initial_commit(self):
         repo = create_git_repo(self)
-        all_commits_before_init = self.all_commits(repo)
+        all_commits_before_init = all_commits(repo)
         gitflow = GitFlow(repo)
         gitflow.init()
-        all_commits_after_init = self.all_commits(repo)
+        all_commits_after_init = all_commits(repo)
         self.assertNotEquals(all_commits_before_init, all_commits_after_init)
         self.assertEquals('Initial commit', repo.heads.master.commit.message)
 
