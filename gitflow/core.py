@@ -475,15 +475,14 @@ class GitFlow(object):
         if remote_name in repo.branches:
             raise BranchExistsError(remote_name)
 
-        origin = self.origin()
         # create remote branch
-        origin.push('%s:refs/heads/%s' % (branch, branch))
+        origin = self.origin()
+        info = origin.push('%s:refs/heads/%s' % (full_name, full_name))[0]
         origin.fetch()
-
         # configure remote tracking
-        self.set ("branch.%s.remote" % branch, origin)
-        self.set ("branch.%s.merge" % branch, "refs/heads/%s" % branch)
-        return branch.checkout()
+        repo.branches[full_name].set_tracking_branch(info.remote_ref)
+
+        return full_name
 
 
     @requires_repo
