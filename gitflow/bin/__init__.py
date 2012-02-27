@@ -240,8 +240,11 @@ class FeatureCommand(GitFlowCommand):
         p = parent.add_parser('pull',
                 help='Pull a feature branch from a remote peer.')
         p.set_defaults(func=self.run_pull)
-        p.add_argument('remote')
-        p.add_argument('name', nargs='?')
+        p.add_argument('remote',
+                       help="Remote repository to pull from.")
+        p.add_argument('name', nargs='?',
+                help='Name of the feature branch to pull. '
+                'Defaults to the current branch, if it is a feature branch.')
         # :todo: implement --prefix
         #p.add-argument('-p', '--prefix',
         #               help='alternative remote feature branch name prefix')
