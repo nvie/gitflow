@@ -10,14 +10,8 @@ from git import GitCommandError
 from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError
 from gitflow.branches import BranchManager
 from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
-     fake_commit
+     fake_commit, all_commits
 from tests.helpers.factory import create_sandbox, create_git_repo
-
-def all_commits(repo):
-    s = set([])
-    for h in repo.heads:
-        s |= set(repo.iter_commits(h))
-    return s
 
 
 class TestGitFlowBasics(TestCase):
