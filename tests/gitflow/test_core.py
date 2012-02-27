@@ -112,6 +112,17 @@ class TestGitFlowBasics(TestCase):
             ], gitflow.status())
 
     @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_status_on_remote_sample_repo(self):
+        gitflow = GitFlow(self.remote)
+        self.assertItemsEqual([
+                ('stable', '296586bb164c946cad10d37e82570f60e6348df9', False),
+                ('devel', '2b34cd2e1617e5f0d4e077c6ec092b9f50ed49a3', False),
+                ('feat/recursion', '54d59c872469c7bf34d540d2fb3128a97502b73f', True),
+                ('feat/even', 'e56be18dada9e81ca7969760ddea357b0c4c9412', False),
+            ], gitflow.status())
+
+
+    @remote_clone_from_fixture('sample_repo')
     def test_gitflow_cloned_sample_repo_is_not_remote(self):
         self.assertNotEqual(self.remote.git_dir, self.repo.git_dir)
 
@@ -431,6 +442,56 @@ class TestGitFlowCommandPull(TestCase):
         self.assertNotIn(change, all_commits(self.repo))
         gitflow.pull('feature', 'my-remote', 'even')
         self.assertIn(change, all_commits(self.repo))
+
+
+class TestGitFlowCommandPublish(TestCase):
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_creates_remote_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        gitflow.create('feature', 'circular', 'devel', fetch=False)
+        gitflow.publish('feature', 'circular')
+        self.assertIn('feat/circular', self.remote.branches)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_creates_sets_tracking_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        gitflow.create('feature', 'circular', 'devel', fetch=False)
+        gitflow.publish('feature', 'circular')
+
+        self.assertTrue(self.repo.branches['feat/circular'].tracking_branch())
+        self.assertTrue(self.repo.branches['feat/circular'].tracking_branch().name,
+                        'my-remote/feat/circular')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_really_pushes(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        gitflow.create('feature', 'circular', 'devel', fetch=False)
+        change = fake_commit(self.repo, "Another commit")
+        all_local_commits = all_commits(self.repo)
+        self.assertIn(change, all_local_commits)
+        gitflow.publish('feature', 'circular')
+
+        all_remote_commits = all_commits(self.remote)
+        self.assertEqual(all_remote_commits, all_remote_commits)
+        self.assertIn(change, all_remote_commits)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_non_existing_branch_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertRaises(NoSuchBranchError,
+                          gitflow.publish, 'feature', 'new-feature')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_branch_existing_remote_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertRaises(NoSuchBranchError,
+                          gitflow.publish, 'feature', 'even')
 
 
 class TestGitFlowBranchManagement(TestCase):
