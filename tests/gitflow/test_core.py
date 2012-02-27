@@ -1,5 +1,10 @@
 from unittest2 import TestCase
 import os
+import sys
+try:
+    import cStringIO as StringIO
+except:
+    import StringIO
 from ConfigParser import NoOptionError, NoSectionError
 from git import GitCommandError
 from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError
@@ -492,6 +497,27 @@ class TestGitFlowCommandPublish(TestCase):
         gitflow.init()
         self.assertRaises(NoSuchBranchError,
                           gitflow.publish, 'feature', 'even')
+
+
+class TestGitFlowCommandDiff(TestCase):
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_creates_remote_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        orig_stdout = sys.stdout
+        sys.stdout = StringIO.StringIO()
+        gitflow.diff('feature', 'recursion')
+        diff = sys.stdout.getvalue()
+        sys.stdout = orig_stdout
+        difflines = diff.splitlines()
+        matchlines = [
+            'diff --git a/odd.py b/odd.py',
+            'index 607a269..8a0c7ff 100644',
+            '--- a/odd.py',
+            '+++ b/odd.py',
+            ]
+        self.assertEqual(difflines[:len(matchlines)], matchlines)
 
 
 class TestGitFlowBranchManagement(TestCase):
