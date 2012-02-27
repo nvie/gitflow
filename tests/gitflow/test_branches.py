@@ -356,23 +356,11 @@ class TestFeatureBranchManager(TestCase):
     def test_finish_feature_keep(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
-
-        mc0 = gitflow.master().commit
-        dc0 = gitflow.develop().commit
         mgr.finish('even', keep=True)
-        mc1 = gitflow.master().commit
-        dc1 = gitflow.develop().commit
-
-        # Feature finishes don't advance master, but develop
-        self.assertEqual(mc0, mc1)
-        self.assertNotEqual(dc0, dc1)
-
-        # Finishing removes the feature branch
+        # feature branch still exists
         self.assertIn('feat/even',
                 [b.name for b in self.repo.branches])
 
-        # Merge commit message
-        self.assertEquals('Finished feature even.\n', dc1.message)
 
     @remote_clone_from_fixture('sample_repo')
     def test_finish_feature_on_unpulled_branch_raises_error(self):
