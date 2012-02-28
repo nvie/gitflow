@@ -165,32 +165,49 @@ class BranchManager(object):
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
 
-        origin = None
-        if gitflow.origin_name(full_name) in repo.refs:
-            # If the origin branch counterpart exists use it
-            origin = repo.refs[gitflow.origin_name(full_name)]
-        if base is None:
-            base = origin and origin.name or self.default_base()
-        if must_be_on_default_base:
-            if not gitflow.is_merged_into(base, self.default_base()):
-                raise BaseNotOnDefaultBranch(self.identifier, self.default_base())
-
         if gitflow.is_dirty() and not gitflow.has_unmerged_changes():
             raise WorkdirIsDirtyError()
 
         # update the local repo with remote changes, if asked
-        if origin and fetch:
-            repo.fetch(origin)
+        if fetch:
+            # :fixme: Should this be really `fetch`, not `update`?
+            # :fixme:  `fetch` does not change any refs, so it is quite
+            # :fixme:  useless. But `update` would advance `develop` and
+            # :fixme:  moan about required merges.
+            # :fixme:  OTOH, `update` would also give new remote refs,
+            # :fixme:  e.g. a remote branch with the same name.
+            gitflow.origin().fetch(self.default_base())
 
         # If the origin branch counterpart exists, assert that the
         # local branch isn't behind it (to avoid unnecessary rebasing).
-        if origin:
-            gitflow.require_branches_equal(base, origin.name)
+        if gitflow.origin_name(self.default_base()) in repo.refs:
+            # :todo: rethink: check this only if base == default_base()?
+            gitflow.require_branches_equal(
+                gitflow.origin_name(self.default_base()),
+                self.default_base())
+
+        if base is None:
+            base = self.default_base()
+        elif must_be_on_default_base:
+            if not gitflow.is_merged_into(base, self.default_base()):
+                raise BaseNotOnBranch(base, self.default_base())
+
+        # If there is a remote branch with the same name, use it
+        remote_branch = None
+        if gitflow.origin_name(full_name) in repo.refs:
+            remote_branch = repo.refs[gitflow.origin_name(full_name)]
+            if fetch:
+                gitflow.origin().fetch(remote_branch.remote_head)
+            # Base must be on the remote branch, too, to avoid conflicts
+            if not gitflow.is_merged_into(base, remote_branch):
+                raise BaseNotOnBranch(base, remote_branch)
+            # base the new local branch on the remote on
+            base = remote_branch
 
         branch = repo.create_head(full_name, base)
         branch.checkout()
-        if origin:
-            branch.set_tracking_branch(origin)
+        if remote_branch:
+            branch.set_tracking_branch(remote_branch)
         return branch
 
     def _is_single_commit_branch(self, from_, to):
