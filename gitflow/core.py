@@ -47,6 +47,9 @@ class BranchExists(Exception):
 class InvalidOperation(Exception):
     pass
 
+class NoSuchRemoteError(Exception):
+    pass
+
 class _NONE:
     pass
 
@@ -231,7 +234,10 @@ class GitFlow(object):
 
     @requires_repo
     def origin(self):
-        return self.repo.remotes[self.origin_name()]
+        try:
+            return self.repo.remotes[self.origin_name()]
+        except IndexError:
+            raise NoSuchRemoteError(self.origin_name())
 
     @requires_repo
     def develop(self):

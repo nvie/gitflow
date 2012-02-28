@@ -7,7 +7,8 @@ except:
     import StringIO
 from ConfigParser import NoOptionError, NoSectionError
 from git import GitCommandError
-from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError
+from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError, \
+     NoSuchRemoteError
 from gitflow.branches import BranchManager
 from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
      fake_commit, all_commits
@@ -66,6 +67,12 @@ class TestGitFlowBasics(TestCase):
         gitflow = GitFlow(self.repo)
         gitflow.init()
         self.assertNotEqual(gitflow.repo.active_branch.name, active_branch)
+
+    def test_origin_without_remote_raises_error(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        self.assertRaises(NoSuchRemoteError, gitflow.origin)
 
     # Sanity checking
     def test_new_repo_is_not_dirty(self):
