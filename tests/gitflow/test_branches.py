@@ -1,12 +1,12 @@
 from unittest2 import TestCase
 from git import GitCommandError
-from gitflow.core import GitFlow
+from gitflow.core import GitFlow, NoSuchRemoteError
 from gitflow.branches import BranchManager, FeatureBranchManager, \
         ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
         PrefixNotUniqueError, NoSuchBranchError, BranchExistsError, \
         BranchTypeExistsError
 from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
-     fake_commit
+     fake_commit, all_commits
 from tests.helpers.factory import create_git_repo
 
 
@@ -174,6 +174,84 @@ class TestFeatureBranchManager(TestCase):
         mgr = FeatureBranchManager(gitflow)
         mgr.create('foo')
         self.assertRaises(BranchExistsError, mgr.create, 'foo')
+
+    def test_create_feature_branch_fetch_without_remote_raises_error(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        self.assertRaises(NoSuchRemoteError, mgr.create, 'foo', fetch=True)
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_create_feature_from_remote_branch(self):
+        remote_branch = self.remote.refs['feat/even']
+        rfc0 = remote_branch.commit
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        branch = self.repo.active_branch
+        self.assertEqual(branch.name, 'feat/even')
+        self.assertEqual(branch.commit, rfc0)
+        # must be a tracking branch
+        self.assertTrue(branch.tracking_branch())
+        self.assertEqual(branch.tracking_branch().name, 'my-remote/feat/even')
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_create_feature_from_remote_branch_with_develop_behind(self):
+        # If BranchManager.create() uses `update`, this test-case has
+        # to be adopted, since since `update` change the cloned repo.
+        rfc0 = self.remote.refs['feat/even'].commit
+        rdc0 = self.remote.refs['devel'].commit
+        # add a commit to remote develop branch
+        self.remote.refs['devel'].checkout()
+        change = fake_commit(self.remote, "Yet another develop commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        # must not advance develop nor feat/even
+        self.assertEqual(self.repo.refs['feat/even'].commit, rfc0)
+        self.assertEqual(self.repo.refs['devel'].commit, rdc0)
+        # change must not be in local repo
+        self.assertNotIn(change, all_commits(self.repo))
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_create_feature_from_remote_branch_behind(self):
+        # If BranchManager.create() uses `update`, this test-case has
+        # to be adopted, since since `update` change the cloned repo.
+        rfc0 = self.remote.refs['feat/even'].commit
+        # add a commit to remote feat/even branch
+        self.remote.refs['feat/even'].checkout()
+        change = fake_commit(self.remote, "Yet another even commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        # does not advance feat/even, since create() uses `fetch`, not `update`
+        self.assertEqual(self.repo.refs['feat/even'].commit, rfc0)
+        # change must not be in local repo, since create() uses `fetch`, not `update`
+        self.assertNotIn(change, all_commits(self.repo))
+
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_create_feature_fetch_from_remote_branch_behind_really_fetches(self):
+        rfc0 = self.remote.refs['feat/even'].commit
+        # add a commit to remote feat/even branch
+        self.remote.refs['feat/even'].checkout()
+        change = fake_commit(self.remote, "Yet another even commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even', fetch=True)
+        # must not advance feat/even
+        self.assertEqual(self.repo.refs['feat/even'].commit, rfc0)
+        # change must nor be in local repo
+        self.assertNotIn(change, all_commits(self.repo))
+
 
     @copy_from_fixture('sample_repo')
     def test_create_feature_changes_active_branch(self):
@@ -373,21 +451,6 @@ class TestFeatureBranchManager(TestCase):
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
         self.assertRaises(NoSuchBranchError, mgr.finish, 'even', push=True)
-
-    @remote_clone_from_fixture('sample_repo')
-    def test_create_feature_from_remote_branch(self):
-        remote_branch = self.remote.refs['feat/even']
-        rfc0 = remote_branch.commit
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-        mgr = FeatureBranchManager(gitflow)
-        mgr.create('even')
-        branch = self.repo.active_branch
-        self.assertEqual(branch.name, 'feat/even')
-        self.assertEqual(branch.commit, rfc0)
-        # must be a tracking branch
-        self.assertTrue(branch.tracking_branch())
-        self.assertEqual(branch.tracking_branch().name, 'my-remote/feat/even')
 
 
     @remote_clone_from_fixture('sample_repo')
