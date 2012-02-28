@@ -152,8 +152,13 @@ def fake_commit(repo, message, append=True):
     repo.index.add(['newfile.py'])
     return repo.index.commit(message)
 
-def all_commits(repo):
+
+def all_commits(repo, heads=None):
     s = set([])
-    for h in repo.heads:
+    if heads:
+        heads = [h for h in repo.heads if h.name in heads]
+    else:
+        heads = repo.heads
+    for h in heads:
         s |= set(repo.iter_commits(h))
     return s
