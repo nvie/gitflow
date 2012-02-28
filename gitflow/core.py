@@ -4,7 +4,8 @@ import os
 import sys
 from functools import wraps
 import git
-from git import Git, Repo, InvalidGitRepositoryError, RemoteReference
+from git import Git, Repo, InvalidGitRepositoryError, RemoteReference, \
+     GitCommandError
 import ConfigParser
 from gitflow.branches import BranchManager, BranchTypeExistsError, \
      NoSuchBranchError
