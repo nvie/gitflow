@@ -37,10 +37,12 @@ class TestGitFlowBasics(TestCase):
         gitflow.init()
         self.assertEquals('production', gitflow.master_name())
         self.assertEquals('master', gitflow.develop_name())
+        self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('f-', gitflow.get_prefix('feature'))
         self.assertEquals('rel-', gitflow.get_prefix('release'))
         self.assertEquals('hf-', gitflow.get_prefix('hotfix'))
         self.assertEquals('supp-', gitflow.get_prefix('support'))
+        self.assertEquals('v', gitflow.get_prefix('versiontag'))
 
 
     # Initialization
@@ -182,22 +184,31 @@ class TestGitFlowInit(TestCase):
         gitflow.init()
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('develop', gitflow.develop_name())
+        self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
         self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
         self.assertEquals('release/', gitflow.get_prefix('release'))
         self.assertEquals('support/', gitflow.get_prefix('support'))
+        self.assertEquals('', gitflow.get_prefix('versiontag'))
 
     def test_gitflow_init_with_alternative_config(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
-        prefixes = dict(feature='f-', hotfix='hf-', release='rel-', support='supp-')
+        prefixes = dict(feature='f-',
+                        hotfix='hf-',
+                        release='rel-',
+                        support='supp-',
+                        origin='somewhereelse',
+                        versiontag='ver')
         gitflow.init(master='foo', develop='bar', prefixes=prefixes)
         self.assertEquals('foo', gitflow.master_name())
         self.assertEquals('bar', gitflow.develop_name())
+        self.assertEquals('somewhereelse', gitflow.origin_name())
         self.assertEquals('f-', gitflow.get_prefix('feature'))
         self.assertEquals('rel-', gitflow.get_prefix('release'))
         self.assertEquals('hf-', gitflow.get_prefix('hotfix'))
         self.assertEquals('supp-', gitflow.get_prefix('support'))
+        self.assertEquals('ver', gitflow.get_prefix('versiontag'))
 
     @copy_from_fixture('partly_inited')
     def test_gitflow_init_config_with_partly_inited(self):
@@ -210,9 +221,11 @@ class TestGitFlowInit(TestCase):
 
         # Implicit defaults
         self.assertEquals('develop', gitflow.develop_name())
+        self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('release/', gitflow.get_prefix('release'))
         self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
         self.assertEquals('support/', gitflow.get_prefix('support'))
+        self.assertEquals('', gitflow.get_prefix('versiontag'))
 
 
     @copy_from_fixture('sample_repo')
@@ -332,9 +345,11 @@ class TestGitFlowInit(TestCase):
 
         # Implicit defaults
         self.assertEquals('develop', gitflow.develop_name())
+        self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('release/', gitflow.get_prefix('release'))
         self.assertEquals('hotfix/', gitflow.get_prefix('hotfix'))
         self.assertEquals('support/', gitflow.get_prefix('support'))
+        self.assertEquals('', gitflow.get_prefix('versiontag'))
 
         # Explicitly forced back to defaults
         self.assertEquals('master', gitflow.master_name())
