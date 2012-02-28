@@ -137,6 +137,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertRaises(PrefixNotUniqueError, mgr.by_name_prefix, 're')
         self.assertRaises(NoSuchBranchError, mgr.by_name_prefix, 'nonexisting')
 
+    #--- create ---
 
     def test_create_new_feature_branch(self):
         repo = create_git_repo(self)
@@ -203,6 +204,8 @@ class TestFeatureBranchManager(TestCase):
         self.repo.index.reset(index=True, working_tree=True, paths=['odd.py'])
         mgr.create('foo')
         self.assertIn('feature/foo', [b.name for b in mgr.iter()])
+
+    #---- delete ---
 
     @copy_from_fixture('sample_repo')
     def test_delete_feature_without_commits(self):
@@ -278,6 +281,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
                 mgr.delete, 'nonexisting')
 
+    #--- merge ---
 
     @copy_from_fixture('sample_repo')
     def test_merge_feature_with_multiple_commits(self):
@@ -329,6 +333,7 @@ class TestFeatureBranchManager(TestCase):
         # Assert the develop tip is unchanged by the merge
         self.assertEqual(dc0, dc1)
 
+    #--- finish ---
 
     @copy_from_fixture('sample_repo')
     def test_finish_feature(self):
