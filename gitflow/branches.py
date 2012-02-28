@@ -327,14 +327,16 @@ class FeatureBranchManager(BranchManager):
         gitflow.must_be_uptodate(gitflow.develop_name(), fetch=fetch)
         if rebase:
             gitflow.rebase(self.identifier, name, interactive=False)
+
+        to_push = [self.gitflow.develop_name()]
+
         self.merge(name, self.gitflow.develop_name(),
                    'Finished %(identifier)s %(short_name)s.')
         if not keep:
             self.delete(name, force=force_delete)
+            to_push.append(':'+full_name)
         if push:
-            gitflow.origin().push(self.gitflow.develop_name())
-            if not keep:
-                gitflow.origin().push(':'+full_name)
+            gitflow.origin().push(to_push)
 
 
 class ReleaseBranchManager(BranchManager):
