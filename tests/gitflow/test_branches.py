@@ -634,6 +634,74 @@ class TestReleaseBranchManager(TestCase):
 
         # Merge commit message
         self.assertEquals('Finished release 1.0.\n', dc1.message)
+        self.assertEquals('Finished release 1.0.\n', mc1.message)
+
+
+    @copy_from_fixture('release')
+    def test_finish_release_keep(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.finish('1.0', keep=True)
+        # release branch still exists
+        self.assertIn('rel/1.0',
+                [b.name for b in self.repo.branches])
+
+
+    @remote_clone_from_fixture('release')
+    def test_create_release_from_remote_branch(self):
+        remote_branch = self.remote.refs['rel/1.0']
+        rfc0 = remote_branch.commit
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        branch = self.repo.active_branch
+        self.assertEqual(branch.name, 'rel/1.0')
+        self.assertEqual(branch.commit, rfc0)
+        # must be a tracking branch
+        self.assertTrue(branch.tracking_branch())
+        self.assertEqual(branch.tracking_branch().name, 'my-remote/rel/1.0')
+
+
+    @remote_clone_from_fixture('release')
+    def test_finish_release_push(self):
+        remote =  GitFlow(self.remote)
+        remote.init()
+        # Since remote is no bare repo, checkout some branch untouched
+        # by this operation.
+        self.remote.heads['feat/even'].checkout()
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+
+        rmc0 = remote.master().commit
+        rdc0 = remote.develop().commit
+        mc0 = gitflow.master().commit
+        dc0 = gitflow.develop().commit
+
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        mgr.finish('1.0', push=True)
+        rmc1 = remote.master().commit
+        rdc1 = remote.develop().commit
+        mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+
+        # Release finishes advances master and develop both local and remote
+        self.assertNotEqual(rmc0, rmc1)
+        self.assertNotEqual(rdc0, rdc1)
+        self.assertNotEqual(mc0, mc1)
+        self.assertNotEqual(dc0, dc1)
+
+        # local and remote heads must be the same again
+        self.assertEqual(rmc1, mc1)
+        self.assertEqual(rdc1, dc1)
+
+        # Finishing removes the remote release branch
+        self.assertNotIn('rel/even',
+                [b.name for b in self.remote.branches])
+
+        # Merge commit message
+        self.assertEquals('Finished release 1.0.\n', rdc1.message)
 
 
 class TestHotfixBranchManager(TestCase):
