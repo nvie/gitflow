@@ -198,9 +198,9 @@ class TestGitFlowInit(TestCase):
                         hotfix='hf-',
                         release='rel-',
                         support='supp-',
-                        origin='somewhereelse',
                         versiontag='ver')
-        gitflow.init(master='foo', develop='bar', prefixes=prefixes)
+        names = dict(origin='somewhereelse')
+        gitflow.init(master='foo', develop='bar', prefixes=prefixes, names=names)
         self.assertEquals('foo', gitflow.master_name())
         self.assertEquals('bar', gitflow.develop_name())
         self.assertEquals('somewhereelse', gitflow.origin_name())

@@ -99,7 +99,7 @@ class GitFlow(object):
             self.defaults['gitflow.prefix.%s' % identifier] = manager.DEFAULT_PREFIX
 
 
-    def _init_config(self, master=None, develop=None, prefixes={},
+    def _init_config(self, master=None, develop=None, prefixes={}, names={},
                      force_defaults=False):
         for setting, default in self.defaults.items():
             if force_defaults:
@@ -108,9 +108,12 @@ class GitFlow(object):
                 value = master
             elif setting == 'gitflow.branch.develop':
                 value = develop
+            elif setting.startswith('gitflow.prefix.'):
+                name = setting[len('gitflow.prefix.'):]
+                value = prefixes.get(name, None)
             else:
-                prefix = setting[len('gitflow.prefix.'):]
-                value = prefixes.get(prefix, None)
+                name = setting[len('gitflow.'):]
+                value = names.get(name, None)
             if value is None:
                 value = self.get(setting, default)
             self.set(setting, value)
@@ -165,10 +168,10 @@ class GitFlow(object):
             self.git.init(self.working_dir)
             self.repo = Repo(self.working_dir)
 
-    def init(self, master=None, develop=None, prefixes={},
+    def init(self, master=None, develop=None, prefixes={}, names={},
              force_defaults=False):
         self._enforce_git_repo()
-        self._init_config(master, develop, prefixes, force_defaults)
+        self._init_config(master, develop, prefixes, names, force_defaults)
         self._init_initial_commit()
         self._init_develop_branch()
 
