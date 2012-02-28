@@ -443,6 +443,14 @@ class GitFlow(object):
                           keep=keep, force_delete=force_delete,
                           tagging_info=tagging_info)
 
+    def tag(self, tagname, commit, sign=False, signingkey=None, message=None):
+        kwargs = {}
+        if sign:
+            kwargs['s'] = True
+        if signingkey:
+            kwargs['u'] = signingkey
+        self.repo.create_tag(tagname, commit, message=message or None, **kwargs)
+
 
     def must_be_uptodate(self, branch, fetch):
         remote_branch = self.origin_name(branch)
