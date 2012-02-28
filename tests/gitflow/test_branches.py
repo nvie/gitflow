@@ -166,7 +166,7 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['develop'].commit)
 
-    def test_create_existing_feature_branch_yields_raises_error(self):
+    def test_create_existing_feature_branch_raises_error(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
         gitflow.init()
@@ -476,7 +476,7 @@ class TestReleaseBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['develop'].commit)
 
-    def test_create_existing_release_branch_yields_raises_error(self):
+    def test_create_existing_release_branch_raises_error(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
         gitflow.init()
