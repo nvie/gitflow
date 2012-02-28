@@ -385,17 +385,29 @@ class ReleaseBranchManager(BranchManager):
         gitflow.must_be_uptodate(gitflow.develop_name(), fetch=fetch)
         gitflow.must_be_uptodate(gitflow.master_name(), fetch=fetch)
 
+        to_push = [self.gitflow.develop_name(), self.gitflow.master_name()]
+
         self.merge(name, self.gitflow.master_name(),
                 'Finished %(identifier)s %(short_name)s.')
+
+        if tagging_info is not None:
+            # try to tag the release
+            tagname = self.gitflow.get('gitflow.prefix.versiontag') + name
+            # In case a previous attempt to finish this release branch
+            # has failed, but the tag was set successful, we skip it
+            # now.
+            # :todo: check: if tag exists, it must point to the commit
+            gitflow.tag(tagname, self.gitflow.master_name(),
+                        **tagging_info)
+            to_push.append(tagname)
+
         self.merge(name, self.gitflow.develop_name(),
                 'Finished %(identifier)s %(short_name)s.')
         if not keep:
             self.delete(name, force=force_delete)
+            to_push.append(':'+full_name)
         if push:
-            i = gitflow.origin().push(self.gitflow.develop_name())
-            i = gitflow.origin().push(self.gitflow.master_name())
-            if not keep:
-                gitflow.origin().push(':'+full_name)
+            gitflow.origin().push(to_push)
 
 
 class HotfixBranchManager(BranchManager):
