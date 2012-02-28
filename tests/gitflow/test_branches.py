@@ -646,6 +646,22 @@ class TestReleaseBranchManager(TestCase):
         self.assertIn('rel/1.0',
                 [b.name for b in self.repo.branches])
 
+    @copy_from_fixture('release')
+    def test_finish_release_tag(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+        taginfo = dict(
+            message = 'Tagging version 1.0'
+            )
+        mgr.finish('1.0', tagging_info=taginfo)
+        mc1 = gitflow.master().commit
+        # tag exists
+        self.assertIn('v1.0', self.repo.tags)
+        self.assertEqual(self.repo.tags['v1.0'].commit, mc1)
+        # tag message
+        self.assertEqual(self.repo.tags['v1.0'].tag.message,
+                         'Tagging version 1.0')
+
 
     @remote_clone_from_fixture('release')
     def test_create_release_from_remote_branch(self):
@@ -702,6 +718,28 @@ class TestReleaseBranchManager(TestCase):
 
         # Merge commit message
         self.assertEquals('Finished release 1.0.\n', rdc1.message)
+
+    @remote_clone_from_fixture('release')
+    def test_finish_release_tag_push(self):
+        # Since remote is no bare repo, checkout some branch untouched
+        # by this operation. :fixme: find better solution
+        self.remote.heads['feat/even'].checkout()
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        taginfo = dict(
+            message = 'Tagging version 1.0'
+            )
+        mgr.finish('1.0', push=True, tagging_info=taginfo)
+        mc1 = gitflow.master().commit
+        # remote tag exists
+        self.assertIn('v1.0', self.remote.tags)
+        self.assertEqual(self.remote.tags['v1.0'].commit, mc1)
+        # tag message
+        self.assertEqual(self.remote.tags['v1.0'].tag.message,
+                         'Tagging version 1.0')
 
 
 class TestHotfixBranchManager(TestCase):
