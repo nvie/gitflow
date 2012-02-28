@@ -592,7 +592,7 @@ class GitFlow(object):
         if commit1 == commit2:
             return 0
         try:
-            base = repo.git.merge_base(commit1, commit2)
+            base = self.repo.git.merge_base(commit1, commit2)
         except GitCommandError:
             return 4
         if base == commit1:
