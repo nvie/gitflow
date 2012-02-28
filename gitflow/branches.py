@@ -371,12 +371,30 @@ class ReleaseBranchManager(BranchManager):
         return super(ReleaseBranchManager, self).create(
             version, base, fetch=fetch, must_be_on_default_base=True)
 
-    def finish(self, name):
+
+    def finish(self, name, fetch=False, rebase=False, keep=False,
+               force_delete=False, push=False):
+        assert rebase == False, "Rebasing a release branch does not make any sense."
+        # require release branch to exist
+        # if flag-fetch: fetch master und develop
+        #   diese muessen dann gleich $ORIGIN/master bzw. $ORIGIN/develop sein
+        gitflow = self.gitflow
+        full_name = self.full_name(name)
+        gitflow.must_be_uptodate(full_name, fetch=fetch)
+        gitflow.must_be_uptodate(gitflow.develop_name(), fetch=fetch)
+        gitflow.must_be_uptodate(gitflow.master_name(), fetch=fetch)
+
         self.merge(name, self.gitflow.master_name(),
                 'Finished %(identifier)s %(short_name)s.')
         self.merge(name, self.gitflow.develop_name(),
                 'Finished %(identifier)s %(short_name)s.')
-        self.delete(name)
+        if not keep:
+            self.delete(name, force=force_delete)
+        if push:
+            i = gitflow.origin().push(self.gitflow.develop_name())
+            i = gitflow.origin().push(self.gitflow.master_name())
+            if not keep:
+                gitflow.origin().push(':'+full_name)
 
 
 class HotfixBranchManager(BranchManager):
