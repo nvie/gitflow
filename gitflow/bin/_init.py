@@ -88,7 +88,7 @@ def _ask_config(args, name, question):
         print question +':', default_suggestion
         answer = default_suggestion
     else:
-        answer = raw_input(question + '? [' + default_suggestion + ']')
+        answer = raw_input(question + '? [' + default_suggestion + '] ')
         answer = answer.strip() or default_suggestion
         if answer == '-':
             answer = ''
@@ -96,6 +96,11 @@ def _ask_config(args, name, question):
 
 def _ask_prefix(args, name, question):
     name = 'gitflow.prefix.' + name
+    if not gitflow.get(name, None) or args.force:
+        _ask_config(args, name, question)
+
+def _ask_name(args, name, question):
+    name = 'gitflow.' + name
     if not gitflow.get(name, None) or args.force:
         _ask_config(args, name, question)
 
@@ -114,7 +119,7 @@ def run_default(args):
     if args.use_defaults:
         warn("Using default branch names.")
 
-    # :todo: ask for origin
+    _ask_name(args, "origin", "Remote name to use as origin in git flow")
  
     #-- add a master branch if no such branch exists yet
     if gitflow.has_master_configured() and not args.force:
