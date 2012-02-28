@@ -8,7 +8,7 @@ class BranchExistsError(Exception):
 class PrefixNotUniqueError(Exception):
     pass
 
-class BaseNotOnDefaultBranch(Exception):
+class BaseNotOnBranch(Exception):
     def __str__(self):
         return ("Given base '%s' is not a valid commit on '%s'."
                 % (self.args[1], self.args[0]))
