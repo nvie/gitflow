@@ -415,8 +415,8 @@ class GitFlow(object):
 
 
     @requires_repo
-    def finish(self, identifier, name, fetch, rebase, keep, force_delete
-               ):
+    def finish(self, identifier, name, fetch, rebase, keep, force_delete,
+               tagging_info):
         """
         Finishes a branch of the given type, with the given short name.
 
@@ -440,7 +440,8 @@ class GitFlow(object):
                 "    git flow %s finish %s" % (identifier, name),
                 "")
         return mgr.finish(mgr.shorten(branch.name), fetch=fetch, rebase=rebase,
-                          keep=keep, force_delete=force_delete)
+                          keep=keep, force_delete=force_delete,
+                          tagging_info=tagging_info)
 
 
     def must_be_uptodate(self, branch, fetch):

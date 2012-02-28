@@ -298,7 +298,7 @@ class FeatureBranchManager(BranchManager):
 
 
     def finish(self, name, fetch=False, rebase=False, keep=False,
-               force_delete=False, push=False):
+               force_delete=False, push=False, tagging_info=None):
         """
         Finishes the branch of type `feature` named :attr:`name`.
         Finishing means that:
@@ -320,6 +320,7 @@ class FeatureBranchManager(BranchManager):
         :param push:
             Push changes to the remote repository.
         """
+        assert not tagging_info, "FeatureBranchManager does not support tagging"
         gitflow = self.gitflow
         full_name = self.full_name(name)
         gitflow.must_be_uptodate(full_name, fetch=fetch)
@@ -373,7 +374,7 @@ class ReleaseBranchManager(BranchManager):
 
 
     def finish(self, name, fetch=False, rebase=False, keep=False,
-               force_delete=False, push=False):
+               force_delete=False, push=False, tagging_info=None):
         assert rebase == False, "Rebasing a release branch does not make any sense."
         # require release branch to exist
         # if flag-fetch: fetch master und develop
@@ -442,7 +443,6 @@ class HotfixBranchManager(BranchManager):
                 'Finished %(identifier)s %(short_name)s.')
         self.delete(name)
 
-
 class SupportBranchManager(BranchManager):
     identifier = 'support'
     DEFAULT_PREFIX = 'support/'
@@ -474,6 +474,6 @@ class SupportBranchManager(BranchManager):
         return super(SupportBranchManager, self).create(
             name, base, fetch=fetch, must_be_on_default_base=True)
 
-    def finish(self, name):
+    def finish(self, *args):
         raise NotImplementedError("Finishing support branches does not make "
                 "any sense.")
