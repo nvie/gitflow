@@ -127,9 +127,15 @@ class TestGitFlowBasics(TestCase):
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_cloned_sample_repo_equals_remote(self):
-        all_remote_commits = all_commits(self.remote)
+        # only the active branch (feat/recursion) is cloned which
+        # includes devel and stable
+        heads_to_check = [h.name for h in self.remote.heads]
+        heads_to_check.remove('feat/even')
+        self.assertIn('devel', heads_to_check)
+        self.assertIn('stable', heads_to_check)
+        all_remote_commits = all_commits(self.remote, heads_to_check)
         all_cloned_commits = all_commits(self.repo)
-        self.assertEqual(all_remote_commits, all_remote_commits)
+        self.assertEqual(all_remote_commits, all_cloned_commits)
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_cloned_sample_repo_remote_name(self):
