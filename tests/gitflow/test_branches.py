@@ -668,7 +668,7 @@ class TestReleaseBranchManager(TestCase):
         remote =  GitFlow(self.remote)
         remote.init()
         # Since remote is no bare repo, checkout some branch untouched
-        # by this operation.
+        # by this operation. :fixme: find better solution
         self.remote.heads['feat/even'].checkout()
         gitflow = GitFlow(self.repo)
         gitflow.init()
