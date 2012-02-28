@@ -333,12 +333,14 @@ class GitFlow(object):
             full branch-name, or any of branch-, head- or
             reference-object.
         """
-        if isinstance(target_branch, git.SymbolicReference):
+        if isinstance(target_branch, git.RemoteReference):
+            target_branch = 'remotes/' + target_branch.name
+        elif isinstance(target_branch, git.SymbolicReference):
             target_branch = target_branch.name
         # :todo: implement this more efficiently
         return target_branch in [
             b.lstrip('* ')
-            for b in self.git.branch('--contains', commit).splitlines()]
+            for b in self.git.branch('-a', '--contains', commit).splitlines()]
 
 
     @requires_repo
