@@ -605,7 +605,6 @@ class GitFlow(object):
 
     @requires_repo
     def require_branches_equal(self, branch1, branch2):
-        reop = self.repo
         status = self.compare_branches(branch1, branch2)
         if status == 0:
             # branches are equal
