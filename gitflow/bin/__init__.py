@@ -15,6 +15,7 @@ git-flow
 """
 
 import argparse
+
 from gitflow.core import GitFlow, die, info, BranchTypeExistsError
 from gitflow.util import itersubclasses
 
@@ -26,7 +27,8 @@ class GitFlowCommand(object):
     subclasses, implementing a new subcommand is as easy as subclassing the
     :class:`GitFlowCommand`.
     """
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         raise NotImplementedError("Implement this method in a subclass.")
 
     @staticmethod
@@ -35,9 +37,10 @@ class GitFlowCommand(object):
 
 
 class VersionCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('version', help='Show the version of gitflow.')
-        p.set_defaults(func=self.run)
+        p.set_defaults(func=cls.run)
 
     @staticmethod
     def run(args):
@@ -46,9 +49,10 @@ class VersionCommand(GitFlowCommand):
 
 
 class StatusCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('status', help='Show some status.')
-        p.set_defaults(func=self.run)
+        p.set_defaults(func=cls.run)
 
     @staticmethod
     def run(args):
@@ -62,7 +66,8 @@ class StatusCommand(GitFlowCommand):
 
 
 class InitCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('init',
                               help='Initialize a repository for gitflow.')
         p.add_argument('-f', '--force', action='store_true',
@@ -70,7 +75,7 @@ class InitCommand(GitFlowCommand):
         p.add_argument('-d', '--defaults', action='store_true',
                        dest='use_defaults',
                        help='use default branch naming conventions and prefixes')
-        p.set_defaults(func=self.run)
+        p.set_defaults(func=cls.run)
         return p
 
     @staticmethod
@@ -80,23 +85,25 @@ class InitCommand(GitFlowCommand):
 
 
 class FeatureCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('feature', help='Manage your feature branches.')
         sub = p.add_subparsers(title='Actions')
-        self.register_list(sub)
-        self.register_start(sub)
-        self.register_finish(sub)
-        self.register_publish(sub)
-        self.register_track(sub)
-        self.register_diff(sub)
-        self.register_rebase(sub)
-        self.register_checkout(sub)
-        self.register_pull(sub)
+        cls.register_list(sub)
+        cls.register_start(sub)
+        cls.register_finish(sub)
+        cls.register_publish(sub)
+        cls.register_track(sub)
+        cls.register_diff(sub)
+        cls.register_rebase(sub)
+        cls.register_checkout(sub)
+        cls.register_pull(sub)
 
     #- list
-    def register_list(self, parent):
+    @classmethod
+    def register_list(cls, parent):
         p = parent.add_parser('list', help='List all feature branches.')
-        p.set_defaults(func=self.run_list)
+        p.set_defaults(func=cls.run_list)
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
@@ -108,9 +115,10 @@ class FeatureCommand(GitFlowCommand):
                      verbose=args.verbose)
 
     #- start
-    def register_start(self, parent):
+    @classmethod
+    def register_start(cls, parent):
         p = parent.add_parser('start', help='Start a new feature branch.')
-        p.set_defaults(func=self.run_start)
+        p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
         p.add_argument('name')
@@ -141,9 +149,10 @@ class FeatureCommand(GitFlowCommand):
         print
 
     #- finish
-    def register_finish(self, parent):
+    @classmethod
+    def register_finish(cls, parent):
         p = parent.add_parser('finish', help='Finish a feature branch.')
-        p.set_defaults(func=self.run_finish)
+        p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
         p.add_argument('-r', '--rebase', action='store_true',
@@ -162,10 +171,11 @@ class FeatureCommand(GitFlowCommand):
         gitflow.finish('feature', args.nameprefix)
 
     #- publish
-    def register_publish(self, parent):
+    @classmethod
+    def register_publish(cls, parent):
         p = parent.add_parser('publish',
                 help='Publish this feature branch to origin.')
-        p.set_defaults(func=self.run_publish)
+        p.set_defaults(func=cls.run_publish)
         p.add_argument('nameprefix', nargs='?')
 
     @staticmethod
@@ -182,10 +192,11 @@ class FeatureCommand(GitFlowCommand):
         print
 
     #- track
-    def register_track(self, parent):
+    @classmethod
+    def register_track(cls, parent):
         p = parent.add_parser('track',
                 help='Track a feature branch from origin.')
-        p.set_defaults(func=self.run_track)
+        p.set_defaults(func=cls.run_track)
         p.add_argument('name')
 
     @staticmethod
@@ -202,10 +213,11 @@ class FeatureCommand(GitFlowCommand):
         print
 
     #- diff
-    def register_diff(self, parent):
+    @classmethod
+    def register_diff(cls, parent):
         p = parent.add_parser('diff',
                 help='Show a diff of changes since this feature branched off.')
-        p.set_defaults(func=self.run_diff)
+        p.set_defaults(func=cls.run_diff)
         p.add_argument('nameprefix', nargs='?')
 
     @staticmethod
@@ -217,10 +229,11 @@ class FeatureCommand(GitFlowCommand):
 
 
     #- rebase
-    def register_rebase(self, parent):
+    @classmethod
+    def register_rebase(cls, parent):
         p = parent.add_parser('rebase',
                 help='Rebase a feature branch on top of develop.')
-        p.set_defaults(func=self.run_rebase)
+        p.set_defaults(func=cls.run_rebase)
         p.add_argument('-i', '--interactive', action='store_true',
                 help='Start an interactive rebase.')
         p.add_argument('nameprefix', nargs='?')
@@ -233,10 +246,11 @@ class FeatureCommand(GitFlowCommand):
         gitflow.rebase('feature', name, args.interactive)
 
     #- checkout
-    def register_checkout(self, parent):
+    @classmethod
+    def register_checkout(cls, parent):
         p = parent.add_parser('checkout',
                 help='Check out (switch to) the given feature branch.')
-        p.set_defaults(func=self.run_checkout)
+        p.set_defaults(func=cls.run_checkout)
         p.add_argument('nameprefix')
 
     @staticmethod
@@ -248,10 +262,11 @@ class FeatureCommand(GitFlowCommand):
         gitflow.checkout('feature', name)
 
     #- pull
-    def register_pull(self, parent):
+    @classmethod
+    def register_pull(cls, parent):
         p = parent.add_parser('pull',
                 help='Pull a feature branch from a remote peer.')
-        p.set_defaults(func=self.run_pull)
+        p.set_defaults(func=cls.run_pull)
         p.add_argument('remote',
                        help="Remote repository to pull from.")
         p.add_argument('name', nargs='?',
@@ -271,21 +286,23 @@ class FeatureCommand(GitFlowCommand):
 
 
 class ReleaseCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('release', help='Manage your release branches.')
         p.add_argument('-v', '--verbose', action='store_true',
            help='be verbose (more output)')
         sub = p.add_subparsers(title='Actions')
-        self.register_list(sub)
-        self.register_start(sub)
-        self.register_finish(sub)
-        self.register_publish(sub)
-        self.register_track(sub)
+        cls.register_list(sub)
+        cls.register_start(sub)
+        cls.register_finish(sub)
+        cls.register_publish(sub)
+        cls.register_track(sub)
 
     #- list
-    def register_list(self, parent):
+    @classmethod
+    def register_list(cls, parent):
         p = parent.add_parser('list', help='List all release branches.')
-        p.set_defaults(func=self.run_list)
+        p.set_defaults(func=cls.run_list)
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
@@ -297,9 +314,10 @@ class ReleaseCommand(GitFlowCommand):
                      verbose=args.verbose)
 
     #- start
-    def register_start(self, parent):
+    @classmethod
+    def register_start(cls, parent):
         p = parent.add_parser('start', help='Start a new release branch.')
-        p.set_defaults(func=self.run_start)
+        p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                        #:todo: get "origin" from config
                 help='Fetch from origin before performing local operation.')
@@ -330,9 +348,10 @@ class ReleaseCommand(GitFlowCommand):
         print "     git flow release finish", args.version
 
     #- finish
-    def register_finish(self, parent):
+    @classmethod
+    def register_finish(cls, parent):
         p = parent.add_parser('finish', help='Finish a release branch.')
-        p.set_defaults(func=self.run_finish)
+        p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
         p.add_argument('-r', '--rebase', action='store_true',
@@ -358,10 +377,11 @@ class ReleaseCommand(GitFlowCommand):
         pass
 
     #- publish
-    def register_publish(self, parent):
+    @classmethod
+    def register_publish(cls, parent):
         p = parent.add_parser('publish',
                 help='Publish this release branch to origin.')
-        p.set_defaults(func=self.run_publish)
+        p.set_defaults(func=cls.run_publish)
         p.add_argument('version', nargs='?')
 
     @staticmethod
@@ -378,10 +398,11 @@ class ReleaseCommand(GitFlowCommand):
         print
 
     #- track
-    def register_track(self, parent):
+    @classmethod
+    def register_track(cls, parent):
         p = parent.add_parser('track',
                 help='Track a release branch from origin.')
-        p.set_defaults(func=self.run_track)
+        p.set_defaults(func=cls.run_track)
         p.add_argument('version')
 
     @staticmethod
@@ -399,20 +420,22 @@ class ReleaseCommand(GitFlowCommand):
 
 
 class HotfixCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('hotfix', help='Manage your hotfix branches.')
         p.add_argument('-v', '--verbose', action='store_true',
            help='be verbose (more output)')
         sub = p.add_subparsers(title='Actions')
-        self.register_list(sub)
-        self.register_start(sub)
-        self.register_finish(sub)
-        self.register_publish(sub)
+        cls.register_list(sub)
+        cls.register_start(sub)
+        cls.register_finish(sub)
+        cls.register_publish(sub)
 
     #- list
-    def register_list(self, parent):
+    @classmethod
+    def register_list(cls, parent):
         p = parent.add_parser('list', help='List all hotfix branches.')
-        p.set_defaults(func=self.run_list)
+        p.set_defaults(func=cls.run_list)
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
@@ -424,9 +447,10 @@ class HotfixCommand(GitFlowCommand):
                      verbose=args.verbose)
 
     #- start
-    def register_start(self, parent):
+    @classmethod
+    def register_start(cls, parent):
         p = parent.add_parser('start', help='Start a new hotfix branch.')
-        p.set_defaults(func=self.run_start)
+        p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                        #:todo: get "origin" from config
                 help='Fetch from origin before performing local operation.')
@@ -462,9 +486,11 @@ class HotfixCommand(GitFlowCommand):
         print "     git flow hotfix finish ", args.version
 
     #- finish
-    def register_finish(self, parent):
+    @classmethod
+    def register_finish(cls, parent):
+        pass
         p = parent.add_parser('finish', help='Finish a hotfix branch.')
-        p.set_defaults(func=self.run_finish)
+        p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
         p.add_argument('-r', '--rebase', action='store_true',
@@ -490,10 +516,11 @@ class HotfixCommand(GitFlowCommand):
         pass
 
     #- publish
-    def register_publish(self, parent):
+    @classmethod
+    def register_publish(cls, parent):
         p = parent.add_parser('publish',
                 help='Publish this hotfix branch to origin.')
-        p.set_defaults(func=self.run_publish)
+        p.set_defaults(func=cls.run_publish)
         p.add_argument('version', nargs='?')
 
     @staticmethod
@@ -511,18 +538,20 @@ class HotfixCommand(GitFlowCommand):
 
 
 class SupportCommand(GitFlowCommand):
-    def register_parser(self, parent):
+    @classmethod
+    def register_parser(cls, parent):
         p = parent.add_parser('support', help='Manage your support branches.')
         p.add_argument('-v', '--verbose', action='store_true',
            help='be verbose (more output)')
         sub = p.add_subparsers(title='Actions')
-        self.register_list(sub)
-        self.register_start(sub)
+        cls.register_list(sub)
+        cls.register_start(sub)
 
     #- list
-    def register_list(self, parent):
+    @classmethod
+    def register_list(cls, parent):
         p = parent.add_parser('list', help='List all support branches.')
-        p.set_defaults(func=self.run_list)
+        p.set_defaults(func=cls.run_list)
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
@@ -534,9 +563,10 @@ class SupportCommand(GitFlowCommand):
                      verbose=args.verbose)
 
     #- start
-    def register_start(self, parent):
+    @classmethod
+    def register_start(cls, parent):
         p = parent.add_parser('start', help='Start a new support branch.')
-        p.set_defaults(func=self.run_start)
+        p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
         p.add_argument('name')
@@ -569,7 +599,7 @@ def main():
     parser = argparse.ArgumentParser(prog='git flow')
     placeholder = parser.add_subparsers(title='Subcommands')
     for cls in itersubclasses(GitFlowCommand):
-        cls().register_parser(placeholder)
+        cls.register_parser(placeholder)
     args = parser.parse_args()
     try:
         args.func(args)
