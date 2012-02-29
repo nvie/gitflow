@@ -13,7 +13,11 @@ class InvalidOperation(GitflowError): pass
 class NoSuchRemoteError(GitflowError):pass
 
 class PrefixNotUniqueError(GitflowError):pass
-class BranchTypeExistsError(GitflowError): pass
+
+class BranchTypeExistsError(GitflowError):
+    def __str__(self):
+        return("There is an existing %s branch. "
+                "Finish that one first." % self.args[0])
 
 class BaseNotOnBranch(GitflowError):
     def __str__(self):
