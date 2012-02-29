@@ -78,7 +78,7 @@ def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
             if remote_name in gitflow.branch_names(remote=True):
                 gitflow.repo.branch(branch_name, remote_name)
             else:
-                die("Local branch '%s' does not exist." % branch_name)
+                raise NoSuchLocalBranchError(branch_name)
 
     # store the name of the develop branch
     gitflow.set(name, branch_name)
@@ -115,9 +115,7 @@ def run_default(args):
 
     if gitflow.is_initialized():
         if not args.force:
-            warn("Already initialized for gitflow.")
-            warn("To force reinitialization, use: git flow init -f")
-            raise SystemExit(1)
+            raise AlreadyInitialized()
 
     if args.use_defaults:
         warn("Using default branch names.")
