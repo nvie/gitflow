@@ -1,14 +1,16 @@
-import time
-import datetime
 import os
 import sys
-from functools import wraps
-import git
-from git import Git, Repo, InvalidGitRepositoryError, RemoteReference, \
-     GitCommandError
+import time
+import datetime
 import ConfigParser
-from gitflow.branches import BranchManager, BranchTypeExistsError, \
-     NoSuchBranchError
+from functools import wraps
+
+import git
+from git import (Git, Repo, InvalidGitRepositoryError, RemoteReference,
+                 GitCommandError)
+
+from gitflow.branches import (BranchManager, BranchTypeExistsError,
+                              NoSuchBranchError)
 from gitflow.util import itersubclasses
 
 

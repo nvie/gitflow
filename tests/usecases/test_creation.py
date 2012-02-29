@@ -1,4 +1,5 @@
 from unittest2 import TestCase, skip
+
 from gitflow.core import GitFlow
 from tests.helpers.factory import create_git_repo
 

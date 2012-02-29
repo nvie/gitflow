@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+
 from unittest2 import TestCase
 from git import Repo
 

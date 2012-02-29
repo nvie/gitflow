@@ -1,12 +1,16 @@
 from unittest2 import TestCase
+
 from git import GitCommandError
+
 from gitflow.core import GitFlow, NoSuchRemoteError
-from gitflow.branches import BranchManager, FeatureBranchManager, \
-        ReleaseBranchManager, HotfixBranchManager, SupportBranchManager, \
-        PrefixNotUniqueError, NoSuchBranchError, BranchExistsError, \
-        BranchTypeExistsError
-from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
-     fake_commit, all_commits
+from gitflow.branches import (
+    BranchManager, FeatureBranchManager,
+    ReleaseBranchManager, HotfixBranchManager, SupportBranchManager,
+    PrefixNotUniqueError, NoSuchBranchError, BranchExistsError,
+    BranchTypeExistsError)
+
+from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
+                           fake_commit, all_commits)
 from tests.helpers.factory import create_git_repo
 
 

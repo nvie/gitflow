@@ -2,8 +2,8 @@ import os
 import shutil
 import tempfile
 from functools import wraps
+
 from unittest2 import TestCase
-import git
 from git import Repo
 
 

@@ -6,12 +6,14 @@ try:
 except:
     import StringIO
 from ConfigParser import NoOptionError, NoSectionError
+
 from git import GitCommandError
-from gitflow.core import GitFlow, NotInitialized, NoSuchBranchError, \
-     NoSuchRemoteError
+
+from gitflow.core import (GitFlow, NotInitialized, NoSuchBranchError,
+                          NoSuchRemoteError)
 from gitflow.branches import BranchManager
-from tests.helpers import copy_from_fixture, remote_clone_from_fixture, \
-     fake_commit, all_commits
+from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
+                           fake_commit, all_commits)
 from tests.helpers.factory import create_sandbox, create_git_repo
 
 
