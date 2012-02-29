@@ -9,9 +9,13 @@ import git
 from git import (Git, Repo, InvalidGitRepositoryError, RemoteReference,
                  GitCommandError)
 
-from gitflow.branches import (BranchManager, BranchTypeExistsError,
-                              NoSuchBranchError)
+from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
+
+from gitflow.exceptions import (NotInitialized, InvalidOperation,
+                                BranchExists, BranchTypeExistsError,
+                                NoSuchRemoteError, 
+                                NoSuchBranchError)
 
 
 def datetime_to_timestamp(d):
@@ -39,18 +43,6 @@ def die(*texts):
     warn(*texts)
     raise SystemExit(1)
 
-
-class NotInitialized(Exception):
-    pass
-
-class BranchExists(Exception):
-    pass
-
-class InvalidOperation(Exception):
-    pass
-
-class NoSuchRemoteError(Exception):
-    pass
 
 class _NONE:
     pass

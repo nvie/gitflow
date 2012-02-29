@@ -1,21 +1,8 @@
 
-class NoSuchBranchError(Exception):
-    pass
-
-class BranchExistsError(Exception):
-    pass
-
-class PrefixNotUniqueError(Exception):
-    pass
-
-class BaseNotOnBranch(Exception):
-    def __str__(self):
-        return ("Given base '%s' is not a valid commit on '%s'."
-                % (self.args[1], self.args[0]))
-
-class WorkdirIsDirtyError(Exception): pass
-class BranchTypeExistsError(Exception): pass
-class TagExistsError(Exception): pass
+from gitflow.exceptions import (NoSuchBranchError, BranchExistsError,
+                                PrefixNotUniqueError, BaseNotOnBranch,
+                                WorkdirIsDirtyError, BranchTypeExistsError,
+                                TagExistsError)
 
 
 class BranchManager(object):

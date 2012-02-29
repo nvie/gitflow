@@ -3,8 +3,11 @@
 git-flow init
 """
 
-from gitflow.core import (GitFlow as CoreGitFlow, NotInitialized,
-                          warn, die)
+from gitflow.core import GitFlow as CoreGitFlow, warn
+
+from gitflow.exceptions import (AlreadyInitialized, NotInitialized,
+                                NoSuchLocalBranchError, NoSuchBranchError)
+
 
 class GitFlow(CoreGitFlow):
 

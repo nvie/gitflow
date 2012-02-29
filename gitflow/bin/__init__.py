@@ -16,9 +16,10 @@ git-flow
 
 import argparse
 
-from gitflow.core import GitFlow, die, info, BranchTypeExistsError
+from gitflow.core import GitFlow, die, info
 from gitflow.util import itersubclasses
-
+from gitflow.exceptions import (GitflowError, AlreadyInitialized,
+                                BranchTypeExistsError)
 
 class GitFlowCommand(object):
     """
