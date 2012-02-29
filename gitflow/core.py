@@ -13,9 +13,9 @@ from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
 
 from gitflow.exceptions import (NotInitialized, InvalidOperation,
-                                BranchExists, BranchTypeExistsError,
-                                NoSuchRemoteError, 
-                                NoSuchBranchError)
+                                BranchExists, BranchExistsError,
+                                BranchTypeExistsError,
+                                NoSuchRemoteError, NoSuchBranchError)
 
 
 def datetime_to_timestamp(d):
@@ -470,10 +470,10 @@ class GitFlow(object):
         full_name = mgr.full_name(name)
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
-        remote_name = self.origin_name(full_name)
         self.origin().fetch(full_name)
-        branch = repo.create_head(full_name, remote_name)
-        branch.set_tracking_branch(remote_name)
+        remote_branch = self.origin().refs[full_name]
+        branch = repo.create_head(full_name, remote_branch)
+        branch.set_tracking_branch(remote_branch)
         return branch.checkout()
 
     @requires_repo
