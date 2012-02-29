@@ -617,9 +617,9 @@ class GitFlow(object):
         else:
             warn("Branches '%s' and '%s' have diverged." % (branch1, branch2))
             if status == 1:
-                die("And branch '%s' may be fast-forwarded." % branch1)
+                raise SystemExit("And branch '%s' may be fast-forwarded." % branch1)
             elif status == 2:
                 # Warn here, since there is no harm in being ahead
                 warn("And local branch '%s' is ahead of '%s'." % (branch1, branch2))
             else:
-                die("Branches need merging first.")
+                raise SystemExit("Branches need merging first.")

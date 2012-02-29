@@ -605,7 +605,7 @@ def main():
     try:
         args.func(args)
     except KeyboardInterrupt:
-        die('', 'Aborted by user request.')
+        raise SystemExit('Aborted by user request.')
 
 
 if __name__ == '__main__':

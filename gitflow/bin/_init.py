@@ -66,10 +66,10 @@ def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
                            % (desc2, default_suggestion))
         branch_name = answer.strip() or default_suggestion
     if not branch_name:
-        die('You need to give a branch name.')
+        raise SystemExit('You need to give a branch name.')
     # check existence in case of an already existing repo
     if branch_name in filter:
-        die("Production and integration branches should differ.")
+        raise SystemExit("Production and integration branches should differ.")
     if should_check_existence:
         # if no local branch exists and a remote branch of the same
         # name exists, checkout that branch and use it for the local branch
