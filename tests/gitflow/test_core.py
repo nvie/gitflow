@@ -9,9 +9,10 @@ from ConfigParser import NoOptionError, NoSectionError
 
 from git import GitCommandError
 
-from gitflow.core import (GitFlow, NotInitialized, NoSuchBranchError,
-                          NoSuchRemoteError)
+from gitflow.core import GitFlow
 from gitflow.branches import BranchManager
+from gitflow.exceptions import (BranchExistsError, NotInitialized,
+                                NoSuchBranchError, NoSuchRemoteError)
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits)
 from tests.helpers.factory import create_sandbox, create_git_repo
@@ -358,6 +359,75 @@ class TestGitFlowInit(TestCase):
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
 
+class TestGitFlowMerges(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_is_merged_into(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+
+        # feat/even is ahead of devel
+        self.assertTrue(gitflow.is_merged_into('devel', 'feat/even'))
+        self.assertFalse(gitflow.is_merged_into('feat/even', 'devel'))
+        # devel as a symbolic ref
+        self.assertFalse(gitflow.is_merged_into('feat/even',
+                                                self.repo.refs['devel']))
+        # feat/even a symbolic ref
+        self.assertFalse(gitflow.is_merged_into(self.repo.refs['feat/even'],
+                                                'devel'))
+        # HEAD
+        self.assertFalse(gitflow.is_merged_into('HEAD', 'devel'))
+        self.assertFalse(gitflow.is_merged_into(self.repo.head, 'devel'))
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_is_merged_into_remote(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+
+        # devel is behind feat/even
+        self.assertTrue(gitflow.is_merged_into(
+            'devel',
+            'remotes/my-remote/feat/even'))
+        self.assertTrue(gitflow.is_merged_into(
+            'devel',
+            gitflow.origin().refs['devel']))
+        self.assertTrue(gitflow.is_merged_into(
+            gitflow.origin().refs['devel'],
+            'remotes/my-remote/feat/even'))
+        self.assertTrue(gitflow.is_merged_into(
+            gitflow.origin().refs['devel'],
+            gitflow.origin().refs['devel']))
+
+        # feat/even is ahead of devel
+        self.assertFalse(gitflow.is_merged_into(
+            'feat/recursion',
+            'devel'))
+        self.assertFalse(gitflow.is_merged_into(
+            'remotes/my-remote/feat/recursion',
+            'devel'))
+
+        self.assertFalse(gitflow.is_merged_into(
+            'feat/recursion',
+            gitflow.origin().refs['devel']))
+        self.assertFalse(gitflow.is_merged_into(
+            'remotes/my-remote/feat/recursion',
+            gitflow.origin().refs['devel']))
+
+    #:todo: test-case is_merged_into_remote with remote branch beeing ahead
+    #       of corresponding local branch
+
+
+class TestGitFlowCheckout(TestCase):
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_name_or_current_defaults_to_current(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        active_branch = self.repo.active_branch
+        gitflow.checkout('feature', 'even')
+        self.assertNotEqual(gitflow.repo.active_branch.name, active_branch)
+        self.assertEqual(gitflow.repo.active_branch.name, 'feat/even')
+
+
 class TestGitFlowBranches(TestCase):
 
     @copy_from_fixture('sample_repo')
@@ -384,6 +454,28 @@ class TestGitFlowBranches(TestCase):
         # gitflow.init check sout `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
         self.assertEqual(gitflow.name_or_current('feature', 'e'), 'even')
+
+class TestGitFlowCommandTrack(TestCase):
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_track_creates_tracking_branch(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        gitflow.track('feature', 'even')
+        self.assertEqual(self.repo.active_branch.name, 'feat/even')
+        self.assertTrue(self.repo.active_branch.tracking_branch())
+        self.assertEqual(self.repo.refs['feat/even'].tracking_branch(),
+                         gitflow.origin().refs['feat/even'])
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_track_existing_branch_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        self.assertRaises(BranchExistsError,
+                          gitflow.track, 'feature', 'recursion')
+
+    # :todo: more test-cases for GitFlow.track()
+
 
 class TestGitFlowCommandPull(TestCase):
 
