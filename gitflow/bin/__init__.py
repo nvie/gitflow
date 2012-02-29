@@ -29,7 +29,8 @@ class GitFlowCommand(object):
     def register_parser(self, parent):
         raise NotImplementedError("Implement this method in a subclass.")
 
-    def run(self, args):
+    @staticmethod
+    def run(args):
         raise NotImplementedError("Implement this method in a subclass.")
 
 
@@ -38,7 +39,8 @@ class VersionCommand(GitFlowCommand):
         p = parent.add_parser('version', help='Show the version of gitflow.')
         p.set_defaults(func=self.run)
 
-    def run(self, args):
+    @staticmethod
+    def run(args):
         from gitflow import __version__
         print(__version__)
 
@@ -48,7 +50,8 @@ class StatusCommand(GitFlowCommand):
         p = parent.add_parser('status', help='Show some status.')
         p.set_defaults(func=self.run)
 
-    def run(self, args):
+    @staticmethod
+    def run(args):
         gitflow = GitFlow()
         for name, hexsha, is_active_branch in gitflow.status():
             if is_active_branch:
@@ -70,7 +73,8 @@ class InitCommand(GitFlowCommand):
         p.set_defaults(func=self.run)
         return p
 
-    def run(self, args):
+    @staticmethod
+    def run(args):
         from . import _init
         _init.run_default(args)
 
@@ -96,7 +100,8 @@ class FeatureCommand(GitFlowCommand):
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
-    def run_list(self, args):
+    @staticmethod
+    def run_list(args):
         gitflow = GitFlow()
         gitflow.start_transaction()
         gitflow.list('feature', 'name', use_tagname=False,
@@ -111,7 +116,8 @@ class FeatureCommand(GitFlowCommand):
         p.add_argument('name')
         p.add_argument('base', nargs='?')
 
-    def run_start(self, args):
+    @staticmethod
+    def run_start(args):
         gitflow = GitFlow()
         # :fixme: Why does the sh-version not require a clean working dir?
         # NB: `args.name` is required since the branch must not yet exist
@@ -148,7 +154,8 @@ class FeatureCommand(GitFlowCommand):
                 help='Force delete feature branch after finish.')
         p.add_argument('nameprefix', nargs='?')
 
-    def run_finish(self, args):
+    @staticmethod
+    def run_finish(args):
         gitflow = GitFlow()
         gitflow.start_transaction('finishing feature branch %s'
                 % args.nameprefix)
@@ -161,7 +168,8 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_publish)
         p.add_argument('nameprefix', nargs='?')
 
-    def run_publish(self, args):
+    @staticmethod
+    def run_publish(args):
         gitflow = GitFlow()
         name = gitflow.name_or_current('feature', args.nameprefix)
         gitflow.start_transaction('publishing feature branch %s' % name)
@@ -180,7 +188,8 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_track)
         p.add_argument('name')
 
-    def run_track(self, args):
+    @staticmethod
+    def run_track(args):
         gitflow = GitFlow()
         # NB: `args.name` is required since the branch must not yet exist
         gitflow.start_transaction('tracking remote feature branch %s'
@@ -199,7 +208,8 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_diff)
         p.add_argument('nameprefix', nargs='?')
 
-    def run_diff(self, args):
+    @staticmethod
+    def run_diff(args):
         gitflow = GitFlow()
         name = gitflow.name_or_current('feature', args.nameprefix)
         gitflow.start_transaction('diff for feature branch %s' % name)
@@ -215,7 +225,8 @@ class FeatureCommand(GitFlowCommand):
                 help='Start an interactive rebase.')
         p.add_argument('nameprefix', nargs='?')
 
-    def run_rebase(self, args):
+    @staticmethod
+    def run_rebase(args):
         gitflow = GitFlow()
         name = gitflow.name_or_current('feature', args.nameprefix)
         gitflow.start_transaction('rebasing feature branch %s' % name)
@@ -228,7 +239,8 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=self.run_checkout)
         p.add_argument('nameprefix')
 
-    def run_checkout(self, args):
+    @staticmethod
+    def run_checkout(args):
         gitflow = GitFlow()
         # NB: Does not default to the current branch as `nameprefix` is required
         name = gitflow.name_or_current('feature', args.nameprefix)
@@ -249,7 +261,8 @@ class FeatureCommand(GitFlowCommand):
         #p.add-argument('-p', '--prefix',
         #               help='alternative remote feature branch name prefix')
 
-    def run_pull(self, args):
+    @staticmethod
+    def run_pull(args):
         gitflow = GitFlow()
         name = gitflow.name_or_current('feature', args.name)
         gitflow.start_transaction('pulling remote feature branch %s '
@@ -276,7 +289,8 @@ class ReleaseCommand(GitFlowCommand):
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
-    def run_list(self, args):
+    @staticmethod
+    def run_list(args):
         gitflow = GitFlow()
         gitflow.start_transaction()
         gitflow.list('release', 'version', use_tagname=True,
@@ -292,7 +306,8 @@ class ReleaseCommand(GitFlowCommand):
         p.add_argument('version')
         p.add_argument('base', nargs='?')
 
-    def run_start(self, args):
+    @staticmethod
+    def run_start(args):
         gitflow = GitFlow()
         # NB: `args.version` is required since the branch must not yet exist
         # :fixme: get default value for `base`
@@ -338,7 +353,9 @@ class ReleaseCommand(GitFlowCommand):
                        help="don't tag this release")
         p.add_argument('version')
 
-    def run_finish(self, args): pass
+    @staticmethod
+    def run_finish(args):
+        pass
 
     #- publish
     def register_publish(self, parent):
@@ -347,7 +364,8 @@ class ReleaseCommand(GitFlowCommand):
         p.set_defaults(func=self.run_publish)
         p.add_argument('version', nargs='?')
 
-    def run_publish(self, args):
+    @staticmethod
+    def run_publish(args):
         gitflow = GitFlow()
         version = gitflow.name_or_current('release', args.version)
         gitflow.start_transaction('publishing release branch %s' % version)
@@ -366,7 +384,8 @@ class ReleaseCommand(GitFlowCommand):
         p.set_defaults(func=self.run_track)
         p.add_argument('version')
 
-    def run_track(self, args):
+    @staticmethod
+    def run_track(args):
         gitflow = GitFlow()
         # NB: `args.version` is required since the branch must not yet exist
         gitflow.start_transaction('tracking remote release branch %s'
@@ -397,7 +416,8 @@ class HotfixCommand(GitFlowCommand):
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
-    def run_list(self, args):
+    @staticmethod
+    def run_list(args):
         gitflow = GitFlow()
         gitflow.start_transaction()
         gitflow.list('hotfix', 'version', use_tagname=True,
@@ -413,7 +433,8 @@ class HotfixCommand(GitFlowCommand):
         p.add_argument('version')
         p.add_argument('base', nargs='?')
 
-    def run_start(self, args):
+    @staticmethod
+    def run_start(args):
         gitflow = GitFlow()
         # NB: `args.version` is required since the branch must not yet exist
         # :fixme: get default value for `base`
@@ -464,7 +485,9 @@ class HotfixCommand(GitFlowCommand):
                        help="don't tag this hotfix")
         p.add_argument('version')
 
-    def run_finish(self, args): pass
+    @staticmethod
+    def run_finish(args):
+        pass
 
     #- publish
     def register_publish(self, parent):
@@ -473,7 +496,8 @@ class HotfixCommand(GitFlowCommand):
         p.set_defaults(func=self.run_publish)
         p.add_argument('version', nargs='?')
 
-    def run_publish(self, args):
+    @staticmethod
+    def run_publish(args):
         gitflow = GitFlow()
         version = gitflow.name_or_current('hotfix', args.version)
         gitflow.start_transaction('publishing hotfix branch %s' % version)
@@ -502,7 +526,8 @@ class SupportCommand(GitFlowCommand):
         p.add_argument('-v', '--verbose', action='store_true',
                 help='Be verbose (more output).')
 
-    def run_list(self, args):
+    @staticmethod
+    def run_list(args):
         gitflow = GitFlow()
         gitflow.start_transaction()
         gitflow.list('support', 'version', use_tagname=True,
@@ -517,7 +542,8 @@ class SupportCommand(GitFlowCommand):
         p.add_argument('name')
         p.add_argument('base', nargs='?')
 
-    def run_start(self, args):
+    @staticmethod
+    def run_start(args):
         gitflow = GitFlow()
         # NB: `args.name` is required since the branch must not yet exist
         # :fixme: get default value for `base`
