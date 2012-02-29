@@ -23,9 +23,9 @@ class BaseNotOnBranch(GitflowError):
 class TagExistsError(GitflowError): pass
 
 class AlreadyInitialized(GitflowError):
-    def __str__self():
+    def __str__(self):
         return ("Already initialized for gitflow.\n"
-                "To force reinitialization, use: git flow init -f")
+                "To force reinitialization use: git flow init -f")
 
 
 class NoSuchLocalBranchError(NoSuchBranchError):
