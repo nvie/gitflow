@@ -150,8 +150,8 @@ def run_default(args):
         print "How to name your supporting branch prefixes?"
 
     _ask_prefix(args, "feature", "Feature branches")
-    _ask_prefix(args, "release", "Release branche")
-    _ask_prefix(args, "hotfix", " Hotfix branches")
+    _ask_prefix(args, "release", "Release branches")
+    _ask_prefix(args, "hotfix", "Hotfix branches")
     _ask_prefix(args, "support", "Support branches")
     _ask_prefix(args, "versiontag", "Version tag prefix")
 
