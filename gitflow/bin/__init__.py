@@ -609,4 +609,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except GitflowError, e:
+        raise SystemExit('Error: %s' %e)
