@@ -91,6 +91,12 @@ class TestAbstractBranchManager(TestCase):
 
 
 class TestFeatureBranchManager(TestCase):
+    def test_empty_repo_has_no_features(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        mgr = FeatureBranchManager(gitflow)
+        self.assertItemsEqual([], mgr.list())
+
     @copy_from_fixture('sample_repo')
     def test_shorten(self):
         gitflow = GitFlow(self.repo)
@@ -111,12 +117,6 @@ class TestFeatureBranchManager(TestCase):
         mgr = FeatureBranchManager(gitflow)
         expected = ['feat/even', 'feat/recursion']
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
-
-    def test_list_empty_repo(self):
-        repo = create_git_repo(self)
-        gitflow = GitFlow(repo)
-        mgr = FeatureBranchManager(gitflow)
-        self.assertItemsEqual([], mgr.list())
 
     @copy_from_fixture('sample_repo')
     def test_list_without_matching_prefix(self):
@@ -556,6 +556,21 @@ class TestReleaseBranchManager(TestCase):
         mgr.create('1.0')
         self.assertRaises(BranchTypeExistsError, mgr.create, '1.0')
 
+    @remote_clone_from_fixture('release')
+    def test_create_release_from_remote_branch(self):
+        remote_branch = self.remote.refs['rel/1.0']
+        rfc0 = remote_branch.commit
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        branch = self.repo.active_branch
+        self.assertEqual(branch.name, 'rel/1.0')
+        self.assertEqual(branch.commit, rfc0)
+        # must be a tracking branch
+        self.assertTrue(branch.tracking_branch())
+        self.assertEqual(branch.tracking_branch().name, 'my-remote/rel/1.0')
+
     def test_create_release_changes_active_branch(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
@@ -588,7 +603,7 @@ class TestReleaseBranchManager(TestCase):
         self.assertIn('release/1.0', [b.name for b in mgr.iter()])
 
     @copy_from_fixture('sample_repo')
-    def test_delete_release(self):
+    def test_delete_release_without_commits(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
 
@@ -601,7 +616,7 @@ class TestReleaseBranchManager(TestCase):
         self.assertNotIn('rel/1.0', [b.name for b in mgr.list()])
 
     @copy_from_fixture('sample_repo')
-    def test_cannot_delete_current_release(self):
+    def test_delete_current_release_raises_error(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
         mgr.create('1.0').checkout()
@@ -610,7 +625,7 @@ class TestReleaseBranchManager(TestCase):
                 mgr.delete, '1.0')
 
     @copy_from_fixture('sample_repo')
-    def test_cannot_delete_non_existing_release(self):
+    def test_delete_non_existing_release_raises_error(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
         self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
@@ -665,22 +680,6 @@ class TestReleaseBranchManager(TestCase):
         # tag message
         self.assertEqual(self.repo.tags['v1.0'].tag.message,
                          'Tagging version 1.0')
-
-
-    @remote_clone_from_fixture('release')
-    def test_create_release_from_remote_branch(self):
-        remote_branch = self.remote.refs['rel/1.0']
-        rfc0 = remote_branch.commit
-        gitflow = GitFlow(self.repo)
-        gitflow.init()
-        mgr = ReleaseBranchManager(gitflow)
-        mgr.create('1.0')
-        branch = self.repo.active_branch
-        self.assertEqual(branch.name, 'rel/1.0')
-        self.assertEqual(branch.commit, rfc0)
-        # must be a tracking branch
-        self.assertTrue(branch.tracking_branch())
-        self.assertEqual(branch.tracking_branch().name, 'my-remote/rel/1.0')
 
 
     @remote_clone_from_fixture('release')
