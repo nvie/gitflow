@@ -399,50 +399,13 @@ class ReleaseBranchManager(BranchManager):
             gitflow.origin().push(to_push)
 
 
-class HotfixBranchManager(BranchManager):
+class HotfixBranchManager(ReleaseBranchManager):
     identifier = 'hotfix'
     DEFAULT_PREFIX = 'hotfix/'
 
     def default_base(self):
         return self.gitflow.master_name()
 
-    def create(self, version, base=None, fetch=False):
-        """
-        Creates a branch of type `hotfix` and checks it out.
-
-        :param version:
-            The version the hotfix will get and for which to create
-            the release-branch for. This will be prefixed by `hotfix/`
-            or whatever is configured in `gitflow.prefix.hotfix`.
-
-        :param base:
-            The base commit or ref to base the branch off from.  If no
-            base is provided, it defaults to the branch configured in
-            `gitflow.branch.master`.  See also :meth:`default_base`.
-
-        :param fetch:
-            If set, update the local repo with remote changes prior to
-            creating the new branch.
-
-        :returns:
-            The newly created :class:`git.refs.Head` reference.
-        """
-        # there must be no active `hotfix` branch
-        if len(self.list()) > 0:
-            raise BranchTypeExistsError(self.identifier)
-        # there must be no tag for this version yet
-        tagname = self.gitflow.get('gitflow.prefix.versiontag') + version
-        if tagname in self.gitflow.repo.tags:
-            raise TagExists(tagname)
-        return super(HotfixBranchManager, self).create(
-            version, base, fetch=fetch, must_be_on_default_base=True)
-
-    def finish(self, name):
-        self.merge(name, self.gitflow.master_name(),
-                'Finished %(identifier)s %(short_name)s.')
-        self.merge(name, self.gitflow.develop_name(),
-                'Finished %(identifier)s %(short_name)s.')
-        self.delete(name)
 
 class SupportBranchManager(BranchManager):
     identifier = 'support'
