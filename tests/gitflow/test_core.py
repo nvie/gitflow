@@ -359,6 +359,10 @@ class TestGitFlowInit(TestCase):
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
 
+    # :todo: test-cases for tag (with signing)
+    # :todo: test-cases for must_be_uptodate
+    # :todo: test-cases for list (one per BranchManager)
+
 class TestGitFlowMerges(TestCase):
 
     @copy_from_fixture('sample_repo')
@@ -415,6 +419,9 @@ class TestGitFlowMerges(TestCase):
 
     #:todo: test-case is_merged_into_remote with remote branch beeing ahead
     #       of corresponding local branch
+
+    # :todo: test-cases for compare_branches
+    # :todo: test-cases for require_branches_equal
 
 
 class TestGitFlowCheckout(TestCase):
@@ -475,6 +482,11 @@ class TestGitFlowCommandTrack(TestCase):
                           gitflow.track, 'feature', 'recursion')
 
     # :todo: more test-cases for GitFlow.track()
+
+
+class TestGitFlowCommandRebase(TestCase):
+    # :todo: test-cases for rebase - one is okay
+    pass
 
 
 class TestGitFlowCommandPull(TestCase):
@@ -564,6 +576,8 @@ class TestGitFlowCommandPull(TestCase):
         gitflow.pull('feature', 'my-remote', 'even')
         self.assertIn(change, all_commits(self.repo))
 
+    # :todo: pull_requires_clean_working_tree
+
 
 class TestGitFlowCommandPublish(TestCase):
 
@@ -613,6 +627,8 @@ class TestGitFlowCommandPublish(TestCase):
         gitflow.init()
         self.assertRaises(NoSuchBranchError,
                           gitflow.publish, 'feature', 'even')
+
+    # :todo: publish_requires_clean_working_tree
 
 
 class TestGitFlowCommandDiff(TestCase):

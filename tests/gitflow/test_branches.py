@@ -89,6 +89,8 @@ class TestAbstractBranchManager(TestCase):
         self.assertEquals('xyz/foo', fb.full_name('xyz/foo'))
         self.assertEquals('feature/foo', fb.full_name('feature/foo'))
 
+    # :todo: test-cases for merge with conflicts
+
 
 class TestFeatureBranchManager(TestCase):
 
@@ -306,6 +308,9 @@ class TestFeatureBranchManager(TestCase):
         self.repo.index.reset(index=True, working_tree=True, paths=['odd.py'])
         mgr.create('foo')
         self.assertIn('feature/foo', [b.name for b in mgr.iter()])
+
+    # :todo: test-cases for create with base not on develop
+    # :todo: test-cases for create with remote base not on develop
 
     #---- delete ---
 
@@ -533,6 +538,10 @@ class TestFeatureBranchManager(TestCase):
         self.assertIn('feat/even',
                 [b.name for b in self.remote.branches])
 
+    # :todo: test-cases for finish with merge-conflicts for both develop
+    # :todo: test-cases for finish with rebase
+    # :todo: test-cases for finish with rebase-conflicts for both develop
+
 class TestReleaseBranchManager(TestCase):
 
     def test_defined_members(self):
@@ -750,6 +759,9 @@ class TestReleaseBranchManager(TestCase):
         self.repo.index.reset(index=True, working_tree=True, paths=['odd.py'])
         mgr.create('1.0')
         self.assertIn('release/1.0', [b.name for b in mgr.iter()])
+
+    # :todo: test-cases for create with base not on develop
+    # :todo: test-cases for create with remote base not on develop
 
     #---- delete ---
 
@@ -1039,6 +1051,9 @@ class TestHotfixBranchManager(TestCase):
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['stable'].commit)
 
+    # :todo: test-cases for create with base not on master
+    # :todo: test-cases for create with remote base not on master
+
     @copy_from_fixture('sample_repo')
     def test_hotfix_branch_origin(self):
         gitflow = GitFlow()
@@ -1133,6 +1148,9 @@ class TestSupportBranchManager(TestCase):
         new_branch = mgr.create('legacy')
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['stable'].commit)
+
+    # :todo: test-cases for create with base not on master
+    # :todo: test-cases for create with remote base not on master
 
     def test_support_branches_cannot_be_finished(self):
         repo = create_git_repo(self)
