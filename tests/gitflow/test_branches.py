@@ -91,6 +91,13 @@ class TestAbstractBranchManager(TestCase):
 
 
 class TestFeatureBranchManager(TestCase):
+
+    def test_defined_members(self):
+        # must define at least these members
+        members = vars(FeatureBranchManager).keys()
+        self.assertIn('DEFAULT_PREFIX', members)
+        self.assertIn('identifier', members)
+
     def test_empty_repo_has_no_features(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
@@ -512,6 +519,12 @@ class TestFeatureBranchManager(TestCase):
 
 class TestReleaseBranchManager(TestCase):
 
+    def test_defined_members(self):
+        # must define at least these members
+        members = vars(ReleaseBranchManager).keys()
+        self.assertIn('DEFAULT_PREFIX', members)
+        self.assertIn('identifier', members)
+
     @copy_from_fixture('sample_repo')
     def test_shorten(self):
         gitflow = GitFlow(self.repo)
@@ -927,6 +940,12 @@ class TestReleaseBranchManager(TestCase):
 
 class TestHotfixBranchManager(TestCase):
 
+    def test_defined_members(self):
+        members = vars(HotfixBranchManager).keys()
+        self.assertEqual(members,
+                         ['DEFAULT_PREFIX', '__module__',
+                          'identifier', 'default_base', '__doc__'])
+
     @copy_from_fixture('sample_repo')
     def test_shorten(self):
         gitflow = GitFlow(self.repo)
@@ -1006,6 +1025,13 @@ class TestHotfixBranchManager(TestCase):
 
 
 class TestSupportBranchManager(TestCase):
+
+    def test_defined_members(self):
+        # must define at least these members
+        members = vars(SupportBranchManager).keys()
+        self.assertIn('DEFAULT_PREFIX', members)
+        self.assertIn('identifier', members)
+        self.assertIn('default_base',  members)
 
     @copy_from_fixture('sample_repo')
     def test_shorten(self):
