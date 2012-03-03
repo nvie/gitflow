@@ -3,6 +3,8 @@
 git-flow init
 """
 
+import readline # this will trigger readline functionality for raw_input
+
 from gitflow.core import GitFlow as CoreGitFlow, warn
 
 from gitflow.exceptions import (AlreadyInitialized, NotInitialized,
