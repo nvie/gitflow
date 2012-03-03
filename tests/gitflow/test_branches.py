@@ -509,13 +509,29 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(rmc1, mc1)
         self.assertEqual(rdc1, dc1)
 
-        # Finishing removes the remote feature branch
+        # Finishing removes the local and the remote feature branch
+        self.assertNotIn('feat/even',
+                [b.name for b in self.repo.branches])
         self.assertNotIn('feat/even',
                 [b.name for b in self.remote.branches])
 
         # Merge commit message
         self.assertEquals('Finished feature even.\n', rdc1.message)
 
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_finish_feature_push_keep(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.create('even')
+        mgr.finish('even', push=True, keep=True)
+
+        # Finishing removes the local and the remote feature branch
+        self.assertIn('feat/even',
+                [b.name for b in self.repo.branches])
+        self.assertIn('feat/even',
+                [b.name for b in self.remote.branches])
 
 class TestReleaseBranchManager(TestCase):
 
@@ -908,12 +924,34 @@ class TestReleaseBranchManager(TestCase):
         self.assertEqual(rmc1, mc1)
         self.assertEqual(rdc1, dc1)
 
-        # Finishing removes the remote release branch
-        self.assertNotIn('rel/even',
+        # Finishing removes the local and the remote release branch
+        self.assertNotIn('rel/1.0',
+                [b.name for b in self.repo.branches])
+        self.assertNotIn('rel/1.0',
                 [b.name for b in self.remote.branches])
+
 
         # Merge commit message
         self.assertEquals('Finished release 1.0.\n', rdc1.message)
+
+
+    @remote_clone_from_fixture('release')
+    def test_finish_release_push_keep(self):
+        # Since remote is no bare repo, checkout some branch untouched
+        # by this operation. :fixme: find better solution
+        self.remote.heads['feat/even'].checkout()
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        mgr.finish('1.0', push=True, keep=True)
+
+        # release branch still exists local and remote
+        self.assertIn('rel/1.0',
+                [b.name for b in self.repo.branches])
+        self.assertIn('rel/1.0',
+                [b.name for b in self.remote.branches])
+
 
     @remote_clone_from_fixture('release')
     def test_finish_release_tag_push(self):
@@ -936,6 +974,19 @@ class TestReleaseBranchManager(TestCase):
         # tag message
         self.assertEqual(self.remote.tags['v1.0'].tag.message,
                          'Tagging version 1.0')
+
+    # :todo: test-cases for tagging with signing, both with and without key
+
+    # :todo: test-cases for finish with merge-conflicts for both master and develop
+    def test_finish_release_rebase(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        self.assertRaisesRegexp(
+            AssertionError, "does not make any sense",
+            mgr.finish, '1.0', rebase=True)
 
 
 class TestHotfixBranchManager(TestCase):
