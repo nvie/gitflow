@@ -902,6 +902,27 @@ class TestReleaseBranchManager(TestCase):
 
 
 class TestHotfixBranchManager(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_shorten(self):
+        gitflow = GitFlow(self.repo)
+        fb = HotfixBranchManager(gitflow)
+        self.assertEquals('foo', fb.shorten('hf/foo'))
+        self.assertEquals('hotfix/foo', fb.shorten('hotfix/foo'))
+
+    @copy_from_fixture('sample_repo')
+    def test_full_name(self):
+        gitflow = GitFlow(self.repo)
+        fb = HotfixBranchManager(gitflow)
+        self.assertEquals('hf/foo', fb.full_name('foo'))
+        self.assertEquals('hf/hotfix/foo', fb.full_name('hotfix/foo'))
+
+    def test_empty_repo_has_no_hotfixes(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        mgr = HotfixBranchManager(gitflow)
+        self.assertItemsEqual([], mgr.list())
+
     def test_create_new_hotfix_branch(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
@@ -949,6 +970,27 @@ class TestHotfixBranchManager(TestCase):
 
 
 class TestSupportBranchManager(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_shorten(self):
+        gitflow = GitFlow(self.repo)
+        fb = SupportBranchManager(gitflow)
+        self.assertEquals('foo', fb.shorten('supp/foo'))
+        self.assertEquals('support/foo', fb.shorten('support/foo'))
+
+    @copy_from_fixture('sample_repo')
+    def test_full_name(self):
+        gitflow = GitFlow(self.repo)
+        fb = SupportBranchManager(gitflow)
+        self.assertEquals('supp/foo', fb.full_name('foo'))
+        self.assertEquals('supp/support/foo', fb.full_name('support/foo'))
+
+    def test_empty_repo_has_no_support(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        mgr = SupportBranchManager(gitflow)
+        self.assertItemsEqual([], mgr.list())
+
     def test_create_new_support_branch(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
