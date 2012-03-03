@@ -451,6 +451,7 @@ class TestFeatureBranchManager(TestCase):
 
     @remote_clone_from_fixture('sample_repo')
     def test_finish_feature_on_unpulled_branch_raises_error(self):
+        # branch exists on remote but was not pulled prior to finish
         gitflow = GitFlow(self.repo)
         gitflow.init()
         mgr = FeatureBranchManager(gitflow)
@@ -497,6 +498,21 @@ class TestFeatureBranchManager(TestCase):
 
 
 class TestReleaseBranchManager(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_shorten(self):
+        gitflow = GitFlow(self.repo)
+        fb = ReleaseBranchManager(gitflow)
+        self.assertEquals('foo', fb.shorten('rel/foo'))
+        self.assertEquals('release/foo', fb.shorten('release/foo'))
+
+    @copy_from_fixture('sample_repo')
+    def test_full_name(self):
+        gitflow = GitFlow(self.repo)
+        fb = ReleaseBranchManager(gitflow)
+        self.assertEquals('rel/foo', fb.full_name('foo'))
+        self.assertEquals('rel/release/foo', fb.full_name('release/foo'))
+
     def test_empty_repo_has_no_releases(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo)
@@ -516,6 +532,24 @@ class TestReleaseBranchManager(TestCase):
         mgr = ReleaseBranchManager(gitflow, 'rel-')
         expected = []
         self.assertItemsEqual(expected, [b.name for b in mgr.list()])
+
+    @copy_from_fixture('release')
+    def test_by_nameprefix(self):
+        gitflow = GitFlow()
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertEquals('rel/1.0', mgr.by_name_prefix('1').name)
+
+    @copy_from_fixture('release')
+    def test_by_nameprefix_not_unique_enough(self):
+        gitflow = GitFlow()
+        mgr = ReleaseBranchManager(gitflow)
+        # Create branch without manager since manager enforces there
+        # is a single release branch.
+        self.repo.create_head('rel/1.1', 'HEAD')
+        self.assertRaises(PrefixNotUniqueError, mgr.by_name_prefix, '1.')
+        self.assertRaises(NoSuchBranchError, mgr.by_name_prefix, 'nonexisting')
+
+    #--- create ---
 
     def test_create_new_release_branch(self):
         repo = create_git_repo(self)
@@ -556,6 +590,13 @@ class TestReleaseBranchManager(TestCase):
         mgr.create('1.0')
         self.assertRaises(BranchTypeExistsError, mgr.create, '1.0')
 
+    def test_create_release_branch_fetch_without_remote_raises_error(self):
+        repo = create_git_repo(self)
+        gitflow = GitFlow(repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertRaises(NoSuchRemoteError, mgr.create, 'foo', fetch=True)
+
     @remote_clone_from_fixture('release')
     def test_create_release_from_remote_branch(self):
         remote_branch = self.remote.refs['rel/1.0']
@@ -570,6 +611,61 @@ class TestReleaseBranchManager(TestCase):
         # must be a tracking branch
         self.assertTrue(branch.tracking_branch())
         self.assertEqual(branch.tracking_branch().name, 'my-remote/rel/1.0')
+
+    @remote_clone_from_fixture('release')
+    def test_create_release_from_remote_branch_with_develop_behind(self):
+        # If BranchManager.create() uses `update`, this test-case has
+        # to be adopted, since `update` changes the cloned repo.
+        rfc0 = self.remote.refs['rel/1.0'].commit
+        rdc0 = self.remote.refs['devel'].commit
+        # add a commit to remote develop branch
+        self.remote.refs['devel'].checkout()
+        change = fake_commit(self.remote, "Yet another develop commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        # must not advance develop nor rel/1.0
+        self.assertEqual(self.repo.refs['rel/1.0'].commit, rfc0)
+        self.assertEqual(self.repo.refs['devel'].commit, rdc0)
+        # change must not be in local repo
+        self.assertNotIn(change, all_commits(self.repo))
+
+    @remote_clone_from_fixture('release')
+    def test_create_release_from_remote_branch_behind(self):
+        # If BranchManager.create() uses `update`, this test-case has
+        # to be adopted, since since `update` change the cloned repo.
+        rfc0 = self.remote.refs['rel/1.0'].commit
+        # add a commit to remote rel/1.0 branch
+        self.remote.refs['rel/1.0'].checkout()
+        change = fake_commit(self.remote, "Yet another 1.0 commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        # does not advance rel/1.0, since create() uses `fetch`, not `update`
+        self.assertEqual(self.repo.refs['rel/1.0'].commit, rfc0)
+        # change must not be in local repo, since create() uses `fetch`, not `update`
+        self.assertNotIn(change, all_commits(self.repo))
+
+
+    @remote_clone_from_fixture('release')
+    def test_create_release_fetch_from_remote_branch_behind_really_fetches(self):
+        rfc0 = self.remote.refs['rel/1.0'].commit
+        # add a commit to remote rel/1.0 branch
+        self.remote.refs['rel/1.0'].checkout()
+        change = fake_commit(self.remote, "Yet another 1.0 commit.")
+
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0', fetch=True)
+        # must not advance rel/1.0
+        self.assertEqual(self.repo.refs['rel/1.0'].commit, rfc0)
+        # change must nor be in local repo
+        self.assertNotIn(change, all_commits(self.repo))
 
     def test_create_release_changes_active_branch(self):
         repo = create_git_repo(self)
@@ -602,6 +698,8 @@ class TestReleaseBranchManager(TestCase):
         mgr.create('1.0')
         self.assertIn('release/1.0', [b.name for b in mgr.iter()])
 
+    #---- delete ---
+
     @copy_from_fixture('sample_repo')
     def test_delete_release_without_commits(self):
         gitflow = GitFlow(self.repo)
@@ -614,6 +712,50 @@ class TestReleaseBranchManager(TestCase):
         mgr.delete('1.0')
         self.assertEquals(0, len(mgr.list()))
         self.assertNotIn('rel/1.0', [b.name for b in mgr.list()])
+
+    @copy_from_fixture('sample_repo')
+    def test_delete_already_merged_release(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+
+        self.assertEquals(0, len(mgr.list()))
+        mgr.create('0.7')
+        fake_commit(self.repo, 'Dummy commit #1')
+        fake_commit(self.repo, 'Dummy commit #2')
+        mgr.merge('0.7', 'devel')
+
+        self.assertEquals(1, len(mgr.list()))
+        mgr.delete('0.7')
+        self.assertEquals(0, len(mgr.list()))
+        self.assertNotIn('rel/0.7', [b.name for b in mgr.list()])
+
+    @copy_from_fixture('sample_repo')
+    def test_delete_release_with_commits_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+
+        self.assertEquals(0, len(mgr.list()))
+        mgr.create('0.7')
+        fake_commit(self.repo, 'A commit on the release branch.', append=False)
+        gitflow.develop().checkout()
+        self.assertEquals(1, len(mgr.list()))
+        self.assertRaisesRegexp(GitCommandError,
+                'The branch .* is not fully merged',
+                mgr.delete, '0.7')
+
+    @copy_from_fixture('sample_repo')
+    def test_delete_release_with_commits_forcefully(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+
+        self.assertEquals(0, len(mgr.list()))
+        mgr.create('0.7')
+        fake_commit(self.repo, 'A commit on the release branch.', append=False)
+        gitflow.develop().checkout()
+        self.assertEquals(1, len(mgr.list()))
+        mgr.delete('0.7', force=True)
+        self.assertEquals(0, len(mgr.list()))
+        self.assertNotIn('rel/0.7', [b.name for b in self.repo.branches])
 
     @copy_from_fixture('sample_repo')
     def test_delete_current_release_raises_error(self):
@@ -631,6 +773,11 @@ class TestReleaseBranchManager(TestCase):
         self.assertRaisesRegexp(GitCommandError, 'branch .* not found',
                 mgr.delete, 'nonexisting')
 
+    #--- merge ---
+    # No need to test merge for ReleaseBranchManager since it is the
+    # same as for FeatureBranch Manager
+
+    #--- finish ---
 
     @copy_from_fixture('release')
     def test_finish_release(self):
@@ -680,6 +827,15 @@ class TestReleaseBranchManager(TestCase):
         # tag message
         self.assertEqual(self.repo.tags['v1.0'].tag.message,
                          'Tagging version 1.0')
+
+
+    @remote_clone_from_fixture('release')
+    def test_finish_release_on_unpulled_branch_raises_error(self):
+        # branch exists on remote but was not pulled prior to finish
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertRaises(NoSuchBranchError, mgr.finish, '1.0', push=True)
 
 
     @remote_clone_from_fixture('release')
