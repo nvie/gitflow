@@ -133,7 +133,8 @@ class GitFlow(object):
             self.repo.create_head(master, c)
 
     def _init_develop_branch(self):
-        # NOTE: This function assumes master already exists
+        # assert master already exists
+        assert self.master_name() in self.repo.refs
         develop = self.develop_name()
         if develop in self.repo.branches:
             # local `develop` branch exists, but do not switch there
