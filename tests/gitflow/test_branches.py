@@ -156,6 +156,17 @@ class TestFeatureBranchManager(TestCase):
                 gitflow.repo.branches['develop'].commit)
 
     @copy_from_fixture('sample_repo')
+    def test_create_new_feature_branch_non_default_prefix(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = FeatureBranchManager(gitflow)
+        new_branch = mgr.create('foo')
+        self.assertEqual(new_branch.name, 'feat/foo')
+        self.assertIn('feat/foo', [b.name for b in mgr.list()])
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['devel'].commit)
+
+    @copy_from_fixture('sample_repo')
     def test_create_new_feature_from_alt_base(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
@@ -566,6 +577,17 @@ class TestReleaseBranchManager(TestCase):
                 gitflow.repo.branches['develop'].commit)
 
     @copy_from_fixture('sample_repo')
+    def test_create_new_release_branch_non_default_prefix(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = ReleaseBranchManager(gitflow)
+        new_branch = mgr.create('3.14-beta5')
+        self.assertEqual(new_branch.name, 'rel/3.14-beta5')
+        self.assertIn('rel/3.14-beta5', [b.name for b in mgr.list()])
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['devel'].commit)
+
+    @copy_from_fixture('sample_repo')
     def test_create_new_release_from_alt_base(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
@@ -938,6 +960,16 @@ class TestHotfixBranchManager(TestCase):
                 gitflow.repo.branches['master'].commit)
 
     @copy_from_fixture('sample_repo')
+    def test_create_new_hotfix_branch_non_default_prefix(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = HotfixBranchManager(gitflow)
+        new_branch = mgr.create('1.2.3')
+        self.assertEqual('hf/1.2.3', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['stable'].commit)
+
+    @copy_from_fixture('sample_repo')
     def test_hotfix_branch_origin(self):
         gitflow = GitFlow()
         mgr = HotfixBranchManager(gitflow)
@@ -1006,6 +1038,16 @@ class TestSupportBranchManager(TestCase):
         self.assertEqual('support/1.x', mgr.list()[0].name)
         self.assertEqual(new_branch.commit,
                 gitflow.repo.branches['master'].commit)
+
+    @copy_from_fixture('sample_repo')
+    def test_create_new_support_branch_non_default_prefix(self):
+        gitflow = GitFlow(self.repo)
+        gitflow.init()
+        mgr = SupportBranchManager(gitflow)
+        new_branch = mgr.create('1.x')
+        self.assertEqual('supp/1.x', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['stable'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_support_branch_origin(self):
