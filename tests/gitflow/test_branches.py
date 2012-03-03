@@ -152,6 +152,8 @@ class TestFeatureBranchManager(TestCase):
         new_branch = mgr.create('foo')
         self.assertEqual(1, len(mgr.list()))
         self.assertEqual('feature/foo', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['develop'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_create_new_feature_from_alt_base(self):
@@ -932,6 +934,8 @@ class TestHotfixBranchManager(TestCase):
         new_branch = mgr.create('1.2.3')
         self.assertEqual(1, len(mgr.list()))
         self.assertEqual('hotfix/1.2.3', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['master'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_hotfix_branch_origin(self):
@@ -1000,6 +1004,8 @@ class TestSupportBranchManager(TestCase):
         new_branch = mgr.create('1.x')
         self.assertEqual(1, len(mgr.list()))
         self.assertEqual('support/1.x', mgr.list()[0].name)
+        self.assertEqual(new_branch.commit,
+                gitflow.repo.branches['master'].commit)
 
     @copy_from_fixture('sample_repo')
     def test_support_branch_origin(self):
