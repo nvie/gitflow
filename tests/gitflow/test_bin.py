@@ -70,8 +70,7 @@ class TestInitCommand(TestCase):
     @sandboxed
     def test_init_defaults(self):
         runGitFlow('init', '--defaults')
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('develop', gitflow.develop_name())
@@ -89,8 +88,7 @@ class TestInitCommand(TestCase):
             runGitFlow('init')
         finally:
             sys.stdin = _stdin
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('develop', gitflow.develop_name())
@@ -109,8 +107,7 @@ class TestInitCommand(TestCase):
             runGitFlow('init')
         finally:
             sys.stdin = _stdin
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         self.assertEquals('my-remote', gitflow.origin_name())
         self.assertEquals('stable', gitflow.master_name())
         self.assertEquals('devel', gitflow.develop_name())
@@ -129,8 +126,7 @@ class TestInitCommand(TestCase):
             runGitFlow('init')
         finally:
             sys.stdin = _stdin
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         self.assertEquals('my-remote', gitflow.origin_name())
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('devel', gitflow.develop_name())
@@ -149,8 +145,7 @@ class TestInitCommand(TestCase):
     @copy_from_fixture('custom_repo')
     def test_init_force_defaults_succeeds_if_already_initialized(self):
         runGitFlow('init', '--defaults', '--force')
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         # these are the values already defined in custom_repo
         self.assertEquals('origin', gitflow.origin_name())
         self.assertEquals('production', gitflow.master_name())
@@ -189,8 +184,7 @@ class TestInitCommand(TestCase):
             runGitFlow('init', '--force')
         finally:
             sys.stdin = _stdin
-        gitflow = GitFlow('.')
-        gitflow.init()
+        gitflow = GitFlow('.').init()
         self.assertEquals('master', gitflow.master_name())
         self.assertEquals('production', gitflow.develop_name())
 

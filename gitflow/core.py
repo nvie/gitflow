@@ -181,6 +181,7 @@ class GitFlow(object):
         self._init_config(master, develop, prefixes, names, force_defaults)
         self._init_initial_commit()
         self._init_develop_branch()
+        return self
 
     def is_initialized(self):
         return (self.repo and
