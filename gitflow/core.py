@@ -31,6 +31,18 @@ def requires_repo(f):
         return f(self, *args, **kwargs)
     return _inner
 
+def requires_initialized(f):
+    @wraps(f)
+    def _inner(self, *args, **kwargs):
+        if (not self.is_initialized() or
+            not self.master_name() in self.repo.branches or
+            not self.develop_name() in self.repo.branches):
+            msg = 'This repo has not yet been initialized for git-flow.'
+            raise NotInitialized(msg)
+        return f(self, *args, **kwargs)
+    return _inner
+
+
 def info(*texts):
     for txt in texts:
         print txt
@@ -386,7 +398,7 @@ class GitFlow(object):
             info(prefix + name + extra_info)
 
 
-    @requires_repo
+    @requires_initialized
     def create(self, identifier, name, base, fetch):
         """
         Creates a branch of the given type, with the given short name.
@@ -409,7 +421,7 @@ class GitFlow(object):
         return self.managers[identifier].create(name, base, fetch=fetch)
 
 
-    @requires_repo
+    @requires_initialized
     def finish(self, identifier, name, fetch, rebase, keep, force_delete,
                tagging_info):
         """
@@ -438,6 +450,7 @@ class GitFlow(object):
                           keep=keep, force_delete=force_delete,
                           tagging_info=tagging_info)
 
+    @requires_initialized
     def tag(self, tagname, commit, sign=False, signingkey=None, message=None):
         kwargs = {}
         if sign:
@@ -455,14 +468,14 @@ class GitFlow(object):
             self.require_branches_equal(branch, remote_branch)
         
 
-    @requires_repo
+    @requires_initialized
     def checkout(self, identifier, name):
         mgr = self.managers[identifier]
         branch = mgr.by_name_prefix(name)
         branch.checkout()
 
 
-    @requires_repo
+    @requires_initialized
     def track(self, identifier, name):
         repo = self.repo
         mgr = self.managers[identifier]
@@ -477,7 +490,7 @@ class GitFlow(object):
         branch.set_tracking_branch(remote_branch)
         return branch.checkout()
 
-    @requires_repo
+    @requires_initialized
     def publish(self, identifier, name):
         repo = self.repo
         mgr = self.managers[identifier]
@@ -501,7 +514,7 @@ class GitFlow(object):
         return full_name
 
 
-    @requires_repo
+    @requires_initialized
     def diff(self, identifier, name):
         repo = self.repo
         mgr = self.managers[identifier]
@@ -510,7 +523,7 @@ class GitFlow(object):
         print self.git.diff('%s..%s' % (base, full_name))
 
 
-    @requires_repo
+    @requires_initialized
     def rebase(self, identifier, name, interactive):
         warn("Will try to rebase %s branch '%s' ..." % (identifier, name))
         repo = self.repo
@@ -524,7 +537,7 @@ class GitFlow(object):
         args.append(mgr.default_base())
         self.git.rebase(*args)
 
-    @requires_repo
+    @requires_initialized
     def pull(self, identifier, remote, name):
 
         def avoid_accidental_cross_branch_action(branch_name):
