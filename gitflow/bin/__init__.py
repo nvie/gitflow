@@ -484,7 +484,7 @@ class HotfixCommand(GitFlowCommand):
         print "- Start committing your hot fixes"
         print "- When done, run:"
         print
-        print "     git flow hotfix finish ", args.version
+        print "     git flow hotfix finish", args.version
 
     #- finish
     @classmethod

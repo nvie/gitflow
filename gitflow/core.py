@@ -305,12 +305,13 @@ class GitFlow(object):
     @requires_repo
     def nameprefix_or_current(self, identifier, prefix):
         """
-        If the prefix is empty, see if the current branch is of type
-        :param`identifier`. If so, returns the current branches short
-        name, otherwise raises :exc:`NoSuchBranchError`.
+        If the :param:`prefix` is empty, see if the current branch is
+        of type :param:`identifier`. If so, returns the current
+        branches short name, otherwise raises
+        :exc:`NoSuchBranchError`.
 
         If exactly one branch of type :param`identifier` starts with
-        the given name prefix, returns that branches short name.
+        the given name :param:`prefix`, returns that branches short name.
         Raises :exc:`NoSuchBranchError` in case no branch exists with
         the given prefix, or :exc:`PrefixNotUniqueError` in case
         multiple matches are found.
@@ -321,7 +322,7 @@ class GitFlow(object):
             if repo.active_branch.name.startswith(manager.prefix):
                 return manager.shorten(repo.active_branch.name)
             else:
-                raise NoSuchBranchError('The current branch is no %s branch.'
+                raise NoSuchBranchError('The current branch is no %s branch. '
                     'Please specify one explicitly.' % identifier)
         return manager.shorten(manager.by_name_prefix(prefix).name)
 
