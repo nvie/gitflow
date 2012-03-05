@@ -325,6 +325,32 @@ class GitFlow(object):
                     'Please specify one explicitly.' % identifier)
         return manager.shorten(manager.by_name_prefix(prefix).name)
 
+    @requires_repo
+    def name_or_current(self, identifier, name, must_exist=True):
+        """
+        If the :param:`name` is empty, see if the current branch is of
+        type :param:`identifier`. If so, returns the current branches
+        short name, otherwise raises :exc:`NoSuchBranchError`.
+
+        If :param:`must_exist` is `True` (the default), raises
+        :exc:`NoSuchBranchError` in case no branch exists with the
+        given :parm:`name`.
+
+        Otherwise return the :parm:`name` unchanged.
+        """
+        repo = self.repo
+        manager = self.managers[identifier]
+        if not name:
+            if repo.active_branch.name.startswith(manager.prefix):
+                return manager.shorten(repo.active_branch.name)
+            else:
+                raise NoSuchBranchError('The current branch is no %s branch. '
+                    'Please specify one explicitly.' % identifier)
+        elif must_exist and not name in manager.list():
+            raise NoSuchBranchError('There is no %s branch named %s.'
+                                    % (identifier, name))
+        return name
+
 
     def is_merged_into(self, commit, target_branch):
         """
