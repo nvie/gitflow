@@ -250,12 +250,9 @@ class GitFlow(object):
         except IndexError:
             raise NoSuchRemoteError(name)
 
-    @requires_repo
     def origin(self):
-        try:
-            return self.repo.remotes[self.origin_name()]
-        except IndexError:
-            raise NoSuchRemoteError(self.origin_name())
+        return self.require_remote(self.origin_name())
+
 
     @requires_repo
     def develop(self):
@@ -598,12 +595,12 @@ class GitFlow(object):
             avoid_accidental_cross_branch_action(full_name)
             # We already have a local branch called like this, so
             # simply pull the remote changes in
-            repo.remotes[remote].pull(full_name)
+            self.require_remote(remote).pull(full_name)
             # :fixme: why is the branch not checked out here?
             info("Pulled %s's changes into %s." % (remote, full_name))
         else:
             # Setup the non-tracking local branch clone for the first time
-            repo.remotes[remote].fetch(full_name+':'+full_name)
+            self.require_remote(remote).fetch(full_name+':'+full_name)
             repo.heads[full_name].checkout()
             info("Created local branch %s based on %s's %s."
                  % (full_name, remote, full_name))
