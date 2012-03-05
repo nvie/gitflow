@@ -451,6 +451,14 @@ class TestGitFlowBranches(TestCase):
         self.repo.branches['feat/recursion'].checkout()
         self.assertEqual(gitflow.nameprefix_or_current('feature', 'e'), 'even')
 
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_nameprefix_or_current_returns_name(self):
+        gitflow = GitFlow(self.repo).init()
+        # gitflow.init checks out `devel` branch :-(
+        self.repo.branches['feat/recursion'].checkout()
+        self.assertEqual('even',
+            gitflow.name_or_current('feature', 'even'))
+
     #-- name_or_current
 
     @copy_from_fixture('sample_repo')
