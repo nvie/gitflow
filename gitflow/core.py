@@ -244,6 +244,13 @@ class GitFlow(object):
             return origin
 
     @requires_repo
+    def require_remote(self, name):
+        try:
+            return self.repo.remotes[name]
+        except IndexError:
+            raise NoSuchRemoteError(name)
+
+    @requires_repo
     def origin(self):
         try:
             return self.repo.remotes[self.origin_name()]

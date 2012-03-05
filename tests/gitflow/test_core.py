@@ -148,6 +148,17 @@ class TestGitFlowBasics(TestCase):
         self.assertEqual(len(list(self.repo.remotes)), 1)
         self.assertEqual(self.repo.remotes[0].name, 'my-remote')
 
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_required_remote_returns_remote(self):
+        gitflow = GitFlow(self.repo).init()
+        remote = gitflow.require_remote('my-remote')
+        self.assertEqual(self.repo.remotes['my-remote'], remote)
+
+    def test_gitflow_required_remote_raises_error_on_nonexisting_remote(self):
+        sandbox = create_sandbox(self)
+        gitflow = GitFlow(sandbox).init()
+        self.assertRaises(NoSuchRemoteError,
+                          gitflow.require_remote, 'some-remote')
 
 class TestGitFlowInit(TestCase):
     # git flow init
