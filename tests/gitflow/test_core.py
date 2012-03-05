@@ -405,7 +405,7 @@ class TestGitFlowMerges(TestCase):
 
 class TestGitFlowCheckout(TestCase):
     @copy_from_fixture('sample_repo')
-    def test_gitflow_name_or_current_defaults_to_current(self):
+    def test_gitflow_nameprefix_or_current_defaults_to_current(self):
         gitflow = GitFlow(self.repo).init()
         active_branch = self.repo.active_branch
         gitflow.checkout('feature', 'even')
@@ -415,27 +415,30 @@ class TestGitFlowCheckout(TestCase):
 
 class TestGitFlowBranches(TestCase):
 
+    #-- nameprefix_or_current
+
     @copy_from_fixture('sample_repo')
-    def test_gitflow_name_or_current_defaults_to_current(self):
+    def test_gitflow_nameprefix_or_current_defaults_to_current(self):
         gitflow = GitFlow(self.repo).init()
         # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
-        self.assertEqual(gitflow.name_or_current('feature', ''), 'recursion')
+        self.assertEqual(gitflow.nameprefix_or_current('feature', ''),
+                         'recursion')
 
     @copy_from_fixture('sample_repo')
-    def test_gitflow_name_or_current_on_other_branch_type_raises_error(self):
+    def test_gitflow_nameprefix_or_current_on_other_branch_type_raises_error(self):
         gitflow = GitFlow(self.repo).init()
         # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
         self.assertRaises(NoSuchBranchError,
-                          gitflow.name_or_current, 'release', '')
+                          gitflow.nameprefix_or_current, 'release', '')
 
     @copy_from_fixture('sample_repo')
-    def test_gitflow_name_or_current_expands_prefix(self):
+    def test_gitflow_nameprefix_or_current_expands_prefix(self):
         gitflow = GitFlow(self.repo).init()
         # gitflow.init check sout `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
-        self.assertEqual(gitflow.name_or_current('feature', 'e'), 'even')
+        self.assertEqual(gitflow.nameprefix_or_current('feature', 'e'), 'even')
 
 class TestGitFlowCommandTrack(TestCase):
 

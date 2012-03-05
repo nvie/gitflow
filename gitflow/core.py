@@ -303,7 +303,7 @@ class GitFlow(object):
 
 
     @requires_repo
-    def name_or_current(self, identifier, prefix):
+    def nameprefix_or_current(self, identifier, prefix):
         """
         If the prefix is empty, see if the current branch is of type
         :param`identifier`. If so, returns the current branches short
