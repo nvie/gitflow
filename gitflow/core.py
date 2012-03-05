@@ -351,7 +351,7 @@ class GitFlow(object):
             else:
                 raise NoSuchBranchError('The current branch is no %s branch. '
                     'Please specify one explicitly.' % identifier)
-        elif must_exist and not name in manager.list():
+        elif must_exist and not manager.full_name(name) in (b.name for b in manager.list()):
             raise NoSuchBranchError('There is no %s branch named %s.'
                                     % (identifier, name))
         return name
