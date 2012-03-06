@@ -176,7 +176,7 @@ class TestInitCommand(TestCase):
 
     @copy_from_fixture('custom_repo')
     def test_init_force_succeeds_if_already_initialized(self):
-        # NB: switching master and develop 
+        # NB: switching master and develop
         text = '\n'.join(['my-remote', 'master', 'production',
                           'feat/', 'rel/', 'hf/', 'sup/', 'ver'])
         _stdin, sys.stdin = sys.stdin, StringIO(text)

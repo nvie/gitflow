@@ -473,7 +473,7 @@ class TestGitFlowBranches(TestCase):
     @copy_from_fixture('sample_repo')
     def test_gitflow_nameprefix_or_current_expands_prefix(self):
         gitflow = GitFlow(self.repo).init()
-        # gitflow.init check sout `devel` branch :-(
+        # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
         self.assertEqual(gitflow.nameprefix_or_current('feature', 'e'), 'even')
 
@@ -506,16 +506,15 @@ class TestGitFlowBranches(TestCase):
     @copy_from_fixture('sample_repo')
     def test_gitflow_name_or_current_for_nonexisting_name_raises_error(self):
         gitflow = GitFlow(self.repo).init()
-        # gitflow.init check sout `devel` branch :-(
+        # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
         self.assertRaises(NoSuchBranchError,
                           gitflow.name_or_current, 'feature', 'xxxx')
 
-
     @copy_from_fixture('sample_repo')
     def test_gitflow_name_or_current_returns_name(self):
         gitflow = GitFlow(self.repo).init()
-        # gitflow.init check sout `devel` branch :-(
+        # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
         self.assertEqual('xxxx',
             gitflow.name_or_current('feature', 'xxxx', must_exist=False))

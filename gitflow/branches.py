@@ -155,7 +155,7 @@ class BranchManager(object):
         gitflow.require_no_merge_conflict()
         if gitflow.has_staged_commits():
             raise WorkdirIsDirtyError('Contains local changes checked into '
-                                      'the index but not committed')
+                                      'the index but not committed.')
 
         # update the local repo with remote changes, if asked
         if fetch:
