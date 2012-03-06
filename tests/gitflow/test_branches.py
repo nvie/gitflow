@@ -398,6 +398,8 @@ class TestFeatureBranchManager(TestCase):
 
         # Assert develop branch advanced
         self.assertNotEqual(dc0, dc1)
+        # Assert the target-branch is active
+        self.assertEqual(gitflow.repo.active_branch.name, 'devel')
 
     @copy_from_fixture('sample_repo')
     def test_merge_feature_with_single_commit(self):
@@ -415,6 +417,8 @@ class TestFeatureBranchManager(TestCase):
 
         # Assert develop branch advanced
         self.assertNotEqual(dc0, dc1)
+        # Assert the target-branch is active
+        self.assertEqual(gitflow.repo.active_branch.name, 'devel')
 
     def test_merge_feature_without_commits(self):
         repo = create_git_repo(self)
@@ -428,6 +432,8 @@ class TestFeatureBranchManager(TestCase):
 
         # Assert the develop tip is unchanged by the merge
         self.assertEqual(dc0, dc1)
+        # Assert the target-branch is active
+        self.assertEqual(gitflow.repo.active_branch.name, 'develop')
 
     #--- finish ---
 
