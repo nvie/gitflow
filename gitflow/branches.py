@@ -152,8 +152,8 @@ class BranchManager(object):
         if full_name in repo.branches:
             raise BranchExistsError(full_name)
 
-        if gitflow.is_dirty() and not gitflow.has_unmerged_changes():
-            raise WorkdirIsDirtyError()
+        gitflow.require_no_merge_conflict()
+        if gitflow.has_staged_commits():
 
         # update the local repo with remote changes, if asked
         if fetch:
