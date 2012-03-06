@@ -1,6 +1,10 @@
 
 class GitflowError(Exception): pass
 
+class Usage(GitflowError):
+    def __str__(self):
+        return '\n'.join(map(str, self.args))
+
 class NotInitialized(GitflowError): pass
 class WorkdirIsDirtyError(GitflowError): pass
 

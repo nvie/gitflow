@@ -15,7 +15,8 @@ from gitflow.util import itersubclasses
 from gitflow.exceptions import (NotInitialized, InvalidOperation,
                                 BranchExists, BranchExistsError,
                                 BranchTypeExistsError, MergeConflict,
-                                NoSuchRemoteError, NoSuchBranchError)
+                                NoSuchRemoteError, NoSuchBranchError,
+                                Usage)
 
 
 def datetime_to_timestamp(d):
@@ -396,12 +397,11 @@ class GitFlow(object):
         manager = self.managers[identifier]
         branches = manager.list()
         if not branches:
-            die('',
+            raise Usage(
                 'No %s branches exist.' % identifier,
                 'You can start a new %s branch with the command:' % identifier,
-                '',
-                '    git flow %s start <%s> [<base>]' % (identifier, arg0_name),
-                '')
+                '    git flow %s start <%s> [<base>]' % (identifier, arg0_name)
+                )
 
         # determine the longest branch name
         width = max(len(b.name) for b in branches) - len(manager.prefix) + 1
@@ -480,14 +480,10 @@ class GitFlow(object):
         try:
             self.require_no_merge_conflict()
         except MergeConflict, e:
-            die("",
-                "Merge conflicts not resolved yet, use:",
-                "    git mergetool",
-                "    git commit",
-                "",
-                "You can then complete the finish by running it again:",
-                "    git flow %s finish %s" % (identifier, name),
-                "")
+            raise Usage(e,
+                        "You can then complete the finish by running it again:",
+                        "    git flow %s finish %s" % (identifier, name)
+                        )
         return mgr.finish(mgr.shorten(branch.name), fetch=fetch, rebase=rebase,
                           keep=keep, force_delete=force_delete,
                           tagging_info=tagging_info)
