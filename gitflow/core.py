@@ -52,10 +52,6 @@ def warn(*texts):
     for txt in texts:
         print >> sys.stderr, txt
 
-def die(*texts):
-    warn(*texts)
-    raise SystemExit(1)
-
 
 class _NONE:
     pass
