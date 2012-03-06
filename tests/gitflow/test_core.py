@@ -363,6 +363,7 @@ class TestGitFlowInit(TestCase):
 
     # :todo: test-cases for tag (with signing)
     # :todo: test-cases for must_be_uptodate
+    # :todo: test-cases for branch_names(remote=True)
     # :todo: test-cases for list (one per BranchManager)
 
 class TestGitFlowMerges(TestCase):

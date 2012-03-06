@@ -239,6 +239,7 @@ class BranchManager(object):
                        % dict(name=full_name, identifier=self.identifier,
                               short_name=name))
             kwargs['message'] = message
+        # :todo: catch GitCommandError, read .git/MERGE_MSG and raise MergeError
         repo.git.merge(full_name, **kwargs)
 
     def delete(self, name, force=False):
@@ -282,6 +283,7 @@ class FeatureBranchManager(BranchManager):
         :returns:
             The newly created :class:`git.refs.Head` reference.
         """
+        # :todo:rethink: feature branch is not required to start at `develop`
         return super(FeatureBranchManager, self).create(
             name, base, fetch=fetch, must_be_on_default_base=False)
 
