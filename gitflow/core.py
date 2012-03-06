@@ -274,6 +274,14 @@ class GitFlow(object):
         """
         return self.repo.is_dirty()
 
+    @requires_repo
+    def has_staged_commits(self):
+        """
+        Returns whether or not the current repo contains local changes
+        checked into the index but not committed.
+        """
+        return len(self.repo.index.diff(self.repo.head.commit)) > 0
+
 
     @requires_repo
     def has_unmerged_changes(self):

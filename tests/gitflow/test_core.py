@@ -85,6 +85,15 @@ class TestGitFlowBasics(TestCase):
         gitflow = GitFlow(self.repo)
         self.assertTrue(gitflow.is_dirty())
 
+    def test_new_repo_has_no_staged_commits(self):
+        sandbox = create_sandbox(self)
+        gitflow = GitFlow(sandbox).init()
+        self.assertFalse(gitflow.has_staged_commits())
+
+    @copy_from_fixture('dirty_sample_repo')
+    def test_existing_repo_has_staged_commits(self):
+        gitflow = GitFlow(self.repo)
+        self.assertTrue(gitflow.has_staged_commits())
 
     def test_gitflow_cannot_get_status_on_empty_sandbox(self):
         sandbox = create_sandbox(self)
