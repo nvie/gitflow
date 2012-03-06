@@ -521,6 +521,36 @@ class TestGitFlowBranches(TestCase):
             gitflow.name_or_current('feature', 'xxxx', must_exist=False))
 
 
+class TestGitFlowCommandCreate(TestCase):
+
+    # more tests are done in test_branches.py
+
+    def test_create_in_new_sandbox(self):
+        sandbox = create_sandbox(self)
+        gitflow = GitFlow(sandbox).init()
+        gitflow.create('feature', 'wow-feature', base=None, fetch=False)
+        self.assertIn('feature/wow-feature', gitflow.repo.branches)
+
+class TestGitFlowCommandFinish(TestCase):
+
+    # more tests are done in test_branches.py
+
+    def test_finish_in_new_sandbox(self):
+        sandbox = create_sandbox(self)
+        gitflow = GitFlow(sandbox).init()
+        gitflow.create('feature', 'wow-feature', base=None, fetch=False)
+        self.assertEqual(gitflow.repo.active_branch.name, 'feature/wow-feature')
+        fake_commit(gitflow.repo, 'Yet another commit')
+        gitflow.finish('feature', 'wow-feature', False, False, False, False, None)
+        self.assertNotIn('feature/wow-feature', gitflow.repo.branches)
+
+    def test_finish_in_new_sandbox_without_commit(self):
+        sandbox = create_sandbox(self)
+        gitflow = GitFlow(sandbox).init()
+        gitflow.create('feature', 'wow-feature', base=None, fetch=False)
+        gitflow.finish('feature', 'wow-feature', False, False, False, False, None)
+        self.assertNotIn('feature/wow-feature', gitflow.repo.branches)
+
 
 class TestGitFlowCommandTrack(TestCase):
 
