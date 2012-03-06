@@ -12,7 +12,8 @@ from git import GitCommandError
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager
 from gitflow.exceptions import (BranchExistsError, NotInitialized,
-                                NoSuchBranchError, NoSuchRemoteError)
+                                NoSuchBranchError, NoSuchRemoteError,
+                                MergeConflict)
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits)
 from tests.helpers.factory import create_sandbox, create_git_repo
@@ -418,6 +419,22 @@ class TestGitFlowMerges(TestCase):
 
     #:todo: test-case is_merged_into_remote with remote branch beeing ahead
     #       of corresponding local branch
+
+    @copy_from_fixture('sample_repo')
+    def test_has_no_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        gitflow.require_no_merge_conflict()
+
+    @copy_from_fixture('sample_repo')
+    def test_has_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        repo = gitflow.repo
+        repo.refs['devel'].checkout()
+        repo.git.merge('feat/recursion')
+        # the next merge creates the merge conflict
+        self.assertRaises(GitCommandError,
+                          repo.git.merge, 'feat/even')
+        self.assertRaises(MergeConflict, gitflow.require_no_merge_conflict)
 
     # :todo: test-cases for compare_branches
     # :todo: test-cases for require_branches_equal

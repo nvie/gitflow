@@ -14,7 +14,7 @@ from gitflow.util import itersubclasses
 
 from gitflow.exceptions import (NotInitialized, InvalidOperation,
                                 BranchExists, BranchExistsError,
-                                BranchTypeExistsError,
+                                BranchTypeExistsError, MergeConflict,
                                 NoSuchRemoteError, NoSuchBranchError)
 
 
@@ -284,18 +284,18 @@ class GitFlow(object):
 
 
     @requires_repo
-    def has_unmerged_changes(self):
+    def require_no_merge_conflict(self):
         """
-        Returns whether or not the current working directory contains
-        unmerged changes.
+        Raises :exc:`MergeConflict` if the current working directory
+        contains a merge conflict.
         """
-        #:todo: implement this correctly
         try:
-            git.SymbolicReference.from_path(self.repo, 'MERGE_BASE')
-            return False
+            git.Reference(self.repo, 'MERGE_HEAD', check_path=False).commit
+            # reference exists, so there is a merge conflict
+            raise MergeConflict()
         except ValueError:
             # no such reference, so there is no merge conflict
-            return True
+            pass
 
 
     @requires_repo
@@ -477,7 +477,9 @@ class GitFlow(object):
         """
         mgr = self.managers[identifier]
         branch = mgr.by_name_prefix(name)
-        if self.has_unmerged_changes():
+        try:
+            self.require_no_merge_conflict()
+        except MergeConflict, e:
             die("",
                 "Merge conflicts not resolved yet, use:",
                 "    git mergetool",

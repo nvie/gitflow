@@ -4,6 +4,14 @@ class GitflowError(Exception): pass
 class NotInitialized(GitflowError): pass
 class WorkdirIsDirtyError(GitflowError): pass
 
+class MergeConflict(GitflowError):
+    def __str__(self):
+        return '\n'.join([
+            "Merge conflicts not resolved yet, use:",
+            "    git mergetool",
+            "    git commit",
+            ])
+
 class BranchExists(GitflowError): pass
 class BranchExistsError(GitflowError):pass
 class NoSuchBranchError(GitflowError):pass
