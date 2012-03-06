@@ -7,7 +7,7 @@ from gitflow.branches import (
     BranchManager, FeatureBranchManager,
     ReleaseBranchManager, HotfixBranchManager, SupportBranchManager,
     PrefixNotUniqueError, NoSuchBranchError, BranchExistsError,
-    BranchTypeExistsError)
+    BranchTypeExistsError, WorkdirIsDirtyError)
 
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits)
@@ -283,7 +283,7 @@ class TestFeatureBranchManager(TestCase):
     def test_create_feature_raises_error_if_local_changes_would_be_overwritten(self):
         gitflow = GitFlow(self.repo)
         mgr = FeatureBranchManager(gitflow)
-        self.assertRaises(GitCommandError,
+        self.assertRaisesRegexp(WorkdirIsDirtyError, 'checked in.*not committed',
                 mgr.create, 'foo')
 
     @copy_from_fixture('dirty_sample_repo')
@@ -724,7 +724,7 @@ class TestReleaseBranchManager(TestCase):
     def test_create_release_raises_error_if_local_changes_would_be_overwritten(self):
         gitflow = GitFlow(self.repo)
         mgr = ReleaseBranchManager(gitflow)
-        self.assertRaises(GitCommandError,
+        self.assertRaisesRegexp(WorkdirIsDirtyError, 'checked in.*not committed',
                 mgr.create, '1.0')
 
     @copy_from_fixture('dirty_sample_repo')
