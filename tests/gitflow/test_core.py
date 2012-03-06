@@ -517,6 +517,8 @@ class TestGitFlowBranches(TestCase):
         gitflow = GitFlow(self.repo).init()
         # gitflow.init checks out `devel` branch :-(
         self.repo.branches['feat/recursion'].checkout()
+        self.assertEqual('even',
+            gitflow.name_or_current('feature', 'even'))
         self.assertEqual('xxxx',
             gitflow.name_or_current('feature', 'xxxx', must_exist=False))
 
