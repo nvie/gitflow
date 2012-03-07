@@ -20,7 +20,7 @@ from gitflow.core import GitFlow
 from gitflow.branches import BranchManager
 from gitflow.exceptions import (BranchExistsError, NotInitialized,
                                 NoSuchBranchError, NoSuchRemoteError,
-                                MergeConflict)
+                                MergeConflict, BadObjectError)
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits, set_gnupg_home)
 from tests.helpers.factory import create_sandbox, create_git_repo
@@ -453,6 +453,12 @@ class TestGitFlowMerges(TestCase):
         # HEAD
         self.assertFalse(gitflow.is_merged_into('HEAD', 'devel'))
         self.assertFalse(gitflow.is_merged_into(self.repo.head, 'devel'))
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_is_merged_into_non_existing_source(self):
+        gitflow = GitFlow(self.repo).init()
+        self.assertRaisesRegexp(BadObjectError, 'feat/ever',
+                          gitflow.is_merged_into ,'feat/ever', 'devel')
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_is_merged_into_remote(self):
