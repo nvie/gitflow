@@ -386,7 +386,19 @@ class ReleaseCommand(GitFlowCommand):
 
     @staticmethod
     def run_finish(args):
-        pass
+        gitflow = GitFlow()
+        version = gitflow.name_or_current('release', args.version)
+        gitflow.start_transaction('finishing release branch %s' % version)
+        tagging_info = None
+        if not args.notag:
+            tagging_info = dict(
+                sign=args.sign or args.signingkey,
+                signingkey=args.signingkey,
+                message=args.message)
+        release = gitflow.finish('release', version,
+                                 fetch=args.fetch, rebase=False,
+                                 keep=args.keep, force_delete=False,
+                                 tagging_info=tagging_info)
 
     #- publish
     @classmethod
@@ -525,7 +537,19 @@ class HotfixCommand(GitFlowCommand):
 
     @staticmethod
     def run_finish(args):
-        pass
+        gitflow = GitFlow()
+        version = gitflow.name_or_current('hotfix', args.version)
+        gitflow.start_transaction('finishing hotfix branch %s' % version)
+        tagging_info = None
+        if not args.notag:
+            tagging_info = dict(
+                sign=args.sign or args.signingkey,
+                signingkey=args.signingkey,
+                message=args.message)
+        release = gitflow.finish('hotfix', version,
+                                 fetch=args.fetch, rebase=False,
+                                 keep=args.keep, force_delete=False,
+                                 tagging_info=tagging_info)
 
     #- publish
     @classmethod
