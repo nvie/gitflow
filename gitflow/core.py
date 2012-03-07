@@ -409,7 +409,7 @@ class GitFlow(object):
             self.require_branches_equal(branch, remote_branch)
 
     @requires_repo
-    def compare_branches(self, branch1, branch2):
+    def _compare_branches(self, branch1, branch2):
         """
         Tests whether branches and their 'origin' counterparts have
         diverged and need merging first. It returns error codes to
@@ -442,7 +442,7 @@ class GitFlow(object):
 
     @requires_repo
     def require_branches_equal(self, branch1, branch2):
-        status = self.compare_branches(branch1, branch2)
+        status = self._compare_branches(branch1, branch2)
         if status == 0:
             # branches are equal
             return
