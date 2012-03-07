@@ -10,7 +10,7 @@ from gitflow.branches import (
     BranchTypeExistsError, WorkdirIsDirtyError)
 
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
-                           fake_commit, all_commits)
+                           fake_commit, all_commits, set_gnupg_home)
 from tests.helpers.factory import create_git_repo
 
 
@@ -874,6 +874,20 @@ class TestReleaseBranchManager(TestCase):
         self.assertEqual(self.repo.tags['v1.0'].tag.message,
                          'Tagging version 1.0')
 
+    @set_gnupg_home
+    @copy_from_fixture('release')
+    def test_finish_release_tag_sign(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+        taginfo = dict(
+            message = 'Tagging version 1.0',
+            signingkey = 'Dummy Key for Gitflow testing',
+            )
+        mgr.finish('1.0', tagging_info=taginfo)
+        # tag message
+        tag = self.repo.tags['v1.0'].tag
+        self.assertIn('-----BEGIN PGP SIGNATURE-----', tag.message)
+
 
     @remote_clone_from_fixture('release')
     def test_finish_release_on_unpulled_branch_raises_error(self):
@@ -963,7 +977,26 @@ class TestReleaseBranchManager(TestCase):
         self.assertEqual(self.remote.tags['v1.0'].tag.message,
                          'Tagging version 1.0')
 
-    # :todo: test-cases for tagging with signing, both with and without key
+
+    @set_gnupg_home
+    @remote_clone_from_fixture('release')
+    def test_finish_release_tag_sign_push(self):
+        # Since remote is no bare repo, checkout some branch untouched
+        # by this operation. :fixme: find better solution
+        self.remote.heads['feat/even'].checkout()
+        gitflow = GitFlow(self.repo).init()
+
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.create('1.0')
+        taginfo = dict(
+            message = 'Tagging version 1.0',
+            signingkey = 'Dummy Key for Gitflow testing',
+            )
+        mgr.finish('1.0', push=True, tagging_info=taginfo)
+        # tag message
+        tag = self.remote.tags['v1.0'].tag
+        self.assertIn('-----BEGIN PGP SIGNATURE-----', tag.message)
+
 
     # :todo: test-cases for finish with merge-conflicts for both master and develop
     def test_finish_release_rebase(self):
