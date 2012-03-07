@@ -5,11 +5,11 @@
 # Distributed under a BSD-like license. For full terms see the file LICENSE.txt
 #
 
-from git import Reference
+from git import GitCommandError, Reference
 from gitflow.exceptions import (NoSuchBranchError, BranchExistsError,
                                 PrefixNotUniqueError, BaseNotOnBranch,
                                 WorkdirIsDirtyError, BranchTypeExistsError,
-                                TagExistsError)
+                                TagExistsError, MergeError)
 
 __copyright__ = "2010-2011 Vincent Driessen; 2012 Hartmut Goebel"
 __license__ = "BSD"
@@ -253,8 +253,12 @@ class BranchManager(object):
                        % dict(name=full_name, identifier=self.identifier,
                               short_name=name))
             kwargs['message'] = message
-        # :todo: catch GitCommandError, read .git/MERGE_MSG and raise MergeError
-        repo.git.merge(full_name, **kwargs)
+        try:
+            repo.git.merge(full_name, **kwargs)
+        except GitCommandError, e:
+            # `git merge` does not send the error message to stderr, thus
+            # we can not test it here :-(
+            raise MergeError(e)
 
     def delete(self, name, force=False):
         """
