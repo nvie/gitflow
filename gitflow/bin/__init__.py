@@ -16,10 +16,14 @@ git-flow
 
 import argparse
 
-from gitflow.core import GitFlow, die, info
+from gitflow.core import GitFlow, info
 from gitflow.util import itersubclasses
 from gitflow.exceptions import (GitflowError, AlreadyInitialized,
-                                BranchTypeExistsError)
+                                NotInitialized, BranchTypeExistsError,
+                                BaseNotOnBranch)
+
+def die(*texts):
+    raise SystemExit('\n'.join(map(str, texts)))
 
 class NotEmpty(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
