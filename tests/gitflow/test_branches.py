@@ -9,12 +9,14 @@ from unittest2 import TestCase
 
 from git import GitCommandError
 
-from gitflow.core import GitFlow, NoSuchRemoteError
+from gitflow.core import GitFlow
+from gitflow.exceptions import (
+    NoSuchRemoteError, MergeError, BranchExistsError,
+    BranchTypeExistsError, PrefixNotUniqueError, NoSuchBranchError,
+    WorkdirIsDirtyError)
 from gitflow.branches import (
-    BranchManager, FeatureBranchManager,
-    ReleaseBranchManager, HotfixBranchManager, SupportBranchManager,
-    PrefixNotUniqueError, NoSuchBranchError, BranchExistsError,
-    BranchTypeExistsError, WorkdirIsDirtyError)
+    BranchManager, FeatureBranchManager, ReleaseBranchManager,
+    HotfixBranchManager, SupportBranchManager)
 
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits, set_gnupg_home)
@@ -538,7 +540,35 @@ class TestFeatureBranchManager(TestCase):
         self.assertIn('feat/even',
                 [b.name for b in self.remote.branches])
 
-    # :todo: test-cases for finish with merge-conflicts for both develop
+    @copy_from_fixture('sample_repo')
+    def test_finish_feature_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.finish('recursion')
+        self.assertRaises(MergeError,
+                          mgr.finish, 'even')
+        # resolve the conflict
+        gitflow.git.rm('odd.py')
+        gitflow.git.commit('-F.git/MERGE_MSG')
+        # the feature branch is still here
+        self.assertIn('feat/even',
+                [b.name for b in self.repo.branches])
+        mgr.finish('even')
+        # now the feature branch is gone
+        self.assertNotIn('feat/even',
+                [b.name for b in self.repo.branches])
+
+    @copy_from_fixture('sample_repo')
+    def test_finish_feature_unresolved_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        mgr = FeatureBranchManager(gitflow)
+        mgr.finish('recursion')
+        self.assertRaises(MergeError,
+                          mgr.finish, 'even')
+        # do not resolve, but finish again
+        self.assertRaises(GitCommandError,
+                          mgr.finish, 'even')
+
     # :todo: test-cases for finish with rebase
     # :todo: test-cases for finish with rebase-conflicts for both develop
 
