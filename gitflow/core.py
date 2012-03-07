@@ -22,7 +22,7 @@ from gitflow.util import itersubclasses
 from gitflow.exceptions import (NotInitialized, BranchExistsError,
                                 BranchTypeExistsError, MergeConflict,
                                 NoSuchRemoteError, NoSuchBranchError,
-                                Usage)
+                                Usage, BadObjectError)
 
 __copyright__ = "2010-2011 Vincent Driessen; 2012 Hartmut Goebel"
 __license__ = "BSD"
@@ -390,6 +390,10 @@ class GitFlow(object):
             full branch-name, or any of branch-, head- or
             reference-object.
         """
+        try:
+            commit = self.repo.rev_parse(str(commit))
+        except git.BadObject:
+            raise BadObjectError(commit)
         if isinstance(target_branch, git.RemoteReference):
             target_branch = 'remotes/' + target_branch.name
         elif isinstance(target_branch, git.SymbolicReference):
