@@ -848,6 +848,8 @@ class TestReleaseBranchManager(TestCase):
         # Release finishes advance both master and develop
         self.assertNotEqual(mc0, mc1)
         self.assertNotEqual(dc0, dc1)
+        # master is merged back to develop
+        self.assertIn(mc1, dc1.parents)
 
         # Finishing removes the release branch
         self.assertNotIn('rel/1.0',
@@ -876,6 +878,9 @@ class TestReleaseBranchManager(TestCase):
             )
         mgr.finish('1.0', tagging_info=taginfo)
         mc1 = gitflow.master().commit
+        dc1 = gitflow.develop().commit
+        # master is merged back to develop
+        self.assertIn(mc1, dc1.parents)
         # tag exists
         self.assertIn('v1.0', self.repo.tags)
         self.assertEqual(self.repo.tags['v1.0'].commit, mc1)
