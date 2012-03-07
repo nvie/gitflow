@@ -1,3 +1,10 @@
+#
+# This file is part of `gitflow`.
+# Copyright (c) 2010-2011 Vincent Driessen
+# Copyright (c) 2012 Hartmut Goebel
+# Distributed under a BSD-like license. For full terms see the file LICENSE.txt
+#
+
 all: cover
 
 doc:

@@ -1,3 +1,10 @@
+#
+# This file is part of `gitflow`.
+# Copyright (c) 2010-2011 Vincent Driessen
+# Copyright (c) 2012 Hartmut Goebel
+# Distributed under a BSD-like license. For full terms see the file LICENSE.txt
+#
+
 import os
 import sys
 import time
@@ -18,6 +25,8 @@ from gitflow.exceptions import (NotInitialized, InvalidOperation,
                                 NoSuchRemoteError, NoSuchBranchError,
                                 Usage)
 
+__copyright__ = "2010-2011 Vincent Driessen; 2012 Hartmut Goebel"
+__license__ = "BSD"
 
 def datetime_to_timestamp(d):
     return time.mktime(d.timetuple()) + d.microsecond / 1e6
