@@ -147,9 +147,11 @@ class FeatureCommand(GitFlowCommand):
         try:
             branch = gitflow.create('feature', args.name, args.base,
                                     fetch=args.fetch)
+        except (NotInitialized, BaseNotOnBranch):
+            # printed in main()
+            raise
         except Exception, e:
-            die("Could not create feature branch %r" % args.name,
-                str(e))
+            die("Could not create feature branch %r" % args.name, e)
         print
         print "Summary of actions:"
         print "- A new branch", branch, "was created, based on", args.base
@@ -349,12 +351,11 @@ class ReleaseCommand(GitFlowCommand):
         try:
             branch = gitflow.create('release', args.version, args.base,
                                     fetch=args.fetch)
-        except BranchTypeExistsError:
+        except (NotInitialized, BranchTypeExistsError, BaseNotOnBranch):
             # printed in main()
             raise
         except Exception, e:
-            die("Could not create release branch %r" % args.version,
-                str(e))
+            die("Could not create release branch %r" % args.version, e)
         print "Follow-up actions:"
         print "- Bump the version number now!"
         print "- Start committing last-minute fixes in preparing your release"
@@ -494,12 +495,11 @@ class HotfixCommand(GitFlowCommand):
         try:
             branch = gitflow.create('hotfix', args.version, args.base,
                                     fetch=args.fetch)
-        except BranchTypeExistsError:
+        except (NotInitialized, BranchTypeExistsError, BaseNotOnBranch):
             # printed in main()
             raise
         except Exception, e:
-            die("Could not create hotfix branch %r" % args.version,
-                str(e))
+            die("Could not create hotfix branch %r" % args.version, e)
         print
         print "Summary of actions:"
         print "- A new branch", branch, "was created, based on", args.base
@@ -515,7 +515,6 @@ class HotfixCommand(GitFlowCommand):
     #- finish
     @classmethod
     def register_finish(cls, parent):
-        pass
         p = parent.add_parser('finish', help='Finish a hotfix branch.')
         p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
@@ -621,12 +620,11 @@ class SupportCommand(GitFlowCommand):
         try:
             branch = gitflow.create('support', args.name, args.base,
                                     fetch=args.fetch)
-        except BranchTypeExistsError:
+        except (NotInitialized, BranchTypeExistsError, BaseNotOnBranch):
             # printed in main()
             raise
         except Exception, e:
-            die("Could not create support branch %r" % args.name,
-                str(e))
+            die("Could not create support branch %r" % args.name, e)
         print
         print "Summary of actions:"
         print "- A new branch", branch, "was created, based on", args.base
