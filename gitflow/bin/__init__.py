@@ -193,7 +193,7 @@ class FeatureCommand(GitFlowCommand):
     @staticmethod
     def run_publish(args):
         gitflow = GitFlow()
-        name = gitflow.name_or_current('feature', args.nameprefix)
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
         gitflow.start_transaction('publishing feature branch %s' % name)
         branch = gitflow.publish('feature', name)
         print
@@ -235,7 +235,7 @@ class FeatureCommand(GitFlowCommand):
     @staticmethod
     def run_diff(args):
         gitflow = GitFlow()
-        name = gitflow.name_or_current('feature', args.nameprefix)
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
         gitflow.start_transaction('diff for feature branch %s' % name)
         gitflow.diff('feature', name)
 
@@ -253,7 +253,7 @@ class FeatureCommand(GitFlowCommand):
     @staticmethod
     def run_rebase(args):
         gitflow = GitFlow()
-        name = gitflow.name_or_current('feature', args.nameprefix)
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
         gitflow.start_transaction('rebasing feature branch %s' % name)
         gitflow.rebase('feature', name, args.interactive)
 
@@ -269,7 +269,7 @@ class FeatureCommand(GitFlowCommand):
     def run_checkout(args):
         gitflow = GitFlow()
         # NB: Does not default to the current branch as `nameprefix` is required
-        name = gitflow.name_or_current('feature', args.nameprefix)
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
         gitflow.start_transaction('checking out feature branch %s' % name)
         gitflow.checkout('feature', name)
 
