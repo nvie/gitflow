@@ -365,24 +365,24 @@ class ReleaseCommand(GitFlowCommand):
         p = parent.add_parser('finish', help='Finish a release branch.')
         p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
-                help='Fetch from origin before performing local operation.')
-        p.add_argument('-r', '--rebase', action='store_true',
-                help='Finish branch by rebasing first.')
-        p.add_argument('-s', '--sign', action='store_true',
-                help="sign the release tag cryptographically")
-        p.add_argument('-u', '--signingkey',
-                help="use the given GPG-key for the digital signature "
-                     "(implies -s)")
-        p.add_argument('-m', '--message',
-                       help="use the given tag message")
+                help='fetch from origin before performing local operation.')
         p.add_argument('-p', '--push', action='store_true',
                        #:todo: get "origin" from config
                        help="push to origin after performing finish")
         p.add_argument('-k', '--keep', action='store_true',
-                help='Keep branch after performing finish.')
-        p.add_argument('-n', '--notag', action='store_true',
+                help='keep branch after performing finish.')
+        p.add_argument('version', nargs='?')
+
+        g = p.add_argument_group('tagging options')
+        g.add_argument('-n', '--notag', action='store_true',
                        help="don't tag this release")
-        p.add_argument('version')
+        g.add_argument('-m', '--message',
+                       help="use the given tag message")
+        g.add_argument('-s', '--sign', action='store_true',
+                help="sign the release tag cryptographically")
+        g.add_argument('-u', '--signingkey',
+                help="use the given GPG-key for the digital signature "
+                     "instead of the default git uses (implies -s)")
 
     @staticmethod
     def run_finish(args):
@@ -504,24 +504,24 @@ class HotfixCommand(GitFlowCommand):
         p = parent.add_parser('finish', help='Finish a hotfix branch.')
         p.set_defaults(func=cls.run_finish)
         p.add_argument('-F', '--fetch', action='store_true',
-                help='Fetch from origin before performing local operation.')
-        p.add_argument('-r', '--rebase', action='store_true',
-                help='Finish branch by rebasing first.')
-        p.add_argument('-s', '--sign', action='store_true',
-                help="sign the hotfix tag cryptographically")
-        p.add_argument('-u', '--signingkey',
-                help="use the given GPG-key for the digital signature "
-                     "(implies -s)")
-        p.add_argument('-m', '--message',
-                       help="use the given tag message")
+                help='fetch from origin before performing local operation.')
         p.add_argument('-p', '--push', action='store_true',
                        #:todo: get "origin" from config
                        help="push to origin after performing finish")
         p.add_argument('-k', '--keep', action='store_true',
-                help='Keep branch after performing finish.')
-        p.add_argument('-n', '--notag', action='store_true',
+                help='keep branch after performing finish.')
+        p.add_argument('version', nargs='?')
+
+        g = p.add_argument_group('tagging options')
+        g.add_argument('-n', '--notag', action='store_true',
                        help="don't tag this hotfix")
-        p.add_argument('version')
+        g.add_argument('-m', '--message',
+                       help="use the given tag message")
+        g.add_argument('-s', '--sign', action='store_true',
+                help="sign the hotfix tag cryptographically")
+        g.add_argument('-u', '--signingkey',
+                help="use this given GPG-key for the digital signature "
+                     "instead of the default git uses (implies -s)")
 
     @staticmethod
     def run_finish(args):
