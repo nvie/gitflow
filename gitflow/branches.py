@@ -218,7 +218,8 @@ class BranchManager(object):
         :attr:`into`, using commit message :attr:`message`.
 
         :param name:
-            The name of the branch that needs merging.
+            The (short) name of the branch that needs merging.  Alternatively
+            this is a instance of git.Reference (or subclass).
         :param into:
             The name of the branch to merge into.
         :param message:
@@ -232,7 +233,11 @@ class BranchManager(object):
 
         You typically don't need to override this method in a subclass.
         """
-        full_name = self.prefix + name
+        if isinstance(name, basestring):
+            full_name = self.prefix + name
+        else:
+            assert isinstance(name, Reference)
+            full_name = name
         repo = self.gitflow.repo
         repo.branches[into].checkout()
         if self.gitflow.is_merged_into(full_name, into):
