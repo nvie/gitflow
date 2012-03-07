@@ -30,6 +30,27 @@ def sandboxed(f):
         f(self, *args, **kwargs)
     return _inner
 
+
+def set_gnupg_home(func):
+    """
+    Decorator which changes the current working dir to the one of the
+    git repository in order to assure relative paths are handled
+    correctly.
+    """
+    @wraps(func)
+    def _inner(*args, **kwargs):
+        root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        gpghome = os.path.join(root, 'fixtures', 'gnupg')
+        oldval = os.environ.get('GNUPGHOME')
+        os.environ['GNUPGHOME'] = gpghome
+        func(*args, **kwargs)
+        if oldval is not None:
+            os.environ['GNUPGHOME'] = oldval
+        else:
+            del os.environ['GNUPGHOME']
+    return _inner
+
+
 def copy_from_fixture(fixture_name):
     """
     This decorator sets up a temporary, self-destructing sandbox and copies
