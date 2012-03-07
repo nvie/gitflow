@@ -488,7 +488,7 @@ class GitFlow(object):
                           tagging_info=tagging_info)
 
     @requires_initialized
-    def tag(self, tagname, commit, sign=False, signingkey=None, message=None):
+    def tag(self, tagname, commit, message=None, sign=False, signingkey=None):
         kwargs = {}
         if sign:
             kwargs['s'] = True
