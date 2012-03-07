@@ -211,6 +211,9 @@ class GitFlow(object):
                 return default
             raise
 
+    def get_prefix(self, identifier):
+        return self._safe_get('gitflow.prefix.%s' % (identifier,))
+
     @requires_repo
     def set(self, setting, value):
         section, option = self._parse_setting(setting)
@@ -250,7 +253,6 @@ class GitFlow(object):
     def origin(self):
         return self.require_remote(self.origin_name())
 
-
     @requires_repo
     def develop(self):
         return self.repo.branches[self.develop_name()]
@@ -258,42 +260,6 @@ class GitFlow(object):
     @requires_repo
     def master(self):
         return self.repo.branches[self.master_name()]
-
-    def get_prefix(self, identifier):
-        return self._safe_get('gitflow.prefix.%s' % (identifier,))
-
-
-    @requires_repo
-    def is_dirty(self):
-        """
-        Returns whether or not the current working directory contains
-        uncommitted changes.
-        """
-        return self.repo.is_dirty()
-
-    @requires_repo
-    def has_staged_commits(self):
-        """
-        Returns whether or not the current repo contains local changes
-        checked into the index but not committed.
-        """
-        return len(self.repo.index.diff(self.repo.head.commit)) > 0
-
-
-    @requires_repo
-    def require_no_merge_conflict(self):
-        """
-        Raises :exc:`MergeConflict` if the current working directory
-        contains a merge conflict.
-        """
-        try:
-            git.Reference(self.repo, 'MERGE_HEAD', check_path=False).commit
-            # reference exists, so there is a merge conflict
-            raise MergeConflict()
-        except ValueError:
-            # no such reference, so there is no merge conflict
-            pass
-
 
     @requires_repo
     def branch_names(self, remote=False):
@@ -303,13 +269,6 @@ class GitFlow(object):
                     if isinstance(r, RemoteReference)]
         else:
             return [r.name for r in self.repo.branches]
-
-
-    @requires_repo
-    def start_transaction(self, message=None):
-        if message:
-            info(message)
-
 
     @requires_repo
     def nameprefix_or_current(self, identifier, prefix):
@@ -362,6 +321,52 @@ class GitFlow(object):
         return name
 
 
+    @requires_repo
+    def status(self):
+        result = []
+        for b in self.repo.branches:
+            tup = self.branch_info(b.name)
+            result.append(tup)
+        return result
+
+    @requires_repo
+    def branch_info(self, name):
+        active_branch = self.repo.active_branch
+        b = self.repo.heads[name]
+        return (name, b.commit.hexsha, b == active_branch)
+
+    @requires_repo
+    def is_dirty(self):
+        """
+        Returns whether or not the current working directory contains
+        uncommitted changes.
+        """
+        return self.repo.is_dirty()
+
+    @requires_repo
+    def has_staged_commits(self):
+        """
+        Returns whether or not the current repo contains local changes
+        checked into the index but not committed.
+        """
+        return len(self.repo.index.diff(self.repo.head.commit)) > 0
+
+
+    @requires_repo
+    def require_no_merge_conflict(self):
+        """
+        Raises :exc:`MergeConflict` if the current working directory
+        contains a merge conflict.
+        """
+        try:
+            git.Reference(self.repo, 'MERGE_HEAD', check_path=False).commit
+            # reference exists, so there is a merge conflict
+            raise MergeConflict()
+        except ValueError:
+            # no such reference, so there is no merge conflict
+            pass
+
+
     def is_merged_into(self, commit, target_branch):
         """
         Checks whether `commit` is succesfully merged into branch
@@ -386,6 +391,79 @@ class GitFlow(object):
             b.lstrip('* ')
             for b in self.git.branch('-a', '--contains', commit).splitlines()]
 
+
+    def must_be_uptodate(self, branch, fetch):
+        remote_branch = self.origin_name(branch)
+        if remote_branch in self.branch_names(remote=True):
+            if fetch:
+                repo.fetch(remote_branch)
+            self.require_branches_equal(branch, remote_branch)
+
+    @requires_repo
+    def compare_branches(self, branch1, branch2):
+        """
+        Tests whether branches and their 'origin' counterparts have
+        diverged and need merging first. It returns error codes to
+        provide more detail, like so:
+
+        0    Branch heads point to the same commit
+        1    First given branch needs fast-forwarding
+        2    Second given branch needs fast-forwarding
+        3    Branch needs a real merge
+        4    There is no merge base, i.e. the branches have no common ancestors
+        """
+        try:
+            commit1 = self.repo.rev_parse(branch1)
+            commit2 = self.repo.rev_parse(branch2)
+        except git.BadObject, e:
+            raise NoSuchBranchError(e.args[0])
+        if commit1 == commit2:
+            return 0
+        try:
+            base = self.repo.git.merge_base(commit1, commit2)
+        except GitCommandError:
+            return 4
+        if base == commit1:
+            return 1
+        elif base == commit2:
+            return 2
+        else:
+            return 3
+
+
+    @requires_repo
+    def require_branches_equal(self, branch1, branch2):
+        status = self.compare_branches(branch1, branch2)
+        if status == 0:
+            # branches are equal
+            return
+        else:
+            warn("Branches '%s' and '%s' have diverged." % (branch1, branch2))
+            if status == 1:
+                raise SystemExit("And branch '%s' may be fast-forwarded." % branch1)
+            elif status == 2:
+                # Warn here, since there is no harm in being ahead
+                warn("And local branch '%s' is ahead of '%s'." % (branch1, branch2))
+            else:
+                raise SystemExit("Branches need merging first.")
+
+    @requires_repo
+    def start_transaction(self, message=None):
+        if message:
+            info(message)
+
+    @requires_initialized
+    def tag(self, tagname, commit, message=None, sign=False, signingkey=None):
+        kwargs = {}
+        if sign:
+            kwargs['s'] = True
+        if signingkey:
+            kwargs['u'] = signingkey
+        self.repo.create_tag(tagname, commit, message=message or None, **kwargs)
+
+    #
+    #====== sub commands =====
+    #
 
     @requires_repo
     def list(self, identifier, arg0_name, use_tagname, verbose):
@@ -488,44 +566,32 @@ class GitFlow(object):
                           tagging_info=tagging_info)
 
     @requires_initialized
-    def tag(self, tagname, commit, message=None, sign=False, signingkey=None):
-        kwargs = {}
-        if sign:
-            kwargs['s'] = True
-        if signingkey:
-            kwargs['u'] = signingkey
-        self.repo.create_tag(tagname, commit, message=message or None, **kwargs)
-
-
-    def must_be_uptodate(self, branch, fetch):
-        remote_branch = self.origin_name(branch)
-        if remote_branch in self.branch_names(remote=True):
-            if fetch:
-                repo.fetch(remote_branch)
-            self.require_branches_equal(branch, remote_branch)
-        
-
-    @requires_initialized
     def checkout(self, identifier, name):
         mgr = self.managers[identifier]
         branch = mgr.by_name_prefix(name)
         branch.checkout()
 
-
     @requires_initialized
-    def track(self, identifier, name):
+    def diff(self, identifier, name):
         repo = self.repo
         mgr = self.managers[identifier]
-        # sanity checks
-        # :todo: require_clean_working_tree
         full_name = mgr.full_name(name)
-        if full_name in repo.branches:
-            raise BranchExistsError(full_name)
-        self.origin().fetch(full_name)
-        remote_branch = self.origin().refs[full_name]
-        branch = repo.create_head(full_name, remote_branch)
-        branch.set_tracking_branch(remote_branch)
-        return branch.checkout()
+        base = self.git.merge_base(mgr.default_base(), full_name)
+        print self.git.diff('%s..%s' % (base, full_name))
+
+    @requires_initialized
+    def rebase(self, identifier, name, interactive):
+        warn("Will try to rebase %s branch '%s' ..." % (identifier, name))
+        repo = self.repo
+        mgr = self.managers[identifier]
+        full_name = mgr.full_name(name)
+        # :todo: require_clean_working_tree
+        self.checkout(identifier, name)
+        args = []
+        if interactive:
+            args.append('-i')
+        args.append(mgr.default_base())
+        self.git.rebase(*args)
 
     @requires_initialized
     def publish(self, identifier, name):
@@ -549,30 +615,6 @@ class GitFlow(object):
         repo.branches[full_name].set_tracking_branch(info.remote_ref)
 
         return full_name
-
-
-    @requires_initialized
-    def diff(self, identifier, name):
-        repo = self.repo
-        mgr = self.managers[identifier]
-        full_name = mgr.full_name(name)
-        base = self.git.merge_base(mgr.default_base(), full_name)
-        print self.git.diff('%s..%s' % (base, full_name))
-
-
-    @requires_initialized
-    def rebase(self, identifier, name, interactive):
-        warn("Will try to rebase %s branch '%s' ..." % (identifier, name))
-        repo = self.repo
-        mgr = self.managers[identifier]
-        full_name = mgr.full_name(name)
-        # :todo: require_clean_working_tree
-        self.checkout(identifier, name)
-        args = []
-        if interactive:
-            args.append('-i')
-        args.append(mgr.default_base())
-        self.git.rebase(*args)
 
     @requires_initialized
     def pull(self, identifier, remote, name):
@@ -610,67 +652,17 @@ class GitFlow(object):
             info("Created local branch %s based on %s's %s."
                  % (full_name, remote, full_name))
 
-
-    @requires_repo
-    def status(self):
-        result = []
-        for b in self.repo.branches:
-            tup = self.branch_info(b.name)
-            result.append(tup)
-        return result
-
-
-    @requires_repo
-    def branch_info(self, name):
-        active_branch = self.repo.active_branch
-        b = self.repo.heads[name]
-        return (name, b.commit.hexsha, b == active_branch)
-
-
-    @requires_repo
-    def compare_branches(self, branch1, branch2):
-        """
-        Tests whether branches and their 'origin' counterparts have
-        diverged and need merging first. It returns error codes to
-        provide more detail, like so:
-
-        0    Branch heads point to the same commit
-        1    First given branch needs fast-forwarding
-        2    Second given branch needs fast-forwarding
-        3    Branch needs a real merge
-        4    There is no merge base, i.e. the branches have no common ancestors
-        """
-        try:
-            commit1 = self.repo.rev_parse(branch1)
-            commit2 = self.repo.rev_parse(branch2)
-        except git.BadObject, e:
-            raise NoSuchBranchError(e.args[0])
-        if commit1 == commit2:
-            return 0
-        try:
-            base = self.repo.git.merge_base(commit1, commit2)
-        except GitCommandError:
-            return 4
-        if base == commit1:
-            return 1
-        elif base == commit2:
-            return 2
-        else:
-            return 3
-
-
-    @requires_repo
-    def require_branches_equal(self, branch1, branch2):
-        status = self.compare_branches(branch1, branch2)
-        if status == 0:
-            # branches are equal
-            return
-        else:
-            warn("Branches '%s' and '%s' have diverged." % (branch1, branch2))
-            if status == 1:
-                raise SystemExit("And branch '%s' may be fast-forwarded." % branch1)
-            elif status == 2:
-                # Warn here, since there is no harm in being ahead
-                warn("And local branch '%s' is ahead of '%s'." % (branch1, branch2))
-            else:
-                raise SystemExit("Branches need merging first.")
+    @requires_initialized
+    def track(self, identifier, name):
+        repo = self.repo
+        mgr = self.managers[identifier]
+        # sanity checks
+        # :todo: require_clean_working_tree
+        full_name = mgr.full_name(name)
+        if full_name in repo.branches:
+            raise BranchExistsError(full_name)
+        self.origin().fetch(full_name)
+        remote_branch = self.origin().refs[full_name]
+        branch = repo.create_head(full_name, remote_branch)
+        branch.set_tracking_branch(remote_branch)
+        return branch.checkout()
