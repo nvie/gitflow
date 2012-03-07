@@ -22,42 +22,33 @@ from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
 from tests.helpers.factory import create_sandbox, create_git_repo
 
 
-
-def capture_stdout(func):
-    @wraps(func)
-    def capture(*args, **kwargs):
-        held, sys.stdout = sys.stdout, StringIO()
-        try:
-            return func(*args, **kwargs)
-        finally:
-            sys.stdout = held
-
-    return capture
-
-def runGitFlow(*argv):
+def runGitFlow(*argv, **kwargs):
+    capture = kwargs.get('capture', False)
     _argv, sys.argv = sys.argv, ['git-flow'] + list(argv)
+    _stdout = sys.stdout
     try:
-        gitflow.bin.main()
+        if not capture:
+            gitflow.bin.main()
+        else:
+            sys.stdout = StringIO()
+            gitflow.bin.main()
+            return sys.stdout.getvalue()
     finally:
+        sys.stdout = _stdout
         sys.argv = _argv
-    
 
 class TestVersionCommand(TestCase):
 
-    @capture_stdout
     def test_version(self):
-        runGitFlow('version')
-        stdout = sys.stdout.getvalue()
+        stdout = runGitFlow('version', capture=1)
         self.assertEqual(gitflow.__version__+'\n', stdout)
 
 
 class TestStatusCommand(TestCase):
 
-    @capture_stdout
     @copy_from_fixture('sample_repo')
     def test_version(self):
-        runGitFlow('status')
-        stdout = sys.stdout.getvalue()
+        stdout = runGitFlow('status', capture=1)
         self.assertItemsEqual([
             '  devel: 2b34cd2',
             '  feat/even: e56be18',
