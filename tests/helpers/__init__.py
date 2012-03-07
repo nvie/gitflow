@@ -170,16 +170,16 @@ def git_working_dir(func):
 
 
 @git_working_dir
-def fake_commit(repo, message, append=True):
+def fake_commit(repo, message, append=True, filename='newfile.py'):
     if append:
-        f = open('newfile.py', 'a')
+        f = open(filename, 'a')
     else:
-        f = open('newfile.py', 'w')
+        f = open(filename, 'w')
     try:
         f.write('This is a dummy change.\n')
     finally:
         f.close()
-    repo.index.add(['newfile.py'])
+    repo.index.add([filename])
     return repo.index.commit(message)
 
 
