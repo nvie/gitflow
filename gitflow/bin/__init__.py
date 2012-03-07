@@ -180,7 +180,10 @@ class FeatureCommand(GitFlowCommand):
         gitflow = GitFlow()
         name = gitflow.nameprefix_or_current('feature', args.nameprefix)
         gitflow.start_transaction('finishing feature branch %s' % name)
-        gitflow.finish('feature', args.nameprefix)
+        gitflow.finish('feature', name,
+                       fetch=args.fetch, rebase=args.rebase,
+                       keep=args.keep, force_delete=args.force_delete,
+                       tagging_info=None)
 
     #- publish
     @classmethod
