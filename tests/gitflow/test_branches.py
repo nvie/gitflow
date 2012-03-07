@@ -1051,7 +1051,6 @@ class TestReleaseBranchManager(TestCase):
         self.assertIn('-----BEGIN PGP SIGNATURE-----', tag.message)
 
 
-    # :todo: test-cases for finish with merge-conflicts for both master and develop
     def test_finish_release_rebase(self):
         repo = create_git_repo(self)
         gitflow = GitFlow(repo).init()
@@ -1061,6 +1060,45 @@ class TestReleaseBranchManager(TestCase):
             AssertionError, "does not make any sense",
             mgr.finish, '1.0', rebase=True)
 
+
+    @copy_from_fixture('release')
+    def test_finish_release_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        fmgr = FeatureBranchManager(gitflow)
+        fmgr.finish('even')
+        fake_commit(self.repo, 'Overwrite version', filename='VERSION')
+
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertRaises(MergeError,
+                          mgr.finish, '1.0')
+        # resolve the conflict
+        gitflow.git.rm('VERSION')
+        gitflow.git.commit('-F.git/MERGE_MSG')
+        # the release branch is still here
+        self.assertIn('rel/1.0',
+                [b.name for b in self.repo.branches])
+        mgr.finish('1.0')
+        # now the release branch is gone
+        self.assertNotIn('rel/1.0',
+                [b.name for b in self.repo.branches])
+
+    @copy_from_fixture('release')
+    def test_finish_release_unresolved_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        fmgr = FeatureBranchManager(gitflow)
+        fmgr.finish('even')
+        fake_commit(self.repo, 'Overwrite version', filename='VERSION')
+
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertRaises(MergeError,
+                          mgr.finish, '1.0')
+        # do not resolve, but finish again
+        self.assertRaises(GitCommandError,
+                          mgr.finish, '1.0')
+
+    # :todo: test-cases for finish with merge-conflicts on master
+    # :todo: test-cases for finish + tag with merge-conflicts on develop
+    # :todo: test-cases for finish + tag with merge-conflicts on master
 
 class TestHotfixBranchManager(TestCase):
 
