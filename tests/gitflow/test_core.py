@@ -575,8 +575,31 @@ class TestGitFlowCommandTrack(TestCase):
 
 
 class TestGitFlowCommandRebase(TestCase):
-    # :todo: test-cases for rebase - one is okay
-    pass
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_rebase(self):
+        gitflow = GitFlow(self.repo).init()
+        dc0 = self.repo.refs['devel'].commit
+        fc0 = self.repo.refs['feat/even'].commit
+        b0 = self.repo.git.merge_base(dc0, fc0)
+
+        gitflow.develop().checkout()
+        fake_commit(self.repo, 'A commit on devel')
+        dc1 = self.repo.refs['devel'].commit
+        b1 = self.repo.git.merge_base(dc1, fc0)
+        # commit advances `devel`
+        self.assertNotEqual(dc0, dc1)
+        # merge base is still the same
+        self.assertEqual(b0, b1)
+
+        gitflow.rebase('feature', 'even', interactive=False)
+
+        fc1 = self.repo.refs['feat/even'].commit
+        b2 = self.repo.git.merge_base('devel', 'feat/even')
+        # rebase advances `feat/even`
+        self.assertNotEqual(fc0, fc1)
+        # merge base is now new `devel` head
+        self.assertEqual(b2, dc1.hexsha)
 
 
 class TestGitFlowCommandPull(TestCase):
