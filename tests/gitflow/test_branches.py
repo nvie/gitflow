@@ -100,8 +100,6 @@ class TestAbstractBranchManager(TestCase):
         self.assertEquals('xyz/foo', fb.full_name('xyz/foo'))
         self.assertEquals('feature/foo', fb.full_name('feature/foo'))
 
-    # :todo: test-cases for merge with conflicts
-
 
 class TestFeatureBranchManager(TestCase):
 
@@ -445,6 +443,17 @@ class TestFeatureBranchManager(TestCase):
         self.assertEqual(dc0, dc1)
         # Assert the target-branch is active
         self.assertEqual(gitflow.repo.active_branch.name, 'develop')
+
+    @copy_from_fixture('sample_repo')
+    def test_merge_conflict(self):
+        gitflow = GitFlow(self.repo)
+        mgr = FeatureBranchManager(gitflow)
+        mgr.merge('recursion', 'devel')
+        self.assertRaises(MergeError,
+                          mgr.merge, 'even', 'devel')
+        gitflow.git.rm('odd.py')
+        gitflow.git.commit('-F.git/MERGE_MSG')
+
 
     #--- finish ---
 
