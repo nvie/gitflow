@@ -37,6 +37,20 @@ def runGitFlow(*argv, **kwargs):
         sys.stdout = _stdout
         sys.argv = _argv
 
+
+class TestCase(TestCase):
+    def assertArgparseError(self, expected_regexp, func, *args, **kwargs):
+        _stderr, sys.stderr = sys.stderr, StringIO()
+        try:
+            self.assertRaises(SystemExit, func, *args, **kwargs)
+            msg = sys.stderr.getvalue()
+            expected_regexp = re.compile(expected_regexp)
+            if not expected_regexp.search(str(msg)):
+                raise self.failureException('"%s" does not match "%s"' %
+                         (expected_regexp.pattern, msg))
+        finally:
+            sys.stderr = _stderr
+
 class TestVersionCommand(TestCase):
 
     def test_version(self):
