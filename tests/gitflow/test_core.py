@@ -15,7 +15,7 @@ from gitflow.exceptions import (BranchExistsError, NotInitialized,
                                 NoSuchBranchError, NoSuchRemoteError,
                                 MergeConflict)
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
-                           fake_commit, all_commits)
+                           fake_commit, all_commits, set_gnupg_home)
 from tests.helpers.factory import create_sandbox, create_git_repo
 
 
@@ -361,7 +361,67 @@ class TestGitFlowInit(TestCase):
         self.assertEquals('feature/', gitflow.get_prefix('feature'))
 
 
-    # :todo: test-cases for tag (with signing)
+class TestGitFlowTag(TestCase):
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_tag_without_message(self):
+        gitflow = GitFlow(self.repo).init()
+        self.assertNotIn('some-tag', self.repo.tags)
+        commit = self.repo.head.commit
+        gitflow.tag('some-tag', commit)
+        self.assertIn('some-tag', self.repo.tags)
+        tagref = self.repo.tags['some-tag']
+        self.assertEqual(tagref.commit, commit)
+        self.assertEqual(tagref.name, 'some-tag')
+        # if there is no message, tagref.tag is None
+        self.assertEqual(tagref.tag, None)
+
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_tag_with_message(self):
+        gitflow = GitFlow(self.repo).init()
+        self.assertNotIn('some-tag', self.repo.tags)
+        commit = self.repo.head.commit
+        gitflow.tag('some-tag', commit, 'This is my tag')
+        self.assertIn('some-tag', self.repo.tags)
+        tagref = self.repo.tags['some-tag']
+        self.assertEqual(tagref.commit, commit)
+        self.assertEqual(tagref.name, 'some-tag')
+        # if there is no message, tagref.tag is None
+        self.assertNotEqual(tagref.tag, None)
+
+        tag = tagref.tag
+        self.assertEqual(tag.message, 'This is my tag')
+        self.assertEqual(tag.tag, 'some-tag')
+        self.assertEqual(tag.object, commit)
+
+    @set_gnupg_home
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_tag_signed(self):
+        gitflow = GitFlow(self.repo).init()
+        # need to the the signing key via config
+        gitflow.set('user.signingkey', 'Dummy Key for Gitflow testing')
+        commit = self.repo.head.commit
+        gitflow.tag('some-tag', commit, 'This is my tag', sign=True)
+        tag = self.repo.tags['some-tag'].tag
+        expected = ['This is my tag', '-----BEGIN PGP SIGNATURE-----']
+        self.assertEqual(tag.message.splitlines()[:2], expected)
+        self.assertEqual(tag.tag, 'some-tag')
+        self.assertEqual(tag.object, commit)
+
+    @set_gnupg_home
+    @copy_from_fixture('sample_repo')
+    def test_gitflow_tag_signed_with_key(self):
+        gitflow = GitFlow(self.repo).init()
+        commit = self.repo.head.commit
+        gitflow.tag('some-tag', commit, 'This is my tag', sign=True,
+                    signingkey='Dummy Key for Gitflow testing')
+        tag = self.repo.tags['some-tag'].tag
+        expected = ['This is my tag', '-----BEGIN PGP SIGNATURE-----']
+        self.assertEqual(tag.message.splitlines()[:2], expected)
+        self.assertEqual(tag.tag, 'some-tag')
+        self.assertEqual(tag.object, commit)
+
+
     # :todo: test-cases for must_be_uptodate
     # :todo: test-cases for branch_names(remote=True)
     # :todo: test-cases for list (one per BranchManager)
