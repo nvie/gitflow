@@ -104,12 +104,13 @@ class FeatureCommand(GitFlowCommand):
         cls.register_list(sub)
         cls.register_start(sub)
         cls.register_finish(sub)
-        cls.register_publish(sub)
-        cls.register_track(sub)
+        cls.register_checkout(sub)
         cls.register_diff(sub)
         cls.register_rebase(sub)
-        cls.register_checkout(sub)
+
+        cls.register_publish(sub)
         cls.register_pull(sub)
+        cls.register_track(sub)
 
     #- list
     @classmethod
@@ -187,6 +188,54 @@ class FeatureCommand(GitFlowCommand):
                        keep=args.keep, force_delete=args.force_delete,
                        tagging_info=None)
 
+    #- checkout
+    @classmethod
+    def register_checkout(cls, parent):
+        p = parent.add_parser('checkout',
+                help='Check out (switch to) the given feature branch.')
+        p.set_defaults(func=cls.run_checkout)
+        p.add_argument('nameprefix', action=NotEmpty)
+
+    @staticmethod
+    def run_checkout(args):
+        gitflow = GitFlow()
+        # NB: Does not default to the current branch as `nameprefix` is required
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('checking out feature branch %s' % name)
+        gitflow.checkout('feature', name)
+
+    #- diff
+    @classmethod
+    def register_diff(cls, parent):
+        p = parent.add_parser('diff',
+                help='Show a diff of changes since this feature branched off.')
+        p.set_defaults(func=cls.run_diff)
+        p.add_argument('nameprefix', nargs='?')
+
+    @staticmethod
+    def run_diff(args):
+        gitflow = GitFlow()
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('diff for feature branch %s' % name)
+        gitflow.diff('feature', name)
+
+    #- rebase
+    @classmethod
+    def register_rebase(cls, parent):
+        p = parent.add_parser('rebase',
+                help='Rebase a feature branch on top of develop.')
+        p.set_defaults(func=cls.run_rebase)
+        p.add_argument('-i', '--interactive', action='store_true',
+                help='Start an interactive rebase.')
+        p.add_argument('nameprefix', nargs='?')
+
+    @staticmethod
+    def run_rebase(args):
+        gitflow = GitFlow()
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('rebasing feature branch %s' % name)
+        gitflow.rebase('feature', name, args.interactive)
+
     #- publish
     @classmethod
     def register_publish(cls, parent):
@@ -207,76 +256,6 @@ class FeatureCommand(GitFlowCommand):
         print "- The local branch '%s' was configured to track the remote branch" % branch
         print "- You are now on branch '%s'" % branch
         print
-
-    #- track
-    @classmethod
-    def register_track(cls, parent):
-        p = parent.add_parser('track',
-                help='Track a feature branch from origin.')
-        p.set_defaults(func=cls.run_track)
-        p.add_argument('name', action=NotEmpty)
-
-    @staticmethod
-    def run_track(args):
-        gitflow = GitFlow()
-        # NB: `args.name` is required since the branch must not yet exist
-        gitflow.start_transaction('tracking remote feature branch %s'
-                                  % args.name)
-        branch = gitflow.track('feature', args.name)
-        print
-        print "Summary of actions:"
-        print "- A new remote tracking branch '%s' was created" % branch
-        print "- You are now on branch '%s'" % branch
-        print
-
-    #- diff
-    @classmethod
-    def register_diff(cls, parent):
-        p = parent.add_parser('diff',
-                help='Show a diff of changes since this feature branched off.')
-        p.set_defaults(func=cls.run_diff)
-        p.add_argument('nameprefix', nargs='?')
-
-    @staticmethod
-    def run_diff(args):
-        gitflow = GitFlow()
-        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
-        gitflow.start_transaction('diff for feature branch %s' % name)
-        gitflow.diff('feature', name)
-
-
-    #- rebase
-    @classmethod
-    def register_rebase(cls, parent):
-        p = parent.add_parser('rebase',
-                help='Rebase a feature branch on top of develop.')
-        p.set_defaults(func=cls.run_rebase)
-        p.add_argument('-i', '--interactive', action='store_true',
-                help='Start an interactive rebase.')
-        p.add_argument('nameprefix', nargs='?')
-
-    @staticmethod
-    def run_rebase(args):
-        gitflow = GitFlow()
-        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
-        gitflow.start_transaction('rebasing feature branch %s' % name)
-        gitflow.rebase('feature', name, args.interactive)
-
-    #- checkout
-    @classmethod
-    def register_checkout(cls, parent):
-        p = parent.add_parser('checkout',
-                help='Check out (switch to) the given feature branch.')
-        p.set_defaults(func=cls.run_checkout)
-        p.add_argument('nameprefix', action=NotEmpty)
-
-    @staticmethod
-    def run_checkout(args):
-        gitflow = GitFlow()
-        # NB: Does not default to the current branch as `nameprefix` is required
-        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
-        gitflow.start_transaction('checking out feature branch %s' % name)
-        gitflow.checkout('feature', name)
 
     #- pull
     @classmethod
@@ -300,6 +279,27 @@ class FeatureCommand(GitFlowCommand):
         gitflow.start_transaction('pulling remote feature branch %s '
                                   'into local banch %s' % (args.remote, name))
         gitflow.pull('feature', args.remote, name)
+
+    #- track
+    @classmethod
+    def register_track(cls, parent):
+        p = parent.add_parser('track',
+                help='Track a feature branch from origin.')
+        p.set_defaults(func=cls.run_track)
+        p.add_argument('name', action=NotEmpty)
+
+    @staticmethod
+    def run_track(args):
+        gitflow = GitFlow()
+        # NB: `args.name` is required since the branch must not yet exist
+        gitflow.start_transaction('tracking remote feature branch %s'
+                                  % args.name)
+        branch = gitflow.track('feature', args.name)
+        print
+        print "Summary of actions:"
+        print "- A new remote tracking branch '%s' was created" % branch
+        print "- You are now on branch '%s'" % branch
+        print
 
 
 class ReleaseCommand(GitFlowCommand):
