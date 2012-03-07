@@ -178,8 +178,8 @@ class FeatureCommand(GitFlowCommand):
     @staticmethod
     def run_finish(args):
         gitflow = GitFlow()
-        gitflow.start_transaction('finishing feature branch %s'
-                % args.nameprefix)
+        name = gitflow.nameprefix_or_current('feature', args.nameprefix)
+        gitflow.start_transaction('finishing feature branch %s' % name)
         gitflow.finish('feature', args.nameprefix)
 
     #- publish
