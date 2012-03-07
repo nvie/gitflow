@@ -21,6 +21,13 @@ from gitflow.util import itersubclasses
 from gitflow.exceptions import (GitflowError, AlreadyInitialized,
                                 BranchTypeExistsError)
 
+class NotEmpty(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not values:
+            raise argparse.ArgumentError(self, 'must not by empty.')
+        setattr(namespace, self.dest, values)
+
+
 class GitFlowCommand(object):
     """
     This is just an empty class to serve as the base class for all command line
@@ -122,7 +129,7 @@ class FeatureCommand(GitFlowCommand):
         p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
-        p.add_argument('name')
+        p.add_argument('name', action=NotEmpty)
         p.add_argument('base', nargs='?')
 
     @staticmethod
@@ -198,7 +205,7 @@ class FeatureCommand(GitFlowCommand):
         p = parent.add_parser('track',
                 help='Track a feature branch from origin.')
         p.set_defaults(func=cls.run_track)
-        p.add_argument('name')
+        p.add_argument('name', action=NotEmpty)
 
     @staticmethod
     def run_track(args):
@@ -252,7 +259,7 @@ class FeatureCommand(GitFlowCommand):
         p = parent.add_parser('checkout',
                 help='Check out (switch to) the given feature branch.')
         p.set_defaults(func=cls.run_checkout)
-        p.add_argument('nameprefix')
+        p.add_argument('nameprefix', action=NotEmpty)
 
     @staticmethod
     def run_checkout(args):
@@ -268,7 +275,7 @@ class FeatureCommand(GitFlowCommand):
         p = parent.add_parser('pull',
                 help='Pull a feature branch from a remote peer.')
         p.set_defaults(func=cls.run_pull)
-        p.add_argument('remote',
+        p.add_argument('remote', action=NotEmpty,
                        help="Remote repository to pull from.")
         p.add_argument('name', nargs='?',
                 help='Name of the feature branch to pull. '
@@ -322,7 +329,7 @@ class ReleaseCommand(GitFlowCommand):
         p.add_argument('-F', '--fetch', action='store_true',
                        #:todo: get "origin" from config
                 help='Fetch from origin before performing local operation.')
-        p.add_argument('version')
+        p.add_argument('version', action=NotEmpty)
         p.add_argument('base', nargs='?')
 
     @staticmethod
@@ -404,7 +411,7 @@ class ReleaseCommand(GitFlowCommand):
         p = parent.add_parser('track',
                 help='Track a release branch from origin.')
         p.set_defaults(func=cls.run_track)
-        p.add_argument('version')
+        p.add_argument('version', action=NotEmpty)
 
     @staticmethod
     def run_track(args):
@@ -455,7 +462,7 @@ class HotfixCommand(GitFlowCommand):
         p.add_argument('-F', '--fetch', action='store_true',
                        #:todo: get "origin" from config
                 help='Fetch from origin before performing local operation.')
-        p.add_argument('version')
+        p.add_argument('version', action=NotEmpty)
         p.add_argument('base', nargs='?')
 
     @staticmethod
@@ -570,7 +577,7 @@ class SupportCommand(GitFlowCommand):
         p.set_defaults(func=cls.run_start)
         p.add_argument('-F', '--fetch', action='store_true',
                 help='Fetch from origin before performing local operation.')
-        p.add_argument('name')
+        p.add_argument('name', action=NotEmpty)
         p.add_argument('base', nargs='?')
 
     @staticmethod
