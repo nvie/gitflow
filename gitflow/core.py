@@ -420,16 +420,19 @@ class GitFlow(object):
                 if branch_sha == basebranch_sha:
                     extra_info = '(no commits yet)'
                 elif use_tagname:
-                    tagname = self.git.name_rev('--tags','--name-only',
-                                                '--no-undefined', base_sha)
-                    if not tagname:
-                        r.git.rev_parse('--short', base_sha)
-                elif base_sha == branch_sha:
-                    extra_info = '(is behind develop, may ff)'
-                elif base_sha == basebranch_sha:
-                    extra_info = '(based on latest develop)'
-                else:
-                    extra_info = '(may be rebased)'
+                    try:
+                        extra_info = self.git.name_rev('--tags','--name-only',
+                                                       '--no-undefined', base_sha)
+                        extra_info = '(based on %s)' % extra_info
+                    except GitCommandError:
+                        pass
+                if not extra_info:
+                    if base_sha == branch_sha:
+                        extra_info = '(is behind %s, may ff)' % manager.default_base()
+                    elif base_sha == basebranch_sha:
+                        extra_info = '(based on latest %s)' % manager.default_base()
+                    else:
+                        extra_info = '(may be rebased)'
 
             info(prefix + name + extra_info)
 
