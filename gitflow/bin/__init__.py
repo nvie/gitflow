@@ -291,7 +291,7 @@ class FeatureCommand(GitFlowCommand):
     @staticmethod
     def run_pull(args):
         gitflow = GitFlow()
-        name = gitflow.name_or_current('feature', args.name)
+        name = gitflow.name_or_current('feature', args.name, must_exist=False)
         gitflow.start_transaction('pulling remote feature branch %s '
                                   'into local banch %s' % (args.remote, name))
         gitflow.pull('feature', args.remote, name)
