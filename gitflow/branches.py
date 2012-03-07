@@ -5,6 +5,7 @@
 # Distributed under a BSD-like license. For full terms see the file LICENSE.txt
 #
 
+from git import Reference
 from gitflow.exceptions import (NoSuchBranchError, BranchExistsError,
                                 PrefixNotUniqueError, BaseNotOnBranch,
                                 WorkdirIsDirtyError, BranchTypeExistsError,
@@ -394,8 +395,9 @@ class ReleaseBranchManager(BranchManager):
         to_push = [self.gitflow.develop_name(), self.gitflow.master_name()]
 
         self.merge(name, self.gitflow.master_name(),
-                'Finished %(identifier)s %(short_name)s.')
+                'Finished %s %s.' % (self.identifier, name))
 
+        tag = None
         if tagging_info is not None:
             # try to tag the release
             tagname = self.gitflow.get('gitflow.prefix.versiontag') + name
@@ -403,12 +405,17 @@ class ReleaseBranchManager(BranchManager):
             # has failed, but the tag was set successful, we skip it
             # now.
             # :todo: check: if tag exists, it must point to the commit
-            gitflow.tag(tagname, self.gitflow.master_name(),
+            tag = gitflow.tag(tagname, self.gitflow.master_name(),
                         **tagging_info)
             to_push.append(tagname)
 
-        self.merge(name, self.gitflow.develop_name(),
-                'Finished %(identifier)s %(short_name)s.')
+        # merge the master branch back into develop; this makes the
+        # master branch - and the new tag (if provided) - a parent of
+        # the development branch, which in turn lets you use 'git
+        # describe' on either branch
+        self.merge(tag or self.gitflow.master(),
+                   self.gitflow.develop_name(),
+                   'Finished %s %s.' % (self.identifier, name))
         if not keep:
             self.delete(name, force=force_delete)
             to_push.append(':'+full_name)
