@@ -19,8 +19,7 @@ from git import (Git, Repo, InvalidGitRepositoryError, RemoteReference,
 from gitflow.branches import BranchManager
 from gitflow.util import itersubclasses
 
-from gitflow.exceptions import (NotInitialized, InvalidOperation,
-                                BranchExists, BranchExistsError,
+from gitflow.exceptions import (NotInitialized, BranchExistsError,
                                 BranchTypeExistsError, MergeConflict,
                                 NoSuchRemoteError, NoSuchBranchError,
                                 Usage)

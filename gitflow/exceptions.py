@@ -25,11 +25,9 @@ class MergeConflict(GitflowError):
             "    git commit",
             ])
 
-class BranchExists(GitflowError): pass
 class BranchExistsError(GitflowError):pass
 class NoSuchBranchError(GitflowError):pass
 
-class InvalidOperation(GitflowError): pass
 
 class NoSuchRemoteError(GitflowError):pass
 
