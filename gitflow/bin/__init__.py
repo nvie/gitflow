@@ -416,7 +416,7 @@ class ReleaseCommand(GitFlowCommand):
         gitflow = GitFlow()
         version = gitflow.name_or_current('release', args.version)
         gitflow.start_transaction('publishing release branch %s' % version)
-        branch = gitflow.publish('release', args.version)
+        branch = gitflow.publish('release', version)
         print
         print "Summary of actions:"
         print "- A new remote branch '%s' was created" % branch
