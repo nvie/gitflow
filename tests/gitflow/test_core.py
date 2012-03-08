@@ -18,9 +18,9 @@ from git import GitCommandError
 
 from gitflow.core import GitFlow
 from gitflow.branches import BranchManager
-from gitflow.exceptions import (BranchExistsError, NotInitialized,
+from gitflow.exceptions import (BranchExistsError, NotInitialized, MergeError,
                                 NoSuchBranchError, NoSuchRemoteError,
-                                MergeConflict, BadObjectError)
+                                MergeConflict, BadObjectError, Usage)
 from tests.helpers import (copy_from_fixture, remote_clone_from_fixture,
                            fake_commit, all_commits, set_gnupg_home)
 from tests.helpers.factory import create_sandbox, create_git_repo
@@ -628,6 +628,16 @@ class TestGitFlowCommandFinish(TestCase):
         gitflow.finish('feature', 'wow-feature', False, False, False, False, None)
         self.assertNotIn('feature/wow-feature', gitflow.repo.branches)
 
+    @copy_from_fixture('sample_repo')
+    def test_finish_unresolved_merge_conflict(self):
+        gitflow = GitFlow(self.repo).init()
+        gitflow.finish('feature', 'recursion', False, False, False, False, None)
+        self.assertRaises(MergeError,
+                          gitflow.finish, 'feature', 'even', False, False, False, False, None)
+        # do not resolve, but finish again
+        self.assertRaises(Usage,
+                          gitflow.finish, 'feature', 'even', False, False, False, False, None)
+
 
 class TestGitFlowCommandTrack(TestCase):
 
@@ -705,7 +715,6 @@ class TestGitFlowCommandPull(TestCase):
             SystemExit, "To avoid unintended merges, git-flow aborted.",
             gitflow.pull, 'feature', 'my-remote', 'my-name-is-irrelevant')
 
-
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_pull_existing_branch_creates_non_tracking_branch(self):
         gitflow = GitFlow(self.repo).init()
@@ -736,7 +745,6 @@ class TestGitFlowCommandPull(TestCase):
         self.assertRaisesRegexp(
             SystemExit, "To avoid unintended merges, git-flow aborted.",
             gitflow.pull, 'feature', 'my-remote', 'even')
-
 
     @remote_clone_from_fixture('sample_repo')
     def test_gitflow_pull_non_existing_feature_raises_error(self):
@@ -803,6 +811,13 @@ class TestGitFlowCommandPublish(TestCase):
         self.assertRaises(NoSuchBranchError,
                           gitflow.publish, 'feature', 'even')
 
+    @remote_clone_from_fixture('sample_repo')
+    def test_gitflow_publish_existing_remote_branch_raises_error(self):
+        gitflow = GitFlow(self.repo).init()
+        gitflow.create('feature', 'even', 'devel', fetch=False)
+        self.assertRaises(BranchExistsError,
+                          gitflow.publish, 'feature', 'even')
+
     # :todo: publish_requires_clean_working_tree
 
 
@@ -849,6 +864,13 @@ class TestGitFlowBranchManagement(TestCase):
         gitflow = GitFlow()
         self.assertIn('foobar', gitflow.managers)
 
+    def test_empty_branch_type_list_raises_usage(self):
+        create_git_repo(self)
+        gitflow = GitFlow().init()
+        self.assertRaises(Usage, gitflow.list, 'feature', 'name', False, False)
+        self.assertRaises(Usage, gitflow.list, 'release', 'version', False, False)
+        self.assertRaises(Usage, gitflow.list, 'hotfix', 'version', False, False)
+        self.assertRaises(Usage, gitflow.list, 'support', 'version', False, False)
 
     # Branch creation
     def test_create_branches(self):
