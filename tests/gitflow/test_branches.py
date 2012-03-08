@@ -11,9 +11,9 @@ from git import GitCommandError
 
 from gitflow.core import GitFlow
 from gitflow.exceptions import (
-    NoSuchRemoteError, MergeError, BranchExistsError,
+    NoSuchRemoteError, MergeError, BranchExistsError, BaseNotOnBranch,
     BranchTypeExistsError, PrefixNotUniqueError, NoSuchBranchError,
-    WorkdirIsDirtyError)
+    WorkdirIsDirtyError, TagExistsError)
 from gitflow.branches import (
     BranchManager, FeatureBranchManager, ReleaseBranchManager,
     HotfixBranchManager, SupportBranchManager)
@@ -671,6 +671,21 @@ class TestReleaseBranchManager(TestCase):
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')  # devel~1
         self.assertEqual(new_branch.commit.hexsha,
                 'c8b6deac7ef94f078a426d52c0b1fb3e1221133c')
+
+    @copy_from_fixture('sample_repo')
+    def test_create_new_release_from_wrong_alt_base_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+        self.assertRaises(BaseNotOnBranch,
+                          mgr.create, '1.0', 'feat/even')
+
+    @copy_from_fixture('release')
+    def test_create_new_release_for_existing_tag_raises_error(self):
+        gitflow = GitFlow(self.repo)
+        mgr = ReleaseBranchManager(gitflow)
+        mgr.finish('1.0', tagging_info={'message':'Tagging 1.0'})
+        self.assertRaises(TagExistsError,
+                          mgr.create, '1.0')
 
     def test_release_branch_origin(self):
         repo = create_git_repo(self)
