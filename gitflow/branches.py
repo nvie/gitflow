@@ -5,6 +5,11 @@
 # Distributed under a BSD-like license. For full terms see the file LICENSE.txt
 #
 
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
 from git import GitCommandError, Reference
 from gitflow.exceptions import (NoSuchBranchError, BranchExistsError,
                                 PrefixNotUniqueError, BaseNotOnBranch,
@@ -253,12 +258,16 @@ class BranchManager(object):
                        % dict(name=full_name, identifier=self.identifier,
                               short_name=name))
             kwargs['message'] = message
+        # `git merge` does not send the error message to stderr, thus
+        # we need to capture stdout manually :-(
+        stdout = StringIO()
         try:
-            repo.git.merge(full_name, **kwargs)
+            repo.git.merge(full_name, output_stream=stdout, **kwargs)
         except GitCommandError, e:
-            # `git merge` does not send the error message to stderr, thus
-            # we can not test it here :-(
-            raise MergeError(e)
+            txt = stdout.getvalue().rstrip()
+            if e.stderr:
+                text = text + '\n' + e.stderr
+            raise MergeError(txt)
 
     def delete(self, name, force=False):
         """
