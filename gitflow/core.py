@@ -73,7 +73,7 @@ class GitFlow(object):
         The directory where the Git repo is located.  If not specified, the
         current working directory is used.
 
-    When a :class:`GitFlow` class is instantiated, it autodiscovers all
+    When a :class:`GitFlow` class is instantiated, it auto-discovers all
     subclasses of :class:`gitflow.branches.BranchManager`, so there is no
     explicit registration required.
     """
@@ -281,13 +281,17 @@ class GitFlow(object):
     @requires_repo
     def nameprefix_or_current(self, identifier, prefix):
         """
-        If the :param:`prefix` is empty, see if the current branch is
-        of type :param:`identifier`. If so, returns the current
-        branches short name, otherwise raises
-        :exc:`NoSuchBranchError`.
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
 
-        If exactly one branch of type :param`identifier` starts with
-        the given name :param:`prefix`, returns that branches short name.
+        :param prefix: If the empty, see if the current branch is of
+            type `identifier`. If so, returns the current branches
+            short name, otherwise raises :exc:`NoSuchBranchError`.
+
+        If exactly one branch of type `identifier` starts with
+        the given name `prefix`, returns that branches short name.
         Raises :exc:`NoSuchBranchError` in case no branch exists with
         the given prefix, or :exc:`PrefixNotUniqueError` in case
         multiple matches are found.
@@ -305,15 +309,21 @@ class GitFlow(object):
     @requires_repo
     def name_or_current(self, identifier, name, must_exist=True):
         """
-        If the :param:`name` is empty, see if the current branch is of
-        type :param:`identifier`. If so, returns the current branches
-        short name, otherwise raises :exc:`NoSuchBranchError`.
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
 
-        If :param:`must_exist` is `True` (the default), raises
-        :exc:`NoSuchBranchError` in case no branch exists with the
-        given :parm:`name`.
+        :param  name: 
+           If the `name` is empty, see if the current branch is of
+           type `identifier`. If so, returns the current branches
+           short name, otherwise raises :exc:`NoSuchBranchError`.
 
-        Otherwise return the :parm:`name` unchanged.
+        :param must_exist: If `True` (the default), raises
+            :exc:`NoSuchBranchError` in case no branch exists with the
+            given `name`.
+
+        Otherwise return the `name` unchanged.
         """
         repo = self.repo
         manager = self.managers[identifier]
@@ -377,7 +387,7 @@ class GitFlow(object):
 
     def is_merged_into(self, commit, target_branch):
         """
-        Checks whether `commit` is succesfully merged into branch
+        Checks whether `commit` is successfully merged into branch
         `target_branch`.
 
         :param commit:
@@ -478,7 +488,30 @@ class GitFlow(object):
     #
 
     @requires_repo
-    def list(self, identifier, arg0_name, use_tagname, verbose):
+    def list(self, identifier, arg0_name, verbose, use_tagname):
+        """
+        List the all branches of the given type. If there are not
+        branches of this type, raises :exc:`Usage` with an
+        explanation on how to start a branch of this type.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param arg0_name:
+            Name of the first argument for the command line to be put
+            into the explanation on how to start a branch of this
+            type. This typically is `name` or `version`.
+
+        :param verbose:
+            If True, give more information about the state of the
+            branch: Whether it's ahead or behind it's default base,
+            may be rebased, etc.
+
+        :param use_tagname:
+            If True, try to describe the state based on the next tag.
+        """
         repo = self.repo
         manager = self.managers[identifier]
         branches = manager.list()
@@ -579,12 +612,37 @@ class GitFlow(object):
 
     @requires_initialized
     def checkout(self, identifier, name):
+        """
+        Checkout a branch of the given type, with the given short name.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+
+        :returns:
+            The checked out :class:`git.refs.Head` branch.
+        """
         mgr = self.managers[identifier]
         branch = mgr.by_name_prefix(name)
-        branch.checkout()
+        return branch.checkout()
 
     @requires_initialized
     def diff(self, identifier, name):
+        """
+        Print the diff of changes since this branch branched off.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+        """
         repo = self.repo
         mgr = self.managers[identifier]
         full_name = mgr.full_name(name)
@@ -593,6 +651,21 @@ class GitFlow(object):
 
     @requires_initialized
     def rebase(self, identifier, name, interactive):
+        """
+        Rebase a branch of the given type, with the given short name,
+        on top of it's default base.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+
+        :param interactive:
+            If True, do an interactive rebase.
+        """
         warn("Will try to rebase %s branch '%s' ..." % (identifier, name))
         repo = self.repo
         mgr = self.managers[identifier]
@@ -607,6 +680,18 @@ class GitFlow(object):
 
     @requires_initialized
     def publish(self, identifier, name):
+        """
+        Publish a branch of the given type, with the given short name,
+        to `origin` (or whatever is configured as `remote` for gitflow.)
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+        """
         repo = self.repo
         mgr = self.managers[identifier]
 
@@ -628,10 +713,25 @@ class GitFlow(object):
         # configure remote tracking
         repo.branches[full_name].set_tracking_branch(info.remote_ref)
 
-        return full_name
 
     @requires_initialized
     def pull(self, identifier, remote, name):
+        """
+        Pull a branch of the given type, with the given short name,
+        from the given remote peer.
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param remote:
+            The remote to pull from. This must have been configured by
+            `git remote add ...`.
+
+        :param name:
+            The friendly (short) name to create.
+        """
 
         def avoid_accidental_cross_branch_action(branch_name):
             current_branch = repo.active_branch
@@ -668,6 +768,26 @@ class GitFlow(object):
 
     @requires_initialized
     def track(self, identifier, name):
+        """
+        Track a branch of the given type, with the given short name,
+        from `origin` (or whatever is configured as `remote` for
+        gitflow.)
+
+        :param identifier:
+            The identifier for the type of branch to create.
+            A :class:`BranchManager <git.branches.BranchManager>` for the given
+            identifier must exist in the :attr:`self.managers`.
+
+        :param name:
+            The friendly (short) name to create.
+
+        :param base:
+            The alternative base to branch off from.  If not given, the default
+            base for the given branch type is used.
+
+        :returns:
+            The newly created :class:`git.refs.Head` branch.
+        """
         repo = self.repo
         mgr = self.managers[identifier]
         # sanity checks
