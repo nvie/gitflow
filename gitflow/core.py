@@ -616,8 +616,10 @@ class GitFlow(object):
         remote_name = self.origin_name(full_name)
         if not full_name in repo.branches:
             raise NoSuchBranchError(full_name)
-        if remote_name in repo.branches:
+        if remote_name in repo.refs:
             raise BranchExistsError(remote_name)
+        # :todo: check if full_name already has a tracking branch
+        # :todo: check if full_name already has the same tracking branch
 
         # create remote branch
         origin = self.origin()
