@@ -9,7 +9,12 @@ git-flow init
 # Distributed under a BSD-like license. For full terms see the file LICENSE.txt
 #
 
-import readline # this will trigger readline functionality for raw_input
+try:
+    # this will trigger readline functionality for raw_input
+    import readline
+except:
+    # readline is optional and may not be available on all installations
+    pass
 
 from gitflow.core import GitFlow as CoreGitFlow, warn
 
