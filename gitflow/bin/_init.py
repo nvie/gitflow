@@ -16,7 +16,7 @@ except:
     # readline is optional and may not be available on all installations
     pass
 
-from gitflow.core import GitFlow as CoreGitFlow, warn
+from gitflow.core import GitFlow as CoreGitFlow, warn, info
 
 from gitflow.exceptions import (AlreadyInitialized, NotInitialized,
                                 NoSuchLocalBranchError, NoSuchBranchError)
@@ -91,7 +91,9 @@ def _ask_branch(args, name, desc1, desc2, suggestions, filter=[]):
         if not branch_name in local_branches:
             remote_name = gitflow.origin_name(branch_name)
             if remote_name in gitflow.branch_names(remote=True):
-                gitflow.repo.branch(branch_name, remote_name)
+                branch = gitflow.repo.create_head(branch_name, remote_name)
+                info("Created local branch %s based on %s."
+                     % (branch_name, remote_name))
             else:
                 raise NoSuchLocalBranchError(branch_name)
 

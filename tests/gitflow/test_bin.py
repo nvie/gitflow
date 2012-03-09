@@ -215,6 +215,23 @@ class TestInitCommand(TestCase):
         finally:
             sys.stdin = _stdin
 
+
+    @remote_clone_from_fixture('sample_repo')
+    def test_init_with_master_existing_remote_but_not_local(self):
+        rsc0 = self.remote.branches['stable'].commit
+        text = '\n'.join(['my-remote', 'stable', 'devel',
+                          'feat/', 'rel/', 'hf/', 'sup/', 'ver'])
+        _stdin, sys.stdin = sys.stdin, StringIO(text)
+        try:
+            runGitFlow('init', '--force')
+        finally:
+            sys.stdin = _stdin
+        rsc1 = self.remote.branches['stable'].commit
+        lsc1 = self.repo.branches['stable'].commit
+        self.assertEqual(rsc0, rsc1)
+        self.assertEqual(rsc1, lsc1)
+
+
     # These tests need a repo with only branches `foo` and `bar`
     # or other names not selected for defaults
     # :todo: give no master branch name (or white-spaces)
@@ -237,7 +254,6 @@ class TestInitCommand(TestCase):
         assertNotInitialized('diff', 'recursion')
         assertNotInitialized('rebase', 'recursion')
         assertNotInitialized('pull', 'even')
-
 
 class TestFeature(TestCase):
 
