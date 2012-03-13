@@ -235,6 +235,8 @@ cmd_finish() {
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	DEFINE_boolean squash false "squash feature during merge" S
+	DEFINE_string  message "" "custom merge message" m
+	DEFINE_string  append_message ""  "append a message to default merge message" a
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -311,16 +313,37 @@ cmd_finish() {
 	fi
 
 	# merge into BASE
-	git_do checkout "$DEVELOP_BRANCH"
+	local append_message=""
+	# get and evaluate feature finish append message, since it can contain custom subcommands that use $BRANCH variable
+	if [ "$FLAGS_append_message" != "" ]; then
+		eval "append_message=\"$FLAGS_append_message\""
+	# no command line message defined, trying default from config
+	elif [ "$(git config gitflow.feature.finish.append)" != "" ]; then
+		eval "append_message=\"$(git config gitflow.feature.finish.append) \""
+	fi
+
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+		if [ "$append_message" != "" ]; then
+			git_do checkout "$BRANCH"
+			git_do commit --amend -m "$(echo "$(git log -n 1 --pretty=%s)\n\n$append_message")"
+		fi
+		git_do checkout "$DEVELOP_BRANCH"
 		git_do merge --ff "$BRANCH"
 	else
-		if noflag squash; then
-		    git_do merge --no-ff "$BRANCH"
-		else
+		local opts=""
+		if [ "$FLAGS_message" != "" ]; then
+			opts="-m '$FLAGS_message'"
+		elif [ "$append_message" != "" ]; then
+			opts=$(echo "-m 'Merge branch $BRANCH into $DEVELOP_BRANCH.\n\n$append_message'")
+		fi
+		
+		git_do checkout "$DEVELOP_BRANCH"
+
+		if flag squash; then
 			git_do merge --squash "$BRANCH"
-			git_do commit
-			git_do merge "$BRANCH"
+			git_do commit "$opts"
+		else 
+			git_do merge "$opts" --no-ff "$BRANCH"
 		fi
 	fi
 
