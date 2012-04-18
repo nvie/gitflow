@@ -14,6 +14,8 @@ git-flow
 
 """
 import argparse
+import readline  # this will trigger readline functionality for raw_input
+
 from gitflow.core import GitFlow
 from gitflow.util import itersubclasses
 
@@ -38,14 +40,64 @@ class InitCommand(GitFlowCommand):
                 help='Initialize a repository for gitflow.')
         p.add_argument('-f', '--force', action='store_true',
                 help='force reinitialization of the gitflow preferences')
+        p.add_argument('-d', '--use-defaults', action='store_true',
+                help='force the use of the defaults gitflow preferences')
         p.set_defaults(func=self.run)
         return p
 
     def run(self, args):
-        print('-------------------')
-        print('Init has been run!')
-        print(args)
-        print('-------------------')
+        gitflow = GitFlow()
+        if gitflow.is_initialized() and not args.force:
+            warn('Git repository is already initialized.')
+            warn('')
+            warn('You can initialize it again:')
+            warn('')
+            warn('    git flow init --force')
+            warn('')
+            raise SystemExit()
+
+        if args.use_defaults:
+            gitflow.init(force_defaults=args.use_defaults)
+        else:
+            # Prompt master
+            master_suggestion = 'master'
+            if len(gitflow.repo.branches) == 0:
+                print('No branches exist yet. Base branches must be created now.')
+            else:
+                print('Which branch should be used for bringing forth production releases?')
+                for b in gitflow.repo.branches:
+                    if b.name in ('production', 'main', 'master'):
+                        master_suggestion = b.name
+                        break
+            master = raw_input('Branch name for production releases: [%s] ' % master_suggestion)
+            master = master.strip()  # remove whitespaces
+            if not master:
+                master = master_suggestion
+            # Prompt develop
+            develop_suggestion = 'develop'
+            if len(gitflow.repo.branches) > 0:
+                print('Which branch should be used for integration of the "next release"?')
+                for b in gitflow.repo.branches:
+                    if b.name in ('develop', 'int', 'integration', 'master', 'next'):
+                        develop_suggestion = b.name
+                        break
+            develop = raw_input('Branch name for "next release" development: [%s] ' % develop_suggestion)
+            develop = develop.strip()  # remove whitespaces
+            if not develop:
+                develop = develop_suggestion
+            if master == develop:
+                warn('Production and integration branches should differ.')
+                raise SystemExit()
+            # Prompt branch values
+            prefix = {}
+            for identifier in gitflow.managers:
+                mgr = gitflow.managers[identifier]
+                data = (mgr.identifier, mgr.prefix)
+                response = raw_input("What's the prefix for the %s branch? [%s] " % data)
+                if not response.strip():
+                    response = mgr.prefix
+                prefix[identifier] = response
+            gitflow.init(master=master, develop=develop, prefixes=prefix)
 
 
 class FeatureCommand(GitFlowCommand):

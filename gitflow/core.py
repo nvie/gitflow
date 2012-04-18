@@ -86,22 +86,26 @@ class GitFlow(object):
 
     def _init_initial_commit(self):
         master = self.master_name()
+        # Only if 'master' branch does not exist
         try:
             self.repo.branches[master]
-        except:
-            # Only if 'master' branch does not exist
+        except (GitCommandError, IndexError):
             c = self.repo.index.commit('Initial commit', head=False)
             self.repo.create_head(master, c)
 
     def _init_develop_branch(self):
         # NOTE: This function assumes master already exists
-        develop_name = self.develop_name()
         try:
+            self.repo.branches[self.master_name()]
+        except (GitCommandError, IndexError):
+            raise NotInitialized("Master branch doesn't exist.")
+        develop_name = self.develop_name()
+        # Create branch if it doesn't exist
+        try:
+            self.repo.branches[develop_name]
+        except (GitCommandError, IndexError):
             self.repo.create_head(develop_name, self.master_name())
-        except GitCommandError:
-            # on error, the branch existed already
-            pass
-        
+
 
     def init(self, master=None, develop=None, prefixes={}, force_defaults=False):
         if self.repo is None:
