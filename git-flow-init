@@ -100,7 +100,8 @@ cmd_default() {
 			default_suggestion=
 			for guess in $(git config --get gitflow.branch.master) \
 			             'production' 'main' 'master'; do
-				if git_local_branch_exists "$guess"; then
+				if git_local_branch_exists "$guess" || \
+					git_remote_branch_exists "origin/$guess"; then
 					default_suggestion="$guess"
 					break
 				fi
@@ -153,7 +154,8 @@ cmd_default() {
 			default_suggestion=
 			for guess in $(git config --get gitflow.branch.develop) \
 			             'develop' 'int' 'integration' 'master'; do
-				if git_local_branch_exists "$guess"; then
+				if git_local_branch_exists "$guess" || \
+					git_remote_branch_exists "origin/$guess"; then
 					default_suggestion="$guess"
 					break
 				fi
