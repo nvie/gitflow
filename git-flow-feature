@@ -248,6 +248,8 @@ avoid_multiple_reviews() {
 	fi
 }
 
+
+
 # Squashes multiple commits into the branch provided as a paramater,
 # and then returns with the current checked out branch being the
 # result of the squash.
@@ -257,13 +259,17 @@ squash_multiple_commits() {
 
 	# Determine the contents of the commit message
 	local allMessages="$(git log --reverse --pretty=format:"%s%n%ad%n%b" "$ORIGIN/$MASTER_BRANCH..$BRANCH")"
-	local firstId="$(echo "$allMessages" | grep "Change-Id:" | head -n 1 | sed -e 's/\s*//')"
+	# Strip all existing change IDs
 	local changedMessages="$(echo "$allMessages" | sed -e 's/Change-Id: .*//')"
+
+	# Generate a change ID based on the repo name and the branch name
+	local changeIdDescriptor="$(basename $(git config --get remote.origin.url))-$squash_branch"
+	local changeId="$(echo "$changeIdDescriptor" | git hash-object --stdin)"
 
 	# Construct new commit message
 	echo "$changedMessages" > "$commit_message_file"
 	echo >> "$commit_message_file"
-	echo "$firstId" >> "$commit_message_file"
+	echo "Change-Id: I$changeId" >> "$commit_message_file"
 
 	# Perform squash
 	git branch --no-track "$squash_branch" "$ORIGIN/$MASTER_BRANCH"
