@@ -253,7 +253,7 @@ avoid_multiple_reviews() {
 # result of the squash.
 squash_multiple_commits() {
 	local squash_branch="$*"
-	local commit_message_file=$(tempfile -p "git-flow")
+	local commit_message_file=$(mktemp -t "git-flow.XXXX")
 
 	# Determine the contents of the commit message
 	local allMessages="$(git log --reverse --pretty=format:"%s%n%ad%n%b" "$ORIGIN/$MASTER_BRANCH..$BRANCH")"
