@@ -27,12 +27,7 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-# Determine if we're inside a debian build .. 
-ifdef DEB_BUILD_ARCH
-   prefix=$(DESTDIR)/usr/
-else
-   prefix=/usr/local
-endif
+prefix=/usr/local
 
 # files that need mode 755
 EXEC_FILES=git-flow
