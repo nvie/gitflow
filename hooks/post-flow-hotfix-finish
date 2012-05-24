@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Runs at the end of git flow hotfix finish
+#
+# Positional arguments:
+# $1    The version (including the version prefix)
+# $2    The origin remote
+# $3    The full branch name (including the feature prefix)
+#
+VERSION=$1
+ORIGIN=$2
+BRANCH=$3
+
+# Implement your script here.
+
+exit 0
