@@ -319,7 +319,6 @@ require_branches_equal() {
 }
 
 #
-<<<<<<< HEAD
 # run_filter_hook
 #
 # Looks for a Git hook script called as defined by the first variable
@@ -340,6 +339,7 @@ run_filter_hook() {
         fi
 }
 
+#
 # run_pre_hook
 #
 # Looks for a Git hook script called
