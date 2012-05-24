@@ -10,6 +10,8 @@ Release date: **not yet**
 
 * Adds support for the version filter in the commands `git flow release start` and `git flow hotfix start`
 
+* Adds support for hooks in various commands.
+
 [Ben Loveridge][bloveridge]
 
 * Fix usage of shFlags on FreeBSD

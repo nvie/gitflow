@@ -124,6 +124,11 @@ those questions to accept the (sane) default suggestions.
   
   For support branches, the `<base>` arg must be a commit on `master`.
 
+### Using Hooks and Filters
+
+For a wide variety of commands hooks or filters can called before and after the command.
+The files should be placed in .git/hooks
+In the directory hooks you can find examples of all the hooks available.
 
 Showing your appreciation
 =========================
