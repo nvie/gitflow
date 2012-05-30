@@ -34,6 +34,8 @@ else
    prefix=/usr/local
 endif
 
+datarootdir=$(prefix)/share
+docdir=$(datarootdir)/doc/gitflow
 # files that need mode 755
 EXEC_FILES=git-flow
 
@@ -47,6 +49,9 @@ SCRIPT_FILES+=git-flow-version
 SCRIPT_FILES+=gitflow-common
 SCRIPT_FILES+=gitflow-shFlags
 
+# Hook files
+HOOK_FILES=$(wildcard hooks/*)
+
 all:
 	@echo "usage: make install"
 	@echo "       make uninstall"
@@ -54,10 +59,14 @@ all:
 install:
 	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
 	install -d -m 0755 $(prefix)/bin
+	install -d -m 0755 $(docdir)/hooks
 	install -m 0755 $(EXEC_FILES) $(prefix)/bin
 	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
+	install -m 0644 $(HOOK_FILES) $(docdir)/hooks
 
 uninstall:
 	test -d $(prefix)/bin && \
 	cd $(prefix)/bin && \
 	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+	test -d $(docdir) && \
+	rm -rf $(docdir)
