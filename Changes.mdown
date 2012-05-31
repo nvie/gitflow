@@ -1,5 +1,6 @@
-[petervanderdoes]:	https://github.com/petervanderdoes	"Peter van der Does on github"
-[bloveridge]:		https://github.com/bloveridge		"Ben Loveridge on github"
+[petervanderdoes]: https://github.com/petervanderdoes "Peter van der Does on github"
+[bloveridge]:  https://github.com/bloveridge "Ben Loveridge on github"
+
 0.4.2-avh2
 ----------
 [Peter van der Does][petervanderdoes]
@@ -96,7 +97,7 @@ Release date: **2010/07/22**
 * Easier addressing of branch names by using name prefixes.
   For example, when using:
 
-  	git flow feature finish fo
+    git flow feature finish fo
 
   this automatically finishes the feature branch `foobar` if that's the only
   feature branch name starting with `fo`.
