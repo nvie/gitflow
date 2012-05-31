@@ -5,6 +5,8 @@
 [Peter van der Does][petervanderdoes]
 
 * Remove trailing whitespace
+* Updated from latest develop branch from nvie.
+  Some features were still missing.
 
 
 0.4.2-avh1
@@ -26,16 +28,21 @@
 Release date: **not yet**
 
 * `git flow init` now detects situations where origin already has gitflow
-  branches set up, and behaves accordingly (thanks Emre Berge Ergenekon)
+  branches set up, and behaves accordingly (thanks Emre Berge Ergenekon).
 
 * `git flow feature finish` can now be called without a feature branch
   name(prefix) argument and will finish the current branch, if on any.
 
-* Various minor bug fixes related to internal argument passing
+* `git flow feature pull` now has a `-r` flag, to support `pull --rebase`
+  semantics (thanks Vedang Manerikar).
 
-* Better support for Windows users.
+* Various minor bug fixes related to internal argument passing.
 
-* Add package installers for the Debian and Windows platforms.
+* Improved some documentation.
+
+* Better support for Windows and BSD users.
+
+* Add package installer for the Windows platform.
 
 0.4.1:
 -----
