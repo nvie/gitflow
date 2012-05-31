@@ -7,6 +7,8 @@
 * Remove trailing whitespace
 * Updated from latest develop branch from nvie.
   Some features were still missing.
+* Remove the submodule shFlags.
+  Instead of the submodule we'll just use the file.
 
 
 0.4.2-avh1
