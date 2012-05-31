@@ -302,6 +302,8 @@ cmd_finish() {
 		  # TODO: What do we do now?
 	fi
 
+	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
+
 	# delete branch
 	if noflag keep; then
 		git branch -d "$BRANCH"
@@ -317,8 +319,6 @@ cmd_finish() {
 				die "Could not push tags to $ORIGIN."
 		fi
 	fi
-
-	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
