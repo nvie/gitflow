@@ -268,6 +268,8 @@ cmd_finish() {
 		  # TODO: What do we do now?
 	fi
 
+	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
+
 	# delete branch
 	if noflag keep; then
 		if [ "$BRANCH" = "$(git_current_branch)" ]; then
@@ -288,8 +290,6 @@ cmd_finish() {
 		git push "$ORIGIN" :"$BRANCH" || \
 			die "Could not delete the remote $BRANCH in $ORIGIN."
 	fi
-
-	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
