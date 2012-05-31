@@ -1,9 +1,14 @@
 [petervanderdoes]:	https://github.com/petervanderdoes	"Peter van der Does on github"
 [bloveridge]:		https://github.com/bloveridge		"Ben Loveridge on github"
+0.4.2-avh2
+----------
+[Peter van der Does][petervanderdoes]
+
+* Remove trailing whitespace
+
+
 0.4.2-avh1
 ----------
-Release date: **not yet**
-
 [Peter van der Does][petervanderdoes]
 
 * Start of the git flow AVH release.
@@ -43,7 +48,7 @@ Release date: **2011/02/04**
 * The parsing issues related to git-flow feature's flags are now dealt with on
   all known platforms.  (Fixed #54, #62, #86, #97)
 
-* Escape queries for detecting branch/tag names.  (Fixed #91) 
+* Escape queries for detecting branch/tag names.  (Fixed #91)
 
 
 0.4:
@@ -68,36 +73,36 @@ Release date: **2010/10/18**
 ----
 Release date: **2010/07/22**
 
-* New subcommands for `git flow feature`:  
-  - **checkout**:  
+* New subcommands for `git flow feature`:
+  - **checkout**:
     For easily checking out features by their short name.  Even allows
     unique prefixes as arguments (see below).
 
-  - **pull**:  
+  - **pull**:
     This subcommand allows you to painlessly work on a feature branch
     together with another peer.  This is especially valuable for doing
     peer reviews of other people's code.  For more detailed info, see the
     [commit log][1].
 
-* Easier addressing of branch names by using name prefixes.  
-  For example, when using:  
-  
+* Easier addressing of branch names by using name prefixes.
+  For example, when using:
+
   	git flow feature finish fo
-  
+
   this automatically finishes the feature branch `foobar` if that's the only
   feature branch name starting with `fo`.
 
-* No force flag anymore for new feature branches  
+* No force flag anymore for new feature branches
   `git flow feature start` lost its `-f` (force) flag.  You now don't
   have to be in a clean repo anymore to start a new feature branch. This
   avoids the manual `git stash`, `git flow feature start`, `git stash
   pop` cycle.
 
-* You can use `git-flow` in stand-alone repo's now.  
+* You can use `git-flow` in stand-alone repo's now.
   This means it does not assume you have an `origin` repository.
   (Thanks [Mark][2].)
 
-* No commands fetch from `origin` by default anymore.  
+* No commands fetch from `origin` by default anymore.
   There were some issues related to disabling this flag on some platforms.
 
 * Init guesses branch names you may want to use for `develop` and `master`.
