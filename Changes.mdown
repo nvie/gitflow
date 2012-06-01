@@ -1,5 +1,6 @@
 [petervanderdoes]: https://github.com/petervanderdoes "Peter van der Does on github"
 [bloveridge]:  https://github.com/bloveridge "Ben Loveridge on github"
+[memleak]: https://github.com/memleak/
 
 0.4.2-avh2
 ----------
@@ -10,6 +11,10 @@
   Some features were still missing.
 * Remove the submodule shFlags.
   Instead of the submodule we'll just use the file.
+
+  [Memleak][memleak]
+
+* Bugfix: Typo when pulling existing feature from remote.
 
 
 0.4.2-avh1
