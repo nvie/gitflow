@@ -1,4 +1,4 @@
-git-flow ![Project status](http://stillmaintained.com/petervanderdoes/gitflow.png)
+git-flow
 ========
 
 A collection of Git extensions to provide high-level repository operations
