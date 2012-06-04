@@ -14,6 +14,7 @@
 * When finishing a release or hotfix branch and the branch was tagged, use the tag for back-merging.
   When a release or hotfix branch is tagged, the tag is never merged into the develop branch, it
   is preferable to have the tag in the develop branch as well, for use with git describe for example.
+* Updated license info
 
   [Memleak][memleak]
 
