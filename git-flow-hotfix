@@ -273,18 +273,19 @@ cmd_finish() {
 		  # TODO: What do we do now?
 	fi
 
+	local commit="$BRANCH"
 	if noflag notag; then
 		# try to tag the release
 		# in case a previous attempt to finish this release branch has failed,
 		# but the tag was set successful, we skip it now
-		local tagname=$VERSION_PREFIX$VERSION
-		if ! git_tag_exists "$tagname"; then
+		if ! git_tag_exists "$VERSION_PREFIX$VERSION"; then
 			local opts="-a"
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			eval git tag $opts "$VERSION_PREFIX$VERSION" || \
 			die "Tagging failed. Please run finish again to retry."
+			commit="$VERSION_PREFIX$VERSION"
 		fi
 	fi
 
@@ -295,9 +296,9 @@ cmd_finish() {
 		git checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
-		# TODO: Actually, accounting for 'git describe' pays, so we should
-		# ideally git merge --no-ff $tagname here, instead!
-		git merge --no-ff "$BRANCH" || \
+		# Accounting for 'git describe', if a release is tagged
+		# we use the tag commit instead of the branch.
+		git merge --no-ff "$commit" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
@@ -323,11 +324,12 @@ cmd_finish() {
 	echo
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
-	echo "- Hotfix branch has been merged into '$MASTER_BRANCH'"
+	echo "- Hotfix branch '$BRANCH'has been merged into '$MASTER_BRANCH'"
 	if noflag notag; then
 		echo "- The hotfix was tagged '$VERSION_PREFIX$VERSION'"
 	fi
-	echo "- Hotfix branch has been back-merged into '$DEVELOP_BRANCH'"
+	[ "$commit" = "$BRANCH" ] && echo "- Hotfix branch '$BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
+	[ "$commit" = "$VERSION_PREFIX$VERSION" ] && echo "- Hotfix tag '$VERSION_PREFIX$VERSION' has been back-merged into '$DEVELOP_BRANCH'"
 	if flag keep; then
 		echo "- Hotfix branch '$BRANCH' is still available"
 	else

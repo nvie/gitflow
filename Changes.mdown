@@ -11,6 +11,9 @@
   Some features were still missing.
 * Remove the submodule shFlags.
   Instead of the submodule we'll just use the file.
+* When finishing a release or hotfix branch and the branch was tagged, use the tag for back-merging.
+  When a release or hotfix branch is tagged, the tag is never merged into the develop branch, it
+  is preferable to have the tag in the develop branch as well, for use with git describe for example.
 
   [Memleak][memleak]
 
