@@ -69,8 +69,8 @@ cd gitflow
 Install the git-flow software by running make.
 
 ```shell
-    git flow init -d
-    git flow feature start <your feature>
+git flow init -d
+git flow feature start <your feature>
 ```
 
 Then, do work and commit your changes.
