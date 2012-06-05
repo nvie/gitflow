@@ -2,8 +2,8 @@
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
-# Original blog post presenting this model is found at:
-#    http://nvie.com/git-model
+# A blog post presenting this model is found at:
+#    http://blog.avirtualhome.com/development-workflow-using-git/
 #
 # Feel free to contribute to this project at:
 #    http://github.com/petervanderdoes/gitflow
@@ -74,7 +74,7 @@ cmd_list() {
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$release_branches" | sed "s ^$PREFIX  g")
 
-	# determine column width first
+	# Determine column width first
 	local width=0
 	local branch
 	for branch in $short_names; do
@@ -115,11 +115,11 @@ cmd_help() {
 }
 
 parse_args() {
-	# parse options
+	# Parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
-	# read arguments into global variables
+	# Read arguments into global variables
 	VERSION=$1
 	BRANCH=$PREFIX$VERSION
 }
@@ -152,15 +152,18 @@ cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
+
 	# Run filter on the version
 	VERSION=`run_filter_hook release-start-version $VERSION`
+
 	# As VERSION might have changed reset BRANCH with new VERSION
 	BRANCH=$PREFIX$VERSION
+
 	require_version_arg
 	require_base_is_on_develop
 	require_no_existing_release_branches
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
 	require_tag_absent "$VERSION_PREFIX$VERSION"
@@ -173,7 +176,7 @@ cmd_start() {
 
 	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 
-	# create branch
+	# Create branch
 	git checkout -b "$BRANCH" "$BASE"
 
 	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
@@ -204,12 +207,12 @@ cmd_finish() {
 	parse_args "$@"
 	require_version_arg
 
-	# handle flags that imply other flags
+	# Handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then
 		FLAGS_sign=$FLAGS_TRUE
 	fi
 
-	# sanity checks
+	# Sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
 	if flag fetch; then
@@ -227,8 +230,8 @@ cmd_finish() {
 
 	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
 
-	# try to merge into master
-	# in case a previous attempt to finish this release branch has failed,
+	# Try to merge into master.
+	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
@@ -240,8 +243,8 @@ cmd_finish() {
 
 	local commit="$BRANCH"
 	if noflag notag; then
-		# try to tag the release
-		# in case a previous attempt to finish this release branch has failed,
+		# Try to tag the release.
+		# In case a previous attempt to finish this release branch has failed,
 		# but the tag was set successful, we skip it now
 		if ! git_tag_exists "$VERSION_PREFIX$VERSION"; then
 			local opts="-a"
@@ -254,8 +257,8 @@ cmd_finish() {
 		fi
 	fi
 
-	# try to merge into develop
-	# in case a previous attempt to finish this release branch has failed,
+	# Try to merge into develop.
+	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
 		git checkout "$DEVELOP_BRANCH" || \
@@ -270,7 +273,7 @@ cmd_finish() {
 
 	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
 
-	# delete branch
+	# Delete branch
 	if noflag keep; then
 		if [ "$BRANCH" = "$(git_current_branch)" ]; then
 			git checkout "$MASTER_BRANCH"
@@ -316,7 +319,7 @@ cmd_publish() {
 	parse_args "$@"
 	require_version_arg
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 	require_branch "$BRANCH"
 	git fetch -q "$ORIGIN"
@@ -324,11 +327,11 @@ cmd_publish() {
 
 	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
 
-	# create remote branch
+	# Create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
 	git fetch -q "$ORIGIN"
 
-	# configure remote tracking
+	# Configure remote tracking
 	git config "branch.$BRANCH.remote" "$ORIGIN"
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
@@ -347,7 +350,7 @@ cmd_track() {
 	parse_args "$@"
 	require_version_arg
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
 	git fetch -q "$ORIGIN"
@@ -355,7 +358,7 @@ cmd_track() {
 
 	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
 
-	# create tracking branch
+	# Create tracking branch
 	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
 
 	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"

@@ -2,8 +2,8 @@
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
-# Original blog post presenting this model is found at:
-#    http://nvie.com/git-model
+# A blog post presenting this model is found at:
+#    http://blog.avirtualhome.com/development-workflow-using-git/
 #
 # Feel free to contribute to this project at:
 #    http://github.com/petervanderdoes/gitflow
@@ -39,7 +39,7 @@
 # Common functionality
 #
 
-# shell output
+# Shell output
 warn() { echo "$@" >&2; }
 die() { warn "$@"; exit 1; }
 
@@ -47,21 +47,21 @@ escape() {
 	echo "$1" | sed 's/\([\.\$\*]\)/\\\1/g'
 }
 
-# set logic
+# Set logic
 has() {
 	local item=$1; shift
 	echo " $@ " | grep -q " $(escape $item) "
 }
 
-# basic math
+# Basic math
 min() { [ "$1" -le "$2" ] && echo "$1" || echo "$2"; }
 max() { [ "$1" -ge "$2" ] && echo "$1" || echo "$2"; }
 
-# basic string matching
+# Basic string matching
 startswith() { [ "$1" != "${1#$2}" ]; }
 endswith() { [ "$1" != "${1%$2}" ]; }
 
-# convenience functions for checking shFlags flags
+# Convenience functions for checking shFlags flags
 flag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -eq $FLAGS_TRUE ]; }
 noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 
@@ -155,7 +155,7 @@ git_is_branch_merged_into() {
 # gitflow specific common functionality
 #
 
-# check if this repo has been inited for gitflow
+# Check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
 	[ "$master" != "" ] && git_local_branch_exists "$master"
@@ -182,7 +182,7 @@ gitflow_is_initialized() {
 	gitflow_has_prefixes_configured
 }
 
-# loading settings that can be overridden using git config
+# Loading settings that can be overridden using git config
 gitflow_load_settings() {
 	export DOT_GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
 	export HOOKS_DIR="$DOT_GIT_DIR"/hooks

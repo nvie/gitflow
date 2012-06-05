@@ -3,8 +3,8 @@
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
-# Original blog post presenting this model is found at:
-#    http://nvie.com/git-model
+# A blog post presenting this model is found at:
+#    http://blog.avirtualhome.com/development-workflow-using-git/
 #
 # Feel free to contribute to this project at:
 #    http://github.com/petervanderdoes/gitflow
@@ -37,7 +37,7 @@
 #
 #
 
-# set this to workaround expr problems in shFlags on freebsd
+# Set this to workaround expr problems in shFlags on FreeBSD
 if uname -s | egrep -iq 'bsd'; then export EXPR_COMPAT=1; fi
 
 # enable debug mode
@@ -69,7 +69,7 @@ main() {
 		exit 1
 	fi
 
-	# load common functionality
+	# Load common functionality
 	. "$GITFLOW_DIR/gitflow-common"
 
 	# This environmental variable fixes non-POSIX getopt style argument
@@ -77,13 +77,13 @@ main() {
 	# Linux platforms.
 	export POSIXLY_CORRECT=1
 
-	# use the shFlags project to parse the command line arguments
+	# Use the shFlags project to parse the command line arguments
 	. "$GITFLOW_DIR/gitflow-shFlags"
 	FLAGS_PARENT="git flow"
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
-	# sanity checks
+	# Sanity checks
 	SUBCOMMAND="$1"; shift
 
 	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
@@ -91,11 +91,11 @@ main() {
 		exit 1
 	fi
 
-	# run command
+	# Run command
 	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
 	FLAGS_PARENT="git flow $SUBCOMMAND"
 
-	# test if the first argument is a flag (i.e. starts with '-')
+	# Test if the first argument is a flag (i.e. starts with '-')
 	# in that case, we interpret this arg as a flag for the default
 	# command
 	SUBACTION="default"
@@ -108,7 +108,7 @@ main() {
 		exit 1
 	fi
 
-	# run the specified action
+	# Run the specified action
 	cmd_$SUBACTION "$@"
 }
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Ran before git flow feature pull.
+# Runs before git flow feature pull.
 #
 # Positional arguments:
 # $1    The friendly name of the branch
@@ -12,5 +12,6 @@ REMOTE=$2
 BRANCH=$3
 
 # Implement your script here.
+
 # To terminate the git-flow action, return a non-zero exit code.
 exit 0

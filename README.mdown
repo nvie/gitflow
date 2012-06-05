@@ -62,17 +62,22 @@ using the complete version number.
 
 Fork the repository.  Then, run:
 
-    git clone --recursive git@github.com:<username>/gitflow.git
-    cd gitflow
-    git branch master origin/master
+```shell
+git clone git@github.com:<username>/gitflow.git
+cd gitflow
+```
+Install the git-flow software by running make.
+
+```shell
     git flow init -d
     git flow feature start <your feature>
+```
 
-Then, do work and commit your changes.  **Hint**: ``export PATH=`pwd`:$PATH``
-from within the gitflow directory makes sure you're using the version of
-gitflow you're currently developing.
+Then, do work and commit your changes.
 
-    git flow feature publish <your feature>
+```shell
+git flow feature publish <your feature>
+```
 
 When done, open a pull request to your feature branch.
 
@@ -147,7 +152,6 @@ The files should be placed in .git/hooks
 In the directory hooks you can find examples of all the hooks available.
 
 ## Showing your appreciation
-
 
 Of course, the best way to show your appreciation for the git-flow tool itself
 remains contributing to the community.  If you'd like to show your appreciation

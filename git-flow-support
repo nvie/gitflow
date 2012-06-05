@@ -2,8 +2,8 @@
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
-# Original blog post presenting this model is found at:
-#    http://nvie.com/git-model
+# A blog post presenting this model is found at:
+#    http://blog.avirtualhome.com/development-workflow-using-git/
 #
 # Feel free to contribute to this project at:
 #    http://github.com/petervanderdoes/gitflow
@@ -73,7 +73,7 @@ cmd_list() {
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
-	# determine column width first
+	# Determine column width first
 	local width=0
 	local branch
 	for branch in $short_names; do
@@ -120,11 +120,11 @@ cmd_help() {
 }
 
 parse_args() {
-	# parse options
+	# Parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
-	# read arguments into global variables
+	# Read arguments into global variables
 	VERSION=$1
 	BASE=$2
 	BRANCH=$PREFIX$VERSION
@@ -161,16 +161,16 @@ cmd_start() {
 	require_base_arg
 	require_base_is_on_master
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 
-	# fetch remote changes
+	# Fetch remote changes
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$BASE"
 	fi
 	require_branch_absent "$BRANCH"
 
-	# create branch
+	# Create branch
 	git checkout -b "$BRANCH" "$BASE"
 
 	echo
