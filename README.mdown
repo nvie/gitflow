@@ -39,7 +39,7 @@ git-flow subcommands and branch names.
 of the project Wiki.
 * Version Numbering Scheme.
 Starting with version 1.0, the project uses the following scheme:
-<MAJOR>.<MINOR>.<REVISION>-avh
+\<MAJOR\>.\<MINOR\>.\<REVISION\>-avh
 
 ## Please help out
 
