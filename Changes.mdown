@@ -2,8 +2,10 @@
 [bloveridge]:  https://github.com/bloveridge "Ben Loveridge on github"
 [memleak]: https://github.com/memleak/
 
-0.4.2-avh2
-----------
+# Changelog
+
+#### 0.4.2-avh2
+
 [Peter van der Does][petervanderdoes]
 
 * Remove trailing whitespace
@@ -11,33 +13,33 @@
   Some features were still missing.
 * Remove the submodule shFlags.
   Instead of the submodule we'll just use the file.
-* When finishing a release or hotfix branch and the branch was tagged, use the tag for back-merging.
-  When a release or hotfix branch is tagged, the tag is never merged into the develop branch, it
-  is preferable to have the tag in the develop branch as well, for use with git describe for example.
-* Updated license info
+* When finishing a release or hotfix, use the tag for back-merging if available.
+  When a release or hotfix branch is tagged, the tag is never merged into the
+  develop branch, it is preferable to have the tag in the develop branch as
+  well, for use with git describe for example.
+* Update license info
 
   [Memleak][memleak]
 
 * Bugfix: Typo when pulling existing feature from remote.
 
 
-0.4.2-avh1
-----------
+#### 0.4.2-avh1
+
 [Peter van der Does][petervanderdoes]
 
 * Start of the git flow AVH release.
-
-* Adds support for the version filter in the commands `git flow release start` and `git flow hotfix start`
-
+* Adds support for the version filter in the commands `git flow release start`
+and `git flow hotfix start`
 * Adds support for hooks in various commands.
 
 [Ben Loveridge][bloveridge]
 
 * Fix usage of shFlags on FreeBSD
 
-0.4.2:
------
-Release date: **not yet**
+#### 0.4.2
+
+Release date: not yet
 
 * `git flow init` now detects situations where origin already has gitflow
   branches set up, and behaves accordingly (thanks Emre Berge Ergenekon).
@@ -56,8 +58,8 @@ Release date: **not yet**
 
 * Add package installer for the Windows platform.
 
-0.4.1:
------
+#### 0.4.1
+
 Release date: **2011/02/04**
 
 * New option `-d` added to `git flow init`, to initialize with defaults without
@@ -70,8 +72,8 @@ Release date: **2011/02/04**
 * Escape queries for detecting branch/tag names.  (Fixed #91)
 
 
-0.4:
----
+#### 0.4
+
 Release date: **2010/10/18**
 
 * The flag parsing issues of git-flow subcommands are solved for most
@@ -88,8 +90,8 @@ Release date: **2010/10/18**
 * Various minor fixes.
 
 
-0.3:
-----
+#### 0.3
+
 Release date: **2010/07/22**
 
 * New subcommands for `git flow feature`:
@@ -134,7 +136,9 @@ Release date: **2010/07/22**
 [2]: http://github.com/talios
 [3]: http://github.com/rickosborne
 
-
-Older versions
---------------
+#####Older versions
 No change history is recorded for pre-0.3 releases.
+
+#### Glossary
+* RFC: Request For Change. This indicates a new or improved function requested
+by one or more users.

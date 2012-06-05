@@ -1,13 +1,12 @@
-git-flow
-========
+# git-flow
 
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
-blog post"). This fork adds functionality not (yet) added to the original branch.
+blog post"). This fork adds functionality not added to the original branch.
 
 
-Getting started
----------------
+## Getting started
+
 For the best introduction to get started with `git flow`, please read Jeff
 Kreeftmeijer's blog post:
 
@@ -20,13 +19,13 @@ Or have a look at one of these screen casts:
 * [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
 
-Installing git-flow
--------------------
+## Installing git-flow
+
 See the Wiki for up-to-date [Installation Instructions](https://github.com/petervanderdoes/gitflow/wiki/Installation).
 
 
-Integration with your shell
----------------------------
+## Integration with your shell
+
 For those who use the [Bash](http://www.gnu.org/software/bash/) or
 [ZSH](http://www.zsh.org) shell, please check out the excellent work on the
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
@@ -34,14 +33,16 @@ by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
 
-FAQ
----
-See the [FAQ](http://github.com/petervanderdoes/gitflow/wiki/FAQ) section of the project
-Wiki.
+## FAQ
 
+* See the [FAQ](http://github.com/petervanderdoes/gitflow/wiki/FAQ) section
+of the project Wiki.
+* Version Numbering Scheme.
+Starting with version 1.0, the project uses the following scheme:
+<MAJOR>.<MINOR>.<REVISION>-avh
 
-Please help out
----------------
+## Please help out
+
 This project is still under development. Feedback and suggestions are very
 welcome and I encourage you to use the [Issues
 list](http://github.com/petervanderdoes/gitflow/issues) on Github to provide that
@@ -52,9 +53,13 @@ contributors, please see the [AUTHORS](AUTHORS) file.
 
 Any questions, tips, or general discussion can be posted to our Google group:
 [http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
+This is the original group set up to support the nvie branch, but I am monitoring
+the list as well for any questions related to my version.
+When you do post a question on the list please indicate which version you are,
+using the complete version number.
 
-Contributing
-------------
+## Contributing
+
 Fork the repository.  Then, run:
 
     git clone --recursive git@github.com:<username>/gitflow.git
@@ -71,14 +76,16 @@ gitflow you're currently developing.
 
 When done, open a pull request to your feature branch.
 
-License terms
--------------
-git-flow is published under the liberal terms of the BSD License, see the
-[LICENSE](LICENSE) file. Although the BSD License does not require you to share
-any modifications you make to the source code, you are very much encouraged and
-invited to contribute back your modifications to the community, preferably
-in a Github fork, of course.
+## License terms
 
+git-flow is published under the FreeBSD License, see the
+[LICENSE](LICENSE) file. Although the FreeBSD License does not require you to
+share any modifications you make to the source code, you are very much
+encouraged and invited to contribute back your modifications to the community,
+preferably in a Github fork, of course.
+
+
+## git flow usage
 
 ### Initialization
 
@@ -134,16 +141,17 @@ The ``-d`` flag will accept all defaults.
 
 ### Using Hooks and Filters
 
-For a wide variety of commands hooks or filters can called before and after the command.
+For a wide variety of commands hooks or filters can called before and after
+the command.
 The files should be placed in .git/hooks
 In the directory hooks you can find examples of all the hooks available.
 
-Showing your appreciation
-=========================
+## Showing your appreciation
 
-Of course, the best way to show your appreciation for the git-flow tool itself remains
-contributing to the community.  If you'd like to show your appreciation in
-another way, however, consider donating through PayPal:
+
+Of course, the best way to show your appreciation for the git-flow tool itself
+remains contributing to the community.  If you'd like to show your appreciation
+in another way, however, consider donating through PayPal:
 
 [![PayPal][2]][1]
 
