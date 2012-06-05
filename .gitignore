@@ -1,4 +1,0 @@
-debian/files
-debian/*.substvars
-debian/*.debhelper.log
-debian/*/*
