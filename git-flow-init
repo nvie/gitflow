@@ -153,11 +153,17 @@ cmd_default() {
 			default_suggestion=
 			for guess in $(git config --get gitflow.branch.develop) \
 			             'develop' 'int' 'integration' 'master'; do
-				if git_local_branch_exists "$guess"; then
+				if git_local_branch_exists "$guess" && [ "$guess" != "$master_branch" ]; then
 					default_suggestion="$guess"
 					break
 				fi
 			done
+			
+			if [ -z $default_suggestion ]; then
+				should_check_existence=NO
+				default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
+			fi
+			
 		fi
 
 		printf "Branch name for \"next release\" development: [$default_suggestion] "
