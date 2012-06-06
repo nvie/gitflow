@@ -1,6 +1,10 @@
 [petervanderdoes]: https://github.com/petervanderdoes "Peter van der Does on github"
 [bloveridge]:  https://github.com/bloveridge "Ben Loveridge on github"
 [memleak]: https://github.com/memleak/
+[sinbad]: https://github.com/sinbad
+[bloomonkey]: https://github.com/bloomonkey
+[mallamanis]: https://github.com/mallamanis
+[kperi]: https://github.com/kperi
 
 # Changelog
 
@@ -19,10 +23,16 @@
   well, for use with git describe for example.
 * Update license info
 
-  [Memleak][memleak]
+* Bugfix: Typo when pulling existing feature from remote. Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis] and [Kostas][kperi]
 
-* Bugfix: Typo when pulling existing feature from remote.
+[Steve Streeting][sinbad]
+* Fixes the suggested name for the integration branch.
+   When git init -d is executed on a repo with multiple branches, the
+   suggested name for the integration branch could possibly be the same name
+   that was already selected for the production release branch.
 
+   If no suggested name is determined the suggested name remains empty which
+   leads to all sorts of other problems.
 
 #### 0.4.2-avh1
 
