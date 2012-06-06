@@ -23,7 +23,7 @@
   well, for use with git describe for example.
 * Update license info
 
-* Bugfix: Typo when pulling existing feature from remote. Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis] and [Kostas][kperi]
+* Bugfix: Typo when pulling existing feature from remote. Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis], [Kostas][kperi] and [memleak][memleak]
 
 [Steve Streeting][sinbad]
 * Fixes the suggested name for the integration branch.
