@@ -1,0 +1,11 @@
+#
+# This list is used by git-shortlog to fix a few botched names in the
+# git-flow repo, either because the author's full name was messed up and/or
+# not always written the same way, making contributions from the same person
+# appearing not to be so.
+#
+
+Eric Holmes <eric@ejholmes.net>
+Eric J. Holmes <eric@ejholmes.net>
+Stefan Näwe <stefan.naewe@atlas-elektronik.com>
+Stefan Näwe <stefan.naewe+github@googlemail.com>
