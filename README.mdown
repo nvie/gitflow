@@ -37,7 +37,7 @@ git-flow subcommands and branch names.
 
 * See the [FAQ](http://github.com/petervanderdoes/gitflow/wiki/FAQ) section
 of the project Wiki.
-* Version Numbering Scheme.
+* Version Numbering Scheme.  
 Starting with version 1.0, the project uses the following scheme:
 \<MAJOR\>.\<MINOR\>.\<REVISION\>-avh
 
@@ -147,8 +147,8 @@ The ``-d`` flag will accept all defaults.
 ### Using Hooks and Filters
 
 For a wide variety of commands hooks or filters can called before and after
-the command.
-The files should be placed in .git/hooks
+the command.  
+The files should be placed in .git/hooks  
 In the directory hooks you can find examples of all the hooks available.
 
 ## Showing your appreciation
