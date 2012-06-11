@@ -8,24 +8,27 @@
 
 # Changelog
 
-#### 0.4.2-avh2
+#### 1.0-avh
 
 [Peter van der Does][petervanderdoes]
 
-* Remove trailing whitespace
-* Updated from latest develop branch from nvie.
+* Remove trailing whitespace.
+* Updated from latest develop branch from nvie.  
   Some features were still missing.
 * Remove the submodule shFlags.  
   Instead of the submodule we'll just use the file.
-* When finishing a release or hotfix, use tag for back-merging if available.  
+* When finishing a release or hotfix, use tag for back-merging if available.    
   When a release or hotfix branch is tagged, the tag is never merged into the
   develop branch, it is preferable to have the tag in the develop branch as
   well, for use with git describe for example.
-* Update license info
-* Bugfix: Typo when pulling existing feature from remote.Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis], [Kostas][kperi] and [memleak][memleak]
+* Update license info.
+* Bugfix: Typo when pulling existing feature from remote.Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis], [Kostas][kperi] and [memleak][memleak].
+* Wrong variable names in the bare-bones.  
+  The wrong variable name is set, this can lead to confusing on what's 
+  passed to the script,
 
 [Steve Streeting][sinbad]
-* Fixes the suggested name for the integration branch.  
+* Fixes the suggested name for the integration branch.    
   When git init -d is executed on a repo with multiple branches, the
   suggested name for the integration branch could possibly be the same name
   that was already selected for the production release branch.  
