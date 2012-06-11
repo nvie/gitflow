@@ -8,7 +8,7 @@
 
 # Changelog
 
-#### 0.4.2-avh2
+#### 1.0-avh
 
 [Peter van der Does][petervanderdoes]
 
