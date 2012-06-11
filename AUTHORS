@@ -1,15 +1,53 @@
-Authors are (ordered by first commit date):
+git-flow AVH Authors
 
-- Vincent Driessen
-- Benedikt Böhm
-- Daniel Truemper
-- Jason L. Shiffer
-- Randy Merrill
-- Rick Osborne
-- Mark Derricutt
-- Nowell Strite
-- Felipe Talavera
-- Guillaume-Jean Herbiet
-- Joseph A. Levin
+This software consists of voluntary contributions made by many
+individuals. For exact contribution history, see the revision history
+and logs, available at http://github.com/petervanderdoes/gitflow.
 
-Portions derived from other open source works are clearly marked.
+
+Vincent Driessen
+Peter van der Does
+Benedikt Böhm
+Felipe Talavera
+Randy Merrill
+Daniel Truemper
+Eric J. Holmes
+Ben Loveridge
+JP Toto
+Kiall Mac Innes
+Lorin Hochstein
+Olivier Mengué
+Stefan Näwe
+Adam Gibbins
+Alexander Groß
+Alexander Zeitler
+Brian St. Pierre
+Chad Walker
+Emre Berge Ergenekon
+Gergely Nagy
+Gruen Christian-Rolf (Kiki)
+Guillaume-Jean Herbiet
+James Moran
+Jannis Leidel
+Jason L. Shiffer
+Jon Bernard
+Joseph A. Levin
+Konstantin Tjuterev
+Mark Borcherding
+Mark Derricutt
+Nowell Strite
+Peter Schröder
+Stefan Schüßler
+Steffen Jaeckel
+Steve Streeting
+Tacit Sawk
+Vedang Manerikar
+eddie cianci
+gmallard
+raybec
+
+
+Portions of the project are derived from other open source works are clearly
+marked.
+
+This file is auto generated, any changes will be lost.

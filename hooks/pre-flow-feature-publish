@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Runs before git flow feature publish
+#
+# Positional arguments:
+# $1    The friendly name of the branch
+# $2    The origin remote
+# $3    The full branch name (including the feature prefix)
+#
+NAME=$1
+ORIGIN=$2
+BRANCH=$3
+
+# Implement your script here.
+
+# To terminate the git-flow action, return a non-zero exit code.
+exit 0

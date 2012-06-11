@@ -1,12 +1,12 @@
-git-flow ![Project status](http://stillmaintained.com/nvie/gitflow.png)
-========
+# git-flow
+
 A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
-blog post").
+blog post"). This fork adds functionality not added to the original branch.
 
 
-Getting started
----------------
+## Getting started
+
 For the best introduction to get started with `git flow`, please read Jeff
 Kreeftmeijer's blog post:
 
@@ -14,111 +14,38 @@ Kreeftmeijer's blog post:
 
 Or have a look at one of these screen casts:
 
+* [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
 * [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
 * [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
 
-Installing git-flow
--------------------
+## Installing git-flow
 
-### Mac OS
-If you're on a Mac and use [homebrew](http://github.com/mxcl/homebrew), it's simple:
-
-    $ brew install git-flow
-
-If you're on a Mac and use [MacPorts](http://macports.org/), it's simple:
-
-    $ port install git-flow
-
-### Linux, etc.
-Another easy way to install git-flow is using Rick Osborne's excellent git-flow
-installer, which can be run using the following command:
-
-	$ wget --no-check-certificate -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sudo sh
-
-### Windows
-#### Using Cygwin
-For Windows users who wish to use the automated install, it is suggested that you install [Cygwin](http://www.cygwin.com/)
-first to install tools like `git`, `util-linux` and `wget` (with those three being packages that can be selected
-during installation). Then simply run this command from a Cygwin shell:
-
-	$ wget -q -O - https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | sh
-
-#### Using msysgit
-This is much like the manual installation below, but there are additional steps required to install some extra tools that
-are not distributed with [msysgit](http://code.google.com/p/msysgit/).
-
-Clone the git-flow sources from Github:
-
-	$ git clone --recursive git://github.com/nvie/gitflow.git
-
-Copy git-flow's relevant files to your msysgit installation directory:
-
-	$ mkdir /usr/local/bin
-	$ cp git-flow* gitflow* /usr/local/bin/
-	$ cp shFlags/src/shflags /usr/local/bin/gitflow-shFlags
-
-Next up we need to borrow a couple of binaries from [Cygwin](http://www.cygwin.com/). If you don't have Cygwin installed, please 
-install it including the `util-linux` package. Apart from `util-linux`'s dependencies, no other packages are required. When you
-finished installation, copy the following files using msysgit's _Git Bash_. We assume the Cygwin's default installation path in C:\cygwin.
-
-	$ cd /c/cygwin/
-	$ cp bin/getopt.exe /usr/local/bin/
-	$ cp bin/cyggcc_s-1.dll /usr/local/bin/
-	$ cp bin/cygiconv-2.dll /usr/local/bin/
-	$ cp bin/cygintl-8.dll /usr/local/bin/
-	$ cp bin/cygwin1.dll /usr/local/bin/
-
-After copying the files above, you can safely uninstall your Cygwin installation by deleting the C:\cygwin directory.
-
-### Manual installation
-If you prefer a manual installation, please use the following instructions:
-
-	$ git clone --recursive git://github.com/nvie/gitflow.git
-
-Then, you can install `git-flow`, using:
-
-	$ sudo make install
-
-By default, git-flow will be installed in /usr/local. To change the prefix
-where git-flow will be installed, simply specify it explicitly, using:
-
-	$ sudo make prefix=/opt/local install
-
-Or simply point your `PATH` environment variable to your git-flow checkout
-directory.
-
-*Installation note:*  
-git-flow depends on the availability of the command line utility `getopt`,
-which may not be available in your Unix/Linux environment.  Please use your
-favorite package manager to install `getopt`.  For Cygwin, install the
-`util-linux` package to get `getopt`.  If you use `apt-get` as your install
-manager, the package name is `opt`.
+See the Wiki for up-to-date [Installation Instructions](https://github.com/petervanderdoes/gitflow/wiki/Installation).
 
 
-Integration with your shell
----------------------------
+## Integration with your shell
+
 For those who use the [Bash](http://www.gnu.org/software/bash/) or
 [ZSH](http://www.zsh.org) shell, please check out the excellent work on the
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
-For Windows users, [msysgit](http://code.google.com/p/msysgit/) is a good
-starting place for installing git.
 
+## FAQ
 
-FAQ
----
-See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
-Wiki.
+* See the [FAQ](http://github.com/petervanderdoes/gitflow/wiki/FAQ) section
+of the project Wiki.
+* Version Numbering Scheme.  
+Starting with version 1.0, the project uses the following scheme:
+\<MAJOR\>.\<MINOR\>.\<REVISION\>-avh
 
+## Please help out
 
-Please help out
----------------
 This project is still under development. Feedback and suggestions are very
 welcome and I encourage you to use the [Issues
-list](http://github.com/nvie/gitflow/issues) on Github to provide that
+list](http://github.com/petervanderdoes/gitflow/issues) on Github to provide that
 feedback.
 
 Feel free to fork this repo and to commit your additions. For a list of all
@@ -126,73 +53,111 @@ contributors, please see the [AUTHORS](AUTHORS) file.
 
 Any questions, tips, or general discussion can be posted to our Google group:
 [http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
+This is the original group set up to support the nvie branch, but I am monitoring
+the list as well for any questions related to my version.
+When you do post a question on the list please indicate which version you are,
+using the complete version number.
+
+## Contributing
+
+Fork the repository.  Then, run:
+
+```shell
+git clone git@github.com:<username>/gitflow.git
+cd gitflow
+```
+Install the git-flow software by running make.
+
+```shell
+git flow init -d
+git flow feature start <your feature>
+```
+
+Then, do work and commit your changes.
+
+```shell
+git flow feature publish <your feature>
+```
+
+When done, open a pull request to your feature branch.
+
+## License terms
+
+git-flow is published under the FreeBSD License, see the
+[LICENSE](LICENSE) file. Although the FreeBSD License does not require you to
+share any modifications you make to the source code, you are very much
+encouraged and invited to contribute back your modifications to the community,
+preferably in a Github fork, of course.
 
 
-License terms
--------------
-git-flow is published under the liberal terms of the BSD License, see the
-[LICENSE](LICENSE) file. Although the BSD License does not require you to share
-any modifications you make to the source code, you are very much encouraged and
-invited to contribute back your modifications to the community, preferably
-in a Github fork, of course.
-
+## git flow usage
 
 ### Initialization
 
 To initialize a new repo with the basic branch structure, use:
-  
-		git flow init
-  
+
+		git flow init [-d]
+
 This will then interactively prompt you with some questions on which branches
 you would like to use as development and production branches, and how you
 would like your prefixes be named. You may simply press Return on any of
 those questions to accept the (sane) default suggestions.
 
+The ``-d`` flag will accept all defaults.
+
 
 ### Creating feature/release/hotfix/support branches
 
 * To list/start/finish feature branches, use:
-  
+
   		git flow feature
   		git flow feature start <name> [<base>]
   		git flow feature finish <name>
-  
+
   For feature branches, the `<base>` arg must be a commit on `develop`.
 
+* To push/pull a feature branch to the remote repository, use:
+
+  		git flow feature publish <name>
+		git flow feature pull <remote> <name>
+
 * To list/start/finish release branches, use:
-  
+
   		git flow release
   		git flow release start <release> [<base>]
   		git flow release finish <release>
-  
+
   For release branches, the `<base>` arg must be a commit on `develop`.
-  
+
 * To list/start/finish hotfix branches, use:
-  
+
   		git flow hotfix
   		git flow hotfix start <release> [<base>]
   		git flow hotfix finish <release>
-  
+
   For hotfix branches, the `<base>` arg must be a commit on `master`.
 
 * To list/start support branches, use:
-  
+
   		git flow support
   		git flow support start <release> <base>
-  
+
   For support branches, the `<base>` arg must be a commit on `master`.
 
+### Using Hooks and Filters
 
-Showing your appreciation
-=========================
-A few people already requested it, so now it's here: a Flattr button.
+For a wide variety of commands hooks or filters can called before and after
+the command.  
+The files should be placed in .git/hooks  
+In the directory hooks you can find examples of all the hooks available.
 
-Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
-contributing to the community.  If you'd like to show your appreciation in
-another way, however, consider Flattr'ing me:
+## Showing your appreciation
 
-[![Flattr this][2]][1]
+Of course, the best way to show your appreciation for the git-flow tool itself
+remains contributing to the community.  If you'd like to show your appreciation
+in another way, however, consider donating through PayPal:
 
-[1]: http://flattr.com/thing/53771/git-flow
-[2]: http://api.flattr.com/button/button-static-50x60.png
+[![PayPal][2]][1]
+
+[1]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=S85FXJ9EBHAF2&lc=US&item_name=gitflow&item_number=gitflow&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller&no_shipping=1&rm=1&return=https%3a%2f%2fgithub%2ecom%2fpetervanderdoes%2fgitflow&cancel_return=https%3a%2f%2fgithub%2ecom%2fpetervanderdoes%2fgitflow&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
+[2]: https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif

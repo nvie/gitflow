@@ -1,5 +1,76 @@
-0.4.1:
------
+[petervanderdoes]: https://github.com/petervanderdoes "Peter van der Does on github"
+[bloveridge]:  https://github.com/bloveridge "Ben Loveridge on github"
+[memleak]: https://github.com/memleak/
+[sinbad]: https://github.com/sinbad
+[bloomonkey]: https://github.com/bloomonkey
+[mallamanis]: https://github.com/mallamanis
+[kperi]: https://github.com/kperi
+
+# Changelog
+
+#### 1.0-avh
+
+[Peter van der Does][petervanderdoes]
+
+* Remove trailing whitespace.
+* Updated from latest develop branch from nvie.  
+  Some features were still missing.
+* Remove the submodule shFlags.  
+  Instead of the submodule we'll just use the file.
+* When finishing a release or hotfix, use tag for back-merging if available.    
+  When a release or hotfix branch is tagged, the tag is never merged into the
+  develop branch, it is preferable to have the tag in the develop branch as
+  well, for use with git describe for example.
+* Update license info.
+* Bugfix: Typo when pulling existing feature from remote.Thanks to [John Harrison][bloomonkey],  [Miltos][mallamanis], [Kostas][kperi] and [memleak][memleak].
+* Wrong variable names in the bare-bones.  
+  The wrong variable name is set, this can lead to confusing on what's 
+  passed to the script,
+
+[Steve Streeting][sinbad]
+* Fixes the suggested name for the integration branch.    
+  When git init -d is executed on a repo with multiple branches, the
+  suggested name for the integration branch could possibly be the same name
+  that was already selected for the production release branch.  
+  If no suggested name is determined the suggested name remains empty which
+  leads to all sorts of other problems.
+
+#### 0.4.2-avh1
+
+[Peter van der Does][petervanderdoes]
+
+* Start of the git flow AVH release.
+* Adds support for the version filter in the commands `git flow release start`
+and `git flow hotfix start`
+* Adds support for hooks in various commands.
+
+[Ben Loveridge][bloveridge]
+
+* Fix usage of shFlags on FreeBSD
+
+#### 0.4.2
+
+Release date: not yet
+
+* `git flow init` now detects situations where origin already has gitflow
+  branches set up, and behaves accordingly (thanks Emre Berge Ergenekon).
+
+* `git flow feature finish` can now be called without a feature branch
+  name(prefix) argument and will finish the current branch, if on any.
+
+* `git flow feature pull` now has a `-r` flag, to support `pull --rebase`
+  semantics (thanks Vedang Manerikar).
+
+* Various minor bug fixes related to internal argument passing.
+
+* Improved some documentation.
+
+* Better support for Windows and BSD users.
+
+* Add package installer for the Windows platform.
+
+#### 0.4.1
+
 Release date: **2011/02/04**
 
 * New option `-d` added to `git flow init`, to initialize with defaults without
@@ -9,11 +80,11 @@ Release date: **2011/02/04**
 * The parsing issues related to git-flow feature's flags are now dealt with on
   all known platforms.  (Fixed #54, #62, #86, #97)
 
-* Escape queries for detecting branch/tag names.  (Fixed #91) 
+* Escape queries for detecting branch/tag names.  (Fixed #91)
 
 
-0.4:
----
+#### 0.4
+
 Release date: **2010/10/18**
 
 * The flag parsing issues of git-flow subcommands are solved for most
@@ -30,40 +101,40 @@ Release date: **2010/10/18**
 * Various minor fixes.
 
 
-0.3:
-----
+#### 0.3
+
 Release date: **2010/07/22**
 
-* New subcommands for `git flow feature`:  
-  - **checkout**:  
+* New subcommands for `git flow feature`:
+  - **checkout**:
     For easily checking out features by their short name.  Even allows
     unique prefixes as arguments (see below).
 
-  - **pull**:  
+  - **pull**:
     This subcommand allows you to painlessly work on a feature branch
     together with another peer.  This is especially valuable for doing
     peer reviews of other people's code.  For more detailed info, see the
     [commit log][1].
 
-* Easier addressing of branch names by using name prefixes.  
-  For example, when using:  
-  
-  	git flow feature finish fo
-  
+* Easier addressing of branch names by using name prefixes.
+  For example, when using:
+
+    git flow feature finish fo
+
   this automatically finishes the feature branch `foobar` if that's the only
   feature branch name starting with `fo`.
 
-* No force flag anymore for new feature branches  
+* No force flag anymore for new feature branches
   `git flow feature start` lost its `-f` (force) flag.  You now don't
   have to be in a clean repo anymore to start a new feature branch. This
   avoids the manual `git stash`, `git flow feature start`, `git stash
   pop` cycle.
 
-* You can use `git-flow` in stand-alone repo's now.  
+* You can use `git-flow` in stand-alone repo's now.
   This means it does not assume you have an `origin` repository.
   (Thanks [Mark][2].)
 
-* No commands fetch from `origin` by default anymore.  
+* No commands fetch from `origin` by default anymore.
   There were some issues related to disabling this flag on some platforms.
 
 * Init guesses branch names you may want to use for `develop` and `master`.
@@ -76,7 +147,9 @@ Release date: **2010/07/22**
 [2]: http://github.com/talios
 [3]: http://github.com/rickosborne
 
-
-Older versions
---------------
+#####Older versions
 No change history is recorded for pre-0.3 releases.
+
+#### Glossary
+* RFC: Request For Change. This indicates a new or improved function requested
+by one or more users.

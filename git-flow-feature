@@ -2,38 +2,37 @@
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
 #
-# Original blog post presenting this model is found at:
-#    http://nvie.com/git-model
+# A blog post presenting this model is found at:
+#    http://blog.avirtualhome.com/development-workflow-using-git/
 #
 # Feel free to contribute to this project at:
-#    http://github.com/nvie/gitflow
+#    http://github.com/petervanderdoes/gitflow
 #
+# Authors:
+# Copyright 2012 Peter van der Does. All rights reserved.
+#
+# Original Author:
 # Copyright 2010 Vincent Driessen. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
-#    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
-# 
-#    2. Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in the
-#       documentation and/or other materials provided with the distribution.
-# 
-# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# The views and conclusions contained in the software and documentation are
-# those of the authors and should not be interpreted as representing official
-# policies, either expressed or implied, of Vincent Driessen.
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
 require_git_repo
@@ -44,13 +43,13 @@ PREFIX=$(git config --get gitflow.prefix.feature)
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFk] <name|nameprefix>"
+	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
-	echo "       git flow feature pull <remote> [<name>]"
+	echo "       git flow feature pull [-r] <remote> [<name>]"
 }
 
 cmd_default() {
@@ -77,7 +76,7 @@ cmd_list() {
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
 	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
 
-	# determine column width first
+	# Determine column width first
 	local width=0
 	local branch
 	for branch in $short_names; do
@@ -197,24 +196,28 @@ cmd_start() {
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
-	# sanity checks
+	# Sanity checks
 	require_branch_absent "$BRANCH"
 
-	# update the local repo with remote changes, if asked
+	# Update the local repo with remote changes, if asked
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
-	# if the origin branch counterpart exists, assert that the local branch
+	# If the origin branch counterpart exists, assert that the local branch
 	# isn't behind it (to avoid unnecessary rebasing)
 	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
+
 	# create branch
 	if ! git checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -231,19 +234,20 @@ cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	parse_args "$@"
-	expand_nameprefix_arg
+	expand_nameprefix_arg_or_current
 
-	# sanity checks
+	# Sanity checks
 	require_branch "$BRANCH"
 
-	# detect if we're restoring from a merge conflict
+	# Detect if we're restoring from a merge conflict
 	if [ -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE" ]; then
 		#
 		# TODO: detect that we're working on the correct branch here!
 		# The user need not necessarily have given the same $NAME twice here
 		# (although he/she should).
-		# 
+		#
 
 		# TODO: git_is_clean_working_tree() should provide an alternative
 		# exit code for "unmerged changes in working tree", which we should
@@ -259,9 +263,10 @@ cmd_finish() {
 				helper_finish_cleanup
 				exit 0
 			else
-				# If the user cancelled the merge and decided to wait until later,
-				# that's fine. But we have to acknowledge this by removing the
-				# MERGE_BASE file and continuing normal execution of the finish
+				# If the user cancelled the merge and decided to wait until
+ 	 	 	 	# later,that's fine. But we have to acknowledge this by
+				# removing the MERGE_BASE file and continuing normal execution
+				# of the finish
 				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 			fi
 		else
@@ -269,7 +274,7 @@ cmd_finish() {
 			echo "Merge conflicts not resolved yet, use:"
 			echo "    git mergetool"
 			echo "    git commit"
-			echo 
+			echo
 			echo "You can then complete the finish by running it again:"
 			echo "    git flow feature finish $NAME"
 			echo
@@ -277,24 +282,27 @@ cmd_finish() {
 		fi
 	fi
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 
-	# update local repo with remote changes first, if asked
-	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
+	# Update local repo with remote changes first, if asked
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		if flag fetch; then
 			git fetch -q "$ORIGIN" "$BRANCH"
+			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
 	fi
 
-	if has "$ORIGIN/$BRANCH" "$(git_remote_branches)"; then
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" "$(git_remote_branches)"; then
+	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
-	# if the user wants to rebase, do that first
+    run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
+	# If the user wants to rebase, do that first
 	if flag rebase; then
 		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
 			warn "Finish was aborted due to conflicts during rebase."
@@ -305,7 +313,7 @@ cmd_finish() {
 		fi
 	fi
 
-	# merge into BASE
+	# Merge into BASE
 	git checkout "$DEVELOP_BRANCH"
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
@@ -314,38 +322,45 @@ cmd_finish() {
 	fi
 
 	if [ $? -ne 0 ]; then
-		# oops.. we have a merge conflict!
-		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
+		# Oops.. we have a merge conflict!
+		# Write the given $DEVELOP_BRANCH to a temporary file as we will
+		# be needing it later.
 		mkdir -p "$DOT_GIT_DIR/.gitflow"
 		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 		echo
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
 		echo "    git mergetool"
 		echo "    git commit"
-		echo 
+		echo
 		echo "You can then complete the finish by running it again:"
 		echo "    git flow feature finish $NAME"
 		echo
 		exit 1
 	fi
 
-	# when no merge conflict is detected, just clean up the feature branch
+    run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
+
+	# When no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
 }
 
 helper_finish_cleanup() {
-	# sanity checks
+	# Sanity checks
 	require_branch "$BRANCH"
 	require_clean_working_tree
 
-	# delete branch
+	# Delete branch
 	if flag fetch; then
 		git push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
-	
-	
+
+
 	if noflag keep; then
-		git branch -d "$BRANCH"
+		if flag force_delete; then
+			git branch -D "$BRANCH"
+		else
+			git branch -d "$BRANCH"
+		fi
 	fi
 
 	echo
@@ -365,20 +380,24 @@ cmd_publish() {
 	parse_args "$@"
 	expand_nameprefix_arg
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 	require_branch "$BRANCH"
 	git fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
-	# create remote branch
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
+	# Create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
 	git fetch -q "$ORIGIN"
 
-	# configure remote tracking
+	# Configure remote tracking
 	git config "branch.$BRANCH.remote" "$ORIGIN"
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -392,14 +411,19 @@ cmd_track() {
 	parse_args "$@"
 	require_name_arg
 
-	# sanity checks
+	# Sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
+
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	git fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
-	# create tracking branch
+	# Create tracking branch
 	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -469,6 +493,7 @@ avoid_accidental_cross_branch_action() {
 
 cmd_pull() {
 	#DEFINE_string prefix false 'alternative remote feature branch name prefix' p
+	DEFINE_boolean rebase false "pull with rebase" r
 	parse_remote_name "$@"
 
 	if [ -z "$REMOTE" ]; then
@@ -481,26 +506,38 @@ cmd_pull() {
 	# argument.
 	local current_branch=$(git_current_branch)
 	if startswith "$current_branch" "$PREFIX"; then
-		# we are on a local feature branch already, so $BRANCH must be equal to
+		# We are on a local feature branch already, so $BRANCH must be equal to
 		# the current branch
 		avoid_accidental_cross_branch_action || die
 	fi
 
 	require_clean_working_tree
 
+	run_pre_hook "$NAME" "$REMOTE" "$BRANCH"
+
 	if git_branch_exists "$BRANCH"; then
 		# Again, avoid accidental merges
 		avoid_accidental_cross_branch_action || die
 
-		# we already have a local branch called like this, so simply pull the
+		# We already have a local branch called like this, so simply pull the
 		# remote changes in
-		git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+		if flag rebase; then
+			if ! git pull --rebase -q "$REMOTE" "$BRANCH"; then
+				warn "Pull was aborted. There might be conflicts during rebase or '$REMOTE' might be inaccessible."
+				exit 1
+			fi
+		else
+			git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+		fi
+
 		echo "Pulled $REMOTE's changes into $BRANCH."
 	else
-		# setup the local branch clone for the first time
-		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+		# Setup the local branch clone for the first time
+		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # Stores in FETCH_HEAD
 		git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
 		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
 		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
 	fi
+
+	run_post_hook "$NAME" "$REMOTE" "$BRANCH"
 }

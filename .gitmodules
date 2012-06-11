@@ -1,3 +1,0 @@
-[submodule "shFlags"]
-	path = shFlags
-	url = git://github.com/nvie/shFlags.git
