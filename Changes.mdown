@@ -5,14 +5,21 @@
 [bloomonkey]: https://github.com/bloomonkey
 [mallamanis]: https://github.com/mallamanis
 [kperi]: https://github.com/kperi
+[gvangool]: https://github.com/gvangool
 
 # Changelog
 
 #### 1.0.1-avh
+
+[Peter van der Does][petervanderdoes]
+
 * Improve the back-merge functionality.  
   Adds an command line option (-b), which the user can utilize if the user
   doesn't want to back-merge but rather merge the release branch into
   develop.
+  
+* Special thanks to the following individual:
+  [Gert Van Gool][gvangool]
   
   
 #### 1.0-avh
