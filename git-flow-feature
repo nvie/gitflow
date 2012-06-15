@@ -50,6 +50,7 @@ usage() {
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
+	echo "       git flow feature delete [-f] <name|nameprefix>"
 }
 
 cmd_default() {
@@ -540,4 +541,40 @@ cmd_pull() {
 	fi
 
 	run_post_hook "$NAME" "$REMOTE" "$BRANCH"
+}
+
+cmd_delete() {
+	DEFINE_boolean force false "force deletion" f
+	parse_args "$@"
+	expand_nameprefix_arg
+
+		if [ "$NAME" = "" ]; then
+		die "Name a feature branch explicitly."
+	fi
+
+	# Sanity checks
+	require_branch "$BRANCH"
+
+	run_pre_hook "$NAME" "$BRANCH"
+
+	local current_branch=$(git_current_branch)
+	# We can't delete a branch we are one, switch to the develop branch.
+	if [ "$BRANCH" = "$current_branch" ]; then
+		require_clean_working_tree
+		git checkout "$DEVELOP_BRANCH"
+	fi
+
+	if git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+		git branch -d "$BRANCH"
+	else
+		if flag force; then
+			git branch -D "$BRANCH"
+		else
+			 die "Feature branch '$BRANCH' has been not been merged yet. Use -f to force the deletion."
+		 fi
+	 fi
+
+	 run_post_hook "$NAME" "$BRANCH"
+
+	 echo "Feature branch '$BRANCH' has been deleted".
 }
