@@ -44,7 +44,7 @@ PREFIX=$(git config --get gitflow.prefix.release)
 usage() {
 	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start [-F] <version> [<base>]"
-	echo "       git flow release finish [-Fsumpkn] <version>"
+	echo "       git flow release finish [-Fsumpknb] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
@@ -203,6 +203,7 @@ cmd_finish() {
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
+	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH, or tag if applicable, in $DEVELOP_BRANCH " b
 
 	parse_args "$@"
 	require_version_arg
@@ -241,7 +242,7 @@ cmd_finish() {
 		  # TODO: What do we do now?
 	fi
 
-	local commit="$BRANCH"
+
 	if noflag notag; then
 		# Try to tag the release.
 		# In case a previous attempt to finish this release branch has failed,
@@ -253,19 +254,36 @@ cmd_finish() {
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			eval git tag $opts "$VERSION_PREFIX$VERSION" || \
 			die "Tagging failed. Please run finish again to retry."
-			commit="$VERSION_PREFIX$VERSION"
 		fi
+	fi
+
+	# By default we backmerge the $MASTER_BRANCH unless the user explicitly
+	# stated not to do a back merge, in that case we use the $BRANCH.
+	if noflag nobackmerge; then
+		MERGE_BRANCH="$MASTER_BRANCH"
+	else
+		MERGE_BRANCH="$BRANCH"
 	fi
 
 	# Try to merge into develop.
 	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
-	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+	if ! git_is_branch_merged_into "$MERGE_BRANCH" "$DEVELOP_BRANCH"; then
 		git checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
-		# Accounting for 'git describe', if a release is tagged
-		# we use the tag commit instead of the branch.
+		if noflag nobackmerge; then
+			# Accounting for 'git describe', if a release is tagged
+			# we use the tag commit instead of the branch.
+			if noflag notag; then
+				commit="$VERSION_PREFIX$VERSION"
+			else
+				commit="$MASTER_BRANCH"
+			fi
+		else
+			commit="$BRANCH"
+		fi
+
 		git merge --no-ff "$commit" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
@@ -301,8 +319,9 @@ cmd_finish() {
 	if noflag notag; then
 		echo "- The release was tagged '$VERSION_PREFIX$VERSION'"
 	fi
-	[ "$commit" = "$BRANCH" ] && echo "- Release branch '$BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
+	[ "$commit" = "$MASTER_BRANCH" ] && echo "- Master branch '$MASTER_BRANCH' has been back-merged into '$DEVELOP_BRANCH'"
 	[ "$commit" = "$VERSION_PREFIX$VERSION" ] && echo "- Release tag '$VERSION_PREFIX$VERSION' has been back-merged into '$DEVELOP_BRANCH'"
+	[ "$commit" = "$BRANCH" ] && echo "- Release branch '$BRANCH' has been merged into '$DEVELOP_BRANCH'"
 	if flag keep; then
 		echo "- Release branch '$BRANCH' is still available"
 	else

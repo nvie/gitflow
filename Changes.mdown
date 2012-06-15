@@ -9,7 +9,12 @@
 # Changelog
 
 #### 1.0.1-avh
-
+* Improve the back-merge functionality.  
+  Adds an command line option (-b), which the user can utilize if the user
+  doesn't want to back-merge but rather merge the release branch into
+  develop.
+  
+  
 #### 1.0-avh
 
 [Peter van der Does][petervanderdoes]
