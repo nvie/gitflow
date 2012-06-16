@@ -401,7 +401,7 @@ cmd_delete() {
 	run_pre_hook "$VERSION" "$BRANCH"
 
 	local current_branch=$(git_current_branch)
-	# We can't delete a branch we are one, switch to the develop branch.
+	# We can't delete a branch we are on, switch to the develop branch.
 	if [ "$BRANCH" = "$current_branch" ]; then
 		require_clean_working_tree
 		git checkout "$DEVELOP_BRANCH"

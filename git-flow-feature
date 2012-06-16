@@ -548,7 +548,7 @@ cmd_delete() {
 	parse_args "$@"
 	expand_nameprefix_arg
 
-		if [ "$NAME" = "" ]; then
+	if [ "$NAME" = "" ]; then
 		die "Name a feature branch explicitly."
 	fi
 
@@ -558,7 +558,7 @@ cmd_delete() {
 	run_pre_hook "$NAME" "$BRANCH"
 
 	local current_branch=$(git_current_branch)
-	# We can't delete a branch we are one, switch to the develop branch.
+	# We can't delete a branch we are on, switch to the develop branch.
 	if [ "$BRANCH" = "$current_branch" ]; then
 		require_clean_working_tree
 		git checkout "$DEVELOP_BRANCH"
