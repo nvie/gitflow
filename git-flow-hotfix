@@ -46,6 +46,7 @@ usage() {
 	echo "       git flow hotfix start [-F] <version> [<base>]"
 	echo "       git flow hotfix finish [-Fsumpknb] <version>"
 	echo "       git flow hotfix publish <version>"
+	echo "       git flow hotfix delete [-f] <version>"
 }
 
 cmd_default() {
@@ -361,4 +362,36 @@ cmd_finish() {
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
 	fi
 	echo
+}
+
+cmd_delete() {
+	DEFINE_boolean force false "force deletion" f
+	parse_args "$@"
+	require_version_arg
+
+	# Sanity checks
+	require_branch "$BRANCH"
+
+	run_pre_hook "$VERSION" "$BRANCH"
+
+	local current_branch=$(git_current_branch)
+	# We can't delete a branch we are one, switch to the develop branch.
+	if [ "$BRANCH" = "$current_branch" ]; then
+		require_clean_working_tree
+		git checkout "$MASTER_BRANCH"
+	fi
+
+	if ( git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH" && git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH" ); then
+		git branch -d "$BRANCH"
+	else
+		if flag force; then
+			git branch -D "$BRANCH"
+		else
+			 die "Hotfix branch '$BRANCH' has been not been merged in master '$MASTER_BRANCH' and/or develop branch '$DEVELOP_BRANCH'. Use -f to force the deletion."
+		 fi
+	 fi
+
+	 run_post_hook "$NAME" "$BRANCH"
+
+	 echo "Hotfix branch '$BRANCH' has been deleted".
 }
