@@ -47,6 +47,7 @@ usage() {
 	echo "       git flow release finish [-Fsumpknb] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
+	echo "       git flow release delete [-fr] <version>"
 }
 
 cmd_default() {
@@ -386,5 +387,48 @@ cmd_track() {
 	echo "Summary of actions:"
 	echo "- A new remote tracking branch '$BRANCH' was created"
 	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
+cmd_delete() {
+	DEFINE_boolean force false "force deletion" f
+	DEFINE_boolean remote false "delete remote branch" r
+	parse_args "$@"
+	require_version_arg
+
+	# Sanity checks
+	require_branch "$BRANCH"
+
+	run_pre_hook "$VERSION" "$ORIGIN" "$BRANCH"
+
+	local current_branch=$(git_current_branch)
+	# We can't delete a branch we are on, switch to the develop branch.
+	if [ "$BRANCH" = "$current_branch" ]; then
+		require_clean_working_tree
+		git checkout "$DEVELOP_BRANCH"
+	fi
+
+	if ( git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH" && git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH" ); then
+		git branch -d "$BRANCH" || die "Could not delete the $BRANCH."
+		if flag remote; then
+			git push "$ORIGIN" :"$BRANCH" || die "Could not delete the remote $BRANCH in $ORIGIN."
+		fi
+	else
+		if flag force; then
+			git branch -D "$BRANCH" || die "Could not delete the $BRANCH."
+			if flag remote; then
+				git push "$ORIGIN" :"$BRANCH" || die "Could not delete the remote $BRANCH in $ORIGIN."
+			fi
+		else
+			 die "Release branch '$BRANCH' has been not been merged in master '$MASTER_BRANCH' and/or develop branch '$DEVELOP_BRANCH'. Use -f to force the deletion."
+		 fi
+	 fi
+
+	 run_post_hook "$VERSION" "$ORIGIN" "$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- Release branch '$BRANCH' has been deleted."
+	[ flag remote ] && echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	echo
 }
