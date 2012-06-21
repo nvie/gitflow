@@ -50,7 +50,7 @@ usage() {
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
-	echo "       git flow feature delete [-f] <name|nameprefix>"
+	echo "       git flow feature delete [-fr] <name|nameprefix>"
 }
 
 cmd_default() {

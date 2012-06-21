@@ -46,7 +46,7 @@ usage() {
 	echo "       git flow hotfix start [-F] <version> [<base>]"
 	echo "       git flow hotfix finish [-Fsumpknb] <version>"
 	echo "       git flow hotfix publish <version>"
-	echo "       git flow hotfix delete [-f] <version>"
+	echo "       git flow hotfix delete [-fr] <version>"
 }
 
 cmd_default() {
