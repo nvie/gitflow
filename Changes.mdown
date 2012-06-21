@@ -17,7 +17,12 @@
   Adds an command line option (-b), which the user can utilize if the user
   doesn't want to back-merge but rather merge the release branch into
   develop.
-  
+* Add the sub-action delete to sub-commands feature, release and hotfix.
+  The sub-commands feature, release and hotfix now have a new sub-action, 
+  delete. With that action you can delete the branches, locally and remote.
+  The action has two options, -f and -r. With -f you can force the deletion,
+  even when the to be deleted branch was not merged yet. With -r the remote 
+  branch will also be deleted.  
 * Special thanks to the following individual:
   [Gert Van Gool][gvangool]
   
