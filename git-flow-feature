@@ -545,6 +545,7 @@ cmd_pull() {
 
 cmd_delete() {
 	DEFINE_boolean force false "force deletion" f
+	DEFINE_boolean remote false "delete remote branch" r
 	parse_args "$@"
 	expand_nameprefix_arg
 
@@ -555,7 +556,7 @@ cmd_delete() {
 	# Sanity checks
 	require_branch "$BRANCH"
 
-	run_pre_hook "$NAME" "$BRANCH"
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	local current_branch=$(git_current_branch)
 	# We can't delete a branch we are on, switch to the develop branch.
@@ -565,16 +566,26 @@ cmd_delete() {
 	fi
 
 	if git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
-		git branch -d "$BRANCH"
+		git branch -d "$BRANCH" || die "Could not delete the $BRANCH."
+		if flag remote; then
+			git push "$ORIGIN" :"$BRANCH" || die "Could not delete the remote $BRANCH in $ORIGIN."
+		fi
 	else
 		if flag force; then
-			git branch -D "$BRANCH"
+			git branch -D "$BRANCH" || die "Could not delete the $BRANCH."
+			if flag remote; then
+				git push "$ORIGIN" :"$BRANCH" || die "Could not delete the remote $BRANCH in $ORIGIN."
+			fi
 		else
 			 die "Feature branch '$BRANCH' has been not been merged yet. Use -f to force the deletion."
 		 fi
 	 fi
 
-	 run_post_hook "$NAME" "$BRANCH"
+	 run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
-	 echo "Feature branch '$BRANCH' has been deleted".
+	echo
+	echo "Summary of actions:"
+	echo "- Feature branch '$BRANCH' has been deleted."
+	[ flag remote ] && echo "- Feature branch '$BRANCH' in '$ORIGIN' has been deleted."
+	echo
 }
