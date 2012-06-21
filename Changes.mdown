@@ -9,7 +9,7 @@
 
 # Changelog
 
-#### 1.0.1-avh
+#### 1.0.6-avh
 
 [Peter van der Does][petervanderdoes]
 
