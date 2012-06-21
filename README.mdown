@@ -108,11 +108,12 @@ The ``-d`` flag will accept all defaults.
 
 ### Creating feature/release/hotfix/support branches
 
-* To list/start/finish feature branches, use:
+* To list/start/finish/delete feature branches, use:
 
   		git flow feature
   		git flow feature start <name> [<base>]
   		git flow feature finish <name>
+  		git flow feature delete <name>
 
   For feature branches, the `<base>` arg must be a commit on `develop`.
 
@@ -121,19 +122,21 @@ The ``-d`` flag will accept all defaults.
   		git flow feature publish <name>
 		git flow feature pull <remote> <name>
 
-* To list/start/finish release branches, use:
+* To list/start/finish/delete release branches, use:
 
   		git flow release
   		git flow release start <release> [<base>]
   		git flow release finish <release>
+  		git flow release delete <release>
 
   For release branches, the `<base>` arg must be a commit on `develop`.
 
-* To list/start/finish hotfix branches, use:
+* To list/start/finish/delete hotfix branches, use:
 
   		git flow hotfix
   		git flow hotfix start <release> [<base>]
   		git flow hotfix finish <release>
+  		git flow hotfix delete <release>
 
   For hotfix branches, the `<base>` arg must be a commit on `master`.
 
