@@ -549,10 +549,6 @@ cmd_delete() {
 	parse_args "$@"
 	expand_nameprefix_arg
 
-	if [ "$NAME" = "" ]; then
-		die "Name a feature branch explicitly."
-	fi
-
 	# Sanity checks
 	require_branch "$BRANCH"
 
