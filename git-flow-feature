@@ -64,7 +64,7 @@ cmd_list() {
 	local feature_branches
 	local current_branch
 	local short_names
-	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	feature_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		warn ""

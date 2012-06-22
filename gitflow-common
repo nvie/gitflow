@@ -74,6 +74,10 @@ git_remote_branches() { git for-each-ref --format='%(refname:short)' refs/remote
 git_all_branches() { git for-each-ref --format='%(refname:short)' refs/remotes refs/heads; }
 git_all_tags() { git for-each-ref --format='%(refname:short)' refs/tags; }
 
+git_local_branches_prefixed() {
+	[ -z $1 ] && die "Fatal: Prefix parameter missing." # This should never happen.
+	git for-each-ref --format='%(refname:short)' refs/heads/$1 ;
+}
 git_current_branch() {
 	local branch_name="$(git symbolic-ref --short --quiet HEAD)" || branch_name="(unnamed branch)"     # detached HEAD
 	echo "$branch_name"

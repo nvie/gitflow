@@ -60,7 +60,7 @@ cmd_list() {
 	local hotfix_branches
 	local current_branch
 	local short_names
-	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	hotfix_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
                 warn ""
@@ -146,7 +146,7 @@ require_base_is_on_master() {
 }
 
 require_no_existing_hotfix_branches() {
-	local hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local hotfix_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${hotfix_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
 	[ -z "$hotfix_branches" ] || \

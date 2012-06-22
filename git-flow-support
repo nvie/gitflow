@@ -60,7 +60,7 @@ cmd_list() {
 	local support_branches
 	local current_branch
 	local short_names
-	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	support_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
                 warn ""

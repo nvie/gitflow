@@ -61,7 +61,7 @@ cmd_list() {
 	local release_branches
 	local current_branch
 	local short_names
-	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	release_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
                 warn ""
@@ -142,7 +142,7 @@ require_base_is_on_develop() {
 }
 
 require_no_existing_release_branches() {
-	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local release_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${release_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
 	[ -z "$release_branches" ] || \
