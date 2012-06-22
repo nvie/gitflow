@@ -260,15 +260,11 @@ gitflow_resolve_nameprefix() {
 #
 
 require_git_repo() {
-	if ! git rev-parse --git-dir 2>/dev/null; then
-		die "fatal: Not a git repository"
-	fi
+	[ $(git rev-parse --git-dir 2>/dev/null) ] || die "fatal: Not a git repository"
 }
 
 require_gitflow_initialized() {
-	if ! gitflow_is_initialized; then
-		die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
-	fi
+	 [ gitflow_is_initialized ] || die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
 }
 
 require_clean_working_tree() {
