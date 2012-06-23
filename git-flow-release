@@ -175,7 +175,7 @@ cmd_start() {
 	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 
 	# Create branch
-	git checkout -b "$BRANCH" "$BASE"
+	git checkout -b "$BRANCH" "$BASE" || die "Could not create release branch '$BRANCH'"
 
 	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 

@@ -211,9 +211,7 @@ cmd_start() {
 	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
 
 	# create branch
-	if ! git checkout -b "$BRANCH" "$BASE"; then
-		die "Could not create feature branch '$BRANCH'"
-	fi
+	git checkout -b "$BRANCH" "$BASE" || die "Could not create feature branch '$BRANCH'"
 
 	run_post_hook "$NAME" "$ORIGIN" "$BRANCH" "$BASE"
 

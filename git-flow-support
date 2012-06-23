@@ -168,7 +168,7 @@ cmd_start() {
 	require_branch_absent "$BRANCH"
 
 	# Create branch
-	git checkout -b "$BRANCH" "$BASE"
+	git checkout -b "$BRANCH" "$BASE" || die "Could not create support branch '$BRANCH'"
 
 	echo
 	echo "Summary of actions:"
