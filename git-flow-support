@@ -59,7 +59,6 @@ cmd_list() {
 
 	local support_branches
 	local current_branch
-	local short_names
 	support_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
@@ -71,30 +70,28 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git_current_branch)
-	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
 
 	# Determine column width first
 	local width=0
 	local branch
-	for branch in $short_names; do
+	for branch in $support_branches; do
 		local len=${#branch}
 		width=$(max $width $len)
 	done
-	width=$(($width+3))
+	width=$(($width+3-${#PREFIX}))
 
 	local branch
-	for branch in $short_names; do
-		local fullname=$PREFIX$branch
-		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+	for branch in $support_branches; do
+		local base=$(git merge-base "$branch" "$MASTER_BRANCH")
 		local master_sha=$(git rev-parse "$MASTER_BRANCH")
-		local branch_sha=$(git rev-parse "$fullname")
-		if [ "$fullname" = "$current_branch" ]; then
+		local branch_sha=$(git rev-parse "$branch")
+		if [ "$branch" = "$current_branch" ]; then
 			printf "* "
 		else
 			printf "  "
 		fi
 		if flag verbose; then
-			printf "%-${width}s" "$branch"
+			printf "%-${width}s" "${branch#$PREFIX}"
 			if [ "$branch_sha" = "$master_sha" ]; then
 				printf "(no commits yet)"
 			else
@@ -108,7 +105,7 @@ cmd_list() {
 				printf "(based on $nicename)"
 			fi
 		else
-			printf "%s" "$branch"
+			printf "%s" "${branch#$PREFIX}"
 		fi
 		echo
 	done
