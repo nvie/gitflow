@@ -168,7 +168,7 @@ cmd_start() {
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
@@ -220,10 +220,10 @@ cmd_finish() {
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$MASTER_BRANCH"; then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 

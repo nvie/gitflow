@@ -282,17 +282,17 @@ cmd_finish() {
 	require_clean_working_tree
 
 	# Update local repo with remote changes first, if asked
-	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$BRANCH"; then
 		if flag fetch; then
 			git fetch -q "$ORIGIN" "$BRANCH"
 			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
 	fi
 
-	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists  "$ORIGIN/$BRANCH"; then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
