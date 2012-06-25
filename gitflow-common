@@ -189,6 +189,14 @@ gitflow_require_name_arg() {
 	fi
 }
 
+gitflow_require_base_arg() {
+	if [ "$BASE" = "" ]; then
+		warn "Missing argument <base>"
+		usage
+		exit 1
+	fi
+}
+
 # Check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
