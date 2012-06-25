@@ -79,28 +79,21 @@ git_local_branches_prefixed() {
 	git for-each-ref --format='%(refname:short)' refs/heads/$1 ;
 }
 git_current_branch() {
-	local branch_name="$(git symbolic-ref --short --quiet HEAD)" || branch_name="(unnamed branch)"     # detached HEAD
+	local branch_name="$(git symbolic-ref --short --quiet HEAD)" || branch_name="(unnamed branch)" # detached HEAD
 	echo "$branch_name"
 }
 
 git_is_clean_working_tree() {
 	git rev-parse --verify HEAD >/dev/null || exit 1
 	git update-index -q --ignore-submodules --refresh
-	local err=0
 
 	# Check for unstaged changes
-	if ! git diff-files --quiet --ignore-submodules
-	then
-		err=1
-	fi
+	git diff-files --quiet --ignore-submodules || return 1
 
 	# Check for Uncommited changes
-	if ! git diff-index --cached --quiet --ignore-submodules HEAD --
-	then
-		err=2
-	fi
+	git diff-index --cached --quiet --ignore-submodules HEAD -- || return 2
 
-	return $err
+	return 0
 }
 
 git_repo_is_headless() {
@@ -269,11 +262,11 @@ gitflow_resolve_nameprefix() {
 #
 
 require_git_repo() {
-	[ $(git rev-parse --git-dir 2>/dev/null) ] || die "fatal: Not a git repository"
+	git rev-parse 2>/dev/null || die "fatal: Not a git repository"
 }
 
 require_gitflow_initialized() {
-	 [ gitflow_is_initialized ] || die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
+	 gitflow_is_initialized || die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
 }
 
 require_clean_working_tree() {
