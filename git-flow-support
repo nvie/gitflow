@@ -127,14 +127,6 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
-require_version_arg() {
-	if [ "$VERSION" = "" ]; then
-		warn "Missing argument <version>"
-		usage
-		exit 1
-	fi
-}
-
 require_base_arg() {
 	if [ "$BASE" = "" ]; then
 		warn "Missing argument <base>"
@@ -146,7 +138,7 @@ require_base_arg() {
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 	require_base_arg
 	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
 

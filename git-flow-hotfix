@@ -126,14 +126,6 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
-require_version_arg() {
-	if [ "$VERSION" = "" ]; then
-		warn "Missing argument <version>"
-		usage
-		exit 1
-	fi
-}
-
 require_no_existing_hotfix_branches() {
 	local hotfix_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${hotfix_branches} | head -n1)
@@ -152,7 +144,7 @@ cmd_start() {
 	# As VERSION might have changed reset BRANCH with new VERSION
 	BRANCH=$PREFIX$VERSION
 
-	require_version_arg
+	gitflow_require_version_arg
 	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
 	require_no_existing_hotfix_branches
 
@@ -190,7 +182,7 @@ cmd_start() {
 
 cmd_publish() {
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Sanity checks
 	require_clean_working_tree
@@ -230,7 +222,7 @@ cmd_finish() {
 	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH, or tag if applicable, in $DEVELOP_BRANCH " b
 
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then
@@ -346,7 +338,7 @@ cmd_delete() {
 	DEFINE_boolean force false "force deletion" f
 	DEFINE_boolean remote false "delete remote branch" r
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Sanity checks
 	require_branch "$BRANCH"

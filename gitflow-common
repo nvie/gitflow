@@ -173,6 +173,13 @@ git_is_ancestor() {
 # gitflow specific common functionality
 #
 
+gitflow_require_version_arg() {
+	if [ "$VERSION" = "" ]; then
+		warn "Missing argument <version>"
+		usage
+		exit 1
+	fi
+}
 # Check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
