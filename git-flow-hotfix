@@ -138,8 +138,7 @@ require_no_existing_hotfix_branches() {
 	local hotfix_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${hotfix_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
-	[ -z "$hotfix_branches" ] || \
-		die "There is an existing hotfix branch ($first_branch). Finish that one first."
+	[ -z "$hotfix_branches" ] || die "There is an existing hotfix branch ($first_branch). Finish that one first."
 }
 
 cmd_start() {
@@ -242,10 +241,8 @@ cmd_finish() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
-		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
-		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
 	if git_remote_branch_exists "$ORIGIN/$MASTER_BRANCH"; then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
@@ -260,10 +257,8 @@ cmd_finish() {
 	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
-		git checkout "$MASTER_BRANCH" || \
-		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
+		git checkout "$MASTER_BRANCH" || die "Could not check out $MASTER_BRANCH."
+		git merge --no-ff "$BRANCH" || die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
@@ -277,8 +272,7 @@ cmd_finish() {
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
-			eval git tag $opts "$VERSION_PREFIX$VERSION" || \
-			die "Tagging failed. Please run finish again to retry."
+			eval git tag $opts "$VERSION_PREFIX$VERSION" || die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
 
@@ -294,8 +288,7 @@ cmd_finish() {
 	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
 	if ! git_is_branch_merged_into "$MERGE_BRANCH" "$DEVELOP_BRANCH"; then
-		git checkout "$DEVELOP_BRANCH" || \
-		  die "Could not check out $DEVELOP_BRANCH."
+		git checkout "$DEVELOP_BRANCH" || die "Could not check out $DEVELOP_BRANCH."
 
 		if noflag nobackmerge; then
 			# Accounting for 'git describe', if a release is tagged
@@ -309,8 +302,7 @@ cmd_finish() {
 			commit="$BRANCH"
 		fi
 
-		git merge --no-ff "$commit" || \
-		  die "There were merge conflicts."
+		git merge --no-ff "$commit" || die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
@@ -322,13 +314,10 @@ cmd_finish() {
 	fi
 
 	if flag push; then
-		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
-			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
-		git push "$ORIGIN" "$MASTER_BRANCH" || \
-			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+		git push "$ORIGIN" "$DEVELOP_BRANCH" || die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
+		git push "$ORIGIN" "$MASTER_BRANCH" || die "Could not push to $MASTER_BRANCH from $ORIGIN."
 		if noflag notag; then
-			git push --tags "$ORIGIN" || \
-				die "Could not push tags to $ORIGIN."
+			git push --tags "$ORIGIN" || die "Could not push tags to $ORIGIN."
 		fi
 	fi
 
