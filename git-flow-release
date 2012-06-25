@@ -130,14 +130,6 @@ require_version_arg() {
 	fi
 }
 
-require_base_is_on_develop() {
-	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
-			| sed 's/[* ] //g' \
-	  		| grep -q "^$DEVELOP_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$DEVELOP_BRANCH'."
-	fi
-}
-
 require_no_existing_release_branches() {
 	local release_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${release_branches} | head -n1)
@@ -158,7 +150,7 @@ cmd_start() {
 	BRANCH=$PREFIX$VERSION
 
 	require_version_arg
-	require_base_is_on_develop
+	git_is_ancestor "$BASE" "$DEVELOP_BRANCH"  || die "Fatal: Given base '$BASE' is not a valid commit on '$DEVELOP_BRANCH'."
 	require_no_existing_release_branches
 
 	# Sanity checks

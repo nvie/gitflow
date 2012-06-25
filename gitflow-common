@@ -168,6 +168,15 @@ git_is_branch_merged_into() {
 }
 
 #
+# git_is_ancestor()
+#
+# This is the same fucntion as git_is_branch_merged_into but
+# for readibilty given a different name.
+#
+git_is_ancestor() {
+	git_is_branch_merged_into $1 $2
+}
+#
 # gitflow specific common functionality
 #
 

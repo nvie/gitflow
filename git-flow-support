@@ -143,20 +143,12 @@ require_base_arg() {
 	fi
 }
 
-require_base_is_on_master() {
-	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
-			| sed 's/[* ] //g' \
-	  		| grep -q "^$MASTER_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
-	fi
-}
-
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	require_version_arg
 	require_base_arg
-	require_base_is_on_master
+	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
 
 	# Sanity checks
 	require_clean_working_tree
