@@ -41,7 +41,7 @@
 
 # Shell output
 warn() { echo "$@" >&2; }
-die() { warn "$@"; exit 1; }
+die() { warn "Fatal: $@"; exit 1; }
 
 escape() {
 	echo "$1" | sed 's/\([\.\$\*]\)/\\\1/g'
@@ -262,26 +262,26 @@ gitflow_resolve_nameprefix() {
 #
 
 require_git_repo() {
-	git rev-parse 2>/dev/null || die "fatal: Not a git repository"
+	git rev-parse 2>/dev/null || die "Not a git repository"
 }
 
 require_gitflow_initialized() {
-	 gitflow_is_initialized || die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
+	 gitflow_is_initialized || die "Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
 }
 
 require_clean_working_tree() {
 	git_is_clean_working_tree
 	local result=$?
 	if [ $result -eq 1 ]; then
-		die "fatal: Working tree contains unstaged changes. Aborting."
+		die "Working tree contains unstaged changes. Aborting."
 	fi
 	if [ $result -eq 2 ]; then
-		die "fatal: Index contains uncommited changes. Aborting."
+		die "Index contains uncommited changes. Aborting."
 	fi
 }
 
 require_local_branch() {
-	git_local_branch_exists $1 || die "fatal: Local branch '$1' does not exist and is required."
+	git_local_branch_exists $1 || die "Local branch '$1' does not exist and is required."
 }
 
 require_remote_branch() {
@@ -359,7 +359,7 @@ run_pre_hook() {
 		exitcode=$?
 
 		if [ $exitcode -gt 0 ]; then
-			die "fatal: Hook command $scriptfile ended with exit code $exitcode."
+			die "Hook command $scriptfile ended with exit code $exitcode."
 		fi
 	fi
 }

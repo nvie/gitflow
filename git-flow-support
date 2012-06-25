@@ -148,7 +148,7 @@ cmd_start() {
 	parse_args "$@"
 	require_version_arg
 	require_base_arg
-	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
 
 	# Sanity checks
 	require_clean_working_tree

@@ -153,7 +153,7 @@ cmd_start() {
 	BRANCH=$PREFIX$VERSION
 
 	require_version_arg
-	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	git_is_ancestor "$BASE" "$MASTER_BRANCH" || die "Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
 	require_no_existing_hotfix_branches
 
 	# Sanity checks
