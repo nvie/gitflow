@@ -117,16 +117,8 @@ cmd_help() {
 	exit 0
 }
 
-require_name_arg() {
-	if [ "$NAME" = "" ]; then
-		warn "Missing argument <name>"
-		usage
-		exit 1
-	fi
-}
-
 expand_nameprefix_arg() {
-	require_name_arg
+	gitflow_require_name_arg
 
 	local expanded_name
 	local exitcode
@@ -192,7 +184,7 @@ cmd_start() {
 	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
-	require_name_arg
+	gitflow_require_name_arg
 
 	# Sanity checks
 	require_branch_absent "$BRANCH"
@@ -405,7 +397,7 @@ cmd_publish() {
 
 cmd_track() {
 	parse_args "$@"
-	require_name_arg
+	gitflow_require_name_arg
 
 	# Sanity checks
 	require_clean_working_tree

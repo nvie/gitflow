@@ -180,6 +180,15 @@ gitflow_require_version_arg() {
 		exit 1
 	fi
 }
+
+gitflow_require_name_arg() {
+	if [ "$NAME" = "" ]; then
+		warn "Missing argument <name>"
+		usage
+		exit 1
+	fi
+}
+
 # Check if this repo has been inited for gitflow
 gitflow_has_master_configured() {
 	local master=$(git config --get gitflow.branch.master)
