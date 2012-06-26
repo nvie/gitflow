@@ -139,7 +139,7 @@ cmd_start() {
 	BASE=${2:-$MASTER_BRANCH}
 
 	# Run filter on the version
-	VERSION=`run_filter_hook hotfix-start-version $VERSION`
+	VERSION=$(run_filter_hook hotfix-start-version $VERSION)
 
 	# As VERSION might have changed reset BRANCH with new VERSION
 	BRANCH=$PREFIX$VERSION

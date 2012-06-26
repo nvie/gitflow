@@ -135,7 +135,7 @@ cmd_start() {
 	BASE=${2:-$DEVELOP_BRANCH}
 
 	# Run filter on the version
-	VERSION=`run_filter_hook release-start-version $VERSION`
+	VERSION=$(run_filter_hook release-start-version $VERSION)
 
 	# As VERSION might have changed reset BRANCH with new VERSION
 	BRANCH=$PREFIX$VERSION
