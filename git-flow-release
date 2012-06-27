@@ -38,7 +38,7 @@
 require_git_repo
 require_gitflow_initialized
 gitflow_load_settings
-VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
 PREFIX=$(git config --get gitflow.prefix.release)
 
 usage() {
@@ -60,8 +60,7 @@ cmd_list() {
 
 	local release_branches
 	local current_branch
-	local short_names
-	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	release_branches=$(git_local_branches_prefixed "$PREFIX")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
                 warn ""
@@ -72,31 +71,29 @@ cmd_list() {
 		exit 0
 	fi
 
-	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$release_branches" | sed "s ^$PREFIX  g")
+	current_branch=$(git_current_branch)
 
 	# Determine column width first
 	local width=0
 	local branch
-	for branch in $short_names; do
+	for branch in $release_branches; do
 		local len=${#branch}
 		width=$(max $width $len)
 	done
-	width=$(($width+3))
+	width=$(($width+3-${#PREFIX}))
 
 	local branch
-	for branch in $short_names; do
-		local fullname=$PREFIX$branch
-		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+	for branch in $release_branches; do
+		local base=$(git merge-base "$branch" "$DEVELOP_BRANCH")
 		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
-		local branch_sha=$(git rev-parse "$fullname")
-		if [ "$fullname" = "$current_branch" ]; then
+		local branch_sha=$(git rev-parse "$branch")
+		if [ "$branch" = "$current_branch" ]; then
 			printf "* "
 		else
 			printf "  "
 		fi
 		if flag verbose; then
-			printf "%-${width}s" "$branch"
+			printf "%-${width}s" "${branch#$PREFIX}"
 			if [ "$branch_sha" = "$develop_sha" ]; then
 				printf "(no commits yet)"
 			else
@@ -104,7 +101,7 @@ cmd_list() {
 				printf "(based on $nicename)"
 			fi
 		else
-			printf "%s" "$branch"
+			printf "%s" "${branch#$PREFIX}"
 		fi
 		echo
 	done
@@ -125,28 +122,11 @@ parse_args() {
 	BRANCH=$PREFIX$VERSION
 }
 
-require_version_arg() {
-	if [ "$VERSION" = "" ]; then
-		warn "Missing argument <version>"
-		usage
-		exit 1
-	fi
-}
-
-require_base_is_on_develop() {
-	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
-			| sed 's/[* ] //g' \
-	  		| grep -q "^$DEVELOP_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$DEVELOP_BRANCH'."
-	fi
-}
-
 require_no_existing_release_branches() {
-	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local release_branches=$(git_local_branches_prefixed "$PREFIX")
 	local first_branch=$(echo ${release_branches} | head -n1)
 	first_branch=${first_branch#$PREFIX}
-	[ -z "$release_branches" ] || \
-		die "There is an existing release branch ($first_branch). Finish that one first."
+	[ -z "$release_branches" ] || die "There is an existing release branch ($first_branch). Finish that one first."
 }
 
 cmd_start() {
@@ -155,13 +135,13 @@ cmd_start() {
 	BASE=${2:-$DEVELOP_BRANCH}
 
 	# Run filter on the version
-	VERSION=`run_filter_hook release-start-version $VERSION`
+	VERSION=$(run_filter_hook release-start-version $VERSION)
 
 	# As VERSION might have changed reset BRANCH with new VERSION
 	BRANCH=$PREFIX$VERSION
 
-	require_version_arg
-	require_base_is_on_develop
+	gitflow_require_version_arg
+	git_is_ancestor "$BASE" "$DEVELOP_BRANCH"  || die "Given base '$BASE' is not a valid commit on '$DEVELOP_BRANCH'."
 	require_no_existing_release_branches
 
 	# Sanity checks
@@ -171,14 +151,14 @@ cmd_start() {
 	if flag fetch; then
 		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
 	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 
 	# Create branch
-	git checkout -b "$BRANCH" "$BASE"
+	git checkout -b "$BRANCH" "$BASE" || die "Could not create release branch '$BRANCH'"
 
 	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 
@@ -207,7 +187,7 @@ cmd_finish() {
 	DEFINE_boolean nobackmerge false "don't back-merge $MASTER_BRANCH, or tag if applicable, in $DEVELOP_BRANCH " b
 
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then
@@ -218,15 +198,13 @@ cmd_finish() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
-		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
-		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$MASTER_BRANCH"; then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+	if git_remote_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
@@ -236,10 +214,8 @@ cmd_finish() {
 	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
-		git checkout "$MASTER_BRANCH" || \
-		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
+		git checkout "$MASTER_BRANCH" || die "Could not check out $MASTER_BRANCH."
+		git merge --no-ff "$BRANCH" || die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
@@ -253,8 +229,7 @@ cmd_finish() {
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
-			eval git tag $opts "$VERSION_PREFIX$VERSION" || \
-			die "Tagging failed. Please run finish again to retry."
+			eval git tag $opts "$VERSION_PREFIX$VERSION" || die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
 
@@ -270,8 +245,7 @@ cmd_finish() {
 	# In case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
 	if ! git_is_branch_merged_into "$MERGE_BRANCH" "$DEVELOP_BRANCH"; then
-		git checkout "$DEVELOP_BRANCH" || \
-		  die "Could not check out $DEVELOP_BRANCH."
+		git checkout "$DEVELOP_BRANCH" || die "Could not check out $DEVELOP_BRANCH."
 
 		if noflag nobackmerge; then
 			# Accounting for 'git describe', if a release is tagged
@@ -285,8 +259,7 @@ cmd_finish() {
 			commit="$BRANCH"
 		fi
 
-		git merge --no-ff "$commit" || \
-		  die "There were merge conflicts."
+		git merge --no-ff "$commit" || die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
@@ -301,16 +274,12 @@ cmd_finish() {
 	fi
 
 	if flag push; then
-		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
-			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
-		git push "$ORIGIN" "$MASTER_BRANCH" || \
-			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+		git push "$ORIGIN" "$DEVELOP_BRANCH" || die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
+		git push "$ORIGIN" "$MASTER_BRANCH" || die "Could not push to $MASTER_BRANCH from $ORIGIN."
 		if noflag notag; then
-			git push --tags "$ORIGIN" || \
-			  die "Could not push tags to $ORIGIN."
+			git push --tags "$ORIGIN" || die "Could not push tags to $ORIGIN."
 		fi
-		git push "$ORIGIN" :"$BRANCH" || \
-			die "Could not delete the remote $BRANCH in $ORIGIN."
+		git push "$ORIGIN" :"$BRANCH" || die "Could not delete the remote $BRANCH in $ORIGIN."
 	fi
 
 	echo
@@ -337,7 +306,7 @@ cmd_finish() {
 
 cmd_publish() {
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Sanity checks
 	require_clean_working_tree
@@ -368,7 +337,7 @@ cmd_publish() {
 
 cmd_track() {
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Sanity checks
 	require_clean_working_tree
@@ -394,7 +363,7 @@ cmd_delete() {
 	DEFINE_boolean force false "force deletion" f
 	DEFINE_boolean remote false "delete remote branch" r
 	parse_args "$@"
-	require_version_arg
+	gitflow_require_version_arg
 
 	# Sanity checks
 	require_branch "$BRANCH"
