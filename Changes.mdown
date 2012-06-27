@@ -9,6 +9,16 @@
 
 # Changelog
 
+
+#### 1.0.7-avh
+
+[Peter van der Does][petervanderdoes]
+
+* Clean up code
+  Remove all porcelain commands.
+  Refactor code
+
+
 #### 1.0.6-avh
 
 [Peter van der Does][petervanderdoes]
@@ -25,7 +35,6 @@
   branch will also be deleted.  
 * Special thanks to the following individual:
   [Gert Van Gool][gvangool]
-  
   
 #### 1.0-avh
 
