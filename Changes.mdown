@@ -14,10 +14,9 @@
 
 [Peter van der Does][petervanderdoes]
 
-* Clean up code
-  Remove all porcelain commands.
-  Refactor code
-
+* Clean up code    
+  Remove all porcelain commands.    
+  Refactor code    
 
 #### 1.0.6-avh
 
