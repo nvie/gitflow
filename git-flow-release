@@ -398,6 +398,6 @@ cmd_delete() {
 	echo
 	echo "Summary of actions:"
 	echo "- Release branch '$BRANCH' has been deleted."
-	[ flag remote ] && echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
+	flag remote && echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	echo
 }
