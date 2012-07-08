@@ -569,6 +569,6 @@ cmd_delete() {
 	echo
 	echo "Summary of actions:"
 	echo "- Feature branch '$BRANCH' has been deleted."
-	[ flag remote ] && echo "- Feature branch '$BRANCH' in '$ORIGIN' has been deleted."
+	flag remote && echo "- Feature branch '$BRANCH' in '$ORIGIN' has been deleted."
 	echo
 }

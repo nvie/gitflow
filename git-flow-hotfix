@@ -373,6 +373,6 @@ cmd_delete() {
 	echo
 	echo "Summary of actions:"
 	echo "- Hotfix branch '$BRANCH' has been deleted."
-	[ flag remote ] && echo "- Hotfix branch '$BRANCH' in '$ORIGIN' has been deleted."
+	flag remote && echo "- Hotfix branch '$BRANCH' in '$ORIGIN' has been deleted."
 	echo
 }
