@@ -36,15 +36,17 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-require_git_repo
-require_gitflow_initialized
-gitflow_load_settings
-PREFIX=$(git config --get gitflow.prefix.feature)
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  PREFIX=$(git config --get gitflow.prefix.feature)
+}
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFkD] [<name|nameprefix>]"
+	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -232,6 +234,7 @@ cmd_finish() {
 	DEFINE_boolean rebase false "rebase instead of merge" r
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
+	DEFINE_boolean squash false "squash feature during merge" S
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -312,7 +315,13 @@ cmd_finish() {
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
 	else
-		git merge --no-ff "$BRANCH"
+		if noflag squash; then
+		    git merge --no-ff "$BRANCH"
+		else
+			git merge --squash "$BRANCH"
+			git commit
+			git merge "$BRANCH"
+		fi
 	fi
 
 	if [ $? -ne 0 ]; then
@@ -507,7 +516,7 @@ cmd_pull() {
 				exit 1
 			fi
 		else
-			it pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+			git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
 		fi
 
 		echo "Pulled $REMOTE's changes into $BRANCH."

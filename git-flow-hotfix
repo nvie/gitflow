@@ -36,17 +36,20 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-require_git_repo
-require_gitflow_initialized
-gitflow_load_settings
-VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-PREFIX=$(git config --get gitflow.prefix.hotfix)
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+  PREFIX=$(git config --get gitflow.prefix.hotfix)
+}
 
 usage() {
 	echo "usage: git flow hotfix [list] [-v]"
 	echo "       git flow hotfix start [-F] <version> [<base>]"
 	echo "       git flow hotfix finish [-Fsumpk] <version>"
 	echo "       git flow hotfix publish <version>"
+	echo "       git flow hotfix track <version>"
 }
 
 cmd_default() {
@@ -216,11 +219,32 @@ cmd_publish() {
 	echo
 }
 
+cmd_track() {
+	parse_args "$@"
+	require_version_arg
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch_absent "$BRANCH"
+	git fetch -q "$ORIGIN"
+	require_branch "$ORIGIN/$BRANCH"
+
+	# create tracking branch
+	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote tracking branch '$BRANCH' was created"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
+	DEFINE_string messagefile "" "use the contents of the given file as tag message" f
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
@@ -269,6 +293,7 @@ cmd_finish() {
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
 			eval git tag $opts "$VERSION_PREFIX$VERSION" "$BRANCH" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi

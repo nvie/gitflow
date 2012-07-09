@@ -63,6 +63,7 @@ goto :End
 :ChkGetopt
 :: %1 is getopt.exe
 if exist "%GIT_HOME%\bin\%1" goto :EOF
+if exist "%USERPROFILE%\bin\%1" goto :EOF
 if exist "%~f$PATH:1" goto :EOF
 echo %GIT_HOME%\bin\%1 not found.>&2
 echo You have to install this file manually. See the GitFlow README.
