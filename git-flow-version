@@ -35,7 +35,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-GITFLOW_VERSION=1.0.41-avh
+GITFLOW_VERSION=1.0.44-avh
 
 usage() {
 	echo "usage: git flow version"

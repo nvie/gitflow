@@ -35,11 +35,13 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-require_git_repo
-require_gitflow_initialized
-gitflow_load_settings
-VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
-PREFIX=$(git config --get gitflow.prefix.support)
+init() {
+	require_git_repo
+	require_gitflow_initialized
+	gitflow_load_settings
+	VERSION_PREFIX=$(git config --get gitflow.prefix.versiontag)
+	PREFIX=$(git config --get gitflow.prefix.support)
+}
 
 warn "note: The support subcommand is still very EXPERIMENTAL!"
 warn "note: DO NOT use it in a production situation."
