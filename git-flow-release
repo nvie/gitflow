@@ -193,7 +193,7 @@ cmd_finish() {
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
-    DEFINE_boolean squash false "squash release during merge" S
+	DEFINE_boolean squash false "squash release during merge" S
 
 	parse_args "$@"
 	require_version_arg
@@ -225,15 +225,15 @@ cmd_finish() {
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-        if noflag squash; then
-		    git merge --no-ff "$BRANCH" || \
-		        die "There were merge conflicts."
-		        # TODO: What do we do now?
-        else
-            git merge --squash "$BRANCH" || \
-                die "There were merge conflicts."
-            git commit
-        fi
+		if noflag squash; then
+			git merge --no-ff "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+		else
+			git merge --squash "$BRANCH" || \
+				die "There were merge conflicts."
+			git commit
+		fi
 	fi
 
 	if noflag notag; then
@@ -260,16 +260,16 @@ cmd_finish() {
 
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
-        if noflag squash; then
-		    git merge --no-ff "$BRANCH" || \
-		        die "There were merge conflicts."
-		        # TODO: What do we do now?
-        else
-		    git merge --squash "$BRANCH" || \
-		        die "There were merge conflicts."
-		        # TODO: What do we do now?
-            git commit
-        fi
+		if noflag squash; then
+			git merge --no-ff "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+		else
+			git merge --squash "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+			git commit
+		fi
 	fi
 
 	# delete branch
