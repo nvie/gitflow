@@ -7,14 +7,18 @@
 [kperi]: https://github.com/kperi
 [gvangool]: https://github.com/gvangool
 [baby-gnu]: https://github.com/baby-gnu
+[pcragone]: https://github.com/pcragone
 
 # Changelog
 
 #### 1.0.42-avh
-* Implement feature Add_init()_function_git-flow-{feature,release,hotfix,support}
+[Peter Ragone][pcragone]
+
+* Add init to git-flow-{feature,release,hotfix,support}    
+  Fixes the relatively minor issue where 'git flow subcommand help' 
+  gives "Not a gitflow-enabled repo yet"
 
 #### 1.0.41-avh
-
 [Daniel Dehennin][baby-gnu]
 
 * Fix flag test in cmd_delete()
