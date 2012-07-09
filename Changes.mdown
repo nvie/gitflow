@@ -11,7 +11,7 @@
 
 # Changelog
 
-#### 1.0.42-avh
+#### 1.0.44-avh
 [Peter Ragone][pcragone]
 
 * Add init to git-flow-{feature,release,hotfix,support}    
