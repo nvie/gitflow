@@ -36,16 +36,18 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-require_git_repo
-require_gitflow_initialized
-gitflow_load_settings
-VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-PREFIX=$(git config --get gitflow.prefix.release)
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+  PREFIX=$(git config --get gitflow.prefix.release)
+}
 
 usage() {
 	echo "usage: git flow release [list] [-v]"
 	echo "       git flow release start [-F] <version> [<base>]"
-	echo "       git flow release finish [-Fsumpk] <version>"
+	echo "       git flow release finish [-FsumpkS] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
 }
@@ -190,9 +192,11 @@ cmd_finish() {
 	DEFINE_boolean sign false "sign the release tag cryptographically" s
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
+	DEFINE_string messagefile "" "use the contents of the given file as a tag message" f
 	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
+	DEFINE_boolean squash false "squash release during merge" S
 
 	parse_args "$@"
 	require_version_arg
@@ -224,9 +228,15 @@ cmd_finish() {
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+		if noflag squash; then
+			git merge --no-ff "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+		else
+			git merge --squash "$BRANCH" || \
+				die "There were merge conflicts."
+			git commit
+		fi
 	fi
 
 	if noflag notag; then
@@ -239,6 +249,7 @@ cmd_finish() {
 			flag sign && opts="$opts -s"
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
 			eval git tag $opts "$tagname" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi
@@ -253,9 +264,16 @@ cmd_finish() {
 
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
-		git merge --no-ff "$BRANCH" || \
-		  die "There were merge conflicts."
-		  # TODO: What do we do now?
+		if noflag squash; then
+			git merge --no-ff "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+		else
+			git merge --squash "$BRANCH" || \
+				die "There were merge conflicts."
+				# TODO: What do we do now?
+			git commit
+		fi
 	fi
 
 	# delete branch
