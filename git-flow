@@ -109,7 +109,10 @@ main() {
 	fi
 
 	# run the specified action
-	cmd_$SUBACTION "$@"
+  if [ $SUBACTION != "help" ]; then
+    init
+  fi
+  cmd_$SUBACTION "$@"
 }
 
 main "$@"
