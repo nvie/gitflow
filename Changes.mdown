@@ -10,7 +10,7 @@
 
 # Changelog
 
-#### 1.0.36-avh
+#### 1.0.41-avh
 
 [Daniel Dehennin][baby-gnu]
 
