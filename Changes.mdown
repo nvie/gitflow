@@ -10,6 +10,9 @@
 
 # Changelog
 
+#### 1.0.42-avh
+* Implement feature Add_init()_function_git-flow-{feature,release,hotfix,support}
+
 #### 1.0.41-avh
 
 [Daniel Dehennin][baby-gnu]
