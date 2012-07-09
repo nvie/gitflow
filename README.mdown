@@ -138,7 +138,7 @@ Showing your appreciation
 A few people already requested it, so now it's here: a Flattr button.
 
 Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/git-model) or the git-flow tool itself remains
+[blog post](http://nvie.com/posts/a-successful-git-branching-model/) or the git-flow tool itself remains
 contributing to the community.  If you'd like to show your appreciation in
 another way, however, consider Flattr'ing me:
 

@@ -36,10 +36,12 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-require_git_repo
-require_gitflow_initialized
-gitflow_load_settings
-PREFIX=$(git config --get gitflow.prefix.feature)
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  PREFIX=$(git config --get gitflow.prefix.feature)
+}
 
 usage() {
 	echo "usage: git flow feature [list] [-v]"
@@ -514,7 +516,7 @@ cmd_pull() {
 				exit 1
 			fi
 		else
-			it pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+			git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
 		fi
 
 		echo "Pulled $REMOTE's changes into $BRANCH."
