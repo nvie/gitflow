@@ -167,7 +167,8 @@ git_is_branch_merged_into() {
 # for readibilty given a different name.
 #
 git_is_ancestor() {
-	git_is_branch_merged_into $1 $2
+	git_tag_exists "$1" && git_is_branch_merged_into "$1"^0 "$2" \
+	    || git_is_branch_merged_into "$1" "$2"
 }
 #
 # gitflow specific common functionality
