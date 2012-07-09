@@ -6,9 +6,15 @@
 [mallamanis]: https://github.com/mallamanis
 [kperi]: https://github.com/kperi
 [gvangool]: https://github.com/gvangool
+[baby-gnu]: https://github.com/baby-gnu
 
 # Changelog
 
+#### 1.0.36-avh
+
+[Daniel Dehennin][baby-gnu]
+
+* Fix flag test in cmd_delete()
 
 #### 1.0.35-avh
 
