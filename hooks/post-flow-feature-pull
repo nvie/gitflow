@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Runs at the end of git flow feature pull.
+#
+# Positional arguments:
+# $1    The friendly name of the branch
+# $2    The remote to pull from
+# $3    The full branch name (including the feature prefix)
+#
+NAME=$1
+REMOTE=$2
+BRANCH=$3
+
+# Implement your script here.
+
+exit 0

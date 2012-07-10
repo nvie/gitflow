@@ -170,8 +170,12 @@ cmd_start() {
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
+ 
 	# create branch
 	git checkout -b "$BRANCH" "$BASE"
+
+	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -221,6 +225,8 @@ cmd_finish() {
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
+
+	run_pre_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
 
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
@@ -297,6 +303,8 @@ cmd_finish() {
 			die "Could not delete the remote $BRANCH in $ORIGIN."
 	fi
 
+	run_post_hook "$VERSION_PREFIX$VERSION" "$ORIGIN" "$BRANCH"
+
 	echo
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
@@ -327,6 +335,8 @@ cmd_publish() {
 	git fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	# create remote branch
 	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
 	git fetch -q "$ORIGIN"
@@ -336,6 +346,8 @@ cmd_publish() {
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
 	git checkout "$BRANCH"
 
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
+	
 	echo
 	echo "Summary of actions:"
 	echo "- A new remote branch '$BRANCH' was created"
@@ -354,8 +366,12 @@ cmd_track() {
 	git fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
+	run_pre_hook "$NAME" "$ORIGIN" "$BRANCH"
+
 	# create tracking branch
 	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	run_post_hook "$NAME" "$ORIGIN" "$BRANCH"
 
 	echo
 	echo "Summary of actions:"

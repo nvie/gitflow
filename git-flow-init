@@ -228,7 +228,7 @@ cmd_default() {
 		git checkout -q "$develop_branch"
 	fi
 
-	# finally, ask the user for naming conventions (branch and tag prefixes)
+	# Ask the user for naming conventions (branch and tag prefixes )
 	if flag force || \
 	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
