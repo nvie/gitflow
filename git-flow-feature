@@ -320,7 +320,6 @@ cmd_finish() {
 		else
 			git merge --squash "$BRANCH"
 			git commit
-			git merge "$BRANCH"
 		fi
 	fi
 
