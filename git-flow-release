@@ -293,8 +293,11 @@ cmd_finish() {
 			git push --tags "$ORIGIN" || \
 			  die "Could not push tags to $ORIGIN."
 		fi
-		git push "$ORIGIN" :"$BRANCH" || \
-			die "Could not delete the remote $BRANCH in $ORIGIN."
+        git ls-remote --exit-code "$ORIGIN" "$BRANCH"
+        if [ "$?" -eq "0" ]; then
+		    git push "$ORIGIN" :"$BRANCH" || \
+			    die "Could not delete the remote $BRANCH in $ORIGIN."
+        fi
 	fi
 
 	echo
