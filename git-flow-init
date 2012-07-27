@@ -241,60 +241,27 @@ cmd_default() {
 
 	local prefix
 
-	# Feature branches
-	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
-		printf "Feature branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
+	# Setup branch_type with a prefix and record it with 'git config'.
+	function setup_branch_type_prefix() {
+		local branch_type=$1
+
+		if ! git config --get gitflow.prefix.${branch_type} >/dev/null 2>&1 || flag force; then
+			default_suggestion=$(git config --get gitflow.prefix.${branch_type} || echo ${branch_type}/)
+			printf "$(capitalize $branch_type) branches? [$default_suggestion] "
+			if noflag defaults; then
+				read answer
+			else
+				printf "\n"
+			fi
+			[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+			git config gitflow.prefix.${branch_type} "$prefix"
 		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.feature "$prefix"
-	fi
+	}
 
-	# Release branches
-	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
-		printf "Release branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.release "$prefix"
-	fi
-
-
-	# Hotfix branches
-	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
-		printf "Hotfix branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.hotfix "$prefix"
-	fi
-
-
-	# Support branches
-	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
-		printf "Support branches? [$default_suggestion] "
-		if noflag defaults; then
-			read answer
-		else
-			printf "\n"
-		fi
-		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git config gitflow.prefix.support "$prefix"
-	fi
-
+	# Setup branch type prefixes.
+	for type in feature release hotfix support ; do
+		setup_branch_type_prefix $type
+	done
 
 	# Version tag prefix
 	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
