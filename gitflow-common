@@ -189,7 +189,6 @@ gitflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
-	export BRANCH_AFTER_RELEASE=$(git config --get gitflow.branch.afterrelease)
 }
 
 #

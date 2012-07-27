@@ -317,12 +317,6 @@ cmd_finish() {
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
 		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	fi
-
-    if [ "$BRANCH_AFTER_RELEASE" != "" ]; then
-        git checkout "$BRANCH_AFTER_RELEASE"
-        echo "- Checked out '$BRANCH_AFTER_RELEASE'."
-    fi
-
 	echo
 }
 
