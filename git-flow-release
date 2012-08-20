@@ -197,6 +197,7 @@ cmd_finish() {
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
 	DEFINE_boolean squash false "squash release during merge" S
+	DEFINE_boolean nomerge false "use fast-forward rather then a merge commit" N
 
 	parse_args "$@"
 	require_version_arg
@@ -222,6 +223,13 @@ cmd_finish() {
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
+    # by default merge commit otherwise fast-forward instead
+    if noflag nomerge; then
+        MERGE_OPTION='--no-ff'
+    else
+        MERGE_OPTION='--ff'
+    fi
+
 	# try to merge into master
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
@@ -229,7 +237,7 @@ cmd_finish() {
 		git checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
 		if noflag squash; then
-			git merge --no-ff "$BRANCH" || \
+			git merge "$MERGE_OPTION" "$BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 		else

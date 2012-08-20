@@ -46,7 +46,7 @@ init() {
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>]"
+	echo "       git flow feature finish [-rFkDSN] [<name|nameprefix>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
@@ -235,6 +235,8 @@ cmd_finish() {
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	DEFINE_boolean squash false "squash feature during merge" S
+	DEFINE_boolean nomerge false "use fast-forward rather then a merge commit" N
+
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
 
@@ -310,13 +312,20 @@ cmd_finish() {
 		fi
 	fi
 
+    # by default merge commit otherwise fast-forward instead
+    if noflag nomerge; then
+        MERGE_OPTION='--no-ff'
+    else
+        MERGE_OPTION='--ff'
+    fi
+
 	# merge into BASE
 	git checkout "$DEVELOP_BRANCH"
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		git merge --ff "$BRANCH"
 	else
 		if noflag squash; then
-		    git merge --no-ff "$BRANCH"
+		    git merge "$MERGE_OPTION" "$BRANCH"
 		else
 			git merge --squash "$BRANCH"
 			git commit
