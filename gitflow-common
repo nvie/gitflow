@@ -316,3 +316,28 @@ require_branches_equal() {
 		fi
 	fi
 }
+
+require_branches_equal_force() {
+	require_local_branch "$1"
+	require_remote_branch "$2"
+	git_compare_branches "$1" "$2"
+	local status=$?
+    current_git_branch=$(git branch 2>/dev/null| sed -n '/^\*/s/^\* //p')
+	if [ $status -gt 0 ]; then
+		warn "Branches '$1' and '$2' have diverged."
+		if [ $status -eq 1 ]; then
+			warn "And branch '$1' may be fast-forwarded."
+            git checkout "$1"
+            git merge -ff "$2"
+            git checkout $current_git_branch
+		elif [ $status -eq 2 ]; then
+			# Warn here, since there is no harm in being ahead
+			warn "And local branch '$1' is ahead of '$2'."
+		else
+			warn "Branches need merging first."
+            git checkout "$1"
+            git merge -no-ff "$2"
+            git checkout $current_git_branch
+		fi
+	fi
+}
