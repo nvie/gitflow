@@ -169,12 +169,12 @@ cmd_start() {
 
 	# fetch remote changes
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$BASE"
+		git_do fetch -q "$ORIGIN" "$BASE"
 	fi
 	require_branch_absent "$BRANCH"
 
 	# create branch
-	git checkout -b "$BRANCH" "$BASE"
+	git_do checkout -b "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"

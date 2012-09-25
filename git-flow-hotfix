@@ -169,14 +169,14 @@ cmd_start() {
 	require_branch_absent "$BRANCH"
 	require_tag_absent "$VERSION_PREFIX$VERSION"
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$MASTER_BRANCH"
+		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH"
 	fi
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
 	fi
 
 	# create branch
-	git checkout -b "$BRANCH" "$BASE"
+	git_do checkout -b "$BRANCH" "$BASE"
 
 	echo
 	echo "Summary of actions:"
@@ -199,17 +199,17 @@ cmd_publish() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch "$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
 	# create remote branch
-	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+	git_do fetch -q "$ORIGIN"
 
 	# configure remote tracking
 	git config "branch.$BRANCH.remote" "$ORIGIN"
 	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-	git checkout "$BRANCH"
+	git_do checkout "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -226,11 +226,11 @@ cmd_track() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
-	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -260,9 +260,9 @@ cmd_finish() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
+		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
 		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
+		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
 	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
@@ -276,9 +276,9 @@ cmd_finish() {
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into master was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
-		git checkout "$MASTER_BRANCH" || \
+		git_do checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
-		git merge --no-ff "$BRANCH" || \
+		git_do merge --no-ff "$BRANCH" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
@@ -294,7 +294,7 @@ cmd_finish() {
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
-			eval git tag $opts "$VERSION_PREFIX$VERSION" "$BRANCH" || \
+			eval git_do tag $opts "$VERSION_PREFIX$VERSION" "$BRANCH" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
@@ -303,28 +303,28 @@ cmd_finish() {
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
 	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
-		git checkout "$DEVELOP_BRANCH" || \
+		git_do checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
-		git merge --no-ff "$BRANCH" || \
+		git_do merge --no-ff "$BRANCH" || \
 		  die "There were merge conflicts."
 		  # TODO: What do we do now?
 	fi
 
 	# delete branch
 	if noflag keep; then
-		git branch -d "$BRANCH"
+		git_do branch -d "$BRANCH"
 	fi
 
 	if flag push; then
-		git push "$ORIGIN" "$DEVELOP_BRANCH" || \
+		git_do push "$ORIGIN" "$DEVELOP_BRANCH" || \
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
-		git push "$ORIGIN" "$MASTER_BRANCH" || \
+		git_do push "$ORIGIN" "$MASTER_BRANCH" || \
 			die "Could not push to $MASTER_BRANCH from $ORIGIN."
 		if noflag notag; then
-			git push --tags "$ORIGIN" || \
+			git_do push --tags "$ORIGIN" || \
 				die "Could not push tags to $ORIGIN."
 		fi
 	fi
