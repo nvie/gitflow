@@ -70,6 +70,14 @@ noflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
 # Git specific common functionality
 #
 
+git_do() {
+  # equivalent to git, used to indicate actions that make modifications
+  if flag show_commands; then
+    echo "git $@" >&2
+  fi
+  git "$@"
+}
+
 git_local_branches() { git branch --no-color | sed 's/^[* ] //'; }
 git_remote_branches() { git branch -r --no-color | sed 's/^[* ] //'; }
 git_all_branches() { ( git branch --no-color; git branch -r --no-color) | sed 's/^[* ] //'; }
