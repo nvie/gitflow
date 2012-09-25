@@ -204,7 +204,7 @@ cmd_start() {
 
 	# update the local repo with remote changes, if asked
 	if flag fetch; then
-		git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 	fi
 
 	# if the origin branch counterpart exists, assert that the local branch
@@ -214,7 +214,7 @@ cmd_start() {
 	fi
 
 	# create branch
-	if ! git checkout -b "$BRANCH" "$BASE"; then
+	if ! git_do checkout -b "$BRANCH" "$BASE"; then
 		die "Could not create feature branch '$BRANCH'"
 	fi
 
@@ -287,8 +287,8 @@ cmd_finish() {
 	# update local repo with remote changes first, if asked
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		if flag fetch; then
-			git fetch -q "$ORIGIN" "$BRANCH"
-			git fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+			git_do fetch -q "$ORIGIN" "$BRANCH"
+			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
 		fi
 	fi
 
@@ -311,16 +311,16 @@ cmd_finish() {
 	fi
 
 	# merge into BASE
-	git checkout "$DEVELOP_BRANCH"
+	git_do checkout "$DEVELOP_BRANCH"
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
-		git merge --ff "$BRANCH"
+		git_do merge --ff "$BRANCH"
 	else
 		if noflag squash; then
-		    git merge --no-ff "$BRANCH"
+		    git_do merge --no-ff "$BRANCH"
 		else
-			git merge --squash "$BRANCH"
-			git commit
-			git merge "$BRANCH"
+			git_do merge --squash "$BRANCH"
+			git_do commit
+			git_do merge "$BRANCH"
 		fi
 	fi
 
@@ -351,15 +351,15 @@ helper_finish_cleanup() {
 
 	# delete branch
 	if flag fetch; then
-		git push "$ORIGIN" ":refs/heads/$BRANCH"
+		git_do push "$ORIGIN" ":refs/heads/$BRANCH"
 	fi
 	
 	
 	if noflag keep; then
 		if flag force_delete; then
-			git branch -D "$BRANCH"
+			git_do branch -D "$BRANCH"
 		else
-			git branch -d "$BRANCH"
+			git_do branch -d "$BRANCH"
 		fi
 	fi
 
@@ -383,17 +383,17 @@ cmd_publish() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch "$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do fetch -q "$ORIGIN"
 	require_branch_absent "$ORIGIN/$BRANCH"
 
 	# create remote branch
-	git push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+	git_do fetch -q "$ORIGIN"
 
 	# configure remote tracking
-	git config "branch.$BRANCH.remote" "$ORIGIN"
-	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-	git checkout "$BRANCH"
+	git_do config "branch.$BRANCH.remote" "$ORIGIN"
+	git_do config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+	git_do checkout "$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -410,11 +410,11 @@ cmd_track() {
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
-	git fetch -q "$ORIGIN"
+	git_do fetch -q "$ORIGIN"
 	require_branch "$ORIGIN/$BRANCH"
 
 	# create tracking branch
-	git checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
 
 	echo
 	echo "Summary of actions:"
@@ -445,7 +445,7 @@ cmd_checkout() {
 
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
-		git checkout "$BRANCH"
+		git_do checkout "$BRANCH"
 	else
 		die "Name a feature branch explicitly."
 	fi
@@ -464,12 +464,12 @@ cmd_rebase() {
 	require_clean_working_tree
 	require_branch "$BRANCH"
 
-	git checkout -q "$BRANCH"
+	git_do checkout -q "$BRANCH"
 	local OPTS=
 	if flag interactive; then
 		OPTS="$OPTS -i"
 	fi
-	git rebase $OPTS "$DEVELOP_BRANCH"
+	git_do rebase $OPTS "$DEVELOP_BRANCH"
 }
 
 avoid_accidental_cross_branch_action() {
@@ -511,20 +511,20 @@ cmd_pull() {
 		# we already have a local branch called like this, so simply pull the
 		# remote changes in
 		if flag rebase; then
-			if ! git pull --rebase -q "$REMOTE" "$BRANCH"; then
+			if ! git_do pull --rebase -q "$REMOTE" "$BRANCH"; then
 				warn "Pull was aborted. There might be conflicts during rebase or '$REMOTE' might be inaccessible."
 				exit 1
 			fi
 		else
-			git pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+			git_do pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
 		fi
 
 		echo "Pulled $REMOTE's changes into $BRANCH."
 	else
 		# setup the local branch clone for the first time
-		git fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
-		git branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
-		git checkout -q "$BRANCH" || die "Checking out new local branch failed."
+		git_do fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+		git_do branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+		git_do checkout -q "$BRANCH" || die "Checking out new local branch failed."
 		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
 	fi
 }
