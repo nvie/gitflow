@@ -249,6 +249,72 @@ gitflow_resolve_nameprefix() {
 }
 
 #
+# gitflow_set_remote
+#
+# Inputs:
+# $1 = name of the remote context, eg "develop" or "release"
+# $2 = name of the branch for which the remote is to be set
+#
+# Configures remote value of branch and possibly the remote push target.
+# Reads "gitflow.remote.*".
+#
+gitflow_set_remote() {
+	local remote_context=$1
+	local branch_name=$2
+	local remote_name=`git config --get gitflow.remote.$remote_context`
+	if [ ! -z $remote_name -a ! -z $branch_name ]; then
+		local remote_branch=`echo $remote_name | awk -F: '{print $2}'`
+		[ -z $remote_branch ] || remote_name=`echo $remote_name | awk -F: '{print $1}'`
+		git config branch.$branch_name.remote $remote_name
+		if [ -z $remote_branch ]; then
+			git config remote.$remote_name.push refs/heads/$branch_name:refs/heads/$branch_name
+		else
+			git config remote.$remote_name.push refs/heads/$branch_name:refs/heads/$remote_branch
+		fi
+	fi
+}
+
+#
+# gitflow_get_remote
+#
+# Inputs:
+# $1 = name of the branch for which the remote is to be set
+#
+# Returns name of the remote and possibly the push reference
+#    1) development
+#    2) development [refs/heads/develop -> refs/heads/master]
+#
+gitflow_get_remote() {
+	local branch_name=$1
+	local remote=`git config --get branch.$branch_name.remote`
+	if [ ! -z $remote ]; then
+		local push_ref=`git config --get remote.$remote.push`
+		if [ -z $push_ref ]; then
+			echo $remote
+		else
+			push_from=`echo $push_ref | awk -F: '{print $1}'`
+			push_to=`echo $push_ref | awk -F: '{print $2}'`
+			echo "$remote [$push_from -> $push_to]"
+		fi
+	else
+		echo ""
+	fi
+}
+
+#
+# gitflow_remove_remote
+#
+# Inputs:
+# $1 = name of the remote context, eg "develop" or "release"
+#
+# Deletes gitflow.<remote-context> from git config
+#
+gitflow_remove_remote() {
+	local remote_context=$1
+	git config --unset gitflow.remote.$remote_context 2>/dev/null
+}
+
+#
 # Assertions for use in git-flow subcommands
 #
 
