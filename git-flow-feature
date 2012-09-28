@@ -220,13 +220,13 @@ cmd_start() {
 	fi
 
 	# get remote, if differnt
-	local branch_remote=`gitflow_get_remote $BRANCH`
+	branch_remote=`gitflow_get_remote $BRANCH`
 
 	echo
 	echo "Summary of actions:"
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
 	echo "- You are now on branch '$BRANCH'"
-	[ ! -z $branch_remote ] && echo "- Changes will be pushed to $branch_remote"
+	[ ! -z "$branch_remote" ] && echo "- Changes will be pushed to $branch_remote"
 	echo ""
 	echo "Now, start committing on your feature. When done, use:"
 	echo ""
