@@ -173,10 +173,15 @@ cmd_start() {
 	# create branch
 	git_do checkout -b "$BRANCH" "$BASE"
 
+	# set remote, if any
+	gitflow_set_remote "release" $BRANCH
+	branch_remote=`gitflow_get_remote $BRANCH`
+
 	echo
 	echo "Summary of actions:"
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
 	echo "- You are now on branch '$BRANCH'"
+	[ ! -z "$branch_remote" ] && echo "- Changes will be pushed to $branch_remote"
 	echo
 	echo "Follow-up actions:"
 	echo "- Bump the version number now!"

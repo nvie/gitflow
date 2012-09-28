@@ -309,6 +309,31 @@ cmd_default() {
 		git_do config gitflow.prefix.versiontag "$prefix"
 	fi
 
+	# Ask the user for branch <-> remote relations
+	if flag force || \
+		! git config --get gitflow.remote.master >/dev/null 2>&1 ||
+		! git config --get gitflow.remote.release >/dev/null 2>&1 ||
+		! git config --get gitflow.remote.develop >/dev/null 2>&1; then
+		echo
+		echo "Do you use multiple remotes?"
+	fi
+
+	local default_remote=`git remote | head -1`
+	for context in `echo "master release develop"`; do
+		if ! git config --get gitflow.remote.$context >/dev/null 2>&1 || flag force; then
+			printf "Remote for $context [$default_remote] "
+			if noflag defaults; then
+				read answer
+			else
+				printf "\n"
+			fi
+			[ "$answer" = "-" ] && prefix=$default_remote || prefix=${answer:-$default_remote}
+			git_do config gitflow.remote.$context "$prefix"
+		fi
+	done
+	gitflow_set_remote "master" $master_branch
+	gitflow_set_remote "develop" $develop_branch 
+
 
 	# TODO: what to do with origin?
 }

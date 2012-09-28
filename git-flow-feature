@@ -53,6 +53,7 @@ usage() {
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
+	echo "       git flow feature remoteset <remote>[:<target-branch>]"
 }
 
 cmd_default() {
@@ -218,10 +219,14 @@ cmd_start() {
 		die "Could not create feature branch '$BRANCH'"
 	fi
 
+	# get remote, if differnt
+	branch_remote=`gitflow_get_remote $BRANCH`
+
 	echo
 	echo "Summary of actions:"
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
 	echo "- You are now on branch '$BRANCH'"
+	[ ! -z "$branch_remote" ] && echo "- Changes will be pushed to $branch_remote"
 	echo ""
 	echo "Now, start committing on your feature. When done, use:"
 	echo ""
@@ -339,6 +344,9 @@ cmd_finish() {
 		echo
 		exit 1
 	fi
+
+	# cleanup git remote, if any
+	gitflow_remove_remote "feature-${BRANCH#${PREFIX}}"
 
 	# when no merge conflict is detected, just clean up the feature branch
 	helper_finish_cleanup
@@ -527,4 +535,21 @@ cmd_pull() {
 		git_do checkout -q "$BRANCH" || die "Checking out new local branch failed."
 		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
 	fi
+}
+
+
+cmd_remoteset() {
+	local set_remote=$1
+
+	# get current branch and extract feature name
+	local current_branch=$(git_current_branch)
+	local feature_name=${current_branch#${PREFIX}}
+
+	# set new remote in settings
+	git config gitflow.remote."feature-$feature_name" "$set_remote"
+
+	# set new remote for branch and remote
+	gitflow_set_remote "feature-$feature_name" $current_branch
+
+	echo "Set remote for feature '$feature_name' to '$set_remote'"
 }
