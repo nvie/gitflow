@@ -37,7 +37,7 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-# set this to workaround expr problems in shFlags on freebsd
+# set this to workaround expr problems in shFlags on FreeBSD
 if uname -s | egrep -iq 'bsd'; then export EXPR_COMPAT=1; fi
 
 # enable debug mode
@@ -114,8 +114,8 @@ main() {
 	fi
 
 	# run the specified action
-  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] ; then
-    init
+  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] && [ $SUBCOMMAND != "version" ] ; then
+    initialize
   fi
   cmd_$SUBACTION "$@"
 }
