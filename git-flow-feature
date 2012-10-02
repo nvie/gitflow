@@ -36,7 +36,7 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-init() {
+initialize() {
   require_git_repo
   require_gitflow_initialized
   gitflow_load_settings
