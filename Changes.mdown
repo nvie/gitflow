@@ -19,6 +19,8 @@ Release date: **not yet**
 
 * Add package installer for the Windows platform.
 
+* Fixing "init: Operation not permitted" bug on FreeBSD.
+
 0.4.1:
 -----
 Release date: **2011/02/04**
