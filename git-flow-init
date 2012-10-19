@@ -195,7 +195,7 @@ cmd_default() {
 	local created_gitflow_branch=0
 	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
 		git_do symbolic-ref HEAD "refs/heads/$master_branch"
-		git_do commit --allow-empty --quiet -m "Initial commit"
+		git_do commit --allow-empty --quiet --edit -m "Initial commit"
 		created_gitflow_branch=1
 	fi
 
