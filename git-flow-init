@@ -53,7 +53,7 @@ cmd_default() {
 	parse_args "$@"
 	
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
-		git_do init
+		git init
 	else
 		# assure that we are not working in a repo with local changes
 		git_repo_is_headless || require_clean_working_tree
@@ -121,14 +121,14 @@ cmd_default() {
 			# name exists, checkout that branch and use it for master
 			if ! git_local_branch_exists "$master_branch" && \
 				git_remote_branch_exists "origin/$master_branch"; then
-				git_do branch "$master_branch" "origin/$master_branch" >/dev/null 2>&1
+				git branch "$master_branch" "origin/$master_branch" >/dev/null 2>&1
 			elif ! git_local_branch_exists "$master_branch"; then
 				die "Local branch '$master_branch' does not exist."
 			fi
 		fi
 
 		# store the name of the master branch
-		git_do config gitflow.branch.master "$master_branch"
+		git config gitflow.branch.master "$master_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
@@ -185,7 +185,7 @@ cmd_default() {
 		fi
 
 		# store the name of the develop branch
-		git_do config gitflow.branch.develop "$develop_branch"
+		git config gitflow.branch.develop "$develop_branch"
 	fi
 
 	# Creation of HEAD
@@ -194,8 +194,8 @@ cmd_default() {
 	# it to be able to create new branches.
 	local created_gitflow_branch=0
 	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
-		git_do symbolic-ref HEAD "refs/heads/$master_branch"
-		git_do commit --allow-empty --quiet -m "Initial commit"
+		git symbolic-ref HEAD "refs/heads/$master_branch"
+		git commit --allow-empty --quiet -m "Initial commit"
 		created_gitflow_branch=1
 	fi
 
@@ -213,9 +213,9 @@ cmd_default() {
 	# the develop branch now in that case (we base it on master, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
 		if git_remote_branch_exists "origin/$develop_branch"; then
-			git_do branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
+			git branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
 		else
-			git_do branch --no-track "$develop_branch" "$master_branch"
+			git branch --no-track "$develop_branch" "$master_branch"
 		fi
 		created_gitflow_branch=1
 	fi
@@ -225,7 +225,7 @@ cmd_default() {
 
 	# switch to develop branch if its newly created
 	if [ $created_gitflow_branch -eq 1 ]; then
-		git_do checkout -q "$develop_branch"
+		git checkout -q "$develop_branch"
 	fi
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
@@ -234,6 +234,7 @@ cmd_default() {
 	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
+	   ! git config --get gitflow.prefix.project >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
 		echo
 		echo "How to name your supporting branch prefixes?"
@@ -251,7 +252,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.feature "$prefix"
+		git config gitflow.prefix.feature "$prefix"
 	fi
 
 	# Release branches
@@ -264,7 +265,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.release "$prefix"
+		git config gitflow.prefix.release "$prefix"
 	fi
 
 
@@ -278,7 +279,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.hotfix "$prefix"
+		git config gitflow.prefix.hotfix "$prefix"
 	fi
 
 
@@ -292,7 +293,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.support "$prefix"
+		git config gitflow.prefix.support "$prefix"
 	fi
 
 
@@ -306,7 +307,7 @@ cmd_default() {
 			printf "\n"
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
-		git_do config gitflow.prefix.versiontag "$prefix"
+		git config gitflow.prefix.versiontag "$prefix"
 	fi
 
 

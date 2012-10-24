@@ -1,3 +1,17 @@
+0.4.3:
+-----
+Release: **not yet**
+
+* Added `git flow project` based on `git flow feature` for branches that 
+  typically lives longer than 1 day.
+
+* Changes `git flow feature finish` to accept a base branch in order to finish
+  features initially created from a project branch.
+
+* Cahnged `git flow init` to ask the user what the project branches prefixes should
+  be called.
+
+
 0.4.2:
 -----
 Release date: **not yet**
