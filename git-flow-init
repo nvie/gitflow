@@ -242,6 +242,19 @@ cmd_default() {
 
 	local prefix
 
+	# Project branches
+	if ! git config --get gitflow.prefix.project >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.project || echo project/)
+		printf "Project branches? [$default_suggestion] "
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+		git config gitflow.prefix.project "$prefix"
+	fi
+
 	# Feature branches
 	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
 		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
