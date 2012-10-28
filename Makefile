@@ -34,6 +34,7 @@ EXEC_FILES=git-flow
 
 # files that need mode 644
 SCRIPT_FILES =git-flow-init
+SCRIPT_FILES+=git-flow-project
 SCRIPT_FILES+=git-flow-feature
 SCRIPT_FILES+=git-flow-hotfix
 SCRIPT_FILES+=git-flow-release
