@@ -1,0 +1,5 @@
+debian/files
+debian/*.substvars
+debian/*.debhelper.log
+debian/*/*
+howto_install.txt

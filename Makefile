@@ -26,6 +26,7 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
 #
+
 prefix=/usr/local
 
 # files that need mode 755
@@ -33,6 +34,7 @@ EXEC_FILES=git-flow
 
 # files that need mode 644
 SCRIPT_FILES =git-flow-init
+SCRIPT_FILES+=git-flow-project
 SCRIPT_FILES+=git-flow-feature
 SCRIPT_FILES+=git-flow-hotfix
 SCRIPT_FILES+=git-flow-release
