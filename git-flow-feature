@@ -236,6 +236,8 @@ cmd_finish() {
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	DEFINE_boolean squash false "squash feature during merge" S
 	parse_args "$@"
+    BASE=$DEVELOP_BRANCH
+    [ -n "$2" ] && BASE=$PREFIX$2
 	expand_nameprefix_arg_or_current
 
 	# sanity checks
@@ -252,7 +254,7 @@ cmd_finish() {
 		# TODO: git_is_clean_working_tree() should provide an alternative
 		# exit code for "unmerged changes in working tree", which we should
 		# actually be testing for here
-		if git_is_clean_working_tree; then
+        if git_is_clean_working_tree; then
 			FINISH_BASE=$(cat "$DOT_GIT_DIR/.gitflow/MERGE_BASE")
 
 			# Since the working tree is now clean, either the user did a
@@ -288,31 +290,31 @@ cmd_finish() {
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		if flag fetch; then
 			git_do fetch -q "$ORIGIN" "$BRANCH"
-			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+			git_do fetch -q "$ORIGIN" "$BASE"
 		fi
 	fi
 
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
 	fi
-	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
-		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	if has "$ORIGIN/$BASE" $(git_remote_branches); then
+		require_branches_equal "$BASE" "$ORIGIN/$BASE"
 	fi
 
 	# if the user wants to rebase, do that first
 	if flag rebase; then
-		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
+		if ! git flow feature rebase "$NAME" "$BASE"; then
 			warn "Finish was aborted due to conflicts during rebase."
 			warn "Please finish the rebase manually now."
 			warn "When finished, re-run:"
-			warn "    git flow feature finish '$NAME' '$DEVELOP_BRANCH'"
+			warn "    git flow feature finish '$NAME' '$BASE'"
 			exit 1
 		fi
 	fi
 
 	# merge into BASE
-	git_do checkout "$DEVELOP_BRANCH"
-	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+	git_do checkout "$BASE"
+	if [ "$(git rev-list -n2 "$BASE..$BRANCH" | wc -l)" -eq 1 ]; then
 		git_do merge --ff "$BRANCH"
 	else
 		if noflag squash; then
@@ -326,9 +328,9 @@ cmd_finish() {
 
 	if [ $? -ne 0 ]; then
 		# oops.. we have a merge conflict!
-		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
+		# write the given $BASE to a temporary file (we need it later)
 		mkdir -p "$DOT_GIT_DIR/.gitflow"
-		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+		echo "$BASE" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
 		echo
 		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
 		echo "    git mergetool"
