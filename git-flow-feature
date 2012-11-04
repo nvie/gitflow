@@ -46,7 +46,7 @@ init() {
 usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
-	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>]"
+	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>] [<base>]"
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
