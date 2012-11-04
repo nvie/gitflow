@@ -236,12 +236,12 @@ cmd_finish() {
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	DEFINE_boolean squash false "squash feature during merge" S
 	parse_args "$@"
-    BASE=$DEVELOP_BRANCH
-    [ -n "$2" ] && BASE=$PREFIX$2
+    BASE=${2:-$DEVELOP_BRANCH}
 	expand_nameprefix_arg_or_current
 
 	# sanity checks
 	require_branch "$BRANCH"
+	require_branch "$BASE"
 
 	# detect if we're restoring from a merge conflict
 	if [ -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE" ]; then
@@ -367,14 +367,14 @@ helper_finish_cleanup() {
 
 	echo
 	echo "Summary of actions:"
-	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
+	echo "- The feature branch '$BRANCH' was merged into '$BASE'"
 	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
 	if flag keep; then
 		echo "- Feature branch '$BRANCH' is still available"
 	else
 		echo "- Feature branch '$BRANCH' has been removed"
 	fi
-	echo "- You are now on branch '$DEVELOP_BRANCH'"
+	echo "- You are now on branch '$BASE'"
 	echo
 }
 
