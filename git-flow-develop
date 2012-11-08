@@ -1,0 +1,83 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
+#
+
+init() {
+	require_git_repo
+	require_gitflow_initialized
+	gitflow_load_settings
+}
+
+usage() {
+	echo "usage: git flow develop on <branch> [<prefix>]"
+}
+
+cmd_on() {
+	local new_develop_branch
+	local branch_created=false
+	new_develop_branch=$1
+
+	# Create the new develop branch if it doesn't exist
+	if ! git_local_branch_exists "$new_develop_branch"; then
+		branch_created=true
+		git_do branch "$new_develop_branch" develop
+	fi
+	# Set the default develop branch to that branch
+	git_do config gitflow.branch.develop "$new_develop_branch"
+
+	# Figure out what to set the new feature prefix to
+	local new_feature_prefix
+	if [ $2 ]; then
+		new_feature_prefix=$2
+	else
+		new_feature_prefix="$(git config --get gitflow.prefix.feature)$new_develop_branch/"
+	fi
+	git_do config gitflow.prefix.feature "$new_"
+
+
+	# Print out sumary of actions
+	echo "Summary of actions:"
+	if $branch_created; then
+		echo "	Branch created: $new_develop_branch"
+	fi
+	echo "	Set default develop branch to: $new_develop_branch"
+	echo "  Set default feature branch prefix to: $new_feature_prefix"
+}
+
+cmd_default() {
+	usage
+}
