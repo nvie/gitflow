@@ -44,11 +44,15 @@ init() {
 
 usage() {
 	echo "usage: git flow develop on <branch> [<prefix>]"
+	echo "       git flow develop reset"
 }
 
 cmd_on() {
+	local old_develop_branch
 	local new_develop_branch
 	local branch_created=false
+	local feature_prefix_changed=false
+	old_develop_branch = "$(git config --get gitflow.branch.develop)"
 	new_develop_branch=$1
 
 	# Create the new develop branch if it doesn't exist
@@ -57,27 +61,49 @@ cmd_on() {
 		git_do branch "$new_develop_branch" develop
 	fi
 	# Set the default develop branch to that branch
+	git_do config gitflow.branch.develop_old "$old_develop_branch"
 	git_do config gitflow.branch.develop "$new_develop_branch"
 
 	# Figure out what to set the new feature prefix to
 	local new_feature_prefix
 	if [ $2 ]; then
 		new_feature_prefix=$2
-	else
-		new_feature_prefix="$(git config --get gitflow.prefix.feature)$new_develop_branch/"
+		git_do config gitflow.prefix.feature_old "$(git config --get gitflow.prefix.feature)"
+		git_do config gitflow.prefix.feature "$new_feature_prefix"
+		feature_prefix_changed=true
 	fi
-	git_do config gitflow.prefix.feature "$new_"
 
 
 	# Print out sumary of actions
 	echo "Summary of actions:"
 	if $branch_created; then
-		echo "	Branch created: $new_develop_branch"
+		echo "    Branch created: $new_develop_branch"
 	fi
-	echo "	Set default develop branch to: $new_develop_branch"
-	echo "  Set default feature branch prefix to: $new_feature_prefix"
+	echo "    Set default develop branch to: $new_develop_branch"
+	if $feature_prefix_changed; then
+		echo "    Set default feature branch prefix to: $new_feature_prefix"
+	fi
+}
+
+cmd_reset() {
+	local old_develop_branch
+	old_develop_branch="$(git config --get gitflow.branch.develop_old 2>/dev/null)" ||
+		exit 0  # If the develop_old config key is not set, exit cleanly
+	git_do config gitflow.branch.develop "$old_develop_branch"
+	git_do config --unset gitflow.branch.develop_old
+
+	local old_feature_branch
+	old_feature_branch="$(git config --get gitflow.prefix.feature_old 2>/dev/null)" ||
+		exit 0  # If the feature_old config key is not set, exit cleanly
+	git_do config gitflow.prefix.feature "$old_feature_branch"
+	git_do config --unset gitflow.prefix.feature_old
 }
 
 cmd_default() {
 	usage
+}
+
+cmd_help() {
+	usage
+	exit 0
 }
