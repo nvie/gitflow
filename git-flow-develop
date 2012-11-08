@@ -61,14 +61,14 @@ cmd_on() {
 		git_do branch "$new_develop_branch" develop
 	fi
 	# Set the default develop branch to that branch
-	git_do config gitflow.branch.develop_old "$old_develop_branch"
+	git_do config gitflow.branch.develop-old "$old_develop_branch"
 	git_do config gitflow.branch.develop "$new_develop_branch"
 
 	# Figure out what to set the new feature prefix to
 	local new_feature_prefix
 	if [ $2 ]; then
 		new_feature_prefix=$2
-		git_do config gitflow.prefix.feature_old "$(git config --get gitflow.prefix.feature)"
+		git_do config gitflow.prefix.feature-old "$(git config --get gitflow.prefix.feature)"
 		git_do config gitflow.prefix.feature "$new_feature_prefix"
 		feature_prefix_changed=true
 	fi
@@ -87,16 +87,16 @@ cmd_on() {
 
 cmd_reset() {
 	local old_develop_branch
-	old_develop_branch="$(git config --get gitflow.branch.develop_old 2>/dev/null)" ||
-		exit 0  # If the develop_old config key is not set, exit cleanly
+	old_develop_branch="$(git config --get gitflow.branch.develop-old 2>/dev/null)" ||
+		exit 0  # If the develop-old config key is not set, exit cleanly
 	git_do config gitflow.branch.develop "$old_develop_branch"
-	git_do config --unset gitflow.branch.develop_old
+	git_do config --unset gitflow.branch.develop-old
 
 	local old_feature_branch
-	old_feature_branch="$(git config --get gitflow.prefix.feature_old 2>/dev/null)" ||
-		exit 0  # If the feature_old config key is not set, exit cleanly
+	old_feature_branch="$(git config --get gitflow.prefix.feature-old 2>/dev/null)" ||
+		exit 0  # If the feature-old config key is not set, exit cleanly
 	git_do config gitflow.prefix.feature "$old_feature_branch"
-	git_do config --unset gitflow.prefix.feature_old
+	git_do config --unset gitflow.prefix.feature-old
 }
 
 cmd_default() {
