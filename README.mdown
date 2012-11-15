@@ -2,8 +2,7 @@ git-flow
 ========
 
 A collection of Git extensions to provide high-level repository operations
-for Vincent Driessen's [branching model](http://nvie.com/git-model "original
-blog post").
+for Vincent Driessen's [branching model][blog post].
 
 
 Getting started
@@ -138,7 +137,7 @@ Showing your appreciation
 A few people already requested it, so now it's here: a Flattr button.
 
 Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/posts/a-successful-git-branching-model/) or the git-flow tool itself remains
+[blog post][blog post] or the git-flow tool itself remains
 contributing to the community.  If you'd like to show your appreciation in
 another way, however, consider Flattr'ing me:
 
@@ -146,3 +145,4 @@ another way, however, consider Flattr'ing me:
 
 [1]: http://flattr.com/thing/53771/git-flow
 [2]: http://api.flattr.com/button/button-static-50x60.png
+[blog post]: http://nvie.com/posts/a-successful-git-branching-model/ "original blog post"
