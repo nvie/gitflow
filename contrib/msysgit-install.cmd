@@ -14,31 +14,50 @@ exit /B 1
 :GitHomeOK
 set ERR=0
 
-echo Installing gitflow into "%GIT_HOME%"...
-
-call :ChkGetopt getopt.exe || set ERR=1
-if %ERR%==1 goto :End
-echo getopt.exe... Found
+set GETOPT_STATUS=Found
+call :ChkGetopt getopt.exe || set GETOPT_STATUS=Not Found
+echo getopt.exe... %GETOPT_STATUS%
 
 if not exist "%GIT_HOME%\bin\git-flow" goto :Install
-echo GitFlow is already installed.>&2
-set /p mychoice="Do you want to replace it [y/n]"
-if "%mychoice%"=="y" goto :DeleteOldFiles
+echo Uninstalling gitflow from "%GIT_HOME%"...>&2
+set /p mychoice="Do you want to uninstall it [y/n]"
+if "%mychoice%"=="y" goto :Uninstall
 goto :Abort
 
-:DeleteOldFiles
+:Uninstall
+setlocal
 echo Deleting old files...
-for /F %%i in ("%GIT_HOME%\git-flow*" "%GIT_HOME%\gitflow-*") do if exist "%%~fi" del /F /Q "%%~fi"
+::This is done in 2 for loops because I could not figure out how to get it to work with 1
+::when there are spaces in the names
+for /F "delims=" %%i in ('dir /b "%GIT_HOME%\bin\git-flow*"') do (
+    call :UninstallFile %%i
+)
 
+for /F "delims=" %%i in ('dir /b "%GIT_HOME%\bin\gitflow-*"') do (
+    call :UninstallFile %%i
+)
+
+call :UninstallFile getopt.exe || set ERR=1
+call :UninstallFile libintl3.dll || set ERR=1
+goto :End
 :Install
+echo Installing gitflow into "%GIT_HOME%"...>&2
 echo Copying files...
 ::goto :EOF
-xcopy "%~dp0\..\git-flow"            "%GIT_HOME%\bin"                 /Y /R /F
 if errorlevel 4 if not errorlevel 5 goto :AccessDenied
 if errorlevel 1 set ERR=1
-xcopy "%~dp0\..\git-flow*"           "%GIT_HOME%\bin"                 /Y /R /F || set ERR=1
-xcopy "%~dp0\..\gitflow-*"           "%GIT_HOME%\bin"                 /Y /R /F || set ERR=1
-xcopy "%~dp0\..\shFlags\src\shflags" "%GIT_HOME%\bin\gitflow-shFlags" /Y /R /F || set ERR=1
+for /F "delims=" %%i in ('dir /b "..\git-flow*"') do (
+    call :InstallFile ..\%%i || set ERR=1
+)
+
+for /F "delims=" %%i in ('dir /b "..\gitflow-*"') do (
+    call :InstallFile ..\%%i || set ERR=1
+)
+call :InstallFile ..\shFlags\src\shflags gitflow-shflags || set ERR=1
+if "%GETOPT_STATUS%" == "Not Found" (
+  call :InstallFile ..\getopt.exe || set ERR=1
+  call :InstallFile ..\libintl3.dll || set ERR=1
+)
 
 if %ERR%==1 choice /T 30 /C Y /D Y /M "Some unexpected errors happened. Sorry, you'll have to fix them by yourself."
 
@@ -65,10 +84,26 @@ goto :End
 if exist "%GIT_HOME%\bin\%1" goto :EOF
 if exist "%USERPROFILE%\bin\%1" goto :EOF
 if exist "%~f$PATH:1" goto :EOF
-echo %GIT_HOME%\bin\%1 not found.>&2
-echo You have to install this file manually. See the GitFlow README.
 exit /B 1
 
+:InstallFile
+::%1 is the input filename
+::%2 is the output filename (if blank the input name is used)
+for /F %%i in ("%~f1") do set OUTPUT_NAME=%%~ni%%~xi
+if not "%2" == "" set OUTPUT_NAME=%2
+
+::Create the file so we are not prompted if it is a file or dir
+echo tmp > "%GIT_HOME%\bin\%OUTPUT_NAME%"
+xcopy "%~dp0%1" "%GIT_HOME%\bin\%OUTPUT_NAME%" /Y /R /F || set ERR=1
+exit /B %ERR%
+
+:UninstallFile
+::%1 is the filename
+  if exist "%GIT_HOME%\bin\%1" (
+    echo Removing "%GIT_HOME%\bin\%1"...
+    del /F /Q "%GIT_HOME%\bin\%1" || set ERR=1
+  )
+exit /B %ERR%
 :FindGitHome
 setlocal
 set GIT_CMD_DIR=%~dp$PATH:1
