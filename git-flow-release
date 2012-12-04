@@ -229,11 +229,11 @@ cmd_finish() {
 		git_do checkout "$MASTER_BRANCH" || \
 		  die "Could not check out $MASTER_BRANCH."
 		if noflag squash; then
-			git_do merge -m "Merge branch '$BRANCH'" --no-ff "$BRANCH" || \
+			git_do merge -m "Merge branch '$BRANCH' into '$MASTER_BRANCH'" --no-ff "$BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 		else
-			git_do merge -m "Merge branch '$BRANCH'" --squash "$BRANCH" || \
+			git_do merge -m "Merge branch '$BRANCH' into '$MASTER_BRANCH'" --squash "$BRANCH" || \
 				die "There were merge conflicts."
 			git_do commit
 		fi
@@ -265,11 +265,11 @@ cmd_finish() {
 		# TODO: Actually, accounting for 'git describe' pays, so we should
 		# ideally git merge --no-ff $tagname here, instead!
 		if noflag squash; then
-			git_do merge -m "Merge branch '$BRANCH' into develop" --no-ff "$BRANCH" || \
+			git_do merge -m "Merge branch '$BRANCH' into '$DEVELOP_BRANCH'" --no-ff "$BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 		else
-			git_do merge -m "Merge branch '$BRANCH' into develop" --squash "$BRANCH" || \
+			git_do merge -m "Merge branch '$BRANCH' into '$DEVELOP_BRANCH'" --squash "$BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 			git_do commit
