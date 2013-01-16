@@ -342,8 +342,10 @@ cmd_finish() {
 		if flag squash; then
 			git_do merge --squash "$BRANCH"
 			git_do commit "$opts"
-		else 
-			git_do merge "$opts" --no-ff "$BRANCH"
+			# keep our branch since it was squashed and not fully merged
+			FLAGS_keep="$FLAGS_TRUE"
+		else
+			git_do merge --no-ff "$opts" "$BRANCH"
 		fi
 	fi
 
