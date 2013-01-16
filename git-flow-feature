@@ -325,16 +325,16 @@ cmd_finish() {
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
 		if [ "$append_message" != "" ]; then
 			git_do checkout "$BRANCH"
-			git_do commit --amend -m "$(echo "$(git log -n 1 --pretty=%s)\n\n$append_message")"
+			git_do commit --amend -m "$(printf "%s\n\n%s" "$(git log -1 --pretty=%s)" "$append_message")"
 		fi
 		git_do checkout "$DEVELOP_BRANCH"
 		git_do merge --ff "$BRANCH"
 	else
 		local opts=""
 		if [ "$FLAGS_message" != "" ]; then
-			opts="-m '$FLAGS_message'"
+			opts="-m$FLAGS_message"
 		elif [ "$append_message" != "" ]; then
-			opts=$(echo "-m 'Merge branch $BRANCH into $DEVELOP_BRANCH.\n\n$append_message'")
+			opts="$(printf "%s\n\n%s" "-mMerge branch $BRANCH into $DEVELOP_BRANCH." "$append_message")"
 		fi
 		
 		git_do checkout "$DEVELOP_BRANCH"
