@@ -313,39 +313,41 @@ cmd_finish() {
 	fi
 
 	# merge into BASE
-	local append_message=""
+	local APPEND_MESSAGE=""
 	# get and evaluate feature finish append message, since it can contain custom subcommands that use $BRANCH variable
 	if [ "$FLAGS_append_message" != "" ]; then
-		eval "append_message=\"$FLAGS_append_message\""
+		eval "APPEND_MESSAGE=\"$FLAGS_append_message\""
 	# no command line message defined, trying default from config
 	elif [ "$(git config gitflow.feature.finish.append)" != "" ]; then
-		eval "append_message=\"$(git config gitflow.feature.finish.append) \""
+		eval "APPEND_MESSAGE=\"$(git config gitflow.feature.finish.append) \""
 	fi
 
 	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
-		if [ "$append_message" != "" ]; then
+		if [ "$APPEND_MESSAGE" != "" ]; then
 			git_do checkout "$BRANCH"
-			git_do commit --amend -m "$(printf "%s\n\n%s" "$(git log -1 --pretty=%s)" "$append_message")"
+			git_do commit --amend -m "$(printf "%s\n\n%s" "$(git log -1 --pretty=%s)" "$APPEND_MESSAGE")"
 		fi
 		git_do checkout "$DEVELOP_BRANCH"
 		git_do merge --ff "$BRANCH"
 	else
-		local opts=""
+		local OPTS=""
 		if [ "$FLAGS_message" != "" ]; then
-			opts="-m$FLAGS_message"
-		elif [ "$append_message" != "" ]; then
-			opts="$(printf "%s\n\n%s" "-mMerge branch $BRANCH into $DEVELOP_BRANCH." "$append_message")"
+			OPTS="-m$FLAGS_message"
+		elif [ "$APPEND_MESSAGE" != "" ]; then
+			OPTS="$(printf "%s\n\n%s" "-mMerge branch $BRANCH into $DEVELOP_BRANCH." "$APPEND_MESSAGE")"
 		fi
 		
 		git_do checkout "$DEVELOP_BRANCH"
 
 		if flag squash; then
 			git_do merge --squash "$BRANCH"
-			git_do commit "$opts"
+			git_do commit "$OPTS"
 			# keep our branch since it was squashed and not fully merged
 			FLAGS_keep="$FLAGS_TRUE"
+		elif [ "$OPTS" != "" ]; then
+			git_do merge --no-ff "$OPTS" "$BRANCH"
 		else
-			git_do merge --no-ff "$opts" "$BRANCH"
+			git_do merge --no-ff "$BRANCH"
 		fi
 	fi
 
