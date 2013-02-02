@@ -40,7 +40,7 @@ init() {
     require_git_repo
     require_gitflow_initialized
     gitflow_load_settings
-    PREFIX=$(git config --get gitflow.prefix.issue
+    PREFIX=$(git config --get gitflow.prefix.issue)
 }
 
 usage() {
