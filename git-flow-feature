@@ -312,16 +312,12 @@ cmd_finish() {
 
 	# merge into BASE
 	git_do checkout "$DEVELOP_BRANCH"
-	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
-		git_do merge --ff "$BRANCH"
+	if noflag squash; then
+		git_do merge --no-ff "$BRANCH"
 	else
-		if noflag squash; then
-		    git_do merge --no-ff "$BRANCH"
-		else
-			git_do merge --squash "$BRANCH"
-			git_do commit
-			git_do merge "$BRANCH"
-		fi
+		git_do merge --squash "$BRANCH"
+		git_do commit
+		git_do merge "$BRANCH"
 	fi
 
 	if [ $? -ne 0 ]; then
