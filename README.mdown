@@ -132,6 +132,11 @@ The ``-d`` flag will accept all defaults.
   
   For support branches, the `<base>` arg must be a commit on `master`.
 
+*  To list/start issue branches, use:
+        `git flow issue`
+        `git flow issue start <name> [<base>]`
+
+  For issue branches, the `<base>` arg must be a commit on `develop`.
 
 Showing your appreciation
 =========================
