@@ -173,12 +173,17 @@ name_or_current() {
 }
 
 parse_args() {
+	local current_branch
 	# parse options
 	FLAGS "$@" || exit $?
 	eval set -- "${FLAGS_ARGV}"
 
 	# read arguments into global variables
 	NAME=$1
+	current_branch=`git_current_branch`
+	if [[ $NAME == "" ]] && [[ $current_branch == $PREFIX* ]]; then
+		NAME=${current_branch//$PREFIX/}
+	fi
 	BRANCH=$PREFIX$NAME
 }
 
