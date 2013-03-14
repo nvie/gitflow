@@ -114,7 +114,7 @@ main() {
 	fi
 
 	# run the specified action
-  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] ; then
+  if [ "`type -t init`" = function ]; then
     init
   fi
   cmd_$SUBACTION "$@"
