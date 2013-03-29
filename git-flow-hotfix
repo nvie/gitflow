@@ -178,6 +178,10 @@ cmd_start() {
 	# create branch
 	git_do checkout -b "$BRANCH" "$BASE"
 
+	#make sure the version file is in the root of the git repo. 
+	echo $VERSION > version
+	git_do commit version -m "bumped the version"
+
 	echo
 	echo "Summary of actions:"
 	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
@@ -189,6 +193,8 @@ cmd_start() {
 	echo "- When done, run:"
 	echo
 	echo "     git flow hotfix finish '$VERSION'"
+	echo
+	echo "The version has been bumped up!"
 	echo
 }
 
