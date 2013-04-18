@@ -50,6 +50,7 @@ usage() {
 	echo "       git flow feature publish <name>"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
+	echo "       git flow feature difftool [<name|nameprefix>]"
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
@@ -437,6 +438,23 @@ cmd_diff() {
 
 		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
 		git diff "$BASE"
+	fi
+}
+
+cmd_difftool() {
+	parse_args "$@"
+
+	if [ "$NAME" != "" ]; then
+		expand_nameprefix_arg
+		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
+		git difftool "$BASE..$BRANCH"
+	else
+		if ! git_current_branch | grep -q "^$PREFIX"; then
+			die "Not on a feature branch. Name one explicitly."
+		fi
+
+		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
+		git difftool "$BASE"
 	fi
 }
 
