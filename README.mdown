@@ -1,3 +1,8 @@
+
+** PLEASE NOTE **
+This fork of gitflow has an extra command that is identical to git flow feature, but is called git flow bugfix
+It is for people who want to branch from develop to do a bugfix but dont want to "consider" it a feature!
+
 git-flow
 ========
 
