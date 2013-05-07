@@ -41,6 +41,11 @@ init() {
   require_gitflow_initialized
   gitflow_load_settings
   PREFIX=$(git config --get gitflow.prefix.bugfix)
+  if [ -z "$PREFIX" ]; then
+		warn "No Bugfix branch prefix set, using default of bugfix/"
+		git_do config gitflow.prefix.bugfix "bugfix"
+		PREFIX=$(git config --get gitflow.prefix.bugfix)
+	fi
 }
 
 usage() {
