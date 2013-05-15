@@ -3,7 +3,6 @@ _ignore_pgp=<<'Hash: SHA1'
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-#!/bin/sh
 # This is a shell archive.  Save it in a file, remove anything before
 # this line, and then unpack it by entering "sh file".  Note, it may
 # create directories; files and directories will be owned by you and
@@ -3577,7 +3576,7 @@ X	@if gpg --verify $^ >/dev/null 2>&1; then \
 X	  echo "$^: Already signed." >&2; \
 X	  exit 1; \
 X	fi
-X	@cat $^ | sed 's #!/bin/\(ba\)\?sh  g' > $^.temp
+X	@cat $^ | sed -E '\@^#!/bin/(ba|c|tc|z|k)?sh@d' > $^.temp
 X	@rm $^
 X	@echo "#!/bin/sh" > $^
 X	@echo "_ignore_pgp=<<'Hash: SHA1'" >> $^ 
@@ -3751,7 +3750,7 @@ exit
 Version: GnuPG/MacGPG2 v2.0.19 (Darwin)
 Comment: GPGTools - http://gpgtools.org
 
-iEYEARECAAYFAlGS9zYACgkQCPj7FrCSJ+AUfgCfcC+ykIAQpDPLtXqOrYL8/2Rz
-0ikAniLhSO3rtQGwEtUuC0R4/hzF9y2r
-=aUZ5
+iEYEARECAAYFAlGTDJMACgkQCPj7FrCSJ+C2fQCfdJSShY1DlclztecR+YMCKfQT
+I/oAn1SU73djtJ1eNBFnJK7/OLSS5rG3
+=CEyW
 -----END PGP SIGNATURE-----

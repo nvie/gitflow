@@ -79,7 +79,7 @@ gpg: $(srcdir)/contrib/gitflow-installer.shar
 	  echo "$^: Already signed." >&2; \
 	  exit 1; \
 	fi
-	@cat $^ | sed 's #!/bin/\(ba\)\?sh  g' > $^.temp
+	@cat $^ | sed -E '\@^#!/bin/(ba|c|tc|z|k)?sh@d' > $^.temp
 	@rm $^
 	@echo "#!/bin/sh" > $^
 	@echo "_ignore_pgp=<<'Hash: SHA1'" >> $^ 
