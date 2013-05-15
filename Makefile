@@ -27,6 +27,9 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
+SHELL = /bin/sh
+srcdir = .
+
 prefix=/usr/local
 
 # files that need mode 755
@@ -56,3 +59,39 @@ uninstall:
 	test -d $(prefix)/bin && \
 	cd $(prefix)/bin && \
 	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+
+$(srcdir)/contrib/gitflow-installer.shar:
+	@test -f $(srcdir)/gitflow-shFlags || { echo "Run 'git submodule init && git submodule update' first." >&2; exit 1; }
+	echo "#!/bin/sh" > $@
+	find $(srcdir) -mindepth 1 -maxdepth 2 -not -path '*/.git*' \
+	       -not -path '*/contrib/*' -not -path '*/shFlags/*' \
+	       -not -type d | xargs -n100 shar >> $@
+	 chmod +x $@
+
+clean-shar:
+	@rm -f $(srcdir)/contrib/gitflow-installer.shar
+	@rm -f $(srcdir)/contrib/gitflow-installer.shar.*
+
+shar: clean-shar $(srcdir)/contrib/gitflow-installer.shar
+
+gpg: $(srcdir)/contrib/gitflow-installer.shar
+	@if gpg --verify $^ >/dev/null 2>&1; then \
+	  echo "$^: Already signed." >&2; \
+	  exit 1; \
+	fi
+	@cat $^ | sed 's #!/bin/\(ba\)\?sh  g' > $^.temp
+	@rm $^
+	@echo "#!/bin/sh" > $^
+	@echo "_ignore_pgp=<<'Hash: SHA1'" >> $^ 
+	gpg -a --sign -o $^.asc --clearsign $^.temp
+	@cat $^.asc >> $^
+	@rm -f $^.*
+	@chmod +x $^
+
+sign: gpg
+
+pgp: gpg
+
+signed-shar: clean-shar gpg
+
+.PHONY: signed-shar sign pgp gpg shar clean-shar

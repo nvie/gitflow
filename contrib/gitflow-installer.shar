@@ -1,0 +1,3757 @@
+#!/bin/sh
+_ignore_pgp=<<'Hash: SHA1'
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+#!/bin/sh
+# This is a shell archive.  Save it in a file, remove anything before
+# this line, and then unpack it by entering "sh file".  Note, it may
+# create directories; files and directories will be owned by you and
+# have default permissions.
+#
+# This archive contains:
+#
+#	./AUTHORS
+#	./bump-version
+#	./Changes.mdown
+#	./git-flow
+#	./git-flow-feature
+#	./git-flow-hotfix
+#	./git-flow-init
+#	./git-flow-release
+#	./git-flow-support
+#	./git-flow-version
+#	./gitflow-common
+#	./gitflow-shFlags
+#	./LICENSE
+#	./Makefile
+#	./README.mdown
+#
+echo x - ./AUTHORS
+sed 's/^X//' >./AUTHORS << 'END-of-./AUTHORS'
+XAuthors are (ordered by first commit date):
+X
+X- Vincent Driessen
+X- Benedikt Böhm
+X- Daniel Truemper
+X- Jason L. Shiffer
+X- Randy Merrill
+X- Rick Osborne
+X- Mark Derricutt
+X- Nowell Strite
+X- Felipe Talavera
+X- Guillaume-Jean Herbiet
+X- Joseph A. Levin
+X- Jannis Leidel
+X- Konstantin Tjuterev
+X- Kiall Mac Innes
+X- Jon Bernard
+X- Olivier Mengué
+X- Emre Berge Ergenekon
+X- Eric Holmes
+X- Vedang Manerikar
+X- Myke Hines
+X
+XPortions derived from other open source works are clearly marked.
+END-of-./AUTHORS
+echo x - ./bump-version
+sed 's/^X//' >./bump-version << 'END-of-./bump-version'
+X#!/bin/sh
+Xusage() {
+X	echo "usage: bump-version <version-id>"
+X}
+X
+Xif [ $# -ne 1 ]; then
+X	usage
+X	exit 1
+Xfi
+X
+Xif ! sed 's/^GITFLOW_VERSION=.*$/GITFLOW_VERSION='$1'/g' git-flow-version > .git-flow-version.new; then
+X	echo "Could not replace GITFLOW_VERSION variable." >&2
+X	exit 2
+Xfi
+X
+Xmv .git-flow-version.new git-flow-version
+Xgit add git-flow-version
+Xgit commit -m "Bumped version number to $1" git-flow-version
+END-of-./bump-version
+echo x - ./Changes.mdown
+sed 's/^X//' >./Changes.mdown << 'END-of-./Changes.mdown'
+X0.4.2:
+X-----
+XRelease date: **not yet**
+X
+X* `git flow init` now detects situations where origin already has gitflow
+X  branches set up, and behaves accordingly (thanks Emre Berge Ergenekon).
+X
+X* `git flow feature finish` can now be called without a feature branch
+X  name(prefix) argument and will finish the current branch, if on any.
+X
+X* `git flow feature pull` now has a `-r` flag, to support `pull --rebase`
+X  semantics (thanks Vedang Manerikar).
+X
+X* Various minor bug fixes related to internal argument passing.
+X
+X* Improved some documentation.
+X
+X* Better support for Windows and BSD users.
+X
+X* Add package installer for the Windows platform.
+X
+X0.4.1:
+X-----
+XRelease date: **2011/02/04**
+X
+X* New option `-d` added to `git flow init`, to initialize with defaults without
+X  asking for input interactively.  Ideal for creating git-flow enabled repos in
+X  custom scripts.
+X
+X* The parsing issues related to git-flow feature's flags are now dealt with on
+X  all known platforms.  (Fixed #54, #62, #86, #97)
+X
+X* Escape queries for detecting branch/tag names.  (Fixed #91) 
+X
+X
+X0.4:
+X---
+XRelease date: **2010/10/18**
+X
+X* The flag parsing issues of git-flow subcommands are solved for most
+X  platforms.
+X
+X* `git flow {feature,hotfix,release} finish` now takes a `-k` flag, to keep the
+X  branch around after finishing.
+X
+X* `git flow release finish` takes a `-n` flag, to skip tagging.
+X
+X* For consistency, `git flow {release,hotfix}` now, too, have a `publish` and
+X  `track` subcommand, just like `feature`.
+X
+X* Various minor fixes.
+X
+X
+X0.3:
+X----
+XRelease date: **2010/07/22**
+X
+X* New subcommands for `git flow feature`:  
+X  - **checkout**:  
+X    For easily checking out features by their short name.  Even allows
+X    unique prefixes as arguments (see below).
+X
+X  - **pull**:  
+X    This subcommand allows you to painlessly work on a feature branch
+X    together with another peer.  This is especially valuable for doing
+X    peer reviews of other people's code.  For more detailed info, see the
+X    [commit log][1].
+X
+X* Easier addressing of branch names by using name prefixes.  
+X  For example, when using:  
+X  
+X  	git flow feature finish fo
+X  
+X  this automatically finishes the feature branch `foobar` if that's the only
+X  feature branch name starting with `fo`.
+X
+X* No force flag anymore for new feature branches  
+X  `git flow feature start` lost its `-f` (force) flag.  You now don't
+X  have to be in a clean repo anymore to start a new feature branch. This
+X  avoids the manual `git stash`, `git flow feature start`, `git stash
+X  pop` cycle.
+X
+X* You can use `git-flow` in stand-alone repo's now.  
+X  This means it does not assume you have an `origin` repository.
+X  (Thanks [Mark][2].)
+X
+X* No commands fetch from `origin` by default anymore.  
+X  There were some issues related to disabling this flag on some platforms.
+X
+X* Init guesses branch names you may want to use for `develop` and `master`.
+X
+X* Added super-easy installation script. (Thanks [Rick][3].)
+X
+X* Added BSD license.
+X
+X[1]: http://github.com/nvie/gitflow/commit/f68d405cc3a11e9df3671f567658a6ab6ed8e0a1
+X[2]: http://github.com/talios
+X[3]: http://github.com/rickosborne
+X
+X
+XOlder versions
+X--------------
+XNo change history is recorded for pre-0.3 releases.
+END-of-./Changes.mdown
+echo x - ./git-flow
+sed 's/^X//' >./git-flow << 'END-of-./git-flow'
+X#!/bin/sh
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+X# set this to workaround expr problems in shFlags on freebsd
+Xif uname -s | egrep -iq 'bsd'; then export EXPR_COMPAT=1; fi
+X
+X# enable debug mode
+Xif [ "$DEBUG" = "yes" ]; then
+X	set -x
+Xfi
+X
+X# The sed expression here replaces all backslashes by forward slashes.
+X# This helps our Windows users, while not bothering our Unix users.
+Xexport GITFLOW_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
+X
+Xusage() {
+X	echo "usage: git flow <subcommand>"
+X	echo
+X	echo "Available subcommands are:"
+X	echo "   init      Initialize a new git repo with support for the branching model."
+X	echo "   feature   Manage your feature branches."
+X	echo "   release   Manage your release branches."
+X	echo "   hotfix    Manage your hotfix branches."
+X	echo "   support   Manage your support branches."
+X	echo "   version   Shows version information."
+X	echo
+X	echo "Try 'git flow <subcommand> help' for details."
+X}
+X
+Xmain() {
+X	if [ $# -lt 1 ]; then
+X		usage
+X		exit 1
+X	fi
+X
+X	# load common functionality
+X	. "$GITFLOW_DIR/gitflow-common"
+X
+X	# This environmental variable fixes non-POSIX getopt style argument
+X	# parsing, effectively breaking git-flow subcommand parsing on several
+X	# Linux platforms.
+X	export POSIXLY_CORRECT=1
+X
+X	# use the shFlags project to parse the command line arguments
+X	. "$GITFLOW_DIR/gitflow-shFlags"
+X	FLAGS_PARENT="git flow"
+X
+X  # allow user to request git action logging
+X  DEFINE_boolean show_commands false 'show actions taken (git commands)' g
+X
+X  # do actual parsing
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# sanity checks
+X	SUBCOMMAND="$1"; shift
+X
+X	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
+X		usage
+X		exit 1
+X	fi
+X
+X	# run command
+X	. "$GITFLOW_DIR/git-flow-$SUBCOMMAND"
+X	FLAGS_PARENT="git flow $SUBCOMMAND"
+X
+X	# test if the first argument is a flag (i.e. starts with '-')
+X	# in that case, we interpret this arg as a flag for the default
+X	# command
+X	SUBACTION="default"
+X	if [ "$1" != "" ] && { ! echo "$1" | grep -q "^-"; } then
+X		SUBACTION="$1"; shift
+X	fi
+X	if ! type "cmd_$SUBACTION" >/dev/null 2>&1; then
+X		warn "Unknown subcommand: '$SUBACTION'"
+X		usage
+X		exit 1
+X	fi
+X
+X	# run the specified action
+X  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] ; then
+X    init
+X  fi
+X  cmd_$SUBACTION "$@"
+X}
+X
+Xmain "$@"
+END-of-./git-flow
+echo x - ./git-flow-feature
+sed 's/^X//' >./git-flow-feature << 'END-of-./git-flow-feature'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+Xinit() {
+X  require_git_repo
+X  require_gitflow_initialized
+X  gitflow_load_settings
+X  PREFIX=$(git config --get gitflow.prefix.feature)
+X}
+X
+Xusage() {
+X	echo "usage: git flow feature [list] [-v]"
+X	echo "       git flow feature start [-F] <name> [<base>]"
+X	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>]"
+X	echo "       git flow feature publish <name>"
+X	echo "       git flow feature track <name>"
+X	echo "       git flow feature diff [<name|nameprefix>]"
+X	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
+X	echo "       git flow feature checkout [<name|nameprefix>]"
+X	echo "       git flow feature pull [-r] <remote> [<name>]"
+X}
+X
+Xcmd_default() {
+X	cmd_list "$@"
+X}
+X
+Xcmd_list() {
+X	DEFINE_boolean verbose false 'verbose (more) output' v
+X	parse_args "$@"
+X
+X	local feature_branches
+X	local current_branch
+X	local short_names
+X	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	if [ -z "$feature_branches" ]; then
+X		warn "No feature branches exist."
+X		warn ""
+X		warn "You can start a new feature branch:"
+X		warn ""
+X		warn "    git flow feature start <name> [<base>]"
+X		warn ""
+X		exit 0
+X	fi
+X	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+X	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
+X
+X	# determine column width first
+X	local width=0
+X	local branch
+X	for branch in $short_names; do
+X		local len=${#branch}
+X		width=$(max $width $len)
+X	done
+X	width=$(($width+3))
+X
+X	local branch
+X	for branch in $short_names; do
+X		local fullname=$PREFIX$branch
+X		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+X		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+X		local branch_sha=$(git rev-parse "$fullname")
+X		if [ "$fullname" = "$current_branch" ]; then
+X			printf "* "
+X		else
+X			printf "  "
+X		fi
+X		if flag verbose; then
+X			printf "%-${width}s" "$branch"
+X			if [ "$branch_sha" = "$develop_sha" ]; then
+X				printf "(no commits yet)"
+X			elif [ "$base" = "$branch_sha" ]; then
+X				printf "(is behind develop, may ff)"
+X			elif [ "$base" = "$develop_sha" ]; then
+X				printf "(based on latest develop)"
+X			else
+X				printf "(may be rebased)"
+X			fi
+X		else
+X			printf "%s" "$branch"
+X		fi
+X		echo
+X	done
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+X
+Xrequire_name_arg() {
+X	if [ "$NAME" = "" ]; then
+X		warn "Missing argument <name>"
+X		usage
+X		exit 1
+X	fi
+X}
+X
+Xexpand_nameprefix_arg() {
+X	require_name_arg
+X
+X	local expanded_name
+X	local exitcode
+X	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX")
+X	exitcode=$?
+X	case $exitcode in
+X		0) NAME=$expanded_name
+X		   BRANCH=$PREFIX$NAME
+X		   ;;
+X		*) exit 1 ;;
+X	esac
+X}
+X
+Xuse_current_feature_branch_name() {
+X	local current_branch=$(git_current_branch)
+X	if startswith "$current_branch" "$PREFIX"; then
+X		BRANCH=$current_branch
+X		NAME=${BRANCH#$PREFIX}
+X	else
+X		warn "The current HEAD is no feature branch."
+X		warn "Please specify a <name> argument."
+X		exit 1
+X	fi
+X}
+X
+Xexpand_nameprefix_arg_or_current() {
+X	if [ "$NAME" != "" ]; then
+X		expand_nameprefix_arg
+X		require_branch "$PREFIX$NAME"
+X	else
+X		use_current_feature_branch_name
+X	fi
+X}
+X
+Xname_or_current() {
+X	if [ -z "$NAME" ]; then
+X		use_current_feature_branch_name
+X	fi
+X}
+X
+Xparse_args() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# read arguments into global variables
+X	NAME=$1
+X	BRANCH=$PREFIX$NAME
+X}
+X
+Xparse_remote_name() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# read arguments into global variables
+X	REMOTE=$1
+X	NAME=$2
+X	BRANCH=$PREFIX$NAME
+X}
+X
+Xcmd_start() {
+X	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+X	parse_args "$@"
+X	BASE=${2:-$DEVELOP_BRANCH}
+X	require_name_arg
+X
+X	# sanity checks
+X	require_branch_absent "$BRANCH"
+X
+X	# update the local repo with remote changes, if asked
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+X	fi
+X
+X	# if the origin branch counterpart exists, assert that the local branch
+X	# isn't behind it (to avoid unnecessary rebasing)
+X	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
+X		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+X	fi
+X
+X	# create branch
+X	if ! git_do checkout -b "$BRANCH" "$BASE"; then
+X		die "Could not create feature branch '$BRANCH'"
+X	fi
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo ""
+X	echo "Now, start committing on your feature. When done, use:"
+X	echo ""
+X	echo "     git flow feature finish $NAME"
+X	echo
+X}
+X
+Xcmd_finish() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	DEFINE_boolean rebase false "rebase instead of merge" r
+X	DEFINE_boolean keep false "keep branch after performing finish" k
+X	DEFINE_boolean force_delete false "force delete feature branch after finish" D
+X	DEFINE_boolean squash false "squash feature during merge" S
+X	parse_args "$@"
+X	expand_nameprefix_arg_or_current
+X
+X	# sanity checks
+X	require_branch "$BRANCH"
+X
+X	# detect if we're restoring from a merge conflict
+X	if [ -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE" ]; then
+X		#
+X		# TODO: detect that we're working on the correct branch here!
+X		# The user need not necessarily have given the same $NAME twice here
+X		# (although he/she should).
+X		# 
+X
+X		# TODO: git_is_clean_working_tree() should provide an alternative
+X		# exit code for "unmerged changes in working tree", which we should
+X		# actually be testing for here
+X		if git_is_clean_working_tree; then
+X			FINISH_BASE=$(cat "$DOT_GIT_DIR/.gitflow/MERGE_BASE")
+X
+X			# Since the working tree is now clean, either the user did a
+X			# succesfull merge manually, or the merge was cancelled.
+X			# We detect this using git_is_branch_merged_into()
+X			if git_is_branch_merged_into "$BRANCH" "$FINISH_BASE"; then
+X				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+X				helper_finish_cleanup
+X				exit 0
+X			else
+X				# If the user cancelled the merge and decided to wait until later,
+X				# that's fine. But we have to acknowledge this by removing the
+X				# MERGE_BASE file and continuing normal execution of the finish
+X				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+X			fi
+X		else
+X			echo
+X			echo "Merge conflicts not resolved yet, use:"
+X			echo "    git mergetool"
+X			echo "    git commit"
+X			echo 
+X			echo "You can then complete the finish by running it again:"
+X			echo "    git flow feature finish $NAME"
+X			echo
+X			exit 1
+X		fi
+X	fi
+X
+X	# sanity checks
+X	require_clean_working_tree
+X
+X	# update local repo with remote changes first, if asked
+X	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+X		if flag fetch; then
+X			git_do fetch -q "$ORIGIN" "$BRANCH"
+X			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+X		fi
+X	fi
+X
+X	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
+X	fi
+X	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+X	fi
+X
+X	# if the user wants to rebase, do that first
+X	if flag rebase; then
+X		if ! git flow feature rebase "$NAME" "$DEVELOP_BRANCH"; then
+X			warn "Finish was aborted due to conflicts during rebase."
+X			warn "Please finish the rebase manually now."
+X			warn "When finished, re-run:"
+X			warn "    git flow feature finish '$NAME' '$DEVELOP_BRANCH'"
+X			exit 1
+X		fi
+X	fi
+X
+X	# merge into BASE
+X	git_do checkout "$DEVELOP_BRANCH"
+X	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+X		git_do merge --ff "$BRANCH"
+X	else
+X		if noflag squash; then
+X		    git_do merge --no-ff "$BRANCH"
+X		else
+X			git_do merge --squash "$BRANCH"
+X			git_do commit
+X			git_do merge "$BRANCH"
+X		fi
+X	fi
+X
+X	if [ $? -ne 0 ]; then
+X		# oops.. we have a merge conflict!
+X		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
+X		mkdir -p "$DOT_GIT_DIR/.gitflow"
+X		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+X		echo
+X		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
+X		echo "    git mergetool"
+X		echo "    git commit"
+X		echo 
+X		echo "You can then complete the finish by running it again:"
+X		echo "    git flow feature finish $NAME"
+X		echo
+X		exit 1
+X	fi
+X
+X	# when no merge conflict is detected, just clean up the feature branch
+X	helper_finish_cleanup
+X}
+X
+Xhelper_finish_cleanup() {
+X	# sanity checks
+X	require_branch "$BRANCH"
+X	require_clean_working_tree
+X
+X	# delete branch
+X	if flag fetch; then
+X		git_do push "$ORIGIN" ":refs/heads/$BRANCH"
+X	fi
+X	
+X	
+X	if noflag keep; then
+X		if flag force_delete; then
+X			git_do branch -D "$BRANCH"
+X		else
+X			git_do branch -d "$BRANCH"
+X		fi
+X	fi
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- The feature branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
+X	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+X	if flag keep; then
+X		echo "- Feature branch '$BRANCH' is still available"
+X	else
+X		echo "- Feature branch '$BRANCH' has been removed"
+X	fi
+X	echo "- You are now on branch '$DEVELOP_BRANCH'"
+X	echo
+X}
+X
+Xcmd_publish() {
+X	parse_args "$@"
+X	expand_nameprefix_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch_absent "$ORIGIN/$BRANCH"
+X
+X	# create remote branch
+X	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X
+X	# configure remote tracking
+X	git_do config "branch.$BRANCH.remote" "$ORIGIN"
+X	git_do config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+X	git_do checkout "$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote branch '$BRANCH' was created"
+X	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+X
+Xcmd_track() {
+X	parse_args "$@"
+X	require_name_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch_absent "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch "$ORIGIN/$BRANCH"
+X
+X	# create tracking branch
+X	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote tracking branch '$BRANCH' was created"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+X
+Xcmd_diff() {
+X	parse_args "$@"
+X
+X	if [ "$NAME" != "" ]; then
+X		expand_nameprefix_arg
+X		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
+X		git diff "$BASE..$BRANCH"
+X	else
+X		if ! git_current_branch | grep -q "^$PREFIX"; then
+X			die "Not on a feature branch. Name one explicitly."
+X		fi
+X
+X		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
+X		git diff "$BASE"
+X	fi
+X}
+X
+Xcmd_checkout() {
+X	parse_args "$@"
+X
+X	if [ "$NAME" != "" ]; then
+X		expand_nameprefix_arg
+X		git_do checkout "$BRANCH"
+X	else
+X		die "Name a feature branch explicitly."
+X	fi
+X}
+X
+Xcmd_co() {
+X	# Alias for checkout
+X	cmd_checkout "$@"
+X}
+X
+Xcmd_rebase() {
+X	DEFINE_boolean interactive false 'do an interactive rebase' i
+X	parse_args "$@"
+X	expand_nameprefix_arg_or_current
+X	warn "Will try to rebase '$NAME'..."
+X	require_clean_working_tree
+X	require_branch "$BRANCH"
+X
+X	git_do checkout -q "$BRANCH"
+X	local OPTS=
+X	if flag interactive; then
+X		OPTS="$OPTS -i"
+X	fi
+X	git_do rebase $OPTS "$DEVELOP_BRANCH"
+X}
+X
+Xavoid_accidental_cross_branch_action() {
+X	local current_branch=$(git_current_branch)
+X	if [ "$BRANCH" != "$current_branch" ]; then
+X		warn "Trying to pull from '$BRANCH' while currently on branch '$current_branch'."
+X		warn "To avoid unintended merges, git-flow aborted."
+X		return 1
+X	fi
+X	return 0
+X}
+X
+Xcmd_pull() {
+X	#DEFINE_string prefix false 'alternative remote feature branch name prefix' p
+X	DEFINE_boolean rebase false "pull with rebase" r
+X	parse_remote_name "$@"
+X
+X	if [ -z "$REMOTE" ]; then
+X		die "Name a remote explicitly."
+X	fi
+X	name_or_current
+X
+X	# To avoid accidentally merging different feature branches into each other,
+X	# die if the current feature branch differs from the requested $NAME
+X	# argument.
+X	local current_branch=$(git_current_branch)
+X	if startswith "$current_branch" "$PREFIX"; then
+X		# we are on a local feature branch already, so $BRANCH must be equal to
+X		# the current branch
+X		avoid_accidental_cross_branch_action || die
+X	fi
+X
+X	require_clean_working_tree
+X
+X	if git_branch_exists "$BRANCH"; then
+X		# Again, avoid accidental merges
+X		avoid_accidental_cross_branch_action || die
+X
+X		# we already have a local branch called like this, so simply pull the
+X		# remote changes in
+X		if flag rebase; then
+X			if ! git_do pull --rebase -q "$REMOTE" "$BRANCH"; then
+X				warn "Pull was aborted. There might be conflicts during rebase or '$REMOTE' might be inaccessible."
+X				exit 1
+X			fi
+X		else
+X			git_do pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+X		fi
+X
+X		echo "Pulled $REMOTE's changes into $BRANCH."
+X	else
+X		# setup the local branch clone for the first time
+X		git_do fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+X		git_do branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+X		git_do checkout -q "$BRANCH" || die "Checking out new local branch failed."
+X		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+X	fi
+X}
+END-of-./git-flow-feature
+echo x - ./git-flow-hotfix
+sed 's/^X//' >./git-flow-hotfix << 'END-of-./git-flow-hotfix'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+Xinit() {
+X  require_git_repo
+X  require_gitflow_initialized
+X  gitflow_load_settings
+X  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+X  PREFIX=$(git config --get gitflow.prefix.hotfix)
+X}
+X
+Xusage() {
+X	echo "usage: git flow hotfix [list] [-v]"
+X	echo "       git flow hotfix start [-F] <version> [<base>]"
+X	echo "       git flow hotfix finish [-Fsumpk] <version>"
+X	echo "       git flow hotfix publish <version>"
+X	echo "       git flow hotfix track <version>"
+X}
+X
+Xcmd_default() {
+X	cmd_list "$@"
+X}
+X
+Xcmd_list() {
+X	DEFINE_boolean verbose false 'verbose (more) output' v
+X	parse_args "$@"
+X
+X	local hotfix_branches
+X	local current_branch
+X	local short_names
+X	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	if [ -z "$hotfix_branches" ]; then
+X		warn "No hotfix branches exist."
+X                warn ""
+X                warn "You can start a new hotfix branch:"
+X                warn ""
+X                warn "    git flow hotfix start <version> [<base>]"
+X                warn ""
+X		exit 0
+X	fi
+X	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+X	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX  g")
+X
+X	# determine column width first
+X	local width=0
+X	local branch
+X	for branch in $short_names; do
+X		local len=${#branch}
+X		width=$(max $width $len)
+X	done
+X	width=$(($width+3))
+X
+X	local branch
+X	for branch in $short_names; do
+X		local fullname=$PREFIX$branch
+X		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+X		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+X		local branch_sha=$(git rev-parse "$fullname")
+X		if [ "$fullname" = "$current_branch" ]; then
+X			printf "* "
+X		else
+X			printf "  "
+X		fi
+X		if flag verbose; then
+X			printf "%-${width}s" "$branch"
+X			if [ "$branch_sha" = "$master_sha" ]; then
+X				printf "(no commits yet)"
+X			else
+X				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+X				local nicename
+X				if [ "$tagname" != "" ]; then
+X					nicename=$tagname
+X				else
+X					nicename=$(git rev-parse --short "$base")
+X				fi
+X				printf "(based on $nicename)"
+X			fi
+X		else
+X			printf "%s" "$branch"
+X		fi
+X		echo
+X	done
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+X
+Xparse_args() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# read arguments into global variables
+X	VERSION=$1
+X	BRANCH=$PREFIX$VERSION
+X}
+X
+Xrequire_version_arg() {
+X	if [ "$VERSION" = "" ]; then
+X		warn "Missing argument <version>"
+X		usage
+X		exit 1
+X	fi
+X}
+X
+Xrequire_base_is_on_master() {
+X	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
+X			| sed 's/[* ] //g' \
+X	  		| grep -q "^$MASTER_BRANCH\$"; then
+X		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+X	fi
+X}
+X
+Xrequire_no_existing_hotfix_branches() {
+X	local hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	local first_branch=$(echo ${hotfix_branches} | head -n1)
+X	first_branch=${first_branch#$PREFIX}
+X	[ -z "$hotfix_branches" ] || \
+X		die "There is an existing hotfix branch ($first_branch). Finish that one first."
+X}
+X
+Xcmd_start() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	parse_args "$@"
+X	BASE=${2:-$MASTER_BRANCH}
+X	require_version_arg
+X	require_base_is_on_master
+X	require_no_existing_hotfix_branches
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch_absent "$BRANCH"
+X	require_tag_absent "$VERSION_PREFIX$VERSION"
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH"
+X	fi
+X	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+X	fi
+X
+X	# create branch
+X	git_do checkout -b "$BRANCH" "$BASE"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X	echo "Follow-up actions:"
+X	echo "- Bump the version number now!"
+X	echo "- Start committing your hot fixes"
+X	echo "- When done, run:"
+X	echo
+X	echo "     git flow hotfix finish '$VERSION'"
+X	echo
+X}
+X
+Xcmd_publish() {
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch_absent "$ORIGIN/$BRANCH"
+X
+X	# create remote branch
+X	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X
+X	# configure remote tracking
+X	git config "branch.$BRANCH.remote" "$ORIGIN"
+X	git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+X	git_do checkout "$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote branch '$BRANCH' was created"
+X	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+X
+Xcmd_track() {
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch_absent "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch "$ORIGIN/$BRANCH"
+X
+X	# create tracking branch
+X	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote tracking branch '$BRANCH' was created"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+X
+Xcmd_finish() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	DEFINE_boolean sign false "sign the release tag cryptographically" s
+X	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
+X	DEFINE_string message "" "use the given tag message" m
+X	DEFINE_string messagefile "" "use the contents of the given file as tag message" f
+X	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
+X	DEFINE_boolean keep false "keep branch after performing finish" k
+X	DEFINE_boolean notag false "don't tag this release" n
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# handle flags that imply other flags
+X	if [ "$FLAGS_signingkey" != "" ]; then
+X		FLAGS_sign=$FLAGS_TRUE
+X	fi
+X
+X	# sanity checks
+X	require_branch "$BRANCH"
+X	require_clean_working_tree
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
+X		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+X		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
+X		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+X	fi
+X	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+X	fi
+X	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+X	fi
+X
+X	# try to merge into master
+X	# in case a previous attempt to finish this release branch has failed,
+X	# but the merge into master was successful, we skip it now
+X	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
+X		git_do checkout "$MASTER_BRANCH" || \
+X		  die "Could not check out $MASTER_BRANCH."
+X		git_do merge --no-ff "$BRANCH" || \
+X		  die "There were merge conflicts."
+X		  # TODO: What do we do now?
+X	fi
+X
+X	if noflag notag; then
+X		# try to tag the release
+X		# in case a previous attempt to finish this release branch has failed,
+X		# but the tag was set successful, we skip it now
+X		local tagname=$VERSION_PREFIX$VERSION
+X		if ! git_tag_exists "$tagname"; then
+X			local opts="-a"
+X			flag sign && opts="$opts -s"
+X			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
+X			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+X			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
+X			eval git_do tag $opts "$VERSION_PREFIX$VERSION" "$BRANCH" || \
+X			die "Tagging failed. Please run finish again to retry."
+X		fi
+X	fi
+X
+X	# try to merge into develop
+X	# in case a previous attempt to finish this release branch has failed,
+X	# but the merge into develop was successful, we skip it now
+X	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+X		git_do checkout "$DEVELOP_BRANCH" || \
+X		  die "Could not check out $DEVELOP_BRANCH."
+X
+X		# TODO: Actually, accounting for 'git describe' pays, so we should
+X		# ideally git merge --no-ff $tagname here, instead!
+X		git_do merge --no-ff "$BRANCH" || \
+X		  die "There were merge conflicts."
+X		  # TODO: What do we do now?
+X	fi
+X
+X	# delete branch
+X	if noflag keep; then
+X		git_do branch -d "$BRANCH"
+X	fi
+X
+X	if flag push; then
+X		git_do push "$ORIGIN" "$DEVELOP_BRANCH" || \
+X			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
+X		git_do push "$ORIGIN" "$MASTER_BRANCH" || \
+X			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+X		if noflag notag; then
+X			git_do push --tags "$ORIGIN" || \
+X				die "Could not push tags to $ORIGIN."
+X		fi
+X	fi
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- Latest objects have been fetched from '$ORIGIN'"
+X	echo "- Hotfix branch has been merged into '$MASTER_BRANCH'"
+X	if noflag notag; then
+X		echo "- The hotfix was tagged '$VERSION_PREFIX$VERSION'"
+X	fi
+X	echo "- Hotfix branch has been back-merged into '$DEVELOP_BRANCH'"
+X	if flag keep; then
+X		echo "- Hotfix branch '$BRANCH' is still available"
+X	else
+X		echo "- Hotfix branch '$BRANCH' has been deleted"
+X	fi
+X	if flag push; then
+X		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
+X	fi
+X	echo
+X}
+END-of-./git-flow-hotfix
+echo x - ./git-flow-init
+sed 's/^X//' >./git-flow-init << 'END-of-./git-flow-init'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+Xusage() {
+X	echo "usage: git flow init [-fd]"
+X}
+X
+Xparse_args() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X}
+X
+X# Default entry when no SUBACTION is given
+Xcmd_default() {
+X	DEFINE_boolean force false 'force setting of gitflow branches, even if already configured' f
+X	DEFINE_boolean defaults false 'use default branch naming conventions' d
+X	parse_args "$@"
+X	
+X	if ! git rev-parse --git-dir >/dev/null 2>&1; then
+X		git_do init
+X	else
+X		# assure that we are not working in a repo with local changes
+X		git_repo_is_headless || require_clean_working_tree
+X	fi
+X
+X	# running git flow init on an already initialized repo is fine
+X	if gitflow_is_initialized && ! flag force; then
+X		warn "Already initialized for gitflow."
+X		warn "To force reinitialization, use: git flow init -f"
+X		exit 0
+X	fi
+X
+X	local branch_count
+X	local answer
+X
+X    if flag defaults; then
+X        warn "Using default branch names."
+X    fi
+X
+X	# add a master branch if no such branch exists yet
+X	local master_branch
+X	if gitflow_has_master_configured && ! flag force; then
+X		master_branch=$(git config --get gitflow.branch.master)
+X	else
+X		# Two cases are distinguished:
+X		# 1. A fresh git repo (without any branches)
+X		#    We will create a new master/develop branch for the user
+X		# 2. Some branches do already exist
+X		#    We will disallow creation of new master/develop branches and
+X		#    rather allow to use existing branches for git-flow.
+X		local default_suggestion
+X		local should_check_existence
+X		branch_count=$(git_local_branches | wc -l)
+X		if [ "$branch_count" -eq 0 ]; then
+X			echo "No branches exist yet. Base branches must be created now."
+X			should_check_existence=NO
+X			default_suggestion=$(git config --get gitflow.branch.master || echo master)
+X		else
+X			echo
+X			echo "Which branch should be used for bringing forth production releases?"
+X			git_local_branches | sed 's/^.*$/   - &/g'
+X
+X			should_check_existence=YES
+X			default_suggestion=
+X			for guess in $(git config --get gitflow.branch.master) \
+X			             'production' 'main' 'master'; do
+X				if git_local_branch_exists "$guess"; then
+X					default_suggestion="$guess"
+X					break
+X				fi
+X			done
+X		fi
+X		
+X		printf "Branch name for production releases: [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		master_branch=${answer:-$default_suggestion}
+X
+X		# check existence in case of an already existing repo
+X		if [ "$should_check_existence" = "YES" ]; then
+X			# if no local branch exists and a remote branch of the same
+X			# name exists, checkout that branch and use it for master
+X			if ! git_local_branch_exists "$master_branch" && \
+X				git_remote_branch_exists "origin/$master_branch"; then
+X				git_do branch "$master_branch" "origin/$master_branch" >/dev/null 2>&1
+X			elif ! git_local_branch_exists "$master_branch"; then
+X				die "Local branch '$master_branch' does not exist."
+X			fi
+X		fi
+X
+X		# store the name of the master branch
+X		git_do config gitflow.branch.master "$master_branch"
+X	fi
+X
+X	# add a develop branch if no such branch exists yet
+X	local develop_branch
+X	if gitflow_has_develop_configured && ! flag force; then
+X		develop_branch=$(git config --get gitflow.branch.develop)
+X	else
+X		# Again, the same two cases as with the master selection are
+X		# considered (fresh repo or repo that contains branches)
+X		local default_suggestion
+X		local should_check_existence
+X		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
+X		if [ "$branch_count" -eq 0 ]; then
+X			should_check_existence=NO
+X			default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
+X		else
+X			echo
+X			echo "Which branch should be used for integration of the \"next release\"?"
+X			git_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
+X
+X			should_check_existence=YES
+X			default_suggestion=
+X			for guess in $(git config --get gitflow.branch.develop) \
+X			             'develop' 'int' 'integration' 'master'; do
+X				if git_local_branch_exists "$guess" && [ "$guess" != "$master_branch" ]; then
+X					default_suggestion="$guess"
+X					break
+X				fi
+X			done
+X			
+X			if [ -z $default_suggestion ]; then
+X				should_check_existence=NO
+X				default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
+X			fi
+X			
+X		fi
+X
+X		printf "Branch name for \"next release\" development: [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		develop_branch=${answer:-$default_suggestion}
+X
+X		if [ "$master_branch" = "$develop_branch" ]; then
+X			die "Production and integration branches should differ."
+X		fi
+X
+X		# check existence in case of an already existing repo
+X		if [ "$should_check_existence" = "YES" ]; then
+X			git_local_branch_exists "$develop_branch" || \
+X				die "Local branch '$develop_branch' does not exist."
+X		fi
+X
+X		# store the name of the develop branch
+X		git_do config gitflow.branch.develop "$develop_branch"
+X	fi
+X
+X	# Creation of HEAD
+X	# ----------------
+X	# We create a HEAD now, if it does not exist yet (in a fresh repo). We need
+X	# it to be able to create new branches.
+X	local created_gitflow_branch=0
+X	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
+X		git_do symbolic-ref HEAD "refs/heads/$master_branch"
+X		git_do commit --allow-empty --quiet -m "Initial commit"
+X		created_gitflow_branch=1
+X	fi
+X
+X	# Creation of master
+X	# ------------------
+X	# At this point, there always is a master branch: either it existed already
+X	# (and was picked interactively as the production branch) or it has just
+X	# been created in a fresh repo
+X
+X	# Creation of develop
+X	# -------------------
+X	# The develop branch possibly does not exist yet.  This is the case when,
+X	# in a git init'ed repo with one or more commits, master was picked as the
+X	# default production branch and develop was "created".  We should create
+X	# the develop branch now in that case (we base it on master, of course)
+X	if ! git_local_branch_exists "$develop_branch"; then
+X		if git_remote_branch_exists "origin/$develop_branch"; then
+X			git_do branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
+X		else
+X			git_do branch --no-track "$develop_branch" "$master_branch"
+X		fi
+X		created_gitflow_branch=1
+X	fi
+X
+X	# assert the gitflow repo has been correctly initialized
+X	gitflow_is_initialized
+X
+X	# switch to develop branch if its newly created
+X	if [ $created_gitflow_branch -eq 1 ]; then
+X		git_do checkout -q "$develop_branch"
+X	fi
+X
+X	# finally, ask the user for naming conventions (branch and tag prefixes)
+X	if flag force || \
+X	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
+X	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
+X	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
+X	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
+X	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+X		echo
+X		echo "How to name your supporting branch prefixes?"
+X	fi
+X
+X	local prefix
+X
+X	# Feature branches
+X	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
+X		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
+X		printf "Feature branches? [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+X		git_do config gitflow.prefix.feature "$prefix"
+X	fi
+X
+X	# Release branches
+X	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
+X		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
+X		printf "Release branches? [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+X		git_do config gitflow.prefix.release "$prefix"
+X	fi
+X
+X
+X	# Hotfix branches
+X	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
+X		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+X		printf "Hotfix branches? [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+X		git_do config gitflow.prefix.hotfix "$prefix"
+X	fi
+X
+X
+X	# Support branches
+X	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
+X		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
+X		printf "Support branches? [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+X		git_do config gitflow.prefix.support "$prefix"
+X	fi
+X
+X
+X	# Version tag prefix
+X	if ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 || flag force; then
+X		default_suggestion=$(git config --get gitflow.prefix.versiontag || echo "")
+X		printf "Version tag prefix? [$default_suggestion] "
+X		if noflag defaults; then
+X			read answer
+X		else
+X			printf "\n"
+X		fi
+X		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+X		git_do config gitflow.prefix.versiontag "$prefix"
+X	fi
+X
+X
+X	# TODO: what to do with origin?
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+END-of-./git-flow-init
+echo x - ./git-flow-release
+sed 's/^X//' >./git-flow-release << 'END-of-./git-flow-release'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+Xinit() {
+X  require_git_repo
+X  require_gitflow_initialized
+X  gitflow_load_settings
+X  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+X  PREFIX=$(git config --get gitflow.prefix.release)
+X}
+X
+Xusage() {
+X	echo "usage: git flow release [list] [-v]"
+X	echo "       git flow release start [-F] <version> [<base>]"
+X	echo "       git flow release finish [-FsumpkS] <version>"
+X	echo "       git flow release publish <name>"
+X	echo "       git flow release track <name>"
+X}
+X
+Xcmd_default() {
+X	cmd_list "$@"
+X}
+X
+Xcmd_list() {
+X	DEFINE_boolean verbose false 'verbose (more) output' v
+X	parse_args "$@"
+X
+X	local release_branches
+X	local current_branch
+X	local short_names
+X	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	if [ -z "$release_branches" ]; then
+X		warn "No release branches exist."
+X                warn ""
+X                warn "You can start a new release branch:"
+X                warn ""
+X                warn "    git flow release start <name> [<base>]"
+X                warn ""
+X		exit 0
+X	fi
+X
+X	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+X	short_names=$(echo "$release_branches" | sed "s ^$PREFIX  g")
+X
+X	# determine column width first
+X	local width=0
+X	local branch
+X	for branch in $short_names; do
+X		local len=${#branch}
+X		width=$(max $width $len)
+X	done
+X	width=$(($width+3))
+X
+X	local branch
+X	for branch in $short_names; do
+X		local fullname=$PREFIX$branch
+X		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+X		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+X		local branch_sha=$(git rev-parse "$fullname")
+X		if [ "$fullname" = "$current_branch" ]; then
+X			printf "* "
+X		else
+X			printf "  "
+X		fi
+X		if flag verbose; then
+X			printf "%-${width}s" "$branch"
+X			if [ "$branch_sha" = "$develop_sha" ]; then
+X				printf "(no commits yet)"
+X			else
+X				local nicename=$(git rev-parse --short "$base")
+X				printf "(based on $nicename)"
+X			fi
+X		else
+X			printf "%s" "$branch"
+X		fi
+X		echo
+X	done
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+X
+Xparse_args() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# read arguments into global variables
+X	VERSION=$1
+X	BRANCH=$PREFIX$VERSION
+X}
+X
+Xrequire_version_arg() {
+X	if [ "$VERSION" = "" ]; then
+X		warn "Missing argument <version>"
+X		usage
+X		exit 1
+X	fi
+X}
+X
+Xrequire_base_is_on_develop() {
+X	if ! git_do branch --no-color --contains "$BASE" 2>/dev/null \
+X			| sed 's/[* ] //g' \
+X	  		| grep -q "^$DEVELOP_BRANCH\$"; then
+X		die "fatal: Given base '$BASE' is not a valid commit on '$DEVELOP_BRANCH'."
+X	fi
+X}
+X
+Xrequire_no_existing_release_branches() {
+X	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	local first_branch=$(echo ${release_branches} | head -n1)
+X	first_branch=${first_branch#$PREFIX}
+X	[ -z "$release_branches" ] || \
+X		die "There is an existing release branch ($first_branch). Finish that one first."
+X}
+X
+Xcmd_start() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	parse_args "$@"
+X	BASE=${2:-$DEVELOP_BRANCH}
+X	require_version_arg
+X	require_base_is_on_develop
+X	require_no_existing_release_branches
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch_absent "$BRANCH"
+X	require_tag_absent "$VERSION_PREFIX$VERSION"
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+X	fi
+X	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+X	fi
+X
+X	# create branch
+X	git_do checkout -b "$BRANCH" "$BASE"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X	echo "Follow-up actions:"
+X	echo "- Bump the version number now!"
+X	echo "- Start committing last-minute fixes in preparing your release"
+X	echo "- When done, run:"
+X	echo
+X	echo "     git flow release finish '$VERSION'"
+X	echo
+X}
+X
+Xcmd_finish() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	DEFINE_boolean sign false "sign the release tag cryptographically" s
+X	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
+X	DEFINE_string message "" "use the given tag message" m
+X	DEFINE_string messagefile "" "use the contents of the given file as a tag message" f
+X	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
+X	DEFINE_boolean keep false "keep branch after performing finish" k
+X	DEFINE_boolean notag false "don't tag this release" n
+X	DEFINE_boolean squash false "squash release during merge" S
+X
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# handle flags that imply other flags
+X	if [ "$FLAGS_signingkey" != "" ]; then
+X		FLAGS_sign=$FLAGS_TRUE
+X	fi
+X
+X	# sanity checks
+X	require_branch "$BRANCH"
+X	require_clean_working_tree
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
+X		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+X		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
+X		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
+X	fi
+X	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+X	fi
+X	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+X		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+X	fi
+X
+X	# try to merge into master
+X	# in case a previous attempt to finish this release branch has failed,
+X	# but the merge into master was successful, we skip it now
+X	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
+X		git_do checkout "$MASTER_BRANCH" || \
+X		  die "Could not check out $MASTER_BRANCH."
+X		if noflag squash; then
+X			git_do merge --no-ff "$BRANCH" || \
+X				die "There were merge conflicts."
+X				# TODO: What do we do now?
+X		else
+X			git_do merge --squash "$BRANCH" || \
+X				die "There were merge conflicts."
+X			git_do commit
+X		fi
+X	fi
+X
+X	if noflag notag; then
+X		# try to tag the release
+X		# in case a previous attempt to finish this release branch has failed,
+X		# but the tag was set successful, we skip it now
+X		local tagname=$VERSION_PREFIX$VERSION
+X		if ! git_tag_exists "$tagname"; then
+X			local opts="-a"
+X			flag sign && opts="$opts -s"
+X			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
+X			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
+X			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
+X			eval git_do tag $opts "$tagname" "$BRANCH" || \
+X			die "Tagging failed. Please run finish again to retry."
+X		fi
+X	fi
+X
+X	# try to merge into develop
+X	# in case a previous attempt to finish this release branch has failed,
+X	# but the merge into develop was successful, we skip it now
+X	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+X		git_do checkout "$DEVELOP_BRANCH" || \
+X		  die "Could not check out $DEVELOP_BRANCH."
+X
+X		# TODO: Actually, accounting for 'git describe' pays, so we should
+X		# ideally git merge --no-ff $tagname here, instead!
+X		if noflag squash; then
+X			git_do merge --no-ff "$BRANCH" || \
+X				die "There were merge conflicts."
+X				# TODO: What do we do now?
+X		else
+X			git_do merge --squash "$BRANCH" || \
+X				die "There were merge conflicts."
+X				# TODO: What do we do now?
+X			git_do commit
+X		fi
+X	fi
+X
+X	# delete branch
+X	if noflag keep; then
+X		if [ "$BRANCH" = "$(git_current_branch)" ]; then
+X			git_do checkout "$MASTER_BRANCH"
+X		fi
+X		git_do branch -d "$BRANCH"
+X	fi
+X
+X	if flag push; then
+X		git_do push "$ORIGIN" "$DEVELOP_BRANCH" || \
+X			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
+X		git_do push "$ORIGIN" "$MASTER_BRANCH" || \
+X			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+X		if noflag notag; then
+X			git_do push --tags "$ORIGIN" || \
+X			  die "Could not push tags to $ORIGIN."
+X		fi
+X		git_do push "$ORIGIN" :"$BRANCH" || \
+X			die "Could not delete the remote $BRANCH in $ORIGIN."
+X	fi
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- Latest objects have been fetched from '$ORIGIN'"
+X	echo "- Release branch has been merged into '$MASTER_BRANCH'"
+X	if noflag notag; then
+X		echo "- The release was tagged '$tagname'"
+X	fi
+X	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
+X	if flag keep; then
+X		echo "- Release branch '$BRANCH' is still available"
+X	else
+X		echo "- Release branch '$BRANCH' has been deleted"
+X	fi
+X	if flag push; then
+X		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
+X		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
+X	fi
+X	echo
+X}
+X
+Xcmd_publish() {
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch_absent "$ORIGIN/$BRANCH"
+X
+X	# create remote branch
+X	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X
+X	# configure remote tracking
+X	git_do config "branch.$BRANCH.remote" "$ORIGIN"
+X	git_do config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+X	git_do checkout "$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote branch '$BRANCH' was created"
+X	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+X
+Xcmd_track() {
+X	parse_args "$@"
+X	require_version_arg
+X
+X	# sanity checks
+X	require_clean_working_tree
+X	require_branch_absent "$BRANCH"
+X	git_do fetch -q "$ORIGIN"
+X	require_branch "$ORIGIN/$BRANCH"
+X
+X	# create tracking branch
+X	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new remote tracking branch '$BRANCH' was created"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+END-of-./git-flow-release
+echo x - ./git-flow-support
+sed 's/^X//' >./git-flow-support << 'END-of-./git-flow-support'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+Xinit() {
+X  require_git_repo
+X  require_gitflow_initialized
+X  gitflow_load_settings
+X  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+X  PREFIX=$(git config --get gitflow.prefix.support)
+X}
+X
+Xwarn "note: The support subcommand is still very EXPERIMENTAL!"
+Xwarn "note: DO NOT use it in a production situation."
+X
+Xusage() {
+X	echo "usage: git flow support [list] [-v]"
+X	echo "       git flow support start [-F] <version> <base>"
+X}
+X
+Xcmd_default() {
+X	cmd_list "$@"
+X}
+X
+Xcmd_list() {
+X	DEFINE_boolean verbose false 'verbose (more) output' v
+X	parse_args "$@"
+X
+X	local support_branches
+X	local current_branch
+X	local short_names
+X	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+X	if [ -z "$support_branches" ]; then
+X		warn "No support branches exist."
+X                warn ""
+X                warn "You can start a new support branch:"
+X                warn ""
+X                warn "    git flow support start <name> <base>"
+X                warn ""
+X		exit 0
+X	fi
+X	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+X	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
+X
+X	# determine column width first
+X	local width=0
+X	local branch
+X	for branch in $short_names; do
+X		local len=${#branch}
+X		width=$(max $width $len)
+X	done
+X	width=$(($width+3))
+X
+X	local branch
+X	for branch in $short_names; do
+X		local fullname=$PREFIX$branch
+X		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
+X		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+X		local branch_sha=$(git rev-parse "$fullname")
+X		if [ "$fullname" = "$current_branch" ]; then
+X			printf "* "
+X		else
+X			printf "  "
+X		fi
+X		if flag verbose; then
+X			printf "%-${width}s" "$branch"
+X			if [ "$branch_sha" = "$master_sha" ]; then
+X				printf "(no commits yet)"
+X			else
+X				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
+X				local nicename
+X				if [ "$tagname" != "" ]; then
+X					nicename=$tagname
+X				else
+X					nicename=$(git rev-parse --short "$base")
+X				fi
+X				printf "(based on $nicename)"
+X			fi
+X		else
+X			printf "%s" "$branch"
+X		fi
+X		echo
+X	done
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+X
+Xparse_args() {
+X	# parse options
+X	FLAGS "$@" || exit $?
+X	eval set -- "${FLAGS_ARGV}"
+X
+X	# read arguments into global variables
+X	VERSION=$1
+X	BASE=$2
+X	BRANCH=$PREFIX$VERSION
+X}
+X
+Xrequire_version_arg() {
+X	if [ "$VERSION" = "" ]; then
+X		warn "Missing argument <version>"
+X		usage
+X		exit 1
+X	fi
+X}
+X
+Xrequire_base_arg() {
+X	if [ "$BASE" = "" ]; then
+X		warn "Missing argument <base>"
+X		usage
+X		exit 1
+X	fi
+X}
+X
+Xrequire_base_is_on_master() {
+X	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
+X			| sed 's/[* ] //g' \
+X	  		| grep -q "^$MASTER_BRANCH\$"; then
+X		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+X	fi
+X}
+X
+Xcmd_start() {
+X	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+X	parse_args "$@"
+X	require_version_arg
+X	require_base_arg
+X	require_base_is_on_master
+X
+X	# sanity checks
+X	require_clean_working_tree
+X
+X	# fetch remote changes
+X	if flag fetch; then
+X		git_do fetch -q "$ORIGIN" "$BASE"
+X	fi
+X	require_branch_absent "$BRANCH"
+X
+X	# create branch
+X	git_do checkout -b "$BRANCH" "$BASE"
+X
+X	echo
+X	echo "Summary of actions:"
+X	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+X	echo "- You are now on branch '$BRANCH'"
+X	echo
+X}
+END-of-./git-flow-support
+echo x - ./git-flow-version
+sed 's/^X//' >./git-flow-version << 'END-of-./git-flow-version'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+XGITFLOW_VERSION=0.4.2-pre
+X
+Xusage() {
+X	echo "usage: git flow version"
+X}
+X
+Xcmd_default() {
+X	echo "$GITFLOW_VERSION"
+X}
+X
+Xcmd_help() {
+X	usage
+X	exit 0
+X}
+END-of-./git-flow-version
+echo x - ./gitflow-common
+sed 's/^X//' >./gitflow-common << 'END-of-./gitflow-common'
+X#
+X# git-flow -- A collection of Git extensions to provide high-level
+X# repository operations for Vincent Driessen's branching model.
+X#
+X# Original blog post presenting this model is found at:
+X#    http://nvie.com/git-model
+X#
+X# Feel free to contribute to this project at:
+X#    http://github.com/nvie/gitflow
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+X#
+X# Common functionality
+X#
+X
+X# shell output
+Xwarn() { echo "$@" >&2; }
+Xdie() { warn "$@"; exit 1; }
+X
+Xescape() {
+X	echo "$1" | sed 's/\([\.\$\*]\)/\\\1/g'
+X}
+X
+X# set logic
+Xhas() {
+X	local item=$1; shift
+X	echo " $@ " | grep -q " $(escape $item) "
+X}
+X
+X# basic math
+Xmin() { [ "$1" -le "$2" ] && echo "$1" || echo "$2"; }
+Xmax() { [ "$1" -ge "$2" ] && echo "$1" || echo "$2"; }
+X
+X# basic string matching
+Xstartswith() { [ "$1" != "${1#$2}" ]; }
+Xendswith() { [ "$1" != "${1%$2}" ]; }
+X
+X# convenience functions for checking shFlags flags
+Xflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -eq $FLAGS_TRUE ]; }
+Xnoflag() { local FLAG; eval FLAG='$FLAGS_'$1; [ $FLAG -ne $FLAGS_TRUE ]; }
+X
+X#
+X# Git specific common functionality
+X#
+X
+Xgit_do() {
+X  # equivalent to git, used to indicate actions that make modifications
+X  if flag show_commands; then
+X    echo "git $@" >&2
+X  fi
+X  git "$@"
+X}
+X
+Xgit_local_branches() { git branch --no-color | sed 's/^[* ] //'; }
+Xgit_remote_branches() { git branch -r --no-color | sed 's/^[* ] //'; }
+Xgit_all_branches() { ( git branch --no-color; git branch -r --no-color) | sed 's/^[* ] //'; }
+Xgit_all_tags() { git tag; }
+X
+Xgit_current_branch() {
+X	git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+X}
+X
+Xgit_is_clean_working_tree() {
+X	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
+X		return 1
+X	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
+X		return 2
+X	else
+X		return 0
+X	fi
+X}
+X
+Xgit_repo_is_headless() {
+X	! git rev-parse --quiet --verify HEAD >/dev/null 2>&1
+X}
+X
+Xgit_local_branch_exists() {
+X	has $1 $(git_local_branches)
+X}
+X
+Xgit_remote_branch_exists() {
+X	has $1 $(git_remote_branches)
+X}
+X
+Xgit_branch_exists() {
+X	has $1 $(git_all_branches)
+X}
+X
+Xgit_tag_exists() {
+X	has $1 $(git_all_tags)
+X}
+X
+X#
+X# git_compare_branches()
+X#
+X# Tests whether branches and their "origin" counterparts have diverged and need
+X# merging first. It returns error codes to provide more detail, like so:
+X#
+X# 0    Branch heads point to the same commit
+X# 1    First given branch needs fast-forwarding
+X# 2    Second given branch needs fast-forwarding
+X# 3    Branch needs a real merge
+X# 4    There is no merge base, i.e. the branches have no common ancestors
+X#
+Xgit_compare_branches() {
+X	local commit1=$(git rev-parse "$1")
+X	local commit2=$(git rev-parse "$2")
+X	if [ "$commit1" != "$commit2" ]; then
+X		local base=$(git merge-base "$commit1" "$commit2")
+X		if [ $? -ne 0 ]; then
+X			return 4
+X		elif [ "$commit1" = "$base" ]; then
+X			return 1
+X		elif [ "$commit2" = "$base" ]; then
+X			return 2
+X		else
+X			return 3
+X		fi
+X	else
+X		return 0
+X	fi
+X}
+X
+X#
+X# git_is_branch_merged_into()
+X#
+X# Checks whether branch $1 is succesfully merged into $2
+X#
+Xgit_is_branch_merged_into() {
+X	local subject=$1
+X	local base=$2
+X	local all_merges="$(git branch --no-color --contains $subject | sed 's/^[* ] //')"
+X	has $base $all_merges
+X}
+X
+X#
+X# gitflow specific common functionality
+X#
+X
+X# check if this repo has been inited for gitflow
+Xgitflow_has_master_configured() {
+X	local master=$(git config --get gitflow.branch.master)
+X	[ "$master" != "" ] && git_local_branch_exists "$master"
+X}
+X
+Xgitflow_has_develop_configured() {
+X	local develop=$(git config --get gitflow.branch.develop)
+X	[ "$develop" != "" ] && git_local_branch_exists "$develop"
+X}
+X
+Xgitflow_has_prefixes_configured() {
+X	git config --get gitflow.prefix.feature >/dev/null 2>&1     && \
+X	git config --get gitflow.prefix.release >/dev/null 2>&1     && \
+X	git config --get gitflow.prefix.hotfix >/dev/null 2>&1      && \
+X	git config --get gitflow.prefix.support >/dev/null 2>&1     && \
+X	git config --get gitflow.prefix.versiontag >/dev/null 2>&1
+X}
+X
+Xgitflow_is_initialized() {
+X	gitflow_has_master_configured                    && \
+X	gitflow_has_develop_configured                   && \
+X	[ "$(git config --get gitflow.branch.master)" !=    \
+X	  "$(git config --get gitflow.branch.develop)" ] && \
+X	gitflow_has_prefixes_configured
+X}
+X
+X# loading settings that can be overridden using git config
+Xgitflow_load_settings() {
+X	export DOT_GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
+X	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
+X	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
+X	export ORIGIN=$(git config --get gitflow.origin || echo origin)
+X}
+X
+X#
+X# gitflow_resolve_nameprefix
+X#
+X# Inputs:
+X# $1 = name prefix to resolve
+X# $2 = branch prefix to use
+X#
+X# Searches branch names from git_local_branches() to look for a unique
+X# branch name whose name starts with the given name prefix.
+X#
+X# There are multiple exit codes possible:
+X# 0: The unambiguous full name of the branch is written to stdout
+X#    (success)
+X# 1: No match is found.
+X# 2: Multiple matches found. These matches are written to stderr
+X#
+Xgitflow_resolve_nameprefix() {
+X	local name=$1
+X	local prefix=$2
+X	local matches
+X	local num_matches
+X
+X	# first, check if there is a perfect match
+X	if git_local_branch_exists "$prefix$name"; then
+X		echo "$name"
+X		return 0
+X	fi
+X
+X	matches=$(echo "$(git_local_branches)" | grep "^$(escape "$prefix$name")")
+X	num_matches=$(echo "$matches" | wc -l)
+X	if [ -z "$matches" ]; then
+X		# no prefix match, so take it literally
+X		warn "No branch matches prefix '$name'"
+X		return 1
+X	else
+X		if [ $num_matches -eq 1 ]; then
+X			echo "${matches#$prefix}"
+X			return 0
+X		else
+X			# multiple matches, cannot decide
+X			warn "Multiple branches match prefix '$name':"
+X			for match in $matches; do
+X				warn "- $match"
+X			done
+X			return 2
+X		fi
+X	fi
+X}
+X
+X#
+X# Assertions for use in git-flow subcommands
+X#
+X
+Xrequire_git_repo() {
+X	if ! git rev-parse --git-dir >/dev/null 2>&1; then
+X		die "fatal: Not a git repository"
+X	fi
+X}
+X
+Xrequire_gitflow_initialized() {
+X	if ! gitflow_is_initialized; then
+X		die "fatal: Not a gitflow-enabled repo yet. Please run \"git flow init\" first."
+X	fi
+X}
+X
+Xrequire_clean_working_tree() {
+X	git_is_clean_working_tree
+X	local result=$?
+X	if [ $result -eq 1 ]; then
+X		die "fatal: Working tree contains unstaged changes. Aborting."
+X	fi
+X	if [ $result -eq 2 ]; then
+X		die "fatal: Index contains uncommited changes. Aborting."
+X	fi
+X}
+X
+Xrequire_local_branch() {
+X	if ! git_local_branch_exists $1; then
+X		die "fatal: Local branch '$1' does not exist and is required."
+X	fi
+X}
+X
+Xrequire_remote_branch() {
+X	if ! has $1 $(git_remote_branches); then
+X		die "Remote branch '$1' does not exist and is required."
+X	fi
+X}
+X
+Xrequire_branch() {
+X	if ! has $1 $(git_all_branches); then
+X		die "Branch '$1' does not exist and is required."
+X	fi
+X}
+X
+Xrequire_branch_absent() {
+X	if has $1 $(git_all_branches); then
+X		die "Branch '$1' already exists. Pick another name."
+X	fi
+X}
+X
+Xrequire_tag_absent() {
+X	for tag in $(git_all_tags); do
+X		if [ "$1" = "$tag" ]; then
+X			die "Tag '$1' already exists. Pick another name."
+X		fi
+X	done
+X}
+X
+Xrequire_branches_equal() {
+X	require_local_branch "$1"
+X	require_remote_branch "$2"
+X	git_compare_branches "$1" "$2"
+X	local status=$?
+X	if [ $status -gt 0 ]; then
+X		warn "Branches '$1' and '$2' have diverged."
+X		if [ $status -eq 1 ]; then
+X			die "And branch '$1' may be fast-forwarded."
+X		elif [ $status -eq 2 ]; then
+X			# Warn here, since there is no harm in being ahead
+X			warn "And local branch '$1' is ahead of '$2'."
+X		else
+X			die "Branches need merging first."
+X		fi
+X	fi
+X}
+END-of-./gitflow-common
+echo x - ./gitflow-shFlags
+sed 's/^X//' >./gitflow-shFlags << 'END-of-./gitflow-shFlags'
+X# $Id$
+X# vim:et:ft=sh:sts=2:sw=2
+X#
+X# Copyright 2008 Kate Ward. All Rights Reserved.
+X# Released under the LGPL (GNU Lesser General Public License)
+X#
+X# shFlags -- Advanced command-line flag library for Unix shell scripts.
+X# http://code.google.com/p/shflags/
+X#
+X# Author: kate.ward@forestent.com (Kate Ward)
+X#
+X# This module implements something like the google-gflags library available
+X# from http://code.google.com/p/google-gflags/.
+X#
+X# FLAG TYPES: This is a list of the DEFINE_*'s that you can do.  All flags take
+X# a name, default value, help-string, and optional 'short' name (one-letter
+X# name).  Some flags have other arguments, which are described with the flag.
+X#
+X# DEFINE_string: takes any input, and intreprets it as a string.
+X#
+X# DEFINE_boolean: typically does not take any argument: say --myflag to set
+X#   FLAGS_myflag to true, or --nomyflag to set FLAGS_myflag to false.
+X#   Alternately, you can say
+X#     --myflag=true  or --myflag=t or --myflag=0  or
+X#     --myflag=false or --myflag=f or --myflag=1
+X#   Passing an option has the same affect as passing the option once.
+X#
+X# DEFINE_float: takes an input and intreprets it as a floating point number. As
+X#   shell does not support floats per-se, the input is merely validated as
+X#   being a valid floating point value.
+X#
+X# DEFINE_integer: takes an input and intreprets it as an integer.
+X#
+X# SPECIAL FLAGS: There are a few flags that have special meaning:
+X#   --help (or -?)  prints a list of all the flags in a human-readable fashion
+X#   --flagfile=foo  read flags from foo.  (not implemented yet)
+X#   --              as in getopt(), terminates flag-processing
+X#
+X# EXAMPLE USAGE:
+X#
+X#   -- begin hello.sh --
+X#   #! /bin/sh
+X#   . ./shflags
+X#   DEFINE_string name 'world' "somebody's name" n
+X#   FLAGS "$@" || exit $?
+X#   eval set -- "${FLAGS_ARGV}"
+X#   echo "Hello, ${FLAGS_name}."
+X#   -- end hello.sh --
+X#
+X#   $ ./hello.sh -n Kate
+X#   Hello, Kate.
+X#
+X# NOTE: Not all systems include a getopt version that supports long flags. On
+X# these systems, only short flags are recognized.
+X
+X#==============================================================================
+X# shFlags
+X#
+X# Shared attributes:
+X#   flags_error: last error message
+X#   flags_return: last return value
+X#
+X#   __flags_longNames: list of long names for all flags
+X#   __flags_shortNames: list of short names for all flags
+X#   __flags_boolNames: list of boolean flag names
+X#
+X#   __flags_opts: options parsed by getopt
+X#
+X# Per-flag attributes:
+X#   FLAGS_<flag_name>: contains value of flag named 'flag_name'
+X#   __flags_<flag_name>_default: the default flag value
+X#   __flags_<flag_name>_help: the flag help string
+X#   __flags_<flag_name>_short: the flag short name
+X#   __flags_<flag_name>_type: the flag type
+X#
+X# Notes:
+X# - lists of strings are space separated, and a null value is the '~' char.
+X
+X# return if FLAGS already loaded
+X[ -n "${FLAGS_VERSION:-}" ] && return 0
+XFLAGS_VERSION='1.0.3'
+X
+X# return values
+XFLAGS_TRUE=0
+XFLAGS_FALSE=1
+XFLAGS_ERROR=2
+X
+X# reserved flag names
+XFLAGS_RESERVED='ARGC ARGV ERROR FALSE HELP PARENT RESERVED TRUE VERSION'
+X
+X_flags_debug() { echo "flags:DEBUG $@" >&2; }
+X_flags_warn() { echo "flags:WARN $@" >&2; }
+X_flags_error() { echo "flags:ERROR $@" >&2; }
+X_flags_fatal() { echo "flags:FATAL $@" >&2; }
+X
+X# specific shell checks
+Xif [ -n "${ZSH_VERSION:-}" ]; then
+X  setopt |grep "^shwordsplit$" >/dev/null
+X  if [ $? -ne ${FLAGS_TRUE} ]; then
+X    _flags_fatal 'zsh shwordsplit option is required for proper zsh operation'
+X    exit ${FLAGS_ERROR}
+X  fi
+X  if [ -z "${FLAGS_PARENT:-}" ]; then
+X    _flags_fatal "zsh does not pass \$0 through properly. please declare' \
+X\"FLAGS_PARENT=\$0\" before calling shFlags"
+X    exit ${FLAGS_ERROR}
+X  fi
+Xfi
+X
+X#
+X# constants
+X#
+X
+X# getopt version
+X__FLAGS_GETOPT_VERS_STD=0
+X__FLAGS_GETOPT_VERS_ENH=1
+X__FLAGS_GETOPT_VERS_BSD=2
+X
+Xgetopt >/dev/null 2>&1
+Xcase $? in
+X  0) __FLAGS_GETOPT_VERS=${__FLAGS_GETOPT_VERS_STD} ;;  # bsd getopt
+X  2)
+X    # TODO(kward): look into '-T' option to test the internal getopt() version
+X    if [ "`getopt --version`" = '-- ' ]; then
+X      __FLAGS_GETOPT_VERS=${__FLAGS_GETOPT_VERS_STD}
+X    else
+X      __FLAGS_GETOPT_VERS=${__FLAGS_GETOPT_VERS_ENH}
+X    fi
+X    ;;
+X  *)
+X    _flags_fatal 'unable to determine getopt version'
+X    exit ${FLAGS_ERROR}
+X    ;;
+Xesac
+X
+X# getopt optstring lengths
+X__FLAGS_OPTSTR_SHORT=0
+X__FLAGS_OPTSTR_LONG=1
+X
+X__FLAGS_NULL='~'
+X
+X# flag info strings
+X__FLAGS_INFO_DEFAULT='default'
+X__FLAGS_INFO_HELP='help'
+X__FLAGS_INFO_SHORT='short'
+X__FLAGS_INFO_TYPE='type'
+X
+X# flag lengths
+X__FLAGS_LEN_SHORT=0
+X__FLAGS_LEN_LONG=1
+X
+X# flag types
+X__FLAGS_TYPE_NONE=0
+X__FLAGS_TYPE_BOOLEAN=1
+X__FLAGS_TYPE_FLOAT=2
+X__FLAGS_TYPE_INTEGER=3
+X__FLAGS_TYPE_STRING=4
+X
+X# set the constants readonly
+X__flags_constants=`set |awk -F= '/^FLAGS_/ || /^__FLAGS_/ {print $1}'`
+Xfor __flags_const in ${__flags_constants}; do
+X  # skip certain flags
+X  case ${__flags_const} in
+X    FLAGS_HELP) continue ;;
+X    FLAGS_PARENT) continue ;;
+X  esac
+X  # set flag readonly
+X  if [ -z "${ZSH_VERSION:-}" ]; then
+X    readonly ${__flags_const}
+X  else  # handle zsh
+X    case ${ZSH_VERSION} in
+X      [123].*) readonly ${__flags_const} ;;
+X      *) readonly -g ${__flags_const} ;;  # declare readonly constants globally
+X    esac
+X  fi
+Xdone
+Xunset __flags_const __flags_constants
+X
+X#
+X# internal variables
+X#
+X
+X__flags_boolNames=' '  # space separated list of boolean flag names
+X__flags_longNames=' '  # space separated list of long flag names
+X__flags_shortNames=' '  # space separated list of short flag names
+X
+X__flags_columns=''  # screen width in columns
+X__flags_opts=''  # temporary storage for parsed getopt flags
+X
+X#------------------------------------------------------------------------------
+X# private functions
+X#
+X
+X# Define a flag.
+X#
+X# Calling this function will define the following info variables for the
+X# specified flag:
+X#   FLAGS_flagname - the name for this flag (based upon the long flag name)
+X#   __flags_<flag_name>_default - the default value
+X#   __flags_flagname_help - the help string
+X#   __flags_flagname_short - the single letter alias
+X#   __flags_flagname_type - the type of flag (one of __FLAGS_TYPE_*)
+X#
+X# Args:
+X#   _flags__type: integer: internal type of flag (__FLAGS_TYPE_*)
+X#   _flags__name: string: long flag name
+X#   _flags__default: default flag value
+X#   _flags__help: string: help string
+X#   _flags__short: string: (optional) short flag name
+X# Returns:
+X#   integer: success of operation, or error
+X_flags_define()
+X{
+X  if [ $# -lt 4 ]; then
+X    flags_error='DEFINE error: too few arguments'
+X    flags_return=${FLAGS_ERROR}
+X    _flags_error "${flags_error}"
+X    return ${flags_return}
+X  fi
+X
+X  _flags_type_=$1
+X  _flags_name_=$2
+X  _flags_default_=$3
+X  _flags_help_=$4
+X  _flags_short_=${5:-${__FLAGS_NULL}}
+X
+X  _flags_return_=${FLAGS_TRUE}
+X
+X  # TODO(kward): check for validity of the flag name (e.g. dashes)
+X
+X  # check whether the flag name is reserved
+X  echo " ${FLAGS_RESERVED} " |grep " ${_flags_name_} " >/dev/null
+X  if [ $? -eq 0 ]; then
+X    flags_error="flag name (${_flags_name_}) is reserved"
+X    _flags_return_=${FLAGS_ERROR}
+X  fi
+X
+X  # require short option for getopt that don't support long options
+X  if [ ${_flags_return_} -eq ${FLAGS_TRUE} \
+X      -a ${__FLAGS_GETOPT_VERS} -ne ${__FLAGS_GETOPT_VERS_ENH} \
+X      -a "${_flags_short_}" = "${__FLAGS_NULL}" ]
+X  then
+X    flags_error="short flag required for (${_flags_name_}) on this platform"
+X    _flags_return_=${FLAGS_ERROR}
+X  fi
+X
+X  # check for existing long name definition
+X  if [ ${_flags_return_} -eq ${FLAGS_TRUE} ]; then
+X    if _flags_itemInList "${_flags_name_}" \
+X        ${__flags_longNames} ${__flags_boolNames}
+X    then
+X      flags_error="flag name ([no]${_flags_name_}) already defined"
+X      _flags_warn "${flags_error}"
+X      _flags_return_=${FLAGS_FALSE}
+X    fi
+X  fi
+X
+X  # check for existing short name definition
+X  if [ ${_flags_return_} -eq ${FLAGS_TRUE} \
+X      -a "${_flags_short_}" != "${__FLAGS_NULL}" ]
+X  then
+X    if _flags_itemInList "${_flags_short_}" ${__flags_shortNames}; then
+X      flags_error="flag short name (${_flags_short_}) already defined"
+X      _flags_warn "${flags_error}"
+X      _flags_return_=${FLAGS_FALSE}
+X    fi
+X  fi
+X
+X  # handle default value. note, on several occasions the 'if' portion of an
+X  # if/then/else contains just a ':' which does nothing. a binary reversal via
+X  # '!' is not done because it does not work on all shells.
+X  if [ ${_flags_return_} -eq ${FLAGS_TRUE} ]; then
+X    case ${_flags_type_} in
+X      ${__FLAGS_TYPE_BOOLEAN})
+X        if _flags_validateBoolean "${_flags_default_}"; then
+X          case ${_flags_default_} in
+X            true|t|0) _flags_default_=${FLAGS_TRUE} ;;
+X            false|f|1) _flags_default_=${FLAGS_FALSE} ;;
+X          esac
+X        else
+X          flags_error="invalid default flag value '${_flags_default_}'"
+X          _flags_return_=${FLAGS_ERROR}
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_FLOAT})
+X        if _flags_validateFloat "${_flags_default_}"; then
+X          :
+X        else
+X          flags_error="invalid default flag value '${_flags_default_}'"
+X          _flags_return_=${FLAGS_ERROR}
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_INTEGER})
+X        if _flags_validateInteger "${_flags_default_}"; then
+X          :
+X        else
+X          flags_error="invalid default flag value '${_flags_default_}'"
+X          _flags_return_=${FLAGS_ERROR}
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_STRING}) ;;  # everything in shell is a valid string
+X
+X      *)
+X        flags_error="unrecognized flag type '${_flags_type_}'"
+X        _flags_return_=${FLAGS_ERROR}
+X        ;;
+X    esac
+X  fi
+X
+X  if [ ${_flags_return_} -eq ${FLAGS_TRUE} ]; then
+X    # store flag information
+X    eval "FLAGS_${_flags_name_}='${_flags_default_}'"
+X    eval "__flags_${_flags_name_}_${__FLAGS_INFO_TYPE}=${_flags_type_}"
+X    eval "__flags_${_flags_name_}_${__FLAGS_INFO_DEFAULT}=\
+X\"${_flags_default_}\""
+X    eval "__flags_${_flags_name_}_${__FLAGS_INFO_HELP}=\"${_flags_help_}\""
+X    eval "__flags_${_flags_name_}_${__FLAGS_INFO_SHORT}='${_flags_short_}'"
+X
+X    # append flag name(s) to list of names
+X    __flags_longNames="${__flags_longNames}${_flags_name_} "
+X    __flags_shortNames="${__flags_shortNames}${_flags_short_} "
+X    [ ${_flags_type_} -eq ${__FLAGS_TYPE_BOOLEAN} ] && \
+X        __flags_boolNames="${__flags_boolNames}no${_flags_name_} "
+X  fi
+X
+X  flags_return=${_flags_return_}
+X  unset _flags_default_ _flags_help_ _flags_name_ _flags_return_ _flags_short_ \
+X      _flags_type_
+X  [ ${flags_return} -eq ${FLAGS_ERROR} ] && _flags_error "${flags_error}"
+X  return ${flags_return}
+X}
+X
+X# Return valid getopt options using currently defined list of long options.
+X#
+X# This function builds a proper getopt option string for short (and long)
+X# options, using the current list of long options for reference.
+X#
+X# Args:
+X#   _flags_optStr: integer: option string type (__FLAGS_OPTSTR_*)
+X# Output:
+X#   string: generated option string for getopt
+X# Returns:
+X#   boolean: success of operation (always returns True)
+X_flags_genOptStr()
+X{
+X  _flags_optStrType_=$1
+X
+X  _flags_opts_=''
+X
+X  for _flags_flag_ in ${__flags_longNames}; do
+X    _flags_type_=`_flags_getFlagInfo ${_flags_flag_} ${__FLAGS_INFO_TYPE}`
+X    case ${_flags_optStrType_} in
+X      ${__FLAGS_OPTSTR_SHORT})
+X        _flags_shortName_=`_flags_getFlagInfo \
+X            ${_flags_flag_} ${__FLAGS_INFO_SHORT}`
+X        if [ "${_flags_shortName_}" != "${__FLAGS_NULL}" ]; then
+X          _flags_opts_="${_flags_opts_}${_flags_shortName_}"
+X          # getopt needs a trailing ':' to indicate a required argument
+X          [ ${_flags_type_} -ne ${__FLAGS_TYPE_BOOLEAN} ] && \
+X              _flags_opts_="${_flags_opts_}:"
+X        fi
+X        ;;
+X
+X      ${__FLAGS_OPTSTR_LONG})
+X        _flags_opts_="${_flags_opts_:+${_flags_opts_},}${_flags_flag_}"
+X        # getopt needs a trailing ':' to indicate a required argument
+X        [ ${_flags_type_} -ne ${__FLAGS_TYPE_BOOLEAN} ] && \
+X            _flags_opts_="${_flags_opts_}:"
+X        ;;
+X    esac
+X  done
+X
+X  echo "${_flags_opts_}"
+X  unset _flags_flag_ _flags_opts_ _flags_optStrType_ _flags_shortName_ \
+X      _flags_type_
+X  return ${FLAGS_TRUE}
+X}
+X
+X# Returns flag details based on a flag name and flag info.
+X#
+X# Args:
+X#   string: long flag name
+X#   string: flag info (see the _flags_define function for valid info types)
+X# Output:
+X#   string: value of dereferenced flag variable
+X# Returns:
+X#   integer: one of FLAGS_{TRUE|FALSE|ERROR}
+X_flags_getFlagInfo()
+X{
+X  _flags_name_=$1
+X  _flags_info_=$2
+X
+X  _flags_nameVar_="__flags_${_flags_name_}_${_flags_info_}"
+X  _flags_strToEval_="_flags_value_=\"\${${_flags_nameVar_}:-}\""
+X  eval "${_flags_strToEval_}"
+X  if [ -n "${_flags_value_}" ]; then
+X    flags_return=${FLAGS_TRUE}
+X  else
+X    # see if the _flags_name_ variable is a string as strings can be empty...
+X    # note: the DRY principle would say to have this function call itself for
+X    # the next three lines, but doing so results in an infinite loop as an
+X    # invalid _flags_name_ will also not have the associated _type variable.
+X    # Because it doesn't (it will evaluate to an empty string) the logic will
+X    # try to find the _type variable of the _type variable, and so on. Not so
+X    # good ;-)
+X    _flags_typeVar_="__flags_${_flags_name_}_${__FLAGS_INFO_TYPE}"
+X    _flags_strToEval_="_flags_type_=\"\${${_flags_typeVar_}:-}\""
+X    eval "${_flags_strToEval_}"
+X    if [ "${_flags_type_}" = "${__FLAGS_TYPE_STRING}" ]; then
+X      flags_return=${FLAGS_TRUE}
+X    else
+X      flags_return=${FLAGS_ERROR}
+X      flags_error="invalid flag name (${_flags_nameVar_})"
+X    fi
+X  fi
+X
+X  echo "${_flags_value_}"
+X  unset _flags_info_ _flags_name_ _flags_strToEval_ _flags_type_ _flags_value_ \
+X      _flags_nameVar_ _flags_typeVar_
+X  [ ${flags_return} -eq ${FLAGS_ERROR} ] && _flags_error "${flags_error}"
+X  return ${flags_return}
+X}
+X
+X# check for presense of item in a list. passed a string (e.g. 'abc'), this
+X# function will determine if the string is present in the list of strings (e.g.
+X# ' foo bar abc ').
+X#
+X# Args:
+X#   _flags__str: string: string to search for in a list of strings
+X#   unnamed: list: list of strings
+X# Returns:
+X#   boolean: true if item is in the list
+X_flags_itemInList()
+X{
+X  _flags_str_=$1
+X  shift
+X
+X  echo " ${*:-} " |grep " ${_flags_str_} " >/dev/null
+X  if [ $? -eq 0 ]; then
+X    flags_return=${FLAGS_TRUE}
+X  else
+X    flags_return=${FLAGS_FALSE}
+X  fi
+X
+X  unset _flags_str_
+X  return ${flags_return}
+X}
+X
+X# Returns the width of the current screen.
+X#
+X# Output:
+X#   integer: width in columns of the current screen.
+X_flags_columns()
+X{
+X  if [ -z "${__flags_columns}" ]; then
+X    # determine the value and store it
+X    if eval stty size >/dev/null 2>&1; then
+X      # stty size worked :-)
+X      set -- `stty size`
+X      __flags_columns=$2
+X    elif eval tput cols >/dev/null 2>&1; then
+X      set -- `tput cols`
+X      __flags_columns=$1
+X    else
+X      __flags_columns=80  # default terminal width
+X    fi
+X  fi
+X  echo ${__flags_columns}
+X}
+X
+X# Validate a boolean.
+X#
+X# Args:
+X#   _flags__bool: boolean: value to validate
+X# Returns:
+X#   bool: true if the value is a valid boolean
+X_flags_validateBoolean()
+X{
+X  _flags_bool_=$1
+X
+X  flags_return=${FLAGS_TRUE}
+X  case "${_flags_bool_}" in
+X    true|t|0) ;;
+X    false|f|1) ;;
+X    *) flags_return=${FLAGS_FALSE} ;;
+X  esac
+X
+X  unset _flags_bool_
+X  return ${flags_return}
+X}
+X
+X# Validate a float.
+X#
+X# Args:
+X#   _flags__float: float: value to validate
+X# Returns:
+X#   bool: true if the value is a valid float
+X_flags_validateFloat()
+X{
+X  _flags_float_=$1
+X
+X  if _flags_validateInteger ${_flags_float_}; then
+X    flags_return=${FLAGS_TRUE}
+X  else
+X    flags_return=${FLAGS_TRUE}
+X    case ${_flags_float_} in
+X      -*)  # negative floats
+X        _flags_test_=`expr "${_flags_float_}" : '\(-[0-9][0-9]*\.[0-9][0-9]*\)'`
+X        ;;
+X      *)  # positive floats
+X        _flags_test_=`expr "${_flags_float_}" : '\([0-9][0-9]*\.[0-9][0-9]*\)'`
+X        ;;
+X    esac
+X    [ "${_flags_test_}" != "${_flags_float_}" ] && flags_return=${FLAGS_FALSE}
+X  fi
+X
+X  unset _flags_float_ _flags_test_
+X  return ${flags_return}
+X}
+X
+X# Validate an integer.
+X#
+X# Args:
+X#   _flags__integer: interger: value to validate
+X# Returns:
+X#   bool: true if the value is a valid integer
+X_flags_validateInteger()
+X{
+X  _flags_int_=$1
+X
+X  flags_return=${FLAGS_TRUE}
+X  case ${_flags_int_} in
+X    -*)  # negative ints
+X      _flags_test_=`expr "${_flags_int_}" : '\(-[0-9][0-9]*\)'`
+X      ;;
+X    *)  # positive ints
+X      _flags_test_=`expr "${_flags_int_}" : '\([0-9][0-9]*\)'`
+X      ;;
+X  esac
+X  [ "${_flags_test_}" != "${_flags_int_}" ] && flags_return=${FLAGS_FALSE}
+X
+X  unset _flags_int_ _flags_test_
+X  return ${flags_return}
+X}
+X
+X# Parse command-line options using the standard getopt.
+X#
+X# Note: the flag options are passed around in the global __flags_opts so that
+X# the formatting is not lost due to shell parsing and such.
+X#
+X# Args:
+X#   @: varies: command-line options to parse
+X# Returns:
+X#   integer: a FLAGS success condition
+X_flags_getoptStandard()
+X{
+X  flags_return=${FLAGS_TRUE}
+X  _flags_shortOpts_=`_flags_genOptStr ${__FLAGS_OPTSTR_SHORT}`
+X
+X  # check for spaces in passed options
+X  for _flags_opt_ in "$@"; do
+X    # note: the silliness with the x's is purely for ksh93 on Ubuntu 6.06
+X    _flags_match_=`echo "x${_flags_opt_}x" |sed 's/ //g'`
+X    if [ "${_flags_match_}" != "x${_flags_opt_}x" ]; then
+X      flags_error='the available getopt does not support spaces in options'
+X      flags_return=${FLAGS_ERROR}
+X      break
+X    fi
+X  done
+X
+X  if [ ${flags_return} -eq ${FLAGS_TRUE} ]; then
+X    __flags_opts=`getopt ${_flags_shortOpts_} $@ 2>&1`
+X    _flags_rtrn_=$?
+X    if [ ${_flags_rtrn_} -ne ${FLAGS_TRUE} ]; then
+X      _flags_warn "${__flags_opts}"
+X      flags_error='unable to parse provided options with getopt.'
+X      flags_return=${FLAGS_ERROR}
+X    fi
+X  fi
+X
+X  unset _flags_match_ _flags_opt_ _flags_rtrn_ _flags_shortOpts_
+X  return ${flags_return}
+X}
+X
+X# Parse command-line options using the enhanced getopt.
+X#
+X# Note: the flag options are passed around in the global __flags_opts so that
+X# the formatting is not lost due to shell parsing and such.
+X#
+X# Args:
+X#   @: varies: command-line options to parse
+X# Returns:
+X#   integer: a FLAGS success condition
+X_flags_getoptEnhanced()
+X{
+X  flags_return=${FLAGS_TRUE}
+X  _flags_shortOpts_=`_flags_genOptStr ${__FLAGS_OPTSTR_SHORT}`
+X  _flags_boolOpts_=`echo "${__flags_boolNames}" \
+X      |sed 's/^ *//;s/ *$//;s/ /,/g'`
+X  _flags_longOpts_=`_flags_genOptStr ${__FLAGS_OPTSTR_LONG}`
+X
+X  __flags_opts=`getopt \
+X      -o ${_flags_shortOpts_} \
+X      -l "${_flags_longOpts_},${_flags_boolOpts_}" \
+X      -- "$@" 2>&1`
+X  _flags_rtrn_=$?
+X  if [ ${_flags_rtrn_} -ne ${FLAGS_TRUE} ]; then
+X    _flags_warn "${__flags_opts}"
+X    flags_error='unable to parse provided options with getopt.'
+X    flags_return=${FLAGS_ERROR}
+X  fi
+X
+X  unset _flags_boolOpts_ _flags_longOpts_ _flags_rtrn_ _flags_shortOpts_
+X  return ${flags_return}
+X}
+X
+X# Dynamically parse a getopt result and set appropriate variables.
+X#
+X# This function does the actual conversion of getopt output and runs it through
+X# the standard case structure for parsing. The case structure is actually quite
+X# dynamic to support any number of flags.
+X#
+X# Args:
+X#   argc: int: original command-line argument count
+X#   @: varies: output from getopt parsing
+X# Returns:
+X#   integer: a FLAGS success condition
+X_flags_parseGetopt()
+X{
+X  _flags_argc_=$1
+X  shift
+X
+X  flags_return=${FLAGS_TRUE}
+X
+X  if [ ${__FLAGS_GETOPT_VERS} -ne ${__FLAGS_GETOPT_VERS_ENH} ]; then
+X    set -- $@
+X  else
+X    # note the quotes around the `$@' -- they are essential!
+X    eval set -- "$@"
+X  fi
+X
+X  # provide user with number of arguments to shift by later
+X  # NOTE: the FLAGS_ARGC variable is obsolete as of 1.0.3 because it does not
+X  # properly give user access to non-flag arguments mixed in between flag
+X  # arguments. Its usage was replaced by FLAGS_ARGV, and it is being kept only
+X  # for backwards compatibility reasons.
+X  FLAGS_ARGC=`expr $# - 1 - ${_flags_argc_}`
+X
+X  # handle options. note options with values must do an additional shift
+X  while true; do
+X    _flags_opt_=$1
+X    _flags_arg_=${2:-}
+X    _flags_type_=${__FLAGS_TYPE_NONE}
+X    _flags_name_=''
+X
+X    # determine long flag name
+X    case "${_flags_opt_}" in
+X      --) shift; break ;;  # discontinue option parsing
+X
+X      --*)  # long option
+X        _flags_opt_=`expr "${_flags_opt_}" : '--\(.*\)'`
+X        _flags_len_=${__FLAGS_LEN_LONG}
+X        if _flags_itemInList "${_flags_opt_}" ${__flags_longNames}; then
+X          _flags_name_=${_flags_opt_}
+X        else
+X          # check for negated long boolean version
+X          if _flags_itemInList "${_flags_opt_}" ${__flags_boolNames}; then
+X            _flags_name_=`expr "${_flags_opt_}" : 'no\(.*\)'`
+X            _flags_type_=${__FLAGS_TYPE_BOOLEAN}
+X            _flags_arg_=${__FLAGS_NULL}
+X          fi
+X        fi
+X        ;;
+X
+X      -*)  # short option
+X        _flags_opt_=`expr "${_flags_opt_}" : '-\(.*\)'`
+X        _flags_len_=${__FLAGS_LEN_SHORT}
+X        if _flags_itemInList "${_flags_opt_}" ${__flags_shortNames}; then
+X          # yes. match short name to long name. note purposeful off-by-one
+X          # (too high) with awk calculations.
+X          _flags_pos_=`echo "${__flags_shortNames}" \
+X              |awk 'BEGIN{RS=" ";rn=0}$0==e{rn=NR}END{print rn}' \
+X                  e=${_flags_opt_}`
+X          _flags_name_=`echo "${__flags_longNames}" \
+X              |awk 'BEGIN{RS=" "}rn==NR{print $0}' rn="${_flags_pos_}"`
+X        fi
+X        ;;
+X    esac
+X
+X    # die if the flag was unrecognized
+X    if [ -z "${_flags_name_}" ]; then
+X      flags_error="unrecognized option (${_flags_opt_})"
+X      flags_return=${FLAGS_ERROR}
+X      break
+X    fi
+X
+X    # set new flag value
+X    [ ${_flags_type_} -eq ${__FLAGS_TYPE_NONE} ] && \
+X        _flags_type_=`_flags_getFlagInfo \
+X            "${_flags_name_}" ${__FLAGS_INFO_TYPE}`
+X    case ${_flags_type_} in
+X      ${__FLAGS_TYPE_BOOLEAN})
+X        if [ ${_flags_len_} -eq ${__FLAGS_LEN_LONG} ]; then
+X          if [ "${_flags_arg_}" != "${__FLAGS_NULL}" ]; then
+X            eval "FLAGS_${_flags_name_}=${FLAGS_TRUE}"
+X          else
+X            eval "FLAGS_${_flags_name_}=${FLAGS_FALSE}"
+X          fi
+X        else
+X          _flags_strToEval_="_flags_val_=\
+X\${__flags_${_flags_name_}_${__FLAGS_INFO_DEFAULT}}"
+X          eval "${_flags_strToEval_}"
+X          if [ ${_flags_val_} -eq ${FLAGS_FALSE} ]; then
+X            eval "FLAGS_${_flags_name_}=${FLAGS_TRUE}"
+X          else
+X            eval "FLAGS_${_flags_name_}=${FLAGS_FALSE}"
+X          fi
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_FLOAT})
+X        if _flags_validateFloat "${_flags_arg_}"; then
+X          eval "FLAGS_${_flags_name_}='${_flags_arg_}'"
+X        else
+X          flags_error="invalid float value (${_flags_arg_})"
+X          flags_return=${FLAGS_ERROR}
+X          break
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_INTEGER})
+X        if _flags_validateInteger "${_flags_arg_}"; then
+X          eval "FLAGS_${_flags_name_}='${_flags_arg_}'"
+X        else
+X          flags_error="invalid integer value (${_flags_arg_})"
+X          flags_return=${FLAGS_ERROR}
+X          break
+X        fi
+X        ;;
+X
+X      ${__FLAGS_TYPE_STRING})
+X        eval "FLAGS_${_flags_name_}='${_flags_arg_}'"
+X        ;;
+X    esac
+X
+X    # handle special case help flag
+X    if [ "${_flags_name_}" = 'help' ]; then
+X      if [ ${FLAGS_help} -eq ${FLAGS_TRUE} ]; then
+X        flags_help
+X        flags_error='help requested'
+X        flags_return=${FLAGS_FALSE}
+X        break
+X      fi
+X    fi
+X
+X    # shift the option and non-boolean arguements out.
+X    shift
+X    [ ${_flags_type_} != ${__FLAGS_TYPE_BOOLEAN} ] && shift
+X  done
+X
+X  # give user back non-flag arguments
+X  FLAGS_ARGV=''
+X  while [ $# -gt 0 ]; do
+X    FLAGS_ARGV="${FLAGS_ARGV:+${FLAGS_ARGV} }'$1'"
+X    shift
+X  done
+X
+X  unset _flags_arg_ _flags_len_ _flags_name_ _flags_opt_ _flags_pos_ \
+X      _flags_strToEval_ _flags_type_ _flags_val_
+X  return ${flags_return}
+X}
+X
+X#------------------------------------------------------------------------------
+X# public functions
+X#
+X
+X# A basic boolean flag. Boolean flags do not take any arguments, and their
+X# value is either 1 (false) or 0 (true). For long flags, the false value is
+X# specified on the command line by prepending the word 'no'. With short flags,
+X# the presense of the flag toggles the current value between true and false.
+X# Specifying a short boolean flag twice on the command results in returning the
+X# value back to the default value.
+X#
+X# A default value is required for boolean flags.
+X#
+X# For example, lets say a Boolean flag was created whose long name was 'update'
+X# and whose short name was 'x', and the default value was 'false'. This flag
+X# could be explicitly set to 'true' with '--update' or by '-x', and it could be
+X# explicitly set to 'false' with '--noupdate'.
+XDEFINE_boolean() { _flags_define ${__FLAGS_TYPE_BOOLEAN} "$@"; }
+X
+X# Other basic flags.
+XDEFINE_float()   { _flags_define ${__FLAGS_TYPE_FLOAT} "$@"; }
+XDEFINE_integer() { _flags_define ${__FLAGS_TYPE_INTEGER} "$@"; }
+XDEFINE_string()  { _flags_define ${__FLAGS_TYPE_STRING} "$@"; }
+X
+X# Parse the flags.
+X#
+X# Args:
+X#   unnamed: list: command-line flags to parse
+X# Returns:
+X#   integer: success of operation, or error
+XFLAGS()
+X{
+X  # define a standard 'help' flag if one isn't already defined
+X  [ -z "${__flags_help_type:-}" ] && \
+X      DEFINE_boolean 'help' false 'show this help' 'h'
+X
+X  # parse options
+X  if [ $# -gt 0 ]; then
+X    if [ ${__FLAGS_GETOPT_VERS} -ne ${__FLAGS_GETOPT_VERS_ENH} ]; then
+X      _flags_getoptStandard "$@"
+X    else
+X      _flags_getoptEnhanced "$@"
+X    fi
+X    flags_return=$?
+X  else
+X    # nothing passed; won't bother running getopt
+X    __flags_opts='--'
+X    flags_return=${FLAGS_TRUE}
+X  fi
+X
+X  if [ ${flags_return} -eq ${FLAGS_TRUE} ]; then
+X    _flags_parseGetopt $# "${__flags_opts}"
+X    flags_return=$?
+X  fi
+X
+X  [ ${flags_return} -eq ${FLAGS_ERROR} ] && _flags_fatal "${flags_error}"
+X  return ${flags_return}
+X}
+X
+X# This is a helper function for determining the `getopt` version for platforms
+X# where the detection isn't working. It simply outputs debug information that
+X# can be included in a bug report.
+X#
+X# Args:
+X#   none
+X# Output:
+X#   debug info that can be included in a bug report
+X# Returns:
+X#   nothing
+Xflags_getoptInfo()
+X{
+X  # platform info
+X  _flags_debug "uname -a: `uname -a`"
+X  _flags_debug "PATH: ${PATH}"
+X
+X  # shell info
+X  if [ -n "${BASH_VERSION:-}" ]; then
+X    _flags_debug 'shell: bash'
+X    _flags_debug "BASH_VERSION: ${BASH_VERSION}"
+X  elif [ -n "${ZSH_VERSION:-}" ]; then
+X    _flags_debug 'shell: zsh'
+X    _flags_debug "ZSH_VERSION: ${ZSH_VERSION}"
+X  fi
+X
+X  # getopt info
+X  getopt >/dev/null
+X  _flags_getoptReturn=$?
+X  _flags_debug "getopt return: ${_flags_getoptReturn}"
+X  _flags_debug "getopt --version: `getopt --version 2>&1`"
+X
+X  unset _flags_getoptReturn
+X}
+X
+X# Returns whether the detected getopt version is the enhanced version.
+X#
+X# Args:
+X#   none
+X# Output:
+X#   none
+X# Returns:
+X#   bool: true if getopt is the enhanced version
+Xflags_getoptIsEnh()
+X{
+X  test ${__FLAGS_GETOPT_VERS} -eq ${__FLAGS_GETOPT_VERS_ENH}
+X}
+X
+X# Returns whether the detected getopt version is the standard version.
+X#
+X# Args:
+X#   none
+X# Returns:
+X#   bool: true if getopt is the standard version
+Xflags_getoptIsStd()
+X{
+X  test ${__FLAGS_GETOPT_VERS} -eq ${__FLAGS_GETOPT_VERS_STD}
+X}
+X
+X# This is effectively a 'usage()' function. It prints usage information and
+X# exits the program with ${FLAGS_FALSE} if it is ever found in the command line
+X# arguments. Note this function can be overridden so other apps can define
+X# their own --help flag, replacing this one, if they want.
+X#
+X# Args:
+X#   none
+X# Returns:
+X#   integer: success of operation (always returns true)
+Xflags_help()
+X{
+X  if [ -n "${FLAGS_HELP:-}" ]; then
+X    echo "${FLAGS_HELP}" >&2
+X  else
+X    echo "USAGE: ${FLAGS_PARENT:-$0} [flags] args" >&2
+X  fi
+X  if [ -n "${__flags_longNames}" ]; then
+X    echo 'flags:' >&2
+X    for flags_name_ in ${__flags_longNames}; do
+X      flags_flagStr_=''
+X      flags_boolStr_=''
+X
+X      flags_default_=`_flags_getFlagInfo \
+X          "${flags_name_}" ${__FLAGS_INFO_DEFAULT}`
+X      flags_help_=`_flags_getFlagInfo \
+X          "${flags_name_}" ${__FLAGS_INFO_HELP}`
+X      flags_short_=`_flags_getFlagInfo \
+X          "${flags_name_}" ${__FLAGS_INFO_SHORT}`
+X      flags_type_=`_flags_getFlagInfo \
+X          "${flags_name_}" ${__FLAGS_INFO_TYPE}`
+X
+X      [ "${flags_short_}" != "${__FLAGS_NULL}" ] \
+X          && flags_flagStr_="-${flags_short_}"
+X
+X      if [ ${__FLAGS_GETOPT_VERS} -eq ${__FLAGS_GETOPT_VERS_ENH} ]; then
+X        [ "${flags_short_}" != "${__FLAGS_NULL}" ] \
+X            && flags_flagStr_="${flags_flagStr_},"
+X        [ ${flags_type_} -eq ${__FLAGS_TYPE_BOOLEAN} ] \
+X            && flags_boolStr_='[no]'
+X        flags_flagStr_="${flags_flagStr_}--${flags_boolStr_}${flags_name_}:"
+X      fi
+X
+X      case ${flags_type_} in
+X        ${__FLAGS_TYPE_BOOLEAN})
+X          if [ ${flags_default_} -eq ${FLAGS_TRUE} ]; then
+X            flags_defaultStr_='true'
+X          else
+X            flags_defaultStr_='false'
+X          fi
+X          ;;
+X        ${__FLAGS_TYPE_FLOAT}|${__FLAGS_TYPE_INTEGER})
+X          flags_defaultStr_=${flags_default_} ;;
+X        ${__FLAGS_TYPE_STRING}) flags_defaultStr_="'${flags_default_}'" ;;
+X      esac
+X      flags_defaultStr_="(default: ${flags_defaultStr_})"
+X
+X      flags_helpStr_="  ${flags_flagStr_}  ${flags_help_} ${flags_defaultStr_}"
+X      flags_helpStrLen_=`expr "${flags_helpStr_}" : '.*'`
+X      flags_columns_=`_flags_columns`
+X      if [ ${flags_helpStrLen_} -lt ${flags_columns_} ]; then
+X        echo "${flags_helpStr_}" >&2
+X      else
+X        echo "  ${flags_flagStr_}  ${flags_help_}" >&2
+X        # note: the silliness with the x's is purely for ksh93 on Ubuntu 6.06
+X        # because it doesn't like empty strings when used in this manner.
+X        flags_emptyStr_="`echo \"x${flags_flagStr_}x\" \
+X            |awk '{printf "%"length($0)-2"s", ""}'`"
+X        flags_helpStr_="  ${flags_emptyStr_}  ${flags_defaultStr_}"
+X        flags_helpStrLen_=`expr "${flags_helpStr_}" : '.*'`
+X        if [ ${__FLAGS_GETOPT_VERS} -eq ${__FLAGS_GETOPT_VERS_STD} \
+X            -o ${flags_helpStrLen_} -lt ${flags_columns_} ]; then
+X          # indented to match help string
+X          echo "${flags_helpStr_}" >&2
+X        else
+X          # indented four from left to allow for longer defaults as long flag
+X          # names might be used too, making things too long
+X          echo "    ${flags_defaultStr_}" >&2
+X        fi
+X      fi
+X    done
+X  fi
+X
+X  unset flags_boolStr_ flags_default_ flags_defaultStr_ flags_emptyStr_ \
+X      flags_flagStr_ flags_help_ flags_helpStr flags_helpStrLen flags_name_ \
+X      flags_columns_ flags_short_ flags_type_
+X  return ${FLAGS_TRUE}
+X}
+X
+X# Reset shflags back to an uninitialized state.
+X#
+X# Args:
+X#   none
+X# Returns:
+X#   nothing
+Xflags_reset()
+X{
+X  for flags_name_ in ${__flags_longNames}; do
+X    flags_strToEval_="unset FLAGS_${flags_name_}"
+X    for flags_type_ in \
+X        ${__FLAGS_INFO_DEFAULT} \
+X        ${__FLAGS_INFO_HELP} \
+X        ${__FLAGS_INFO_SHORT} \
+X        ${__FLAGS_INFO_TYPE}
+X    do
+X      flags_strToEval_=\
+X"${flags_strToEval_} __flags_${flags_name_}_${flags_type_}"
+X    done
+X    eval ${flags_strToEval_}
+X  done
+X
+X  # reset internal variables
+X  __flags_boolNames=' '
+X  __flags_longNames=' '
+X  __flags_shortNames=' '
+X
+X  unset flags_name_ flags_type_ flags_strToEval_
+X}
+END-of-./gitflow-shFlags
+echo x - ./LICENSE
+sed 's/^X//' >./LICENSE << 'END-of-./LICENSE'
+XCopyright 2010 Vincent Driessen. All rights reserved.
+X
+XRedistribution and use in source and binary forms, with or without modification,
+Xare permitted provided that the following conditions are met:
+X
+X   1. Redistributions of source code must retain the above copyright notice,
+X      this list of conditions and the following disclaimer.
+X
+X   2. Redistributions in binary form must reproduce the above copyright notice,
+X      this list of conditions and the following disclaimer in the documentation
+X      and/or other materials provided with the distribution.
+X
+XTHIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+XIMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+XMERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+XSHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+XINCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+XLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+XPROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+XLIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+XOR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+XADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X
+XThe views and conclusions contained in the software and documentation are those
+Xof the authors and should not be interpreted as representing official policies,
+Xeither expressed or implied, of Vincent Driessen.
+END-of-./LICENSE
+echo x - ./Makefile
+sed 's/^X//' >./Makefile << 'END-of-./Makefile'
+X#
+X# Copyright 2010 Vincent Driessen. All rights reserved.
+X# 
+X# Redistribution and use in source and binary forms, with or without
+X# modification, are permitted provided that the following conditions are met:
+X# 
+X#    1. Redistributions of source code must retain the above copyright notice,
+X#       this list of conditions and the following disclaimer.
+X# 
+X#    2. Redistributions in binary form must reproduce the above copyright
+X#       notice, this list of conditions and the following disclaimer in the
+X#       documentation and/or other materials provided with the distribution.
+X# 
+X# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+X# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+X# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+X# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+X# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+X# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+X# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+X# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+X# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+X# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+X# 
+X# The views and conclusions contained in the software and documentation are
+X# those of the authors and should not be interpreted as representing official
+X# policies, either expressed or implied, of Vincent Driessen.
+X#
+X
+XSHELL = /bin/sh
+Xsrcdir = .
+X
+Xprefix=/usr/local
+X
+X# files that need mode 755
+XEXEC_FILES=git-flow
+X
+X# files that need mode 644
+XSCRIPT_FILES =git-flow-init
+XSCRIPT_FILES+=git-flow-feature
+XSCRIPT_FILES+=git-flow-hotfix
+XSCRIPT_FILES+=git-flow-release
+XSCRIPT_FILES+=git-flow-support
+XSCRIPT_FILES+=git-flow-version
+XSCRIPT_FILES+=gitflow-common
+XSCRIPT_FILES+=gitflow-shFlags
+X
+Xall:
+X	@echo "usage: make install"
+X	@echo "       make uninstall"
+X
+Xinstall:
+X	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
+X	install -d -m 0755 $(prefix)/bin
+X	install -m 0755 $(EXEC_FILES) $(prefix)/bin
+X	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
+X
+Xuninstall:
+X	test -d $(prefix)/bin && \
+X	cd $(prefix)/bin && \
+X	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+X
+X$(srcdir)/contrib/gitflow-installer.shar:
+X	@test -f $(srcdir)/gitflow-shFlags || { echo "Run 'git submodule init && git submodule update' first." >&2; exit 1; }
+X	echo "#!/bin/sh" > $@
+X	find $(srcdir) -mindepth 1 -maxdepth 2 -not -path '*/.git*' \
+X	       -not -path '*/contrib/*' -not -path '*/shFlags/*' \
+X	       -not -type d | xargs -n100 shar >> $@
+X	 chmod +x $@
+X
+Xclean-shar:
+X	@rm -f $(srcdir)/contrib/gitflow-installer.shar
+X	@rm -f $(srcdir)/contrib/gitflow-installer.shar.*
+X
+Xshar: clean-shar $(srcdir)/contrib/gitflow-installer.shar
+X
+Xgpg: $(srcdir)/contrib/gitflow-installer.shar
+X	@if gpg --verify $^ >/dev/null 2>&1; then \
+X	  echo "$^: Already signed." >&2; \
+X	  exit 1; \
+X	fi
+X	@cat $^ | sed 's #!/bin/\(ba\)\?sh  g' > $^.temp
+X	@rm $^
+X	@echo "#!/bin/sh" > $^
+X	@echo "_ignore_pgp=<<'Hash: SHA1'" >> $^ 
+X	gpg -a --sign -o $^.asc --clearsign $^.temp
+X	@cat $^.asc >> $^
+X	@rm -f $^.*
+X	@chmod +x $^
+X
+Xsign: gpg
+X
+Xpgp: gpg
+X
+Xsigned-shar: clean-shar gpg
+X
+X.PHONY: signed-shar sign pgp gpg shar clean-shar
+END-of-./Makefile
+echo x - ./README.mdown
+sed 's/^X//' >./README.mdown << 'END-of-./README.mdown'
+Xgit-flow
+X========
+X
+XA collection of Git extensions to provide high-level repository operations
+Xfor Vincent Driessen's [branching model](http://nvie.com/git-model "original
+Xblog post").
+X
+X
+XGetting started
+X---------------
+XFor the best introduction to get started with `git flow`, please read Jeff
+XKreeftmeijer's blog post:
+X
+X[http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/](http://jeffkreeftmeijer.com/2010/why-arent-you-using-git-flow/)
+X
+XOr have a look at one of these screen casts:
+X
+X* [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
+X* [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
+X* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
+X
+X
+XInstalling git-flow
+X-------------------
+XSee the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
+X
+X
+XIntegration with your shell
+X---------------------------
+XFor those who use the [Bash](http://www.gnu.org/software/bash/) or
+X[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
+X[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
+Xby [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
+Xgit-flow subcommands and branch names.
+X
+X
+XFAQ
+X---
+XSee the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+XWiki.
+X
+X
+XPlease help out
+X---------------
+XThis project is still under development. Feedback and suggestions are very
+Xwelcome and I encourage you to use the [Issues
+Xlist](http://github.com/nvie/gitflow/issues) on Github to provide that
+Xfeedback.
+X
+XFeel free to fork this repo and to commit your additions. For a list of all
+Xcontributors, please see the [AUTHORS](AUTHORS) file.
+X
+XAny questions, tips, or general discussion can be posted to our Google group:
+X[http://groups.google.com/group/gitflow-users](http://groups.google.com/group/gitflow-users)
+X
+XContributing
+X------------
+XFork the repository.  Then, run:
+X
+X    git clone --recursive git@github.com:<username>/gitflow.git
+X    cd gitflow
+X    git branch master origin/master
+X    git flow init -d
+X    git flow feature start <your feature>
+X
+XThen, do work and commit your changes.  **Hint**: ``export PATH=`pwd`:$PATH``
+Xfrom within the gitflow directory makes sure you're using the version of
+Xgitflow you're currently developing.
+X
+X    git flow feature publish <your feature>
+X
+XWhen done, open a pull request to your feature branch.
+X
+XLicense terms
+X-------------
+Xgit-flow is published under the liberal terms of the BSD License, see the
+X[LICENSE](LICENSE) file. Although the BSD License does not require you to share
+Xany modifications you make to the source code, you are very much encouraged and
+Xinvited to contribute back your modifications to the community, preferably
+Xin a Github fork, of course.
+X
+X
+X### Initialization
+X
+XTo initialize a new repo with the basic branch structure, use:
+X  
+X		git flow init [-d]
+X  
+XThis will then interactively prompt you with some questions on which branches
+Xyou would like to use as development and production branches, and how you
+Xwould like your prefixes be named. You may simply press Return on any of
+Xthose questions to accept the (sane) default suggestions.
+X
+XThe ``-d`` flag will accept all defaults.
+X
+X
+X### Creating feature/release/hotfix/support branches
+X
+X* To list/start/finish feature branches, use:
+X  
+X  		git flow feature
+X  		git flow feature start <name> [<base>]
+X  		git flow feature finish <name>
+X  
+X  For feature branches, the `<base>` arg must be a commit on `develop`.
+X
+X* To push/pull a feature branch to the remote repository, use:
+X
+X  		git flow feature publish <name>
+X		  git flow feature pull <remote> <name>
+X
+X* To list/start/finish release branches, use:
+X  
+X  		git flow release
+X  		git flow release start <release> [<base>]
+X  		git flow release finish <release>
+X  
+X  For release branches, the `<base>` arg must be a commit on `develop`.
+X  
+X* To list/start/finish hotfix branches, use:
+X  
+X  		git flow hotfix
+X  		git flow hotfix start <release> [<base>]
+X  		git flow hotfix finish <release>
+X  
+X  For hotfix branches, the `<base>` arg must be a commit on `master`.
+X
+X* To list/start support branches, use:
+X  
+X  		git flow support
+X  		git flow support start <release> <base>
+X  
+X  For support branches, the `<base>` arg must be a commit on `master`.
+X
+X
+XShowing your appreciation
+X=========================
+XA few people already requested it, so now it's here: a Flattr button.
+X
+XOf course, the best way to show your appreciation for the original
+X[blog post](http://nvie.com/posts/a-successful-git-branching-model/) or the git-flow tool itself remains
+Xcontributing to the community.  If you'd like to show your appreciation in
+Xanother way, however, consider Flattr'ing me:
+X
+X[![Flattr this][2]][1]
+X
+X[1]: http://flattr.com/thing/53771/git-flow
+X[2]: http://api.flattr.com/button/button-static-50x60.png
+END-of-./README.mdown
+exit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG/MacGPG2 v2.0.19 (Darwin)
+Comment: GPGTools - http://gpgtools.org
+
+iEYEARECAAYFAlGS9zYACgkQCPj7FrCSJ+AUfgCfcC+ykIAQpDPLtXqOrYL8/2Rz
+0ikAniLhSO3rtQGwEtUuC0R4/hzF9y2r
+=aUZ5
+-----END PGP SIGNATURE-----
