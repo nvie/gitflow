@@ -250,7 +250,7 @@ cmd_finish() {
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
-			eval git_do tag $opts "$tagname" "$BRANCH" || \
+			eval git_do tag $opts "$tagname" "$MASTER_BRANCH" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
