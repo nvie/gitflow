@@ -47,7 +47,7 @@ usage() {
 	echo "usage: git flow feature [list] [-v]"
 	echo "       git flow feature start [-F] <name> [<base>]"
 	echo "       git flow feature finish [-rFkDS] [<name|nameprefix>]"
-	echo "       git flow feature publish <name>"
+	echo "       git flow feature publish [<name>]"
 	echo "       git flow feature track <name>"
 	echo "       git flow feature diff [<name|nameprefix>]"
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
@@ -378,7 +378,7 @@ helper_finish_cleanup() {
 
 cmd_publish() {
 	parse_args "$@"
-	expand_nameprefix_arg
+	expand_nameprefix_arg_or_current
 
 	# sanity checks
 	require_clean_working_tree
