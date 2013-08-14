@@ -42,6 +42,24 @@ init() {
   gitflow_load_settings
   VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
   PREFIX=$(git config --get gitflow.prefix.hotfix)
+  if ! git config --get --bool gitflow.always-sign >/dev/null 2>&1; then
+    FORCE_SIGN=$(git config --get gitflow.always-sign 2>/dev/null)
+    if [ "$FORCE_SIGN" != "" ]; then
+      if echo "$FORCE_SIGN" | grep -q hotfix; then
+        FORCE_SIGN=$FLAGS_TRUE
+      else
+        FORCE_SIGN=$FLAGS_FALSE
+      fi
+    else
+      FORCE_SIGN=$FLAGS_FALSE
+    fi
+  else
+    if [ "$(git config --get --bool gitflow.always-sign)" = "true" ]; then
+      FORCE_SIGN=$FLAGS_TRUE
+    else
+      FORCE_SIGN=$FLAGS_FALSE
+    fi
+  fi
 }
 
 usage() {
@@ -250,6 +268,10 @@ cmd_finish() {
 	DEFINE_boolean notag false "don't tag this release" n
 	parse_args "$@"
 	require_version_arg
+
+	if [ $FORCE_SIGN -eq $FLAGS_TRUE ]; then
+		FLAGS_sign=$FLAGS_TRUE
+	fi
 
 	# handle flags that imply other flags
 	if [ "$FLAGS_signingkey" != "" ]; then
