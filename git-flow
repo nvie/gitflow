@@ -40,6 +40,9 @@
 # set this to workaround expr problems in shFlags on freebsd
 if uname -s | egrep -iq 'bsd'; then export EXPR_COMPAT=1; fi
 
+# user's GREP_OPTIONS mustn't interfere (e.g. GREP_OPTIONS='-n' breaks things)
+export GREP_OPTIONS=''
+
 # enable debug mode
 if [ "$DEBUG" = "yes" ]; then
 	set -x
