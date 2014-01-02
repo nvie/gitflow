@@ -458,11 +458,34 @@ cmd_co() {
 
 cmd_rebase() {
 	DEFINE_boolean interactive false 'do an interactive rebase' i
+	DEFINE_boolean pull false "pull $DEVELOP_BRANCH from $ORIGIN (fast-forward only) before performing rebase" P
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
-	warn "Will try to rebase '$NAME'..."
+	
 	require_clean_working_tree
 	require_branch "$BRANCH"
+	
+	if flag pull; then
+		warn "Fetching latest from $ORIGIN"
+		git fetch -q "$ORIGIN"
+		git_compare_branches "$ORIGIN/$DEVELOP_BRANCH" "$DEVELOP_BRANCH"
+ 		local status=$?
+
+		case $status in
+		0|1) warn "$DEVELOP_BRANCH up to date, proceeding with rebase...";;
+		2) 
+			warn "Fast-forwarding $DEVELOP_BRANCH to $ORIGIN/$DEVELOP_BRANCH...";
+			git checkout -q "$DEVELOP_BRANCH"
+			git pull -q --ff-only
+			;;
+		3) warn "$DEVELOP_BRANCH and $ORIGIN/$DEVELOP_BRANCH have diverged. Please manually pull latest, proceeding with rebase however";;
+		*) warn "Unable to update $DEVELOP_BRANCH, proceeding";;
+			esac
+	
+	fi
+
+	
+	warn "Will try to rebase '$NAME'..."
 
 	git_do checkout -q "$BRANCH"
 	local OPTS=
