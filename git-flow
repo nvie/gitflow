@@ -114,10 +114,10 @@ main() {
 	fi
 
 	# run the specified action
-  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] ; then
-    init
-  fi
-  cmd_$SUBACTION "$@"
+	if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] && [ $SUBCOMMAND != "version" ]; then
+	    init
+	fi
+	cmd_$SUBACTION "$@"
 }
 
 main "$@"
