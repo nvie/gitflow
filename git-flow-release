@@ -154,6 +154,7 @@ require_no_existing_release_branches() {
 cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
+	eval set -- "${FLAGS_ARGV}"
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_version_arg
 	require_base_is_on_develop
