@@ -155,6 +155,10 @@ cmd_start() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	parse_args "$@"
 	BASE=${2:-$DEVELOP_BRANCH}
+	# Run filter on the version
+	VERSION=`run_filter_hook release-start-version $VERSION`
+	# As VERSION might have changed reset BRANCH with new VERSION
+	BRANCH=$PREFIX$VERSION
 	require_version_arg
 	require_base_is_on_develop
 	require_no_existing_release_branches

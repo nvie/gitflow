@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Runs during git flow release start
+#
+# Positional arguments:
+# $1    Version
+#
+# Return VERSION - When VERSION is returned empty gitflow 
+#	will stop as the version is necessary
+#
+VERSION=$1
+
+# Implement your script here.
+
+# Return the VERSION
+echo ${VERSION}
+exit 0
