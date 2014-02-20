@@ -250,7 +250,7 @@ cmd_finish() {
 			[ "$FLAGS_signingkey" != "" ] && opts="$opts -u '$FLAGS_signingkey'"
 			[ "$FLAGS_message" != "" ] && opts="$opts -m '$FLAGS_message'"
 			[ "$FLAGS_messagefile" != "" ] && opts="$opts -F '$FLAGS_messagefile'"
-			eval git_do tag $opts "$tagname" "$BRANCH" || \
+			eval git_do tag $opts "$tagname" "$MASTER_BRANCH" || \
 			die "Tagging failed. Please run finish again to retry."
 		fi
 	fi
@@ -258,18 +258,16 @@ cmd_finish() {
 	# try to merge into develop
 	# in case a previous attempt to finish this release branch has failed,
 	# but the merge into develop was successful, we skip it now
-	if ! git_is_branch_merged_into "$BRANCH" "$DEVELOP_BRANCH"; then
+	if ! git_is_branch_merged_into "$MASTER_BRANCH" "$DEVELOP_BRANCH"; then
 		git_do checkout "$DEVELOP_BRANCH" || \
 		  die "Could not check out $DEVELOP_BRANCH."
 
-		# TODO: Actually, accounting for 'git describe' pays, so we should
-		# ideally git merge --no-ff $tagname here, instead!
 		if noflag squash; then
-			git_do merge --no-ff "$BRANCH" || \
+			git_do merge --no-ff "$MASTER_BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 		else
-			git_do merge --squash "$BRANCH" || \
+			git_do merge --squash "$MASTER_BRANCH" || \
 				die "There were merge conflicts."
 				# TODO: What do we do now?
 			git_do commit
@@ -304,7 +302,7 @@ cmd_finish() {
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
 	fi
-	echo "- Release branch has been back-merged into '$DEVELOP_BRANCH'"
+	echo "- '$MASTER_BRANCH' has been merged into '$DEVELOP_BRANCH'"
 	if flag keep; then
 		echo "- Release branch '$BRANCH' is still available"
 	else
