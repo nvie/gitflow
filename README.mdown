@@ -84,7 +84,7 @@ in a Github fork, of course.
 
 To initialize a new repo with the basic branch structure, use:
   
-		git flow init [-d]
+    git flow init [-d]
   
 This will then interactively prompt you with some questions on which branches
 you would like to use as development and production branches, and how you
@@ -107,7 +107,7 @@ The ``-d`` flag will accept all defaults.
 * To push/pull a feature branch to the remote repository, use:
 
   		git flow feature publish <name>
-		  git flow feature pull <remote> <name>
+  		git flow feature pull <remote> <name>
 
 * To list/start/finish release branches, use:
   
