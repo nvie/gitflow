@@ -39,6 +39,147 @@ FAQ
 See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
 Wiki.
 
+Overview
+--------
+
+### Initialization
+
+To initialize a new repo with the basic branch structure, use:
+  
+                git flow init [-d]
+  
+This will then interactively prompt you with some questions on which branches
+you would like to use as development and production branches, and how you
+would like your prefixes be named. You may simply press Return on any of
+those questions to accept the (sane) default suggestions.
+
+The ``-d`` flag will accept all defaults.
+
+
+### Creating feature/release/hotfix/support branches
+
+* To list/start/finish feature branches, use:
+  
+                git flow feature
+                git flow feature start <name> [<base>]
+                git flow feature finish <name>
+  
+  For feature branches, the `<base>` arg must be a commit on `develop`.
+
+* To push/pull a feature branch to the remote repository, use:
+
+                git flow feature publish <name>
+                  git flow feature pull <remote> <name>
+
+* To list/start/finish release branches, use:
+  
+                git flow release
+                git flow release start <release> [<base>]
+                git flow release finish <release>
+  
+  For release branches, the `<base>` arg must be a commit on `develop`.
+  
+* To list/start/finish hotfix branches, use:
+  
+                git flow hotfix
+                git flow hotfix start <release> [<base>]
+                git flow hotfix finish <release>
+  
+  For hotfix branches, the `<base>` arg must be a commit on `master`.
+
+* To list/start support branches, use:
+  
+                git flow support
+                git flow support start <release> <base>
+  
+  For support branches, the `<base>` arg must be a commit on `master`.
+
+Commands
+--------
+
+* Init:
+
+                git flow init [-fd]
+
+                Flags:
+                  -d,--[no]defaults:  use default branch naming conventions (default: false)
+                  -f,--[no]force:  force setting of gitflow branches, even if already configured (default: false)
+                  -h,--[no]help:  show this help (default: false)
+
+* Feature branches:
+
+                git flow feature [list] [-v]
+                git flow feature start [-F] <name> [<base>]
+                git flow feature finish [-rFkD] [<name|nameprefix>]
+                git flow feature publish <name>
+                git flow feature track <name>
+                git flow feature diff [<name|nameprefix>]
+                git flow feature rebase [-i] [<name|nameprefix>]
+                git flow feature checkout [<name|nameprefix>]
+                git flow feature pull [-r] <remote> [<name>]
+
+                Flags:
+                  -D,--[no]force_delete:  force delete feature branch after finish (default: false)
+                  -F,--[no]fetch:  fetch from origin before performing finish (default: false)
+                  -F,--[no]fetch:  fetch from origin before performing local operation (default: false)
+                  -h,--[no]help:  show this help (default: false)
+                  -i,--[no]interactive:  do an interactive rebase (default: false)
+                  -k,--[no]keep:  keep branch after performing finish (default: false)
+                  -r,--[no]rebase:  pull with rebase (default: false)
+                  -r,--[no]rebase:  rebase instead of merge (default: false)
+                  -v,--[no]verbose:  verbose (more) output (default: false)
+
+* Release branches:
+
+                git flow release [list] [-v]
+                git flow release start [-F] <version> [<base>]
+                git flow release finish [-Fsumpk] <version>
+                git flow release publish <name>
+                git flow release track <name>
+
+                Flags:
+                  -F,--[no]fetch:  fetch from origin before performing finish (default: false)
+                  -h,--[no]help:  show this help (default: false)
+                  -k,--[no]keep:  keep branch after performing finish (default: false)
+                  -m,--message:  use the given tag message (default: '')
+                  -n,--[no]notag:  don't tag this release (default: false)
+                  -p,--[no]push:  push to origin after performing finish (default: false)
+                  -s,--[no]sign:  sign the release tag cryptographically (default: false) (default: '')
+                  -u,--signingkey:  use the given GPG-key for the digital signature (implies -s)
+                  -v,--[no]verbose:  verbose (more) output (default: false)
+
+* Hotfix branches:
+
+                git flow hotfix [list] [-v]
+                git flow hotfix start [-F] <version> [<base>]
+                git flow hotfix finish [-Fsumpk] <version>
+                git flow hotfix publish <version>
+
+                Flags:
+                  -F,--[no]fetch:  fetch from origin before performing finish (default: false)
+                  -h,--[no]help:  show this help (default: false)
+                  -k,--[no]keep:  keep branch after performing finish (default: false)
+                  -m,--message:  use the given tag message (default: '')
+                  -n,--[no]notag:  don't tag this release (default: false)
+                  -p,--[no]push:  push to origin after performing finish (default: false)
+                  -s,--[no]sign:  sign the release tag cryptographically (default: false)
+                  -u,--signingkey:  use the given GPG-key for the digital signature (implies -s) (default: '')
+                  -v,--[no]verbose:  verbose (more) output (default: false)
+
+* Support branches:
+
+                git flow support [list] [-v]
+                git flow support start [-F] <version> <base>
+
+                Flags:
+                  -F,--[no]fetch:  fetch from origin before performing finish (default: false)
+                  -h,--[no]help:  show this help (default: false)
+                  -v,--[no]verbose:  verbose (more) output (default: false)
+
+* Version:
+
+                git flow version
+
 
 Please help out
 ---------------
@@ -78,60 +219,6 @@ git-flow is published under the liberal terms of the BSD License, see the
 any modifications you make to the source code, you are very much encouraged and
 invited to contribute back your modifications to the community, preferably
 in a Github fork, of course.
-
-
-### Initialization
-
-To initialize a new repo with the basic branch structure, use:
-  
-		git flow init [-d]
-  
-This will then interactively prompt you with some questions on which branches
-you would like to use as development and production branches, and how you
-would like your prefixes be named. You may simply press Return on any of
-those questions to accept the (sane) default suggestions.
-
-The ``-d`` flag will accept all defaults.
-
-
-### Creating feature/release/hotfix/support branches
-
-* To list/start/finish feature branches, use:
-  
-  		git flow feature
-  		git flow feature start <name> [<base>]
-  		git flow feature finish <name>
-  
-  For feature branches, the `<base>` arg must be a commit on `develop`.
-
-* To push/pull a feature branch to the remote repository, use:
-
-  		git flow feature publish <name>
-		  git flow feature pull <remote> <name>
-
-* To list/start/finish release branches, use:
-  
-  		git flow release
-  		git flow release start <release> [<base>]
-  		git flow release finish <release>
-  
-  For release branches, the `<base>` arg must be a commit on `develop`.
-  
-* To list/start/finish hotfix branches, use:
-  
-  		git flow hotfix
-  		git flow hotfix start <release> [<base>]
-  		git flow hotfix finish <release>
-  
-  For hotfix branches, the `<base>` arg must be a commit on `master`.
-
-* To list/start support branches, use:
-  
-  		git flow support
-  		git flow support start <release> <base>
-  
-  For support branches, the `<base>` arg must be a commit on `master`.
-
 
 Showing your appreciation
 =========================
