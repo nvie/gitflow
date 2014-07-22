@@ -1,4 +1,13 @@
 #
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
 # Copyright 2010 Vincent Driessen. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,33 +36,76 @@
 # policies, either expressed or implied, of Vincent Driessen.
 #
 
-prefix=/usr/local
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  PREFIX=$(git config --get gitflow.prefix.sprint)
+}
 
-# files that need mode 755
-EXEC_FILES=git-flow
+usage() {
+  echo "usage: git flow sprint [list]"
+  echo "       git flow sprint start <number>"
+}
 
-# files that need mode 644
-SCRIPT_FILES =git-flow-init
-SCRIPT_FILES+=git-flow-feature
-SCRIPT_FILES+=git-flow-hotfix
-SCRIPT_FILES+=git-flow-release
-SCRIPT_FILES+=git-flow-support
-SCRIPT_FILES+=git-flow-version
-SCRIPT_FILES+=git-flow-sprint
-SCRIPT_FILES+=gitflow-common
-SCRIPT_FILES+=gitflow-shFlags
+cmd_default() {
+  cmd_list "$@"
+}
 
-all:
-	@echo "usage: make install"
-	@echo "       make uninstall"
+cmd_list() {
 
-install:
-	@test -f gitflow-shFlags || (echo "Run 'git submodule init && git submodule update' first." ; exit 1 )
-	install -d -m 0755 $(prefix)/bin
-	install -m 0755 $(EXEC_FILES) $(prefix)/bin
-	install -m 0644 $(SCRIPT_FILES) $(prefix)/bin
+  local sprints
+  local current_sprint
+  local short_names
+  sprints=$(echo "$(git_local_branches)" | grep "^$PREFIX" | cut -d / -f1)
+  sprints=$(echo "${sprints}" | sort -u)
 
-uninstall:
-	test -d $(prefix)/bin && \
-	cd $(prefix)/bin && \
-	rm -f $(EXEC_FILES) $(SCRIPT_FILES)
+  if [ -z "$sprints" ]; then
+    warn "No sprints exist."
+    warn ""
+    warn "You can start a new sprint:"
+    warn ""
+    warn "    git flow sprint start <number>"
+    warn ""
+    exit 0
+  fi
+
+  current_sprint=$(git config --get gitflow.sprint.current | sed 's/\///g')
+
+  local sprint
+  for sprint in $sprints; do
+    if [ "$sprint" = "$current_sprint" ]; then
+      printf "* "
+    else
+      printf "  "
+    fi
+
+    printf "%s" "$sprint"
+
+    echo
+  done
+}
+
+cmd_start() {
+  parse_args "$@"
+
+  git_do config gitflow.sprint.current "$SPRINT/"
+}
+
+cmd_help() {
+  usage
+  exit 0
+}
+
+
+# Helper functions
+
+parse_args() {
+  # parse options
+  FLAGS "$@" || exit $?
+  eval set -- "${FLAGS_ARGV}"
+
+  # read arguments into global variables
+  NUMBER=$1
+  SPRINT=$PREFIX$NUMBER
+}
