@@ -1,0 +1,111 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright 2010 Vincent Driessen. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
+#
+
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  PREFIX=$(git config --get gitflow.prefix.sprint)
+}
+
+usage() {
+  echo "usage: git flow sprint [list]"
+  echo "       git flow sprint start <number>"
+}
+
+cmd_default() {
+  cmd_list "$@"
+}
+
+cmd_list() {
+
+  local sprints
+  local current_sprint
+  local short_names
+  sprints=$(echo "$(git_local_branches)" | grep "^$PREFIX" | cut -d / -f1)
+  sprints=$(echo "${sprints}" | sort -u)
+
+  if [ -z "$sprints" ]; then
+    warn "No sprints exist."
+    warn ""
+    warn "You can start a new sprint:"
+    warn ""
+    warn "    git flow sprint start <number>"
+    warn ""
+    exit 0
+  fi
+
+  current_sprint=$(git config --get gitflow.sprint.current | sed 's/\///g')
+
+  local sprint
+  for sprint in $sprints; do
+    if [ "$sprint" = "$current_sprint" ]; then
+      printf "* "
+    else
+      printf "  "
+    fi
+
+    printf "%s" "$sprint"
+
+    echo
+  done
+}
+
+cmd_start() {
+  parse_args "$@"
+
+  git_do config gitflow.sprint.current "$SPRINT/"
+}
+
+cmd_help() {
+  usage
+  exit 0
+}
+
+
+# Helper functions
+
+parse_args() {
+  # parse options
+  FLAGS "$@" || exit $?
+  eval set -- "${FLAGS_ARGV}"
+
+  # read arguments into global variables
+  NUMBER=$1
+  SPRINT=$PREFIX$NUMBER
+}

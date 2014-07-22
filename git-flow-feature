@@ -537,6 +537,4 @@ load_prefix_with_sprint() {
   if [ -n $SPRINT ]; then
     PREFIX=$SPRINT$PREFIX
   fi
-
-  echo $PREFIX
 }
