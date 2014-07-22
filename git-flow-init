@@ -9,17 +9,17 @@
 #    http://github.com/nvie/gitflow
 #
 # Copyright 2010 Vincent Driessen. All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 #    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-# 
+#
 #    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -30,7 +30,7 @@
 # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Vincent Driessen.
@@ -51,7 +51,7 @@ cmd_default() {
 	DEFINE_boolean force false 'force setting of gitflow branches, even if already configured' f
 	DEFINE_boolean defaults false 'use default branch naming conventions' d
 	parse_args "$@"
-	
+
 	if ! git rev-parse --git-dir >/dev/null 2>&1; then
 		git_do init
 	else
@@ -106,7 +106,7 @@ cmd_default() {
 				fi
 			done
 		fi
-		
+
 		printf "Branch name for production releases: [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -158,12 +158,12 @@ cmd_default() {
 					break
 				fi
 			done
-			
+
 			if [ -z $default_suggestion ]; then
 				should_check_existence=NO
 				default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
 			fi
-			
+
 		fi
 
 		printf "Branch name for \"next release\" development: [$default_suggestion] "
@@ -230,11 +230,12 @@ cmd_default() {
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
 	if flag force || \
-	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 || 
-	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1; then
+	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 ||
+	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 ||
+	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 ||
+	   ! git config --get gitflow.prefix.support >/dev/null 2>&1 ||
+	   ! git config --get gitflow.prefix.versiontag >/dev/null 2>&1 ||
+		 ! git config --get gitflow.prefix.sprint >/dev/null 2>&1 ; then
 		echo
 		echo "How to name your supporting branch prefixes?"
 	fi
@@ -307,6 +308,26 @@ cmd_default() {
 		fi
 		[ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
 		git_do config gitflow.prefix.versiontag "$prefix"
+	fi
+
+
+	# Sprint prefix
+	if ! git config --get gitflow.prefix.sprint >/dev/null 2>&1 || flag force; then
+		default_suggestion=$(git config --get gitflow.prefix.sprint || echo "sprint-")
+		printf "Sprint prefix? [$default_suggestion] "
+
+		if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ -z $answer ] || [ "$answer" = "-" ] && prefix= || prefix=${answer:-$default_suggestion}
+
+		git_do config gitflow.prefix.sprint "$prefix"
+	fi
+
+	if [ ! -z $prefix ]; then
+		echo $(git flow sprint start 1)
 	fi
 
 
