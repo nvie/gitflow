@@ -43,7 +43,7 @@ init() {
   PREFIX=$(git config --get gitflow.prefix.bugfix)
   if [ -z "$PREFIX" ]; then
 		warn "No Bugfix branch prefix set, using default of bugfix/"
-		git_do config gitflow.prefix.bugfix "bugfix"
+		git_do config gitflow.prefix.bugfix "bugfix/"
 		PREFIX=$(git config --get gitflow.prefix.bugfix)
 	fi
 }
