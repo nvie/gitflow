@@ -1,0 +1,535 @@
+#
+# git-flow -- A collection of Git extensions to provide high-level
+# repository operations for Vincent Driessen's branching model.
+#
+# Original blog post presenting this model is found at:
+#    http://nvie.com/git-model
+#
+# Feel free to contribute to this project at:
+#    http://github.com/nvie/gitflow
+#
+# Copyright 2010 Vincent Driessen. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY VINCENT DRIESSEN ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+# EVENT SHALL VINCENT DRIESSEN OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are
+# those of the authors and should not be interpreted as representing official
+# policies, either expressed or implied, of Vincent Driessen.
+#
+
+init() {
+  require_git_repo
+  require_gitflow_initialized
+  gitflow_load_settings
+  PREFIX=$(git config --get gitflow.prefix.bugfix)
+  if [ -z "$PREFIX" ]; then
+		warn "No Bugfix branch prefix set, using default of bugfix/"
+		git_do config gitflow.prefix.bugfix "bugfix/"
+		PREFIX=$(git config --get gitflow.prefix.bugfix)
+	fi
+}
+
+usage() {
+	echo "usage: git flow bugfix [list] [-v]"
+	echo "       git flow bugfix start [-F] <name> [<base>]"
+	echo "       git flow bugfix finish [-rFkDS] [<name|nameprefix>]"
+	echo "       git flow bugfix publish <name>"
+	echo "       git flow bugfix track <name>"
+	echo "       git flow bugfix diff [<name|nameprefix>]"
+	echo "       git flow bugfix rebase [-i] [<name|nameprefix>]"
+	echo "       git flow bugfix checkout [<name|nameprefix>]"
+	echo "       git flow bugfix pull [-r] <remote> [<name>]"
+}
+
+cmd_default() {
+	cmd_list "$@"
+}
+
+cmd_list() {
+	DEFINE_boolean verbose false 'verbose (more) output' v
+	parse_args "$@"
+
+	local bugfix_branches
+	local current_branch
+	local short_names
+	bugfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	if [ -z "$bugfix_branches" ]; then
+		warn "No bugfix branches exist."
+		warn ""
+		warn "You can start a new bugfix branch:"
+		warn ""
+		warn "    git flow bugfix start <name> [<base>]"
+		warn ""
+		exit 0
+	fi
+	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
+	short_names=$(echo "$bugfix_branches" | sed "s ^$PREFIX  g")
+
+	# determine column width first
+	local width=0
+	local branch
+	for branch in $short_names; do
+		local len=${#branch}
+		width=$(max $width $len)
+	done
+	width=$(($width+3))
+
+	local branch
+	for branch in $short_names; do
+		local fullname=$PREFIX$branch
+		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
+		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
+		local branch_sha=$(git rev-parse "$fullname")
+		if [ "$fullname" = "$current_branch" ]; then
+			printf "* "
+		else
+			printf "  "
+		fi
+		if flag verbose; then
+			printf "%-${width}s" "$branch"
+			if [ "$branch_sha" = "$develop_sha" ]; then
+				printf "(no commits yet)"
+			elif [ "$base" = "$branch_sha" ]; then
+				printf "(is behind develop, may ff)"
+			elif [ "$base" = "$develop_sha" ]; then
+				printf "(based on latest develop)"
+			else
+				printf "(may be rebased)"
+			fi
+		else
+			printf "%s" "$branch"
+		fi
+		echo
+	done
+}
+
+cmd_help() {
+	usage
+	exit 0
+}
+
+require_name_arg() {
+	if [ "$NAME" = "" ]; then
+		warn "Missing argument <name>"
+		usage
+		exit 1
+	fi
+}
+
+expand_nameprefix_arg() {
+	require_name_arg
+
+	local expanded_name
+	local exitcode
+	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX")
+	exitcode=$?
+	case $exitcode in
+		0) NAME=$expanded_name
+		   BRANCH=$PREFIX$NAME
+		   ;;
+		*) exit 1 ;;
+	esac
+}
+
+use_current_bugfix_branch_name() {
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		BRANCH=$current_branch
+		NAME=${BRANCH#$PREFIX}
+	else
+		warn "The current HEAD is no bugfix branch."
+		warn "Please specify a <name> argument."
+		exit 1
+	fi
+}
+
+expand_nameprefix_arg_or_current() {
+	if [ "$NAME" != "" ]; then
+		expand_nameprefix_arg
+		require_branch "$PREFIX$NAME"
+	else
+		use_current_bugfix_branch_name
+	fi
+}
+
+name_or_current() {
+	if [ -z "$NAME" ]; then
+		use_current_bugfix_branch_name
+	fi
+}
+
+parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	NAME=$1
+	BRANCH=$PREFIX$NAME
+}
+
+parse_remote_name() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+
+	# read arguments into global variables
+	REMOTE=$1
+	NAME=$2
+	BRANCH=$PREFIX$NAME
+}
+
+cmd_start() {
+	DEFINE_boolean fetch false 'fetch from origin before performing local operation' F
+	parse_args "$@"
+	BASE=${2:-$DEVELOP_BRANCH}
+	require_name_arg
+
+	# sanity checks
+	require_branch_absent "$BRANCH"
+
+	# update the local repo with remote changes, if asked
+	if flag fetch; then
+		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+	fi
+
+	# if the origin branch counterpart exists, assert that the local branch
+	# isn't behind it (to avoid unnecessary rebasing)
+	if git_branch_exists "$ORIGIN/$DEVELOP_BRANCH"; then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
+
+	# create branch
+	if ! git_do checkout -b "$BRANCH" "$BASE"; then
+		die "Could not create bugfix branch '$BRANCH'"
+	fi
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new branch '$BRANCH' was created, based on '$BASE'"
+	echo "- You are now on branch '$BRANCH'"
+	echo ""
+	echo "Now, start committing on your bugfix. When done, use:"
+	echo ""
+	echo "     git flow bugfix finish $NAME"
+	echo
+}
+
+cmd_finish() {
+	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
+	DEFINE_boolean rebase false "rebase instead of merge" r
+	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean force_delete false "force delete bugfix branch after finish" D
+	DEFINE_boolean squash false "squash bugfix during merge" S
+	parse_args "$@"
+	expand_nameprefix_arg_or_current
+
+	# sanity checks
+	require_branch "$BRANCH"
+
+	# detect if we're restoring from a merge conflict
+	if [ -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE" ]; then
+		#
+		# TODO: detect that we're working on the correct branch here!
+		# The user need not necessarily have given the same $NAME twice here
+		# (although he/she should).
+		# 
+
+		# TODO: git_is_clean_working_tree() should provide an alternative
+		# exit code for "unmerged changes in working tree", which we should
+		# actually be testing for here
+		if git_is_clean_working_tree; then
+			FINISH_BASE=$(cat "$DOT_GIT_DIR/.gitflow/MERGE_BASE")
+
+			# Since the working tree is now clean, either the user did a
+			# succesfull merge manually, or the merge was cancelled.
+			# We detect this using git_is_branch_merged_into()
+			if git_is_branch_merged_into "$BRANCH" "$FINISH_BASE"; then
+				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+				helper_finish_cleanup
+				exit 0
+			else
+				# If the user cancelled the merge and decided to wait until later,
+				# that's fine. But we have to acknowledge this by removing the
+				# MERGE_BASE file and continuing normal execution of the finish
+				rm -f "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+			fi
+		else
+			echo
+			echo "Merge conflicts not resolved yet, use:"
+			echo "    git mergetool"
+			echo "    git commit"
+			echo 
+			echo "You can then complete the finish by running it again:"
+			echo "    git flow bugfix finish $NAME"
+			echo
+			exit 1
+		fi
+	fi
+
+	# sanity checks
+	require_clean_working_tree
+
+	# update local repo with remote changes first, if asked
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+		if flag fetch; then
+			git_do fetch -q "$ORIGIN" "$BRANCH"
+			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+		fi
+	fi
+
+	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
+	fi
+	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
+		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
+	fi
+
+	# if the user wants to rebase, do that first
+	if flag rebase; then
+		if ! git flow bugfix rebase "$NAME" "$DEVELOP_BRANCH"; then
+			warn "Finish was aborted due to conflicts during rebase."
+			warn "Please finish the rebase manually now."
+			warn "When finished, re-run:"
+			warn "    git flow bugfix finish '$NAME' '$DEVELOP_BRANCH'"
+			exit 1
+		fi
+	fi
+
+	# merge into BASE
+	git_do checkout "$DEVELOP_BRANCH"
+	if [ "$(git rev-list -n2 "$DEVELOP_BRANCH..$BRANCH" | wc -l)" -eq 1 ]; then
+		git_do merge --ff "$BRANCH"
+	else
+		if noflag squash; then
+		    git_do merge --no-ff "$BRANCH"
+		else
+			git_do merge --squash "$BRANCH"
+			git_do commit
+			git_do merge "$BRANCH"
+		fi
+	fi
+
+	if [ $? -ne 0 ]; then
+		# oops.. we have a merge conflict!
+		# write the given $DEVELOP_BRANCH to a temporary file (we need it later)
+		mkdir -p "$DOT_GIT_DIR/.gitflow"
+		echo "$DEVELOP_BRANCH" > "$DOT_GIT_DIR/.gitflow/MERGE_BASE"
+		echo
+		echo "There were merge conflicts. To resolve the merge conflict manually, use:"
+		echo "    git mergetool"
+		echo "    git commit"
+		echo 
+		echo "You can then complete the finish by running it again:"
+		echo "    git flow bugfix finish $NAME"
+		echo
+		exit 1
+	fi
+
+	# when no merge conflict is detected, just clean up the bugfix branch
+	helper_finish_cleanup
+}
+
+helper_finish_cleanup() {
+	# sanity checks
+	require_branch "$BRANCH"
+	require_clean_working_tree
+
+	# delete branch
+	if flag fetch; then
+		git_do push "$ORIGIN" ":refs/heads/$BRANCH"
+	fi
+	
+	
+	if noflag keep; then
+		if flag force_delete; then
+			git_do branch -D "$BRANCH"
+		else
+			git_do branch -d "$BRANCH"
+		fi
+	fi
+
+	echo
+	echo "Summary of actions:"
+	echo "- The bugfix branch '$BRANCH' was merged into '$DEVELOP_BRANCH'"
+	#echo "- Merge conflicts were resolved"		# TODO: Add this line when it's supported
+	if flag keep; then
+		echo "- bugfix branch '$BRANCH' is still available"
+	else
+		echo "- bugfix branch '$BRANCH' has been removed"
+	fi
+	echo "- You are now on branch '$DEVELOP_BRANCH'"
+	echo
+}
+
+cmd_publish() {
+	parse_args "$@"
+	expand_nameprefix_arg
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch "$BRANCH"
+	git_do fetch -q "$ORIGIN"
+	require_branch_absent "$ORIGIN/$BRANCH"
+
+	# create remote branch
+	git_do push "$ORIGIN" "$BRANCH:refs/heads/$BRANCH"
+	git_do fetch -q "$ORIGIN"
+
+	# configure remote tracking
+	git_do config "branch.$BRANCH.remote" "$ORIGIN"
+	git_do config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+	git_do checkout "$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote branch '$BRANCH' was created"
+	echo "- The local branch '$BRANCH' was configured to track the remote branch"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
+cmd_track() {
+	parse_args "$@"
+	require_name_arg
+
+	# sanity checks
+	require_clean_working_tree
+	require_branch_absent "$BRANCH"
+	git_do fetch -q "$ORIGIN"
+	require_branch "$ORIGIN/$BRANCH"
+
+	# create tracking branch
+	git_do checkout -b "$BRANCH" "$ORIGIN/$BRANCH"
+
+	echo
+	echo "Summary of actions:"
+	echo "- A new remote tracking branch '$BRANCH' was created"
+	echo "- You are now on branch '$BRANCH'"
+	echo
+}
+
+cmd_diff() {
+	parse_args "$@"
+
+	if [ "$NAME" != "" ]; then
+		expand_nameprefix_arg
+		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
+		git diff "$BASE..$BRANCH"
+	else
+		if ! git_current_branch | grep -q "^$PREFIX"; then
+			die "Not on a bugfix branch. Name one explicitly."
+		fi
+
+		BASE=$(git merge-base "$DEVELOP_BRANCH" HEAD)
+		git diff "$BASE"
+	fi
+}
+
+cmd_checkout() {
+	parse_args "$@"
+
+	if [ "$NAME" != "" ]; then
+		expand_nameprefix_arg
+		git_do checkout "$BRANCH"
+	else
+		die "Name a bugfix branch explicitly."
+	fi
+}
+
+cmd_co() {
+	# Alias for checkout
+	cmd_checkout "$@"
+}
+
+cmd_rebase() {
+	DEFINE_boolean interactive false 'do an interactive rebase' i
+	parse_args "$@"
+	expand_nameprefix_arg_or_current
+	warn "Will try to rebase '$NAME'..."
+	require_clean_working_tree
+	require_branch "$BRANCH"
+
+	git_do checkout -q "$BRANCH"
+	local OPTS=
+	if flag interactive; then
+		OPTS="$OPTS -i"
+	fi
+	git_do rebase $OPTS "$DEVELOP_BRANCH"
+}
+
+avoid_accidental_cross_branch_action() {
+	local current_branch=$(git_current_branch)
+	if [ "$BRANCH" != "$current_branch" ]; then
+		warn "Trying to pull from '$BRANCH' while currently on branch '$current_branch'."
+		warn "To avoid unintended merges, git-flow aborted."
+		return 1
+	fi
+	return 0
+}
+
+cmd_pull() {
+	#DEFINE_string prefix false 'alternative remote bugfix branch name prefix' p
+	DEFINE_boolean rebase false "pull with rebase" r
+	parse_remote_name "$@"
+
+	if [ -z "$REMOTE" ]; then
+		die "Name a remote explicitly."
+	fi
+	name_or_current
+
+	# To avoid accidentally merging different bugfix branches into each other,
+	# die if the current bugfix branch differs from the requested $NAME
+	# argument.
+	local current_branch=$(git_current_branch)
+	if startswith "$current_branch" "$PREFIX"; then
+		# we are on a local bugfix branch already, so $BRANCH must be equal to
+		# the current branch
+		avoid_accidental_cross_branch_action || die
+	fi
+
+	require_clean_working_tree
+
+	if git_branch_exists "$BRANCH"; then
+		# Again, avoid accidental merges
+		avoid_accidental_cross_branch_action || die
+
+		# we already have a local branch called like this, so simply pull the
+		# remote changes in
+		if flag rebase; then
+			if ! git_do pull --rebase -q "$REMOTE" "$BRANCH"; then
+				warn "Pull was aborted. There might be conflicts during rebase or '$REMOTE' might be inaccessible."
+				exit 1
+			fi
+		else
+			git_do pull -q "$REMOTE" "$BRANCH" || die "Failed to pull from remote '$REMOTE'."
+		fi
+
+		echo "Pulled $REMOTE's changes into $BRANCH."
+	else
+		# setup the local branch clone for the first time
+		git_do fetch -q "$REMOTE" "$BRANCH" || die "Fetch failed."     # stores in FETCH_HEAD
+		git_do branch --no-track "$BRANCH" FETCH_HEAD || die "Branch failed."
+		git_do checkout -q "$BRANCH" || die "Checking out new local branch failed."
+		echo "Created local branch $BRANCH based on $REMOTE's $BRANCH."
+	fi
+}
