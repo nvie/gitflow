@@ -15,6 +15,7 @@ exit /B 1
 set ERR=0
 
 echo Installing gitflow into "%GIT_HOME%"...
+xcopy "%~dp0\deps-windows"            "%GIT_HOME%\bin"                 /Y /R /F
 
 call :ChkGetopt getopt.exe || set ERR=1
 if %ERR%==1 goto :End
