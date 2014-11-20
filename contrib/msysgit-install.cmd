@@ -15,6 +15,7 @@ exit /B 1
 set ERR=0
 
 echo Installing gitflow into "%GIT_HOME%"...
+xcopy "%~dp0\deps-windows"            "%GIT_HOME%\bin"                 /Y /R /F
 
 call :ChkGetopt getopt.exe || set ERR=1
 if %ERR%==1 goto :End
@@ -34,7 +35,6 @@ for /F %%i in ("%GIT_HOME%\git-flow*" "%GIT_HOME%\gitflow-*") do if exist "%%~fi
 echo Copying files...
 ::goto :EOF
 xcopy "%~dp0\..\git-flow"            "%GIT_HOME%\bin"                 /Y /R /F
-xcopy "%~dp0\deps-windows"            "%GIT_HOME%\bin"                 /Y /R /F
 if errorlevel 4 if not errorlevel 5 goto :AccessDenied
 if errorlevel 1 set ERR=1
 xcopy "%~dp0\..\git-flow*"           "%GIT_HOME%\bin"                 /Y /R /F || set ERR=1
