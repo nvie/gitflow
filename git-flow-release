@@ -193,7 +193,7 @@ cmd_finish() {
 	DEFINE_string signingkey "" "use the given GPG-key for the digital signature (implies -s)" u
 	DEFINE_string message "" "use the given tag message" m
 	DEFINE_string messagefile "" "use the contents of the given file as a tag message" f
-	DEFINE_boolean push false "push to $ORIGIN after performing finish" p
+	DEFINE_boolean push true "push to $ORIGIN after performing finish" p
 	DEFINE_boolean keep false "keep branch after performing finish" k
 	DEFINE_boolean notag false "don't tag this release" n
 	DEFINE_boolean squash false "squash release during merge" S
