@@ -17,7 +17,7 @@ if [ -z "$REPO_NAME" ] ; then
 fi
 
 if [ -z "$REPO_HOME" ] ; then
-	REPO_HOME="http://github.com/nvie/gitflow.git"
+	REPO_HOME="https://github.com/nvie"
 fi
 
 EXEC_FILES="git-flow"
@@ -54,7 +54,8 @@ case "$1" in
 			echo "Using existing repo: $REPO_NAME"
 		else
 			echo "Cloning repo from GitHub to $REPO_NAME"
-			git clone "$REPO_HOME" "$REPO_NAME"
+			git clone "$REPO_HOME/gitflow.git" "$REPO_NAME"
+			git clone "$REPO_HOME/shFlags.git" "$REPO_NAME/shFlags"
 		fi
 		if [ -f "$REPO_NAME/$SUBMODULE_FILE" ] ; then
 			echo "Submodules look up to date"
