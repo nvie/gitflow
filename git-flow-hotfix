@@ -50,6 +50,14 @@ usage() {
 	echo "       git flow hotfix finish [-Fsumpk] <version>"
 	echo "       git flow hotfix publish <version>"
 	echo "       git flow hotfix track <version>"
+	echo
+	echo "Properties:"
+	echo " - May branch off from:"
+	echo "     master"
+	echo " - Must merge back into:"
+	echo "     develop and master"
+	echo " - Branch naming conventions:"
+	echo '     hotfix-*'
 }
 
 cmd_default() {
