@@ -53,6 +53,14 @@ usage() {
 	echo "       git flow feature rebase [-i] [<name|nameprefix>]"
 	echo "       git flow feature checkout [<name|nameprefix>]"
 	echo "       git flow feature pull [-r] <remote> [<name>]"
+	echo
+	echo "Properties:"
+	echo " - May branch off from:"
+	echo "     develop"
+	echo " - Must merge back into:"
+	echo "     develop"
+	echo " - Branch naming conventions:"
+	echo '     anything except master, develop, release-*, or hotfix-*'
 }
 
 cmd_default() {

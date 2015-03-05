@@ -50,6 +50,14 @@ usage() {
 	echo "       git flow release finish [-FsumpkS] <version>"
 	echo "       git flow release publish <name>"
 	echo "       git flow release track <name>"
+	echo
+	echo "Properties:"
+	echo " - May branch off from:"
+	echo "     develop"
+	echo " - Must merge back into:"
+	echo "     develop and master"
+	echo " - Branch naming conventions:"
+	echo '     release-*'
 }
 
 cmd_default() {
