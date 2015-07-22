@@ -6,6 +6,11 @@ for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
 
+Project Status
+---------------
+This project is no longer maintained. For an actively developed fork try [https://github.com/petervanderdoes/gitflow](https://github.com/petervanderdoes/gitflow).
+
+
 Getting started
 ---------------
 For the best introduction to get started with `git flow`, please read Jeff
