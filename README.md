@@ -6,8 +6,8 @@
 -   **libintl3.dll**
 
 ##### 下载地址：
-[util-linux-ng-2.14.1-bin.zip](http://sourceforge.net/projects/gnuwin32/files/util-linux/2.14.1/util-linux-ng-2.14.1-bin.zip/download)
-[util-linux-ng-2.14.1-dep.zip](http://sourceforge.net/projects/gnuwin32/files/util-linux/2.14.1/util-linux-ng-2.14.1-dep.zip/download)
+- [util-linux-ng-2.14.1-bin.zip](http://sourceforge.net/projects/gnuwin32/files/util-linux/2.14.1/util-linux-ng-2.14.1-bin.zip/download)
+- [util-linux-ng-2.14.1-dep.zip](http://sourceforge.net/projects/gnuwin32/files/util-linux/2.14.1/util-linux-ng-2.14.1-dep.zip/download)
 
 我们需要的以下两个文件
 - **getopt.exe(util-linux-ng-2.14.1-bin.zip => bin)**
