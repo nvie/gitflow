@@ -237,6 +237,9 @@ cmd_finish() {
 				die "There were merge conflicts."
 			git_do commit
 		fi
+	else
+		git_do checkout "$MASTER_BRANCH" || \
+		  die "Could not check out $MASTER_BRANCH."
 	fi
 
 	if noflag notag; then
