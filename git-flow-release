@@ -159,6 +159,11 @@ cmd_start() {
 	require_base_is_on_develop
 	require_no_existing_release_branches
 
+  # override "fetch first" argument with git configuration
+  if [ "$RELEASE_FETCH_BEFORE_START" = "true" ]; then
+    FLAGS_fetch=0
+  fi
+
 	# sanity checks
 	require_clean_working_tree
 	require_branch_absent "$BRANCH"
@@ -205,6 +210,11 @@ cmd_finish() {
 	if [ "$FLAGS_signingkey" != "" ]; then
 		FLAGS_sign=$FLAGS_TRUE
 	fi
+
+  # override "fetch first" flag with git configuration
+  if [ "$RELEASE_FETCH_BEFORE_START" = "true" ]; then
+    FLAGS_fetch=0
+  fi
 
 	# sanity checks
 	require_branch "$BRANCH"

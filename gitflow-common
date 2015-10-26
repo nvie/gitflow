@@ -197,6 +197,12 @@ gitflow_load_settings() {
 	export MASTER_BRANCH=$(git config --get gitflow.branch.master)
 	export DEVELOP_BRANCH=$(git config --get gitflow.branch.develop)
 	export ORIGIN=$(git config --get gitflow.origin || echo origin)
+  export FEATURE_FETCH_BEFORE_FINISH=$(git config --get gitflow.feature.finish.fetch || echo false)
+  export FEATURE_FETCH_BEFORE_START=$(git config --get gitflow.feature.start.fetch || echo false)
+  export HOTFIX_FETCH_BEFORE_FINISH=$(git config --get gitflow.hotfix.finish.fetch || echo false)
+  export HOTFIX_FETCH_BEFORE_START=$(git config --get gitflow.hotfix.start.fetch || echo false)
+  export RELEASE_FETCH_BEFORE_FINISH=$(git config --get gitflow.release.finish.fetch || echo false)
+  export RELEASE_FETCH_BEFORE_START=$(git config --get gitflow.release.start.fetch || echo false)
 }
 
 #
