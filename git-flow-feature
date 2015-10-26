@@ -199,6 +199,11 @@ cmd_start() {
 	BASE=${2:-$DEVELOP_BRANCH}
 	require_name_arg
 
+  # override "fetch first" argument with git configuration
+  if [ "$FEATURE_FETCH_BEFORE_START" = "true" ]; then
+    FLAGS_fetch=0
+  fi
+
 	# sanity checks
 	require_branch_absent "$BRANCH"
 
@@ -237,6 +242,11 @@ cmd_finish() {
 	DEFINE_boolean squash false "squash feature during merge" S
 	parse_args "$@"
 	expand_nameprefix_arg_or_current
+
+  # override "fetch first" argument with git configuration
+  if [ "$FEATURE_FETCH_BEFORE_FINISH" = "true" ]; then
+    FLAGS_fetch=0
+  fi
 
 	# sanity checks
 	require_branch "$BRANCH"
@@ -285,12 +295,12 @@ cmd_finish() {
 	require_clean_working_tree
 
 	# update local repo with remote changes first, if asked
-	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
-		if flag fetch; then
-			git_do fetch -q "$ORIGIN" "$BRANCH"
-			git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
-		fi
-	fi
+  if flag fetch; then
+    git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH"
+    if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
+      git_do fetch -q "$ORIGIN" "$BRANCH"
+    fi
+  fi
 
 	if has "$ORIGIN/$BRANCH" $(git_remote_branches); then
 		require_branches_equal "$BRANCH" "$ORIGIN/$BRANCH"
