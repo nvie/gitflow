@@ -88,6 +88,7 @@ git_current_branch() {
 }
 
 git_is_clean_working_tree() {
+	git status > /dev/null 2>&1
 	if ! git diff --no-ext-diff --ignore-submodules --quiet --exit-code; then
 		return 1
 	elif ! git diff-index --cached --quiet --ignore-submodules HEAD --; then
