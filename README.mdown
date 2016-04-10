@@ -17,7 +17,7 @@ Or have a look at one of these screen casts:
 
 * [How to use a scalable Git branching model called git-flow](http://buildamodule.com/video/change-management-and-version-control-deploying-releases-features-and-fixes-with-git-how-to-use-a-scalable-git-branching-model-called-gitflow) (by Build a Module)
 * [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
-* [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
+* [On the path with git-flow](https://vimeo.com/codesherpas/on-the-path-gitflow) (by Dave Bock)
 
 
 Installing git-flow
@@ -83,9 +83,9 @@ in a Github fork, of course.
 ### Initialization
 
 To initialize a new repo with the basic branch structure, use:
-  
+
 		git flow init [-d]
-  
+
 This will then interactively prompt you with some questions on which branches
 you would like to use as development and production branches, and how you
 would like your prefixes be named. You may simply press Return on any of
@@ -97,11 +97,11 @@ The ``-d`` flag will accept all defaults.
 ### Creating feature/release/hotfix/support branches
 
 * To list/start/finish feature branches, use:
-  
+
   		git flow feature
   		git flow feature start <name> [<base>]
   		git flow feature finish <name>
-  
+
   For feature branches, the `<base>` arg must be a commit on `develop`.
 
 * To push/pull a feature branch to the remote repository, use:
@@ -110,26 +110,26 @@ The ``-d`` flag will accept all defaults.
 		  git flow feature pull <remote> <name>
 
 * To list/start/finish release branches, use:
-  
+
   		git flow release
   		git flow release start <release> [<base>]
   		git flow release finish <release>
-  
+
   For release branches, the `<base>` arg must be a commit on `develop`.
-  
+
 * To list/start/finish hotfix branches, use:
-  
+
   		git flow hotfix
   		git flow hotfix start <release> [<base>]
   		git flow hotfix finish <release>
-  
+
   For hotfix branches, the `<base>` arg must be a commit on `master`.
 
 * To list/start support branches, use:
-  
+
   		git flow support
   		git flow support start <release> <base>
-  
+
   For support branches, the `<base>` arg must be a commit on `master`.
 
 
