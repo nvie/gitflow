@@ -60,11 +60,15 @@ Fork the repository.  Then, run:
     git clone --recursive git@github.com:<username>/gitflow.git
     cd gitflow
     git branch master origin/master
+
+    # ... Arrange you PATH to include this cloned directory, Something like:
+    # ... PATH="$PATH:$(pwd)"
+
     git flow init -d
     git flow feature start <your feature>
 
-Then, do work and commit your changes.  **Hint**: ``export PATH=`pwd`:$PATH``
-from within the gitflow directory makes sure you're using the version of
+Then, do work and commit your changes. Permanently set ``export
+PATH="$(pwd):$PATH"`` which makes sure you're using the version of
 gitflow you're currently developing.
 
     git flow feature publish <your feature>
