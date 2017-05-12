@@ -37,7 +37,12 @@
 #
 
 usage() {
-	echo "usage: git flow init [-fd]"
+	echo "Usage: git flow init [-fd]"
+	echo "    Initialize a new git repo with support for the branching model."
+	echo
+	echo "    Options:"
+	echo "      -f   Force reinitialization"
+	echo "      -d   Accept default initialization configuration"
 }
 
 parse_args() {
