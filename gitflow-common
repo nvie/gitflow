@@ -139,7 +139,7 @@ git_compare_branches() {
 #
 # git_is_branch_merged_into()
 #
-# Checks whether branch $1 is succesfully merged into $2
+# Checks whether branch $1 is successfully merged into $2
 #
 git_is_branch_merged_into() {
 	local subject=$1
