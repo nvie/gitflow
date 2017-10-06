@@ -51,7 +51,14 @@ escape() {
 # set logic
 has() {
 	local item=$1; shift
-	echo " $@ " | grep -q " $(escape $item) "
+	for s in $@; do
+		if [ "$item" = "$s" ]; then
+			return 0
+		fi
+	done
+	return 1
+	# the following code has issues with + in the branch names
+	# echo " $@ " | grep -q " $(escape $item) "
 }
 
 # basic math
