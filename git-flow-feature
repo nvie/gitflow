@@ -232,7 +232,7 @@ cmd_start() {
 cmd_finish() {
 	DEFINE_boolean fetch false "fetch from $ORIGIN before performing finish" F
 	DEFINE_boolean rebase false "rebase instead of merge" r
-	DEFINE_boolean keep false "keep branch after performing finish" k
+	DEFINE_boolean keep true "keep branch after performing finish" k
 	DEFINE_boolean force_delete false "force delete feature branch after finish" D
 	DEFINE_boolean squash false "squash feature during merge" S
 	parse_args "$@"
