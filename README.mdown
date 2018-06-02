@@ -5,7 +5,6 @@ A collection of Git extensions to provide high-level repository operations
 for Vincent Driessen's [branching model](http://nvie.com/git-model "original
 blog post").
 
-
 Getting started
 ---------------
 For the best introduction to get started with `git flow`, please read Jeff
@@ -19,11 +18,9 @@ Or have a look at one of these screen casts:
 * [A short introduction to git-flow](http://vimeo.com/16018419) (by Mark Derricutt)
 * [On the path with git-flow](http://codesherpas.com/screencasts/on_the_path_gitflow.mov) (by Dave Bock)
 
-
 Installing git-flow
 -------------------
 See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
-
 
 Integration with your shell
 ---------------------------
@@ -33,12 +30,10 @@ For those who use the [Bash](http://www.gnu.org/software/bash/) or
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
-
 FAQ
 ---
 See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
 Wiki.
-
 
 Please help out
 ---------------
@@ -79,7 +74,6 @@ any modifications you make to the source code, you are very much encouraged and
 invited to contribute back your modifications to the community, preferably
 in a Github fork, of course.
 
-
 ### Initialization
 
 To initialize a new repo with the basic branch structure, use:
@@ -92,7 +86,6 @@ would like your prefixes be named. You may simply press Return on any of
 those questions to accept the (sane) default suggestions.
 
 The ``-d`` flag will accept all defaults.
-
 
 ### Creating feature/release/hotfix/support branches
 
@@ -131,7 +124,6 @@ The ``-d`` flag will accept all defaults.
   		git flow support start <release> <base>
   
   For support branches, the `<base>` arg must be a commit on `master`.
-
 
 Showing your appreciation
 =========================
