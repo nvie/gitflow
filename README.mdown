@@ -22,7 +22,7 @@ Or have a look at one of these screen casts:
 
 Installing git-flow
 -------------------
-See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
+See the wiki for up-to-date [Installation Instructions](https://github.com/nvie/gitflow/wiki/Installation).
 
 
 Integration with your shell
@@ -44,10 +44,10 @@ Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
 welcome and I encourage you to use the [Issues
-list](http://github.com/nvie/gitflow/issues) on Github to provide that
+list](http://github.com/nvie/gitflow/issues) on GitHub to provide that
 feedback.
 
-Feel free to fork this repo and to commit your additions. For a list of all
+Feel free to fork this repository and to commit your additions. For a list of all
 contributors, please see the [AUTHORS](AUTHORS) file.
 
 Any questions, tips, or general discussion can be posted to our Google group:
@@ -82,7 +82,7 @@ in a Github fork, of course.
 
 ### Initialization
 
-To initialize a new repo with the basic branch structure, use:
+To initialize a new repository with the basic branch structure, use:
   
 		git flow init [-d]
   
