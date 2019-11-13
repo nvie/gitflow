@@ -2,7 +2,7 @@ git-flow
 ========
 
 A collection of Git extensions to provide high-level repository operations
-for Vincent Driessen's [branching model](http://nvie.com/git-model "original
+for Vincent Driessen's [branching model](https://nvie.com/posts/a-successful-git-branching-model/ "original
 blog post").
 
 
@@ -29,14 +29,14 @@ Integration with your shell
 ---------------------------
 For those who use the [Bash](http://www.gnu.org/software/bash/) or
 [ZSH](http://www.zsh.org) shell, please check out the excellent work on the
-[git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
-by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
+[git-flow-completion](https://github.com/bobthecow/git-flow-completion) project
+by [bobthecow](https://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
 
 
 FAQ
 ---
-See the [FAQ](http://github.com/nvie/gitflow/wiki/FAQ) section of the project
+See the [FAQ](https://github.com/nvie/gitflow/wiki/FAQ) section of the project
 Wiki.
 
 
@@ -44,7 +44,7 @@ Please help out
 ---------------
 This project is still under development. Feedback and suggestions are very
 welcome and I encourage you to use the [Issues
-list](http://github.com/nvie/gitflow/issues) on Github to provide that
+list](https://github.com/nvie/gitflow/issues) on Github to provide that
 feedback.
 
 Feel free to fork this repo and to commit your additions. For a list of all
@@ -138,7 +138,7 @@ Showing your appreciation
 A few people already requested it, so now it's here: a Flattr button.
 
 Of course, the best way to show your appreciation for the original
-[blog post](http://nvie.com/posts/a-successful-git-branching-model/) or the git-flow tool itself remains
+[blog post](https://nvie.com/posts/a-successful-git-branching-model/) or the git-flow tool itself remains
 contributing to the community.  If you'd like to show your appreciation in
 another way, however, consider Flattr'ing me:
 
