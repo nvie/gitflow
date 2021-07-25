@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
@@ -261,7 +262,11 @@ cmd_default() {
 		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature)
 		printf "Feature branches? [$default_suggestion] "
 		if noflag defaults; then
-			read answer
+		  local isValid=false
+		  while [ "$isValid" = false ]; do
+			  read answer
+		    is_valid_prefix "$answer" && isValid=true
+		  done
 		else
 			printf "\n"
 		fi
@@ -274,7 +279,11 @@ cmd_default() {
 		default_suggestion=$(git config --get gitflow.prefix.release || echo release)
 		printf "Release branches? [$default_suggestion] "
 		if noflag defaults; then
-			read answer
+			local isValid=false
+		  while [ "$isValid" = false ]; do
+			  read answer
+		    is_valid_prefix "$answer" && isValid=true
+		  done
 		else
 			printf "\n"
 		fi
@@ -288,7 +297,11 @@ cmd_default() {
 		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix)
 		printf "Hotfix branches? [$default_suggestion] "
 		if noflag defaults; then
-			read answer
+			local isValid=false
+		  while [ "$isValid" = false ]; do
+			  read answer
+		    is_valid_prefix "$answer" && isValid=true
+		  done
 		else
 			printf "\n"
 		fi
@@ -302,7 +315,11 @@ cmd_default() {
 		default_suggestion=$(git config --get gitflow.prefix.support || echo support)
 		printf "Support branches? [$default_suggestion] "
 		if noflag defaults; then
-			read answer
+			local isValid=false
+		  while [ "$isValid" = false ]; do
+			  read answer
+		    is_valid_prefix "$answer" && isValid=true
+		  done
 		else
 			printf "\n"
 		fi
@@ -326,6 +343,16 @@ cmd_default() {
 
 
 	# TODO: what to do with origin?
+}
+
+is_valid_prefix() {
+  local prefix=$1
+  if [ "$prefix" = "init" ] || [ "$prefix" = "version" ]; then
+	    echo "Prefix must not be $prefix"
+	    return 1;
+	else
+	    return 0;
+  fi
 }
 
 cmd_help() {

@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
@@ -40,17 +41,18 @@ init() {
   require_git_repo
   require_gitflow_initialized
   gitflow_load_settings
-  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-  DELIMITER="$(git config --get gitflow.prefix.delimiter)";
-  PREFIX=$(git config --get gitflow.prefix.release)
 }
 
+VERSION_PREFIX=$(eval "echo $(git config --get gitflow.prefix.versiontag)")
+DELIMITER="$(git config --get gitflow.prefix.delimiter)";
+PREFIX=$(git config --get gitflow.prefix.release)
+
 usage() {
-	echo "usage: git flow release [list] [-v]"
-	echo "       git flow release start [-F] <version> [<base>]"
-	echo "       git flow release finish [-FsumpkS] <version>"
-	echo "       git flow release publish <name>"
-	echo "       git flow release track <name>"
+	echo "usage: git flow $PREFIX [list] [-v]"
+	echo "       git flow $PREFIX start [-F] <version> [<base>]"
+	echo "       git flow $PREFIX finish [-FsumpkS] <version>"
+	echo "       git flow $PREFIX publish <name>"
+	echo "       git flow $PREFIX track <name>"
 }
 
 cmd_default() {
