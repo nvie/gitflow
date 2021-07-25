@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
@@ -40,16 +41,18 @@ init() {
   require_git_repo
   require_gitflow_initialized
   gitflow_load_settings
-  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-  PREFIX=$(git config --get gitflow.prefix.support)
 }
+
+VERSION_PREFIX=$(eval "echo $(git config --get gitflow.prefix.versiontag)")
+DELIMITER="$(git config --get gitflow.prefix.delimiter)";
+PREFIX=$(git config --get gitflow.prefix.support)
 
 warn "note: The support subcommand is still very EXPERIMENTAL!"
 warn "note: DO NOT use it in a production situation."
 
 usage() {
-	echo "usage: git flow support [list] [-v]"
-	echo "       git flow support start [-F] <version> <base>"
+	echo "usage: git flow $PREFIX [list] [-v]"
+	echo "       git flow $PREFIX start [-F] <version> <base>"
 }
 
 cmd_default() {
@@ -63,7 +66,7 @@ cmd_list() {
 	local support_branches
 	local current_branch
 	local short_names
-	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	support_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	if [ -z "$support_branches" ]; then
 		warn "No support branches exist."
                 warn ""
@@ -74,7 +77,7 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$support_branches" | sed "s ^$PREFIX  g")
+	short_names=$(echo "$support_branches" | sed "s ^$PREFIX$DELIMITER  g")
 
 	# determine column width first
 	local width=0
@@ -87,7 +90,7 @@ cmd_list() {
 
 	local branch
 	for branch in $short_names; do
-		local fullname=$PREFIX$branch
+		local fullname=$PREFIX$DELIMITER$branch
 		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
 		local master_sha=$(git rev-parse "$MASTER_BRANCH")
 		local branch_sha=$(git rev-parse "$fullname")
@@ -130,7 +133,7 @@ parse_args() {
 	# read arguments into global variables
 	VERSION=$1
 	BASE=$2
-	BRANCH=$PREFIX$VERSION
+	BRANCH=$PREFIX$DELIMITER$VERSION
 }
 
 require_version_arg() {

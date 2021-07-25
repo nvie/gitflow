@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # git-flow -- A collection of Git extensions to provide high-level
 # repository operations for Vincent Driessen's branching model.
@@ -40,16 +41,18 @@ init() {
   require_git_repo
   require_gitflow_initialized
   gitflow_load_settings
-  VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
-  PREFIX=$(git config --get gitflow.prefix.release)
 }
 
+VERSION_PREFIX=$(eval "echo $(git config --get gitflow.prefix.versiontag)")
+DELIMITER="$(git config --get gitflow.prefix.delimiter)";
+PREFIX=$(git config --get gitflow.prefix.release)
+
 usage() {
-	echo "usage: git flow release [list] [-v]"
-	echo "       git flow release start [-F] <version> [<base>]"
-	echo "       git flow release finish [-FsumpkS] <version>"
-	echo "       git flow release publish <name>"
-	echo "       git flow release track <name>"
+	echo "usage: git flow $PREFIX [list] [-v]"
+	echo "       git flow $PREFIX start [-F] <version> [<base>]"
+	echo "       git flow $PREFIX finish [-FsumpkS] <version>"
+	echo "       git flow $PREFIX publish <name>"
+	echo "       git flow $PREFIX track <name>"
 }
 
 cmd_default() {
@@ -63,7 +66,7 @@ cmd_list() {
 	local release_branches
 	local current_branch
 	local short_names
-	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	if [ -z "$release_branches" ]; then
 		warn "No release branches exist."
                 warn ""
@@ -75,7 +78,7 @@ cmd_list() {
 	fi
 
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$release_branches" | sed "s ^$PREFIX  g")
+	short_names=$(echo "$release_branches" | sed "s ^$PREFIX$DELIMITER  g")
 
 	# determine column width first
 	local width=0
@@ -88,7 +91,7 @@ cmd_list() {
 
 	local branch
 	for branch in $short_names; do
-		local fullname=$PREFIX$branch
+		local fullname=$PREFIX$DELIMITER$branch
 		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
 		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
 		local branch_sha=$(git rev-parse "$fullname")
@@ -124,7 +127,7 @@ parse_args() {
 
 	# read arguments into global variables
 	VERSION=$1
-	BRANCH=$PREFIX$VERSION
+	BRANCH=$PREFIX$DELIMITER$VERSION
 }
 
 require_version_arg() {
@@ -144,9 +147,9 @@ require_base_is_on_develop() {
 }
 
 require_no_existing_release_branches() {
-	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local release_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	local first_branch=$(echo ${release_branches} | head -n1)
-	first_branch=${first_branch#$PREFIX}
+	first_branch=${first_branch#$PREFIX$DELIMITER}
 	[ -z "$release_branches" ] || \
 		die "There is an existing release branch ($first_branch). Finish that one first."
 }

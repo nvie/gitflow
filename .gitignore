@@ -2,3 +2,6 @@ debian/files
 debian/*.substvars
 debian/*.debhelper.log
 debian/*/*
+
+# use this directory to init a git repo and test the implementation
+test/

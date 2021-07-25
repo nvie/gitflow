@@ -50,15 +50,24 @@ fi
 export GITFLOW_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
 
 usage() {
+  local featurePrefix=$(git config --get gitflow.prefix.feature)
+  featurePrefix=${featurePrefix:-feature}
+  local releasePrefix=$(git config --get gitflow.prefix.release)
+  releasePrefix=${releasePrefix:-release}
+  local hotfixPrefix=$(git config --get gitflow.prefix.hotfix)
+  hotfixPrefix=${hotfixPrefix:-hotfix}
+  local supportPrefix=$(git config --get gitflow.prefix.support)
+  supportPrefix=${supportPrefix:-support}
+
 	echo "usage: git flow <subcommand>"
 	echo
 	echo "Available subcommands are:"
-	echo "   init      Initialize a new git repo with support for the branching model."
-	echo "   feature   Manage your feature branches."
-	echo "   release   Manage your release branches."
-	echo "   hotfix    Manage your hotfix branches."
-	echo "   support   Manage your support branches."
-	echo "   version   Shows version information."
+	printf '    %s\t%s\n' "init" "Initialize a new git repo with support for the branching model."
+	printf '    %s\t%s\n' "$featurePrefix" "Manage your $featurePrefix branches."
+	printf '    %s\t%s\n' "$releasePrefix" "Manage your $releasePrefix branches."
+	printf '    %s\t%s\n' "$hotfixPrefix" "Manage your $hotfixPrefix branches."
+	printf '    %s\t%s\n' "$supportPrefix" "Manage your $supportPrefix branches."
+	printf '    %s\t%s\n' "version" "Shows version information."
 	echo
 	echo "Try 'git flow <subcommand> help' for details."
 }
@@ -91,6 +100,22 @@ main() {
 	# sanity checks
 	SUBCOMMAND="$1"; shift
 
+  # use configured prefix as sub-command
+  case $SUBCOMMAND in
+    init) ;;
+    version) ;;
+    *)
+      if [ "$(git config --get gitflow.prefix.feature)" = "$SUBCOMMAND" ]; then
+        SUBCOMMAND="feature";
+      elif [ "$(git config --get gitflow.prefix.release)" = "$SUBCOMMAND" ]; then
+        SUBCOMMAND="release";
+      elif [ "$(git config --get gitflow.prefix.hotfix)" = "$SUBCOMMAND" ]; then
+        SUBCOMMAND="hotfix";
+      elif [ "$(git config --get gitflow.prefix.support)" = "$SUBCOMMAND" ]; then
+        SUBCOMMAND="support";
+      fi
+  esac
+
 	if [ ! -e "$GITFLOW_DIR/git-flow-$SUBCOMMAND" ]; then
 		usage
 		exit 1
@@ -114,7 +139,7 @@ main() {
 	fi
 
 	# run the specified action
-  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] ; then
+  if [ $SUBACTION != "help" ] && [ $SUBCOMMAND != "init" ] && [ $SUBCOMMAND != "version" ] ; then
     init
   fi
   cmd_$SUBACTION "$@"
