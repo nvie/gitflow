@@ -230,6 +230,7 @@ cmd_default() {
 
 	# finally, ask the user for naming conventions (branch and tag prefixes)
 	if flag force || \
+	   ! git config --get gitflow.prefix.delimiter >/dev/null 2>&1 ||
 	   ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.release >/dev/null 2>&1 || 
 	   ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || 
@@ -239,11 +240,25 @@ cmd_default() {
 		echo "How to name your supporting branch prefixes?"
 	fi
 
+	local delimiter
+
+	if ! git config --get gitflow.prefix.delimiter >/dev/null 2>&1 || flag force; then
+	  default_suggestion=$(git config --get gitflow.prefix.delimiter || echo /)
+	  printf "Delimiter between prefix and name? [$default_suggestion] "
+	  if noflag defaults; then
+			read answer
+		else
+			printf "\n"
+		fi
+		[ "$answer" = "-" ] && delimiter= || delimiter=${answer:-$default_suggestion}
+		git_do config gitflow.prefix.delimiter "$delimiter"
+  fi
+
 	local prefix
 
 	# Feature branches
 	if ! git config --get gitflow.prefix.feature >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature/)
+		default_suggestion=$(git config --get gitflow.prefix.feature || echo feature)
 		printf "Feature branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -256,7 +271,7 @@ cmd_default() {
 
 	# Release branches
 	if ! git config --get gitflow.prefix.release >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.release || echo release/)
+		default_suggestion=$(git config --get gitflow.prefix.release || echo release)
 		printf "Release branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -270,7 +285,7 @@ cmd_default() {
 
 	# Hotfix branches
 	if ! git config --get gitflow.prefix.hotfix >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix/)
+		default_suggestion=$(git config --get gitflow.prefix.hotfix || echo hotfix)
 		printf "Hotfix branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer
@@ -284,7 +299,7 @@ cmd_default() {
 
 	# Support branches
 	if ! git config --get gitflow.prefix.support >/dev/null 2>&1 || flag force; then
-		default_suggestion=$(git config --get gitflow.prefix.support || echo support/)
+		default_suggestion=$(git config --get gitflow.prefix.support || echo support)
 		printf "Support branches? [$default_suggestion] "
 		if noflag defaults; then
 			read answer

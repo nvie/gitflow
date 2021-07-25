@@ -41,6 +41,7 @@ init() {
   require_gitflow_initialized
   gitflow_load_settings
   VERSION_PREFIX=$(eval "echo `git config --get gitflow.prefix.versiontag`")
+  DELIMITER="$(git config --get gitflow.prefix.delimiter)";
   PREFIX=$(git config --get gitflow.prefix.hotfix)
 }
 
@@ -63,7 +64,7 @@ cmd_list() {
 	local hotfix_branches
 	local current_branch
 	local short_names
-	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	if [ -z "$hotfix_branches" ]; then
 		warn "No hotfix branches exist."
                 warn ""
@@ -74,7 +75,7 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX  g")
+	short_names=$(echo "$hotfix_branches" | sed "s ^$PREFIX$DELIMITER  g")
 
 	# determine column width first
 	local width=0
@@ -87,7 +88,7 @@ cmd_list() {
 
 	local branch
 	for branch in $short_names; do
-		local fullname=$PREFIX$branch
+		local fullname=$PREFIX$DELIMITER$branch
 		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
 		local master_sha=$(git rev-parse "$MASTER_BRANCH")
 		local branch_sha=$(git rev-parse "$fullname")
@@ -129,7 +130,7 @@ parse_args() {
 
 	# read arguments into global variables
 	VERSION=$1
-	BRANCH=$PREFIX$VERSION
+	BRANCH=$PREFIX$DELIMITER$VERSION
 }
 
 require_version_arg() {
@@ -149,9 +150,9 @@ require_base_is_on_master() {
 }
 
 require_no_existing_hotfix_branches() {
-	local hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	local hotfix_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	local first_branch=$(echo ${hotfix_branches} | head -n1)
-	first_branch=${first_branch#$PREFIX}
+	first_branch=${first_branch#$PREFIX$DELIMITER}
 	[ -z "$hotfix_branches" ] || \
 		die "There is an existing hotfix branch ($first_branch). Finish that one first."
 }

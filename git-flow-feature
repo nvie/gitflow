@@ -40,7 +40,8 @@ init() {
   require_git_repo
   require_gitflow_initialized
   gitflow_load_settings
-  PREFIX=$(git config --get gitflow.prefix.feature)
+  DELIMITER="$(git config --get gitflow.prefix.delimiter)";
+  PREFIX="$(git config --get gitflow.prefix.feature)";
 }
 
 usage() {
@@ -66,7 +67,7 @@ cmd_list() {
 	local feature_branches
 	local current_branch
 	local short_names
-	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX")
+	feature_branches=$(echo "$(git_local_branches)" | grep "^$PREFIX$DELIMITER")
 	if [ -z "$feature_branches" ]; then
 		warn "No feature branches exist."
 		warn ""
@@ -77,7 +78,7 @@ cmd_list() {
 		exit 0
 	fi
 	current_branch=$(git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g')
-	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX  g")
+	short_names=$(echo "$feature_branches" | sed "s ^$PREFIX$DELIMITER  g")
 
 	# determine column width first
 	local width=0
@@ -90,7 +91,7 @@ cmd_list() {
 
 	local branch
 	for branch in $short_names; do
-		local fullname=$PREFIX$branch
+		local fullname="$PREFIX$DELIMITER$branch"
 		local base=$(git merge-base "$fullname" "$DEVELOP_BRANCH")
 		local develop_sha=$(git rev-parse "$DEVELOP_BRANCH")
 		local branch_sha=$(git rev-parse "$fullname")
@@ -135,11 +136,11 @@ expand_nameprefix_arg() {
 
 	local expanded_name
 	local exitcode
-	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX")
+	expanded_name=$(gitflow_resolve_nameprefix "$NAME" "$PREFIX$DELIMITER")
 	exitcode=$?
 	case $exitcode in
 		0) NAME=$expanded_name
-		   BRANCH=$PREFIX$NAME
+		   BRANCH="$PREFIX$DELIMITER$NAME"
 		   ;;
 		*) exit 1 ;;
 	esac
@@ -147,9 +148,9 @@ expand_nameprefix_arg() {
 
 use_current_feature_branch_name() {
 	local current_branch=$(git_current_branch)
-	if startswith "$current_branch" "$PREFIX"; then
+	if startswith "$current_branch" "$PREFIX$DELIMITER"; then
 		BRANCH=$current_branch
-		NAME=${BRANCH#$PREFIX}
+		NAME=${BRANCH#$PREFIX$DELIMITER}
 	else
 		warn "The current HEAD is no feature branch."
 		warn "Please specify a <name> argument."
@@ -160,7 +161,7 @@ use_current_feature_branch_name() {
 expand_nameprefix_arg_or_current() {
 	if [ "$NAME" != "" ]; then
 		expand_nameprefix_arg
-		require_branch "$PREFIX$NAME"
+		require_branch "$PREFIX$DELIMITER$NAME"
 	else
 		use_current_feature_branch_name
 	fi
@@ -179,7 +180,7 @@ parse_args() {
 
 	# read arguments into global variables
 	NAME=$1
-	BRANCH=$PREFIX$NAME
+	BRANCH=$PREFIX$DELIMITER$NAME
 }
 
 parse_remote_name() {
@@ -190,7 +191,7 @@ parse_remote_name() {
 	# read arguments into global variables
 	REMOTE=$1
 	NAME=$2
-	BRANCH=$PREFIX$NAME
+	BRANCH=$PREFIX$DELIMITER$NAME
 }
 
 cmd_start() {
@@ -431,7 +432,7 @@ cmd_diff() {
 		BASE=$(git merge-base "$DEVELOP_BRANCH" "$BRANCH")
 		git diff "$BASE..$BRANCH"
 	else
-		if ! git_current_branch | grep -q "^$PREFIX"; then
+		if ! git_current_branch | grep -q "^$PREFIX$DELIMITER"; then
 			die "Not on a feature branch. Name one explicitly."
 		fi
 
@@ -496,7 +497,7 @@ cmd_pull() {
 	# die if the current feature branch differs from the requested $NAME
 	# argument.
 	local current_branch=$(git_current_branch)
-	if startswith "$current_branch" "$PREFIX"; then
+	if startswith "$current_branch" "$PREFIX$DELIMITER"; then
 		# we are on a local feature branch already, so $BRANCH must be equal to
 		# the current branch
 		avoid_accidental_cross_branch_action || die
