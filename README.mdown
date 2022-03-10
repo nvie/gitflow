@@ -27,8 +27,8 @@ See the Wiki for up-to-date [Installation Instructions](https://github.com/nvie/
 
 Integration with your shell
 ---------------------------
-For those who use the [Bash](http://www.gnu.org/software/bash/) or
-[ZSH](http://www.zsh.org) shell, please check out the excellent work on the
+For those who use the [Bash](http://www.gnu.org/software/bash/),
+[ZSH](http://www.zsh.org) shell, or [Fish](https://fishshell.com/) shell, the please check out the excellent work on the
 [git-flow-completion](http://github.com/bobthecow/git-flow-completion) project
 by [bobthecow](http://github.com/bobthecow). It offers tab-completion for all
 git-flow subcommands and branch names.
