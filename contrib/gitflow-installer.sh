@@ -2,7 +2,7 @@
 
 # git-flow make-less installer for *nix systems, by Rick Osborne
 # Based on the git-flow core Makefile:
-# http://github.com/nvie/gitflow/blob/master/Makefile
+# http://github.com/nvie/gitflow/blob/main/Makefile
 
 # Licensed under the same restrictions as git-flow:
 # http://github.com/nvie/gitflow/blob/develop/LICENSE

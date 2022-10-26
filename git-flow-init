@@ -73,16 +73,16 @@ cmd_default() {
         warn "Using default branch names."
     fi
 
-	# add a master branch if no such branch exists yet
-	local master_branch
-	if gitflow_has_master_configured && ! flag force; then
-		master_branch=$(git config --get gitflow.branch.master)
+	# add a main branch if no such branch exists yet
+	local main_branch
+	if gitflow_has_main_configured && ! flag force; then
+		main_branch=$(git config --get gitflow.branch.main)
 	else
 		# Two cases are distinguished:
 		# 1. A fresh git repo (without any branches)
-		#    We will create a new master/develop branch for the user
+		#    We will create a new main/develop branch for the user
 		# 2. Some branches do already exist
-		#    We will disallow creation of new master/develop branches and
+		#    We will disallow creation of new main/develop branches and
 		#    rather allow to use existing branches for git-flow.
 		local default_suggestion
 		local should_check_existence
@@ -90,7 +90,7 @@ cmd_default() {
 		if [ "$branch_count" -eq 0 ]; then
 			echo "No branches exist yet. Base branches must be created now."
 			should_check_existence=NO
-			default_suggestion=$(git config --get gitflow.branch.master || echo master)
+			default_suggestion=$(git config --get gitflow.branch.main || echo main)
 		else
 			echo
 			echo "Which branch should be used for bringing forth production releases?"
@@ -98,8 +98,8 @@ cmd_default() {
 
 			should_check_existence=YES
 			default_suggestion=
-			for guess in $(git config --get gitflow.branch.master) \
-			             'production' 'main' 'master'; do
+			for guess in $(git config --get gitflow.branch.main) \
+			             'production' 'main' 'main'; do
 				if git_local_branch_exists "$guess"; then
 					default_suggestion="$guess"
 					break
@@ -113,22 +113,22 @@ cmd_default() {
 		else
 			printf "\n"
 		fi
-		master_branch=${answer:-$default_suggestion}
+		main_branch=${answer:-$default_suggestion}
 
 		# check existence in case of an already existing repo
 		if [ "$should_check_existence" = "YES" ]; then
 			# if no local branch exists and a remote branch of the same
-			# name exists, checkout that branch and use it for master
-			if ! git_local_branch_exists "$master_branch" && \
-				git_remote_branch_exists "origin/$master_branch"; then
-				git_do branch "$master_branch" "origin/$master_branch" >/dev/null 2>&1
-			elif ! git_local_branch_exists "$master_branch"; then
-				die "Local branch '$master_branch' does not exist."
+			# name exists, checkout that branch and use it for main
+			if ! git_local_branch_exists "$main_branch" && \
+				git_remote_branch_exists "origin/$main_branch"; then
+				git_do branch "$main_branch" "origin/$main_branch" >/dev/null 2>&1
+			elif ! git_local_branch_exists "$main_branch"; then
+				die "Local branch '$main_branch' does not exist."
 			fi
 		fi
 
-		# store the name of the master branch
-		git_do config gitflow.branch.master "$master_branch"
+		# store the name of the main branch
+		git_do config gitflow.branch.main "$main_branch"
 	fi
 
 	# add a develop branch if no such branch exists yet
@@ -136,24 +136,24 @@ cmd_default() {
 	if gitflow_has_develop_configured && ! flag force; then
 		develop_branch=$(git config --get gitflow.branch.develop)
 	else
-		# Again, the same two cases as with the master selection are
+		# Again, the same two cases as with the main selection are
 		# considered (fresh repo or repo that contains branches)
 		local default_suggestion
 		local should_check_existence
-		branch_count=$(git_local_branches | grep -v "^${master_branch}\$" | wc -l)
+		branch_count=$(git_local_branches | grep -v "^${main_branch}\$" | wc -l)
 		if [ "$branch_count" -eq 0 ]; then
 			should_check_existence=NO
 			default_suggestion=$(git config --get gitflow.branch.develop || echo develop)
 		else
 			echo
 			echo "Which branch should be used for integration of the \"next release\"?"
-			git_local_branches | grep -v "^${master_branch}\$" | sed 's/^.*$/   - &/g'
+			git_local_branches | grep -v "^${main_branch}\$" | sed 's/^.*$/   - &/g'
 
 			should_check_existence=YES
 			default_suggestion=
 			for guess in $(git config --get gitflow.branch.develop) \
-			             'develop' 'int' 'integration' 'master'; do
-				if git_local_branch_exists "$guess" && [ "$guess" != "$master_branch" ]; then
+			             'develop' 'int' 'integration' 'main'; do
+				if git_local_branch_exists "$guess" && [ "$guess" != "$main_branch" ]; then
 					default_suggestion="$guess"
 					break
 				fi
@@ -174,7 +174,7 @@ cmd_default() {
 		fi
 		develop_branch=${answer:-$default_suggestion}
 
-		if [ "$master_branch" = "$develop_branch" ]; then
+		if [ "$main_branch" = "$develop_branch" ]; then
 			die "Production and integration branches should differ."
 		fi
 
@@ -194,28 +194,28 @@ cmd_default() {
 	# it to be able to create new branches.
 	local created_gitflow_branch=0
 	if ! git rev-parse --quiet --verify HEAD >/dev/null 2>&1; then
-		git_do symbolic-ref HEAD "refs/heads/$master_branch"
+		git_do symbolic-ref HEAD "refs/heads/$main_branch"
 		git_do commit --allow-empty --quiet -m "Initial commit"
 		created_gitflow_branch=1
 	fi
 
-	# Creation of master
+	# Creation of main
 	# ------------------
-	# At this point, there always is a master branch: either it existed already
+	# At this point, there always is a main branch: either it existed already
 	# (and was picked interactively as the production branch) or it has just
 	# been created in a fresh repo
 
 	# Creation of develop
 	# -------------------
 	# The develop branch possibly does not exist yet.  This is the case when,
-	# in a git init'ed repo with one or more commits, master was picked as the
+	# in a git init'ed repo with one or more commits, main was picked as the
 	# default production branch and develop was "created".  We should create
-	# the develop branch now in that case (we base it on master, of course)
+	# the develop branch now in that case (we base it on main, of course)
 	if ! git_local_branch_exists "$develop_branch"; then
 		if git_remote_branch_exists "origin/$develop_branch"; then
 			git_do branch "$develop_branch" "origin/$develop_branch" >/dev/null 2>&1
 		else
-			git_do branch --no-track "$develop_branch" "$master_branch"
+			git_do branch --no-track "$develop_branch" "$main_branch"
 		fi
 		created_gitflow_branch=1
 	fi

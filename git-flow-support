@@ -88,8 +88,8 @@ cmd_list() {
 	local branch
 	for branch in $short_names; do
 		local fullname=$PREFIX$branch
-		local base=$(git merge-base "$fullname" "$MASTER_BRANCH")
-		local master_sha=$(git rev-parse "$MASTER_BRANCH")
+		local base=$(git merge-base "$fullname" "$MAIN_BRANCH")
+		local main_sha=$(git rev-parse "$MAIN_BRANCH")
 		local branch_sha=$(git rev-parse "$fullname")
 		if [ "$fullname" = "$current_branch" ]; then
 			printf "* "
@@ -98,7 +98,7 @@ cmd_list() {
 		fi
 		if flag verbose; then
 			printf "%-${width}s" "$branch"
-			if [ "$branch_sha" = "$master_sha" ]; then
+			if [ "$branch_sha" = "$main_sha" ]; then
 				printf "(no commits yet)"
 			else
 				local tagname=$(git name-rev --tags --no-undefined --name-only "$base")
@@ -149,11 +149,11 @@ require_base_arg() {
 	fi
 }
 
-require_base_is_on_master() {
+require_base_is_on_main() {
 	if ! git branch --no-color --contains "$BASE" 2>/dev/null \
 			| sed 's/[* ] //g' \
-	  		| grep -q "^$MASTER_BRANCH\$"; then
-		die "fatal: Given base '$BASE' is not a valid commit on '$MASTER_BRANCH'."
+	  		| grep -q "^$MAIN_BRANCH\$"; then
+		die "fatal: Given base '$BASE' is not a valid commit on '$MAIN_BRANCH'."
 	fi
 }
 
@@ -162,7 +162,7 @@ cmd_start() {
 	parse_args "$@"
 	require_version_arg
 	require_base_arg
-	require_base_is_on_master
+	require_base_is_on_main
 
 	# sanity checks
 	require_clean_working_tree

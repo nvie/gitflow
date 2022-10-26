@@ -210,24 +210,24 @@ cmd_finish() {
 	require_branch "$BRANCH"
 	require_clean_working_tree
 	if flag fetch; then
-		git_do fetch -q "$ORIGIN" "$MASTER_BRANCH" || \
-		  die "Could not fetch $MASTER_BRANCH from $ORIGIN."
+		git_do fetch -q "$ORIGIN" "$MAIN_BRANCH" || \
+		  die "Could not fetch $MAIN_BRANCH from $ORIGIN."
 		git_do fetch -q "$ORIGIN" "$DEVELOP_BRANCH" || \
 		  die "Could not fetch $DEVELOP_BRANCH from $ORIGIN."
 	fi
-	if has "$ORIGIN/$MASTER_BRANCH" $(git_remote_branches); then
-		require_branches_equal "$MASTER_BRANCH" "$ORIGIN/$MASTER_BRANCH"
+	if has "$ORIGIN/$MAIN_BRANCH" $(git_remote_branches); then
+		require_branches_equal "$MAIN_BRANCH" "$ORIGIN/$MAIN_BRANCH"
 	fi
 	if has "$ORIGIN/$DEVELOP_BRANCH" $(git_remote_branches); then
 		require_branches_equal "$DEVELOP_BRANCH" "$ORIGIN/$DEVELOP_BRANCH"
 	fi
 
-	# try to merge into master
+	# try to merge into main
 	# in case a previous attempt to finish this release branch has failed,
-	# but the merge into master was successful, we skip it now
-	if ! git_is_branch_merged_into "$BRANCH" "$MASTER_BRANCH"; then
-		git_do checkout "$MASTER_BRANCH" || \
-		  die "Could not check out $MASTER_BRANCH."
+	# but the merge into main was successful, we skip it now
+	if ! git_is_branch_merged_into "$BRANCH" "$MAIN_BRANCH"; then
+		git_do checkout "$MAIN_BRANCH" || \
+		  die "Could not check out $MAIN_BRANCH."
 		if noflag squash; then
 			git_do merge --no-ff "$BRANCH" || \
 				die "There were merge conflicts."
@@ -279,7 +279,7 @@ cmd_finish() {
 	# delete branch
 	if noflag keep; then
 		if [ "$BRANCH" = "$(git_current_branch)" ]; then
-			git_do checkout "$MASTER_BRANCH"
+			git_do checkout "$MAIN_BRANCH"
 		fi
 		git_do branch -d "$BRANCH"
 	fi
@@ -287,8 +287,8 @@ cmd_finish() {
 	if flag push; then
 		git_do push "$ORIGIN" "$DEVELOP_BRANCH" || \
 			die "Could not push to $DEVELOP_BRANCH from $ORIGIN."
-		git_do push "$ORIGIN" "$MASTER_BRANCH" || \
-			die "Could not push to $MASTER_BRANCH from $ORIGIN."
+		git_do push "$ORIGIN" "$MAIN_BRANCH" || \
+			die "Could not push to $MAIN_BRANCH from $ORIGIN."
 		if noflag notag; then
 			git_do push --tags "$ORIGIN" || \
 			  die "Could not push tags to $ORIGIN."
@@ -300,7 +300,7 @@ cmd_finish() {
 	echo
 	echo "Summary of actions:"
 	echo "- Latest objects have been fetched from '$ORIGIN'"
-	echo "- Release branch has been merged into '$MASTER_BRANCH'"
+	echo "- Release branch has been merged into '$MAIN_BRANCH'"
 	if noflag notag; then
 		echo "- The release was tagged '$tagname'"
 	fi
@@ -311,7 +311,7 @@ cmd_finish() {
 		echo "- Release branch '$BRANCH' has been deleted"
 	fi
 	if flag push; then
-		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
+		echo "- '$DEVELOP_BRANCH', '$MAIN_BRANCH' and tags have been pushed to '$ORIGIN'"
 		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
 	fi
 	echo
