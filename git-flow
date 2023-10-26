@@ -57,6 +57,7 @@ usage() {
 	echo "   feature   Manage your feature branches."
 	echo "   release   Manage your release branches."
 	echo "   hotfix    Manage your hotfix branches."
+	echo "   bugfix    Manage your bugfix branches."
 	echo "   support   Manage your support branches."
 	echo "   version   Shows version information."
 	echo

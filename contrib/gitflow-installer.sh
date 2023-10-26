@@ -21,7 +21,7 @@ if [ -z "$REPO_HOME" ] ; then
 fi
 
 EXEC_FILES="git-flow"
-SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-release git-flow-support git-flow-version gitflow-common gitflow-shFlags"
+SCRIPT_FILES="git-flow-init git-flow-feature git-flow-hotfix git-flow-bugfix git-flow-release git-flow-support git-flow-version gitflow-common gitflow-shFlags"
 SUBMODULE_FILE="gitflow-shFlags"
 
 echo "### gitflow no-make installer ###"

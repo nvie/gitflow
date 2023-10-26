@@ -125,6 +125,14 @@ The ``-d`` flag will accept all defaults.
   
   For hotfix branches, the `<base>` arg must be a commit on `master`.
 
+ * To list/start/finish bugfix branches, use:
+
+    		git flow bugfix
+    		git flow bugfix start <release> [<base>]
+    		git flow bugfix finish <release>
+
+    For bugfix branches, the `<base>` arg must be a commit on `master`.
+
 * To list/start support branches, use:
   
   		git flow support
